@@ -122,14 +122,14 @@ function getHoverClass(block: BuilderBlock): string {
 /**
  * Compiles a specific visual builder block to its Handlebars/HTML string.
  */
-function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>): string {
+function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>, isPageContext: boolean = false): string {
   const block = blocks[blockId];
   if (!block) return "";
 
   let compiledChildren = "";
   if (block.childrenIds && block.childrenIds.length > 0) {
     compiledChildren = block.childrenIds
-      .map((cid) => compileBlockToHbs(cid, blocks))
+      .map((cid) => compileBlockToHbs(cid, blocks, isPageContext))
       .join("\n");
   }
 
@@ -176,10 +176,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     case "columns":
       return `
 <div class="flex-columns">
-  ${block.childrenIds ? block.childrenIds.map((cid) => `
-  <div class="column-item">
-    ${compileBlockToHbs(cid, blocks)}
-  </div>`).join("\n") : ""}
+  ${block.childrenIds ? block.childrenIds.map((cid) => `\n  <div class="column-item">\n    ${compileBlockToHbs(cid, blocks, isPageContext)}\n  </div>`).join("\n") : ""}
 </div>`;
 
     case "heading": {
@@ -261,7 +258,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
       return `
 <div class="site-header-wrapper ${isSticky ? "sticky-header" : ""}" style="${headerStyles}">
-  <header class="site-header flex items-center justify-between py-4 px-6 max-w-7xl mx-auto">
+  <header class="site-header flex items-center justify-between py-4 px-6">
     <div class="site-title font-sans font-bold">
       ${logoImageUrl ? `
         <a href="{{@site.url}}"><img src="${logoImageUrl}" alt="${logoText}" style="height: 24px; width: auto; object-fit: contain;" /></a>
@@ -271,7 +268,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     </div>
     <div class="flex items-center gap-6">
       <nav class="site-nav flex gap-4 text-xs font-medium">
-        ${linksArray.map((link: string) => `<span>${link}</span>`).join("\n        ")}
+        ${linksArray.map((link: string) => `<a href="#">${link}</a>`).join("\n        ")}
       </nav>
       ${showCta ? `
       <a href="${ctaHref}" class="btn btn-primary" style="padding: 0.35rem 1rem; border-radius: 4px; font-size: 11px;">${ctaLabel}</a>
@@ -340,24 +337,46 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
   </div>
 </div>`;
 
-    case "post-content":
-      return `
-<article class="post-full-content py-12 max-w-2xl mx-auto px-6">
+    case "post-content": {
+      const titleMarkup = block.props.showTitle !== false ? '{{title}}' : '';
+      
+      const headerHtml = `
   <header class="post-header mb-8">
-    <h1 class="text-3xl font-bold leading-tight">${block.props.showTitle !== false ? '{{title}}' : ''}</h1>
+    <h1 class="text-3xl font-bold leading-tight">${titleMarkup}</h1>
     <div class="post-meta text-xs text-muted mt-2">
       <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
     </div>
-  </header>
+  </header>`;
+
+      const imageHtml = `
   {{#if feature_image}}
     <figure class="post-feature-image rounded-md overflow-hidden my-6">
       <img src="{{feature_image}}" alt="{{title}}" class="w-full h-auto" />
     </figure>
+  {{/if}}`;
+
+      if (isPageContext) {
+        return `
+<article class="post-full-content py-12 max-w-2xl mx-auto px-6">
+  {{#if @page.show_title_and_feature_image}}
+    ${headerHtml}
+    ${imageHtml}
   {{/if}}
   <div class="post-body text-sm leading-relaxed mt-4">
     {{content}}
   </div>
 </article>`;
+      } else {
+        return `
+<article class="post-full-content py-12 max-w-2xl mx-auto px-6">
+  ${headerHtml}
+  ${imageHtml}
+  <div class="post-body text-sm leading-relaxed mt-4">
+    {{content}}
+  </div>
+</article>`;
+      }
+    }
 
     case "accordion":
       return `
@@ -443,15 +462,16 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
   const page = doc.pages[pageName];
   if (!page) return "";
 
+  const isPageContext = pageName === "page" || pageName.startsWith("custom-");
   const mainContent = page.sections
-    .map((sectionId) => compileBlockToHbs(sectionId, doc.blocks))
+    .map((sectionId) => compileBlockToHbs(sectionId, doc.blocks, isPageContext))
     .join("\n");
 
   if (pageName === "post") {
     return `{{!< default}}\n\n{{#post}}\n${mainContent}\n{{/post}}`;
   }
   if (pageName === "page") {
-    return `{{!< default}}\n\n{{#post}}\n${mainContent}\n{{/post}}`;
+    return `{{!< default}}\n\n{{#post}}\n{{#if @page.show_title_and_feature_image}}\n  <header class="page-header py-8 max-w-2xl mx-auto px-6">\n    <h1 class="text-3xl font-bold tracking-tight">{{title}}</h1>\n  </header>\n{{/if}}\n${mainContent}\n{{/post}}`;
   }
   if (pageName === "author") {
     return `{{!< default}}\n\n{{#author}}\n${mainContent}\n{{/author}}`;
@@ -620,19 +640,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
-  border-bottom: 1px solid #ebebeb;
+  padding: 1rem 1.5rem;
+  width: 100%;
 }
 .site-header .site-title a {
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 0.875rem;
   color: #171717;
   text-decoration: none;
+  text-transform: uppercase;
 }
 .site-header .site-nav a {
   color: #4d4d4d;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   transition: color 0.2s;
 }
 .site-header .site-nav a:hover {
