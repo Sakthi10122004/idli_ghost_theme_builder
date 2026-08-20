@@ -34,3 +34,13 @@ next-env.d.ts
 logs/
 project.log
 *.log
+
+# caches
+.turbo/
+.eslintcache
+.next
+.cache/
+npm-debug.log
+yarn-error.log
+.docusaurus/
+dist/
