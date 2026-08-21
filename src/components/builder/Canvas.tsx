@@ -853,7 +853,6 @@ export default function Canvas() {
         const { 
           logoText = "THE BLOG", 
           logoImageUrl, 
-          navLinks = "Articles, About, Newsletter", 
           showCta = false, 
           ctaLabel = "Subscribe", 
           ctaHref = "#" 
@@ -864,10 +863,16 @@ export default function Canvas() {
           borderWidth = "1px",
           borderColor = "#e2e8f0",
           borderRadius,
-          backgroundColor = "#ffffff"
+          backgroundColor = "#ffffff",
+          paddingTop,
+          paddingBottom
         } = block.styles;
         
-        const linksArray = navLinks.split(",").map((s: string) => s.trim()).filter(Boolean);
+        const items = Array.isArray(block.props.navItems) ? block.props.navItems : [
+          { label: "Articles", url: "#", subMenu: [] },
+          { label: "About", url: "#", subMenu: [] },
+          { label: "Newsletter", url: "#", subMenu: [] }
+        ];
 
         return (
           <SortableElement
@@ -883,9 +888,11 @@ export default function Canvas() {
               WebkitBackdropFilter: isSticky ? "blur(12px)" : undefined,
               borderRadius: resolveStyle(borderRadius) || undefined,
               borderBottom: borderWidth !== "0px" ? `${borderWidth} solid ${borderColor}` : "none",
+              paddingTop: resolveStyle(paddingTop) || undefined,
+              paddingBottom: resolveStyle(paddingBottom) || undefined,
             }}
           >
-            <header className="w-full flex items-center justify-between py-4 px-6">
+            <header className="w-full flex items-center justify-between py-2 px-6">
               <div className="flex items-center gap-3">
                 {logoImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -895,9 +902,28 @@ export default function Canvas() {
                 )}
               </div>
               <div className="flex items-center gap-6">
-                <nav className="flex gap-4 text-xs font-medium text-brand-body">
-                  {linksArray.map((link: string, idx: number) => (
-                    <span key={idx} className="hover:text-brand-ink cursor-pointer transition-colors">{link}</span>
+                <nav className="flex gap-5 text-xs font-medium text-brand-body">
+                  {items.map((item: any, idx: number) => (
+                    <div key={idx} className="relative group/nav-item py-2">
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors flex items-center gap-1 select-none">
+                        {item.label}
+                        {item.subMenu && item.subMenu.length > 0 && (
+                          <span className="text-[8px] opacity-60">▼</span>
+                        )}
+                      </span>
+                      {item.subMenu && item.subMenu.length > 0 && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-brand-hairline shadow-level-2 py-1.5 rounded-sm min-w-[120px] opacity-0 invisible group-hover/nav-item:opacity-100 group-hover/nav-item:visible transition-all duration-200 z-50">
+                          {item.subMenu.map((sub: any, sIdx: number) => (
+                            <span 
+                              key={sIdx} 
+                              className="block px-3 py-1 text-[11px] text-brand-body hover:bg-brand-canvas-soft hover:text-brand-ink cursor-pointer transition-colors"
+                            >
+                              {sub.label}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </nav>
                 {showCta && (

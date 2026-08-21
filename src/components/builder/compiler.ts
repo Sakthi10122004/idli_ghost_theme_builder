@@ -245,7 +245,6 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
       const { 
         logoText = "THE BLOG", 
         logoImageUrl, 
-        navLinks = "Articles, About, Newsletter", 
         showCta = false, 
         ctaLabel = "Subscribe", 
         ctaHref = "#" 
@@ -256,21 +255,46 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
         borderWidth = "1px",
         borderColor = "#e2e8f0",
         borderRadius,
-        backgroundColor = "#ffffff"
+        backgroundColor = "#ffffff",
+        paddingTop,
+        paddingBottom
       } = block.styles;
 
-      const linksArray = navLinks.split(",").map((s: string) => s.trim()).filter(Boolean);
+      const items = Array.isArray(block.props.navItems) ? block.props.navItems : [
+        { label: "Articles", url: "#", subMenu: [] },
+        { label: "About", url: "#", subMenu: [] },
+        { label: "Newsletter", url: "#", subMenu: [] }
+      ];
 
       const headerStyles = [
         `background-color: ${isSticky ? `${backgroundColor}cc` : backgroundColor}`,
         isSticky ? `backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)` : "",
         borderRadius ? `border-radius: ${borderRadius}` : "",
         borderWidth !== "0px" ? `border-bottom: ${borderWidth} solid ${borderColor}` : "border-bottom: none",
+        paddingTop ? `padding-top: ${resolveStyleValue(paddingTop)}` : "",
+        paddingBottom ? `padding-bottom: ${resolveStyleValue(paddingBottom)}` : "",
       ].filter(Boolean).join("; ");
+
+      const navHtml = items.map((item: any) => {
+        const hasSub = item.subMenu && item.subMenu.length > 0;
+        if (hasSub) {
+          const subItemsHtml = item.subMenu.map((sub: any) => `
+            <a href="${sub.url || '#'}">${sub.label}</a>
+          `).join("");
+          return `
+          <div class="nav-dropdown-wrapper">
+            <a href="${item.url || '#'}" class="nav-dropdown-trigger">${item.label} <span style="font-size: 8px; opacity: 0.6;">▼</span></a>
+            <div class="nav-dropdown-menu">
+              ${subItemsHtml}
+            </div>
+          </div>`;
+        }
+        return `<a href="${item.url || '#'}">${item.label}</a>`;
+      }).join("\n        ");
 
       return `
 <div class="site-header-wrapper ${isSticky ? "sticky-header" : ""}" style="${headerStyles}">
-  <header class="site-header flex items-center justify-between py-4 px-6">
+  <header class="site-header flex items-center justify-between py-2 px-6">
     <div class="site-title font-sans font-bold">
       ${logoImageUrl ? `
         <a href="{{@site.url}}"><img src="${logoImageUrl}" alt="${logoText}" style="height: 24px; width: auto; object-fit: contain;" /></a>
@@ -279,8 +303,8 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
       `}
     </div>
     <div class="flex items-center gap-6">
-      <nav class="site-nav flex gap-4 text-xs font-medium">
-        ${linksArray.map((link: string) => `<a href="#">${link}</a>`).join("\n        ")}
+      <nav class="site-nav flex gap-5 text-xs font-medium">
+        ${navHtml}
       </nav>
       ${showCta ? `
       <a href="${ctaHref}" class="btn btn-primary" style="padding: 0.35rem 1rem; border-radius: 4px; font-size: 11px;">${ctaLabel}</a>
@@ -670,6 +694,48 @@ body {
 }
 .site-header .site-nav a:hover {
   color: #171717;
+}
+
+/* Nav Dropdown Compilation Styles */
+.site-header .nav-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.site-header .nav-dropdown-trigger {
+  color: #4d4d4d;
+  text-decoration: none;
+  font-size: 0.75rem;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.site-header .nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  background-color: #ffffff;
+  border: 1px solid #ebebeb;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 0.5rem 0;
+  min-width: 140px;
+  display: none;
+  z-index: 999;
+}
+.site-header .nav-dropdown-menu a {
+  display: block;
+  padding: 0.35rem 1rem;
+  color: #4d4d4d;
+  font-size: 0.7rem;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+.site-header .nav-dropdown-menu a:hover {
+  background-color: #fafafa;
+  color: #171717;
+}
+.site-header .nav-dropdown-wrapper:hover .nav-dropdown-menu {
+  display: block;
 }
 
 /* Footer component styles */

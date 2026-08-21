@@ -221,15 +221,141 @@ export default function RightSidebar() {
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Nav Links (Comma-separated)</label>
-                  <input
-                    type="text"
-                    value={selectedBlock.props.navLinks || "Articles, About, Newsletter"}
-                    onChange={(e) => handlePropChange("navLinks", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
+                
+                {/* Nested Nav Items Editor */}
+                <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
+                  <span className="text-[11px] font-sans font-semibold text-brand-body">Navigation Menu Items</span>
+                  <div className="flex flex-col gap-3">
+                    {(() => {
+                      let items = [];
+                      if (Array.isArray(selectedBlock.props.navItems)) {
+                        items = selectedBlock.props.navItems;
+                      } else {
+                        // Fallback from legacy navLinks CSV string if exists
+                        const legacyStr = selectedBlock.props.navLinks || "Articles, About, Newsletter";
+                        items = legacyStr.split(",").map((s: string) => ({
+                          label: s.trim(),
+                          url: "#",
+                          subMenu: []
+                        })).filter((i: any) => i.label);
+                      }
+
+                      return (
+                        <>
+                          {items.map((item: any, idx: number) => (
+                            <div key={idx} className="border border-brand-hairline p-2.5 rounded-sm bg-brand-canvas-soft flex flex-col gap-2 relative">
+                              <div className="flex justify-between items-center">
+                                <span className="font-mono text-[9px] text-brand-mute">Item #{idx + 1}</span>
+                                <button 
+                                  onClick={() => {
+                                    const next = [...items];
+                                    next.splice(idx, 1);
+                                    handlePropChange("navItems", next);
+                                  }}
+                                  className="text-[9px] font-sans text-brand-error hover:underline cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Label"
+                                  value={item.label || ""}
+                                  onChange={(e) => {
+                                    const next = [...items];
+                                    next[idx] = { ...next[idx], label: e.target.value };
+                                    handlePropChange("navItems", next);
+                                  }}
+                                  className="w-1/2 px-2 py-1 border border-brand-hairline rounded-sm text-xs"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="URL"
+                                  value={item.url || ""}
+                                  onChange={(e) => {
+                                    const next = [...items];
+                                    next[idx] = { ...next[idx], url: e.target.value };
+                                    handlePropChange("navItems", next);
+                                  }}
+                                  className="w-1/2 px-2 py-1 border border-brand-hairline rounded-sm text-xs font-mono"
+                                />
+                              </div>
+
+                              {/* Nested Sub-menus list */}
+                              <div className="pl-3 border-l border-brand-hairline-strong flex flex-col gap-1.5 mt-1">
+                                <span className="text-[9px] font-sans font-semibold text-brand-body">Sub-menu Items</span>
+                                {(item.subMenu || []).map((sub: any, sIdx: number) => (
+                                  <div key={sIdx} className="flex gap-1 items-center">
+                                    <input
+                                      type="text"
+                                      placeholder="Sub Label"
+                                      value={sub.label || ""}
+                                      onChange={(e) => {
+                                        const next = [...items];
+                                        const subNext = [...(next[idx].subMenu || [])];
+                                        subNext[sIdx] = { ...subNext[sIdx], label: e.target.value };
+                                        next[idx] = { ...next[idx], subMenu: subNext };
+                                        handlePropChange("navItems", next);
+                                      }}
+                                      className="w-2/5 px-1.5 py-0.5 border border-brand-hairline rounded-xs text-[10px]"
+                                    />
+                                    <input
+                                      type="text"
+                                      placeholder="Sub URL"
+                                      value={sub.url || ""}
+                                      onChange={(e) => {
+                                        const next = [...items];
+                                        const subNext = [...(next[idx].subMenu || [])];
+                                        subNext[sIdx] = { ...subNext[sIdx], url: e.target.value };
+                                        next[idx] = { ...next[idx], subMenu: subNext };
+                                        handlePropChange("navItems", next);
+                                      }}
+                                      className="w-2/5 px-1.5 py-0.5 border border-brand-hairline rounded-xs text-[10px] font-mono"
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        const next = [...items];
+                                        const subNext = [...(next[idx].subMenu || [])];
+                                        subNext.splice(sIdx, 1);
+                                        next[idx] = { ...next[idx], subMenu: subNext };
+                                        handlePropChange("navItems", next);
+                                      }}
+                                      className="text-[9px] text-brand-mute hover:text-brand-error px-1"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  onClick={() => {
+                                    const next = [...items];
+                                    const subNext = [...(next[idx].subMenu || []), { label: "New Page", url: "#" }];
+                                    next[idx] = { ...next[idx], subMenu: subNext };
+                                    handlePropChange("navItems", next);
+                                  }}
+                                  className="text-[9px] text-left text-brand-link hover:underline mt-1 cursor-pointer"
+                                >
+                                  + Add Sub-item
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => {
+                              const next = [...items, { label: "New Item", url: "#", subMenu: [] }];
+                              handlePropChange("navItems", next);
+                            }}
+                            className="w-full py-1 text-[11px] font-mono border border-dashed border-brand-hairline hover:bg-brand-canvas-soft"
+                          >
+                            + Add Menu Item
+                          </button>
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
+
                 <div className="flex items-center gap-2 border-t border-brand-hairline pt-3 mt-1">
                   <input
                     type="checkbox"
