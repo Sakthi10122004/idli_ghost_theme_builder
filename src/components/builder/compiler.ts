@@ -51,6 +51,14 @@ function getInlineStyles(block: BuilderBlock): string {
     const val = resolveStyleValue(styles.paddingBottom);
     if (val) stylePairs.push(`padding-bottom: ${val}`);
   }
+  if (styles.width) {
+    const val = resolveStyleValue(styles.width);
+    if (val) {
+      stylePairs.push(`width: ${val}`);
+      stylePairs.push(`margin-left: auto`);
+      stylePairs.push(`margin-right: auto`);
+    }
+  }
 
   // 3. Backgrounds & Borders & Shadows
   if (styles.backgroundColor) {
@@ -137,7 +145,8 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     case "section": {
       const { 
         backgroundVideoUrl,
-        enableParallax = false
+        enableParallax = false,
+        contentWidth
       } = block.styles;
 
       const inlineStyles = getInlineStyles(block);
@@ -158,10 +167,13 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
         }
       }
 
+      const innerWidthVal = resolveStyleValue(contentWidth);
+      const innerStyle = innerWidthVal ? ` style="max-width: ${innerWidthVal}; position: relative; z-index: 10;"` : ' style="position: relative; z-index: 10;"';
+
       return `
 <section class="section${getHoverClass(block)}${extraClasses}"${finalStyles}>
   ${videoHtml}
-  <div class="container-width mx-auto px-6" style="position: relative; z-index: 10;">
+  <div class="container-width mx-auto px-6"${innerStyle}>
     ${compiledChildren}
   </div>
 </section>`;
@@ -204,7 +216,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "hero":
       return `
-<div class="hero-block text-center py-16 mesh-glow relative overflow-hidden">
+<div class="hero-block text-center py-16 mesh-glow relative overflow-hidden${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="max-w-xl mx-auto px-6">
     <span class="eyebrow bg-brand-light px-2 py-0.5 rounded-full text-xs font-semibold">Introducing V2</span>
     <h1 class="heading font-heading text-4xl font-bold mt-4">${block.props.title || "Build beautiful templates."}</h1>
@@ -218,7 +230,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "newsletter":
       return `
-<div class="newsletter-block py-12 px-8 bg-brand-soft border border-brand-hairline rounded-md flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="newsletter-block py-12 px-8 bg-brand-soft border border-brand-hairline rounded-md flex flex-col md:flex-row justify-between items-center gap-6${getHoverClass(block)}"${getInlineStyles(block)}>
   <div>
     <h3 class="font-heading text-lg font-bold">${block.props.title || "Join our technical newsletter"}</h3>
     <p class="text-xs text-muted">Stay up to date with new features and tutorials.</p>
@@ -280,7 +292,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "footer":
       return `
-<footer class="site-footer py-8 border-t border-brand-hairline">
+<footer class="site-footer py-8 border-t border-brand-hairline${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
     <span>© {{@site.title}} - Visual compiler output.</span>
     <nav class="flex gap-4">
@@ -292,7 +304,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "post-grid":
       return `
-<div class="post-grid-wrapper py-8">
+<div class="post-grid-wrapper py-8${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="grid-columns">
     {{#foreach posts}}
     <article class="post-card">
@@ -319,7 +331,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "featured-posts":
       return `
-<div class="featured-posts-block py-8">
+<div class="featured-posts-block py-8${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="grid-columns">
     {{#foreach posts featured="true" limit="3"}}
     <article class="post-card border-brand-hairline shadow-level-1">
@@ -357,7 +369,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
       if (isPageContext) {
         return `
-<article class="post-full-content py-12 max-w-2xl mx-auto px-6">
+<article class="post-full-content py-12 max-w-2xl mx-auto px-6${getHoverClass(block)}"${getInlineStyles(block)}>
   {{#if @page.show_title_and_feature_image}}
     ${headerHtml}
     ${imageHtml}
@@ -368,7 +380,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 </article>`;
       } else {
         return `
-<article class="post-full-content py-12 max-w-2xl mx-auto px-6">
+<article class="post-full-content py-12 max-w-2xl mx-auto px-6${getHoverClass(block)}"${getInlineStyles(block)}>
   ${headerHtml}
   ${imageHtml}
   <div class="post-body text-sm leading-relaxed mt-4">
@@ -380,7 +392,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "accordion":
       return `
-<div class="accordion-wrapper py-6 flex flex-col gap-3">
+<div class="accordion-wrapper py-6 flex flex-col gap-3${getHoverClass(block)}"${getInlineStyles(block)}>
   ${(block.props.items || []).map((item: any) => `
   <div class="accordion-item border border-brand-hairline rounded-sm p-4 bg-white">
     <h4 class="text-xs font-bold text-brand-ink mb-2 flex justify-between items-center cursor-pointer">
@@ -393,7 +405,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "testimonials":
       return `
-<div class="testimonials-wrapper py-6 flex flex-col gap-4">
+<div class="testimonials-wrapper py-6 flex flex-col gap-4${getHoverClass(block)}"${getInlineStyles(block)}>
   ${(block.props.items || []).map((item: any) => `
   <div class="testimonial-card border border-brand-hairline rounded-sm p-6 bg-brand-soft">
     <p class="text-xs italic leading-relaxed mb-4">"${item.quote || ""}"</p>
@@ -406,7 +418,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "pricing-table":
       return `
-<div class="pricing-table-block py-8 text-center">
+<div class="pricing-table-block py-8 text-center${getHoverClass(block)}"${getInlineStyles(block)}>
   ${block.props.title ? `<h3 class="text-sm font-mono uppercase tracking-wider text-muted mb-6">${block.props.title}</h3>` : ""}
   <div class="pricing-grid flex flex-col md:flex-row justify-center gap-6 max-w-4xl mx-auto">
     ${(block.props.tiers || []).map((tier: any) => `
@@ -425,7 +437,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "grid-gallery":
       return `
-<div class="gallery-grid-wrapper py-6">
+<div class="gallery-grid-wrapper py-6${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="gallery-grid">
     ${(block.props.urls || []).map((url: any) => `
     <div class="gallery-image">
@@ -436,7 +448,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "social-links":
       return `
-<div class="social-links-row py-4 flex justify-center gap-6 text-xs font-mono">
+<div class="social-links-row py-4 flex justify-center gap-6 text-xs font-mono${getHoverClass(block)}"${getInlineStyles(block)}>
   ${block.props.github ? `<a href="${block.props.github}" target="_blank" rel="noreferrer">GitHub</a>` : ""}
   ${block.props.twitter ? `<a href="${block.props.twitter}" target="_blank" rel="noreferrer">Twitter</a>` : ""}
   ${block.props.website ? `<a href="${block.props.website}" target="_blank" rel="noreferrer">Website</a>` : ""}
@@ -444,7 +456,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
     case "video-player":
       return `
-<div class="video-player-wrapper py-6 flex justify-center">
+<div class="video-player-wrapper py-6 flex justify-center${getHoverClass(block)}"${getInlineStyles(block)}>
   <div class="video-container aspect-video w-full max-w-2xl bg-black rounded-md overflow-hidden">
     ${block.props.url ? `<iframe src="${block.props.url}" class="w-full h-full" allowfullscreen></iframe>` : ""}
   </div>

@@ -119,7 +119,7 @@ function SortableElement({
           ? "outline-2 outline-brand-primary outline-offset-1 ring-2 ring-white/50"
           : "hover:outline-1 hover:outline-brand-hairline-strong hover:outline-offset-1";
 
-  const handleResizeStart = (e: React.MouseEvent, direction: 'width' | 'height') => {
+  const handleResizeStart = (e: React.MouseEvent, direction: 'width' | 'innerWidth' | 'height') => {
     e.stopPropagation();
     e.preventDefault();
     const parentEl = e.currentTarget.parentElement;
@@ -131,12 +131,21 @@ function SortableElement({
     const startWidth = rect.width;
     const startHeight = rect.height;
 
+    // For inner width resizing of section content container
+    const innerContainerEl = parentEl.querySelector('.container-width');
+    const startInnerWidth = innerContainerEl ? innerContainerEl.getBoundingClientRect().width : 1200;
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (direction === 'width') {
         const deltaX = moveEvent.clientX - startX;
-        const newWidth = startWidth + deltaX;
+        const newWidth = startWidth + deltaX * 2; // dual-side expand representation
         const snappedWidth = Math.round(newWidth / 16) * 16;
-        updateBlockStyles(block.id, { width: `${Math.max(100, snappedWidth)}px` });
+        updateBlockStyles(block.id, { width: `${Math.max(200, snappedWidth)}px` });
+      } else if (direction === 'innerWidth') {
+        const deltaX = moveEvent.clientX - startX;
+        const newWidth = startInnerWidth + deltaX * 2;
+        const snappedWidth = Math.round(newWidth / 16) * 16;
+        updateBlockStyles(block.id, { contentWidth: `${Math.max(200, snappedWidth)}px` });
       } else {
         const deltaY = moveEvent.clientY - startY;
         const newHeight = startHeight + deltaY;
@@ -228,17 +237,30 @@ function SortableElement({
           {/* Resizing Edge Handles */}
           {!isPreviewMode && (
             <>
-              {/* Right Edge (Width) Resize handle */}
+              {/* Outer Section / General Block Width Handle */}
               <div 
                 onMouseDown={(e) => handleResizeStart(e, 'width')}
-                className="absolute top-0 -right-1 w-2 h-full cursor-col-resize group-hover/sortable:border-r-2 group-hover/sortable:border-brand-primary/30 hover:border-brand-primary active:border-brand-primary z-30 transition-all"
-                title="Drag right edge to change width"
+                className="absolute top-0 -right-1 w-2.5 h-full cursor-col-resize group-hover/sortable:bg-brand-primary/20 hover:bg-brand-primary active:bg-brand-primary z-30 transition-all"
+                title={block.type === 'section' ? "Drag to resize Outer Background Width" : "Drag to resize Width"}
               />
-              {/* Bottom Edge (Height) Resize handle */}
+              
+              {/* Inner Section Content Width Handle (rendered only on Section types) */}
+              {block.type === 'section' && (
+                <div 
+                  onMouseDown={(e) => handleResizeStart(e, 'innerWidth')}
+                  className="absolute top-0 right-1/2 translate-x-[600px] w-2 h-2/3 my-auto bottom-0 cursor-col-resize border-r border-dashed border-brand-primary/50 hover:border-solid hover:border-brand-primary hover:border-r-2 z-30 transition-all"
+                  style={{
+                    transform: `translateX(clamp(100px, calc(${resolveStyleLocal(block.styles.contentWidth) || '1200px'} / 2), 50vw))`
+                  }}
+                  title="Drag to resize Inner Content Width"
+                />
+              )}
+
+              {/* Bottom Edge (Height / Padding) Resize handle */}
               <div 
                 onMouseDown={(e) => handleResizeStart(e, 'height')}
                 className="absolute -bottom-1 left-0 w-full h-2 cursor-row-resize group-hover/sortable:border-b-2 group-hover/sortable:border-brand-primary/30 hover:border-brand-primary active:border-brand-primary z-30 transition-all"
-                title="Drag bottom edge to change height"
+                title={block.type === 'section' ? "Drag to resize Section Vertical Padding" : "Drag to resize Height"}
               />
             </>
           )}
@@ -329,7 +351,9 @@ export default function Canvas() {
           enableParallax = false,
           backgroundSize = "cover",
           backgroundRepeat = "no-repeat",
-          backgroundPosition = "center"
+          backgroundPosition = "center",
+          width,
+          contentWidth
         } = block.styles;
         return (
           <SortableElement
@@ -348,8 +372,11 @@ export default function Canvas() {
               backgroundPosition: backgroundImage ? (resolveStyle(backgroundPosition) || "center") : undefined,
               backgroundAttachment: (backgroundImage && enableParallax) ? "fixed" : undefined,
               clipPath: (backgroundVideoUrl && enableParallax) ? "inset(0px)" : undefined,
+              width: resolveStyle(width) || "100%",
+              marginLeft: resolveStyle(width) ? "auto" : undefined,
+              marginRight: resolveStyle(width) ? "auto" : undefined,
             }}
-            className="w-full relative overflow-hidden"
+            className="relative overflow-hidden"
           >
             {backgroundVideoUrl && (
               <video
@@ -370,7 +397,10 @@ export default function Canvas() {
                 }}
               />
             )}
-            <div className="w-full px-6 max-w-[1200px] mx-auto min-h-[40px] border border-dashed border-transparent hover:border-brand-hairline transition-all relative z-10">
+            <div 
+              style={{ maxWidth: resolveStyle(contentWidth) || "1200px" }}
+              className="container-width w-full px-6 mx-auto min-h-[40px] border border-dashed border-transparent hover:border-brand-hairline transition-all relative z-10"
+            >
               {block.childrenIds && block.childrenIds.length > 0 ? (
                 <SortableContext items={block.childrenIds} strategy={verticalListSortingStrategy}>
                   {block.childrenIds.map((cid) => renderBlock(cid))}

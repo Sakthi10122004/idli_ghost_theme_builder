@@ -881,6 +881,26 @@ export default function RightSidebar() {
             {selectedBlock.type === "section" && (
               <>
                 <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 100%, 1400px"
+                    value={getInputValue(selectedBlock.styles.width)}
+                    onChange={(e) => handleStyleChange("width", e.target.value)}
+                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 1200px, 800px"
+                    value={getInputValue(selectedBlock.styles.contentWidth)}
+                    onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
+                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Top</label>
                   <input
                     type="text"
