@@ -277,6 +277,22 @@ export default function Toolbar() {
                     const originalCssFile = zip.file("assets/css/screen.css");
                     const originalCss = originalCssFile ? await originalCssFile.async("text") : "";
                     zip.file("assets/css/screen.css", originalCss + "\n\n" + (content as string));
+                  } else if (name === "package.json") {
+                    const originalPackageFile = zip.file("package.json");
+                    const originalPackage = originalPackageFile ? JSON.parse(await originalPackageFile.async("text")) : {};
+                    const compiledPackage = JSON.parse(content as string);
+                    
+                    const mergedPackage = {
+                      ...originalPackage,
+                      name: compiledPackage.name || originalPackage.name,
+                      description: compiledPackage.description || originalPackage.description,
+                      version: compiledPackage.version || originalPackage.version,
+                      author: {
+                        ...originalPackage.author,
+                        name: compiledPackage.author?.name || originalPackage.author?.name
+                      }
+                    };
+                    zip.file("package.json", JSON.stringify(mergedPackage, null, 2));
                   } else {
                     zip.file(name, content as string);
                   }
