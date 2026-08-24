@@ -30,12 +30,23 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
   - `page.hbs` markup must gate titles/images with `{{#if @page.show_title_and_feature_image}}`.
   - Direct queries (like `{{#get "tags"}}`) must specify a safe maximum limit (e.g. `limit="100"` instead of `"all"`).
   - Theme assets (`assets/css/screen.css`) must be automatically minified (stripping whitespace and comments) during compilation.
+  - **Dynamic Navigation Integration**: The compiler must output a dedicated `partials/navigation.hbs` template containing the `{{#foreach navigation}}` loop, and the compiled header layout must render the dynamic list using Ghost's native `{{navigation}}` helper, ensuring absolute compatibility with Ghost backend menu settings.
 
 ## Editor Lifecycle & State Rules
 
 - **Autosave Timings**: Debounced store updates saved to database providers must execute within a snappy window (e.g., 400ms delay) to keep editor reactions fast.
 - **Hydration safety**: Client-side layout drag-and-drop structures (`dnd-kit` contexts) must delay rendering until client-side hydration completes to prevent server-rendered HTML mismatches.
 - **Node native module isolation**: Native Node packages (e.g. `bunyan`, `fs`) must be dynamically imported/required behind server-only scope checks (e.g. `typeof window === 'undefined'`) to prevent client-side bundler compilation failures.
+- **Direct Zustand State Queries**: For operations that require the absolute latest state at execution time (e.g., manual saves, theme export compile cycles), query the Zustand store directly using `useEditorStore.getState()` instead of destructured React state variables to bypass React render closure lag.
+
+## Modular Component Registration Rules
+
+- **Component Registration**: All visual builder block types must be defined modularly under `src/editor/components/<component-name>/` following the registry pattern:
+  - `schema.ts`: Defines its type name, default props, and default style layouts.
+  - `canvas.tsx`: A modular React component for visual block rendering inside the builder canvas workspace.
+  - `sidebar.tsx`: A modular React component containing properties settings inputs for the block.
+  - `compiler.ts`: A compiler function translating the AST block and its children into standard Ghost Handlebars markup.
+- **Central Registry**: Register all modular components in `src/editor/components/registry.ts` to expose them dynamically to the Canvas, compiler, RightSidebar, and editor stores.
 
 
 
