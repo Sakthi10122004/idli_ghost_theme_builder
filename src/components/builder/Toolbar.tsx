@@ -241,31 +241,60 @@ export default function Toolbar() {
 
           <button 
             className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-sm text-xs font-semibold hover:bg-black transition-all shadow-level-3"
-            onClick={() => {
-              // Statically imported JSZip makes zip compilation fully stable
+            onClick={async () => {
               const zip = new JSZip();
 
-              import("./compiler").then(({ generateThemeFiles }) => {
+              try {
+                const manifestRes = await fetch("/casper-template/manifest.json");
+                if (!manifestRes.ok) throw new Error("Failed to load template manifest");
+                const manifest: string[] = await manifestRes.json();
+
+                await Promise.all(
+                  manifest.map(async (filePath) => {
+                    const res = await fetch(`/casper-template/${filePath}`);
+                    if (!res.ok) throw new Error(`Failed to load ${filePath}`);
+                    
+                    if (filePath === "assets/built/screen.css" || filePath === "assets/css/screen.css") {
+                      const cssText = await res.text();
+                      zip.file(filePath, cssText);
+                    } else {
+                      const buffer = await res.arrayBuffer();
+                      zip.file(filePath, buffer);
+                    }
+                  })
+                );
+
+                const { generateThemeFiles } = await import("./compiler");
                 const latestDoc = useEditorStore.getState().document;
                 const files = generateThemeFiles(latestDoc);
-                
-                // Add files to zip archive
-                Object.entries(files).forEach(([name, content]) => {
-                  zip.file(name, content as string);
-                });
-                
-                // Build ZIP blob and download
-                zip.generateAsync({ type: "blob" }).then((blob) => {
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                });
-              });
+
+                for (const [name, content] of Object.entries(files)) {
+                  if (name === "assets/css/screen.css") {
+                    const originalBuiltCssFile = zip.file("assets/built/screen.css");
+                    const originalBuiltCss = originalBuiltCssFile ? await originalBuiltCssFile.async("text") : "";
+                    zip.file("assets/built/screen.css", originalBuiltCss + "\n\n" + (content as string));
+
+                    const originalCssFile = zip.file("assets/css/screen.css");
+                    const originalCss = originalCssFile ? await originalCssFile.async("text") : "";
+                    zip.file("assets/css/screen.css", originalCss + "\n\n" + (content as string));
+                  } else {
+                    zip.file(name, content as string);
+                  }
+                }
+
+                const blob = await zip.generateAsync({ type: "blob" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              } catch (error) {
+                console.error("Export theme error:", error);
+                alert("Error exporting theme. Please check console logs.");
+              }
             }}
           >
             <Download size={12} />

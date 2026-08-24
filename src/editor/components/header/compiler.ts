@@ -2,23 +2,22 @@ import { BuilderBlock } from "@/types/theme";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const { logoText = "THE BLOG", logoImageUrl, showCta = false, ctaLabel = "Subscribe", ctaHref = "#" } = block.props;
-  return `<div class="site-header-wrapper">
-  <header class="site-header flex items-center justify-between py-2 px-6">
-    <div class="site-title font-sans font-bold">
-      ${logoImageUrl ? `
-        <a href="{{@site.url}}"><img src="${logoImageUrl}" alt="${logoText}" style="height: 24px; width: auto; object-fit: contain;" /></a>
-      ` : `
-        <a href="{{@site.url}}" style="text-decoration: none; color: inherit; text-transform: uppercase;">${logoText}</a>
-      `}
+  return `<header id="gh-head" class="gh-head outer">
+  <div class="gh-head-inner inner">
+    <div class="gh-head-brand">
+      <a class="gh-head-logo${logoImageUrl ? "" : " no-image"}" href="{{@site.url}}">
+        ${logoImageUrl ? `<img src="${logoImageUrl}" alt="${logoText}">` : logoText}
+      </a>
+      <button class="gh-burger"></button>
     </div>
-    <div class="flex items-center gap-6">
-      <nav class="site-nav flex gap-5 text-xs font-medium">
-        {{navigation}}
-      </nav>
-      ${showCta ? `
-      <a href="${ctaHref}" class="btn btn-primary" style="padding: 0.35rem 1rem; border-radius: 4px; font-size: 11px;">${ctaLabel}</a>
-      ` : ""}
+    <nav class="gh-head-menu">
+      {{navigation}}
+    </nav>
+    <div class="gh-head-actions">
+      <div class="gh-head-members">
+        ${showCta ? `<a class="gh-head-button" href="${ctaHref}">${ctaLabel}</a>` : ""}
+      </div>
     </div>
-  </header>
-</div>`;
+  </div>
+</header>`;
 };

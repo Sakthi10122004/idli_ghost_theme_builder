@@ -1,13 +1,15 @@
 import { BuilderBlock } from "@/types/theme";
 
 export const compileToHbs = (block: BuilderBlock) => {
-  return `<footer class="site-footer py-8 border-t border-brand-hairline">
-  <div class="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
-    <span>© {{@site.title}} - Visual compiler output.</span>
-    <nav class="flex gap-4">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-    </nav>
+  return `<footer class="site-footer outer">
+  <div class="inner">
+    <section class="copyright"><a href="{{@site.url}}">{{@site.title}}</a> &copy; {{date format="YYYY"}}</section>
+    <div class="site-footer-center">
+      <nav class="site-footer-nav">
+        {{navigation type="secondary"}}
+      </nav>
+    </div>
+    <div class="gh-powered-by"><a href="https://ghost.org/" target="_blank" rel="noopener">Powered by Ghost</a></div>
   </div>
 </footer>`;
 };
