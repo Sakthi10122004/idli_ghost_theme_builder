@@ -41,6 +41,17 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
         return;
       }
 
+      // If dropping over a layout block, place it inside (prevent nested sections)
+      const overBlock = themeDoc.blocks[overId];
+      if (
+        overBlock &&
+        (overBlock.type === "container" || overBlock.type === "section" || overBlock.type === "columns") &&
+        !(blockType === "section" && overBlock.type === "section")
+      ) {
+        insertBlockAt(blockType, overBlock.childrenIds?.length || 0, overId);
+        return;
+      }
+
       // Resolve drop index in page sections or container children
       const sections = themeDoc.pages[activePage]?.sections || [];
       const overIndex = sections.indexOf(overId);

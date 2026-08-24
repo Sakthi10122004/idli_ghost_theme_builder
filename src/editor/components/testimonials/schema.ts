@@ -1,0 +1,2 @@
+export const defaultProps = { items: [{ quote: "The interface layout built using this editor compiles faster than manual code.", author: "Reviewer A", title: "Theme Developer" }] };
+export const defaultStyles = {};

@@ -1,4 +1,5 @@
 import { ThemeDocument, BuilderBlock } from "../../types/theme";
+import { componentRegistry } from "@/editor/components/registry";
 
 /**
  * Resolves a responsive style property (using desktop value by default for server-side theme files)
@@ -141,354 +142,44 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
       .join("\n");
   }
 
-  switch (block.type) {
-    case "section": {
-      const { 
-        backgroundVideoUrl,
-        enableParallax = false,
-        contentWidth
-      } = block.styles;
-
-      const inlineStyles = getInlineStyles(block);
-      
-      const videoHtml = backgroundVideoUrl ? `
-<video src="${resolveStyleValue(backgroundVideoUrl)}" autoplay loop muted playsinline style="position: ${enableParallax ? 'fixed' : 'absolute'}; top: 0; left: 0; width: ${enableParallax ? '100vw' : '100%'}; height: ${enableParallax ? '100vh' : '100%'}; object-fit: cover; z-index: 0; pointer-events: none;"></video>
-      ` : "";
-
-      const extraClasses = backgroundVideoUrl ? " relative overflow-hidden" : "";
-      const extraStyles = (backgroundVideoUrl && enableParallax) ? "clip-path: inset(0px);" : "";
-
-      let finalStyles = inlineStyles;
-      if (extraStyles) {
-        if (finalStyles.includes('style="')) {
-          finalStyles = finalStyles.replace('style="', `style="${extraStyles} `);
-        } else {
-          finalStyles = ` style="${extraStyles}"`;
+  const def = componentRegistry[block.type];
+  if (def) {
+    let markup = def.compileToHbs(block, compiledChildren, isPageContext);
+    const inline = getInlineStyles(block);
+    const hover = getHoverClass(block);
+    
+    if (inline || hover) {
+      const tagMatch = markup.match(/^<([a-zA-Z0-9-]+)([^>]*)>/);
+      if (tagMatch) {
+        const tagName = tagMatch[1];
+        let attributes = tagMatch[2];
+        
+        if (hover) {
+          if (attributes.includes('class="')) {
+            attributes = attributes.replace('class="', `class="${hover.trim()} `);
+          } else {
+            attributes = `${attributes} class="${hover.trim()}"`;
+          }
         }
-      }
-
-      const innerWidthVal = resolveStyleValue(contentWidth);
-      const innerStyle = innerWidthVal ? ` style="max-width: ${innerWidthVal}; position: relative; z-index: 10;"` : ' style="position: relative; z-index: 10;"';
-
-      return `
-<section class="section${getHoverClass(block)}${extraClasses}"${finalStyles}>
-  ${videoHtml}
-  <div class="container-width mx-auto px-6"${innerStyle}>
-    ${compiledChildren}
-  </div>
-</section>`;
-    }
-
-    case "container":
-      return `
-<div class="container-inner${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${compiledChildren}
-</div>`;
-
-    case "columns":
-      return `
-<div class="flex-columns">
-  ${block.childrenIds ? block.childrenIds.map((cid) => `\n  <div class="column-item">\n    ${compileBlockToHbs(cid, blocks, isPageContext)}\n  </div>`).join("\n") : ""}
-</div>`;
-
-    case "heading": {
-      const level = block.props.level || 2;
-      return `<h${level} class="heading font-heading${getHoverClass(block)}"${getInlineStyles(block)}>${block.props.text || "Heading Content"}</h${level}>`;
-    }
-
-    case "text":
-      return `<p class="text-content font-body${getHoverClass(block)}"${getInlineStyles(block)}>${block.props.text || "Paragraph Content."}</p>`;
-
-    case "button":
-      return `<a href="${block.props.href || '#'}" class="btn btn-${block.props.variant || 'primary'}${getHoverClass(block)}"${getInlineStyles(block)}>${block.props.label || 'Click Here'}</a>`;
-
-    case "divider":
-      return `<hr class="divider-hairline" />`;
-
-    case "spacer":
-      return `<div style="height: ${block.props.height || '40px'};"></div>`;
-
-    case "image":
-      return `
-<figure class="image-wrapper${getHoverClass(block)}"${getInlineStyles(block)}>
-  <img src="${block.props.url || ''}" alt="${block.props.alt || ''}" class="img-fluid" style="width: 100%; height: auto;" />
-</figure>`;
-
-    case "hero":
-      return `
-<div class="hero-block text-center py-16 mesh-glow relative overflow-hidden${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="max-w-xl mx-auto px-6">
-    <span class="eyebrow bg-brand-light px-2 py-0.5 rounded-full text-xs font-semibold">Introducing V2</span>
-    <h1 class="heading font-heading text-4xl font-bold mt-4">${block.props.title || "Build beautiful templates."}</h1>
-    <p class="text-content font-body text-base mt-2">${block.props.subtitle || "A visual workspace built directly on layout AST compilation."}</p>
-    <div class="mt-6 flex justify-center gap-3">
-      <a href="#" class="btn btn-primary">${block.props.buttonLabel || "Start Free"}</a>
-      <a href="#" class="btn btn-secondary">Documentation</a>
-    </div>
-  </div>
-</div>`;
-
-    case "newsletter":
-      return `
-<div class="newsletter-block py-12 px-8 bg-brand-soft border border-brand-hairline rounded-md flex flex-col md:flex-row justify-between items-center gap-6${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div>
-    <h3 class="font-heading text-lg font-bold">${block.props.title || "Join our technical newsletter"}</h3>
-    <p class="text-xs text-muted">Stay up to date with new features and tutorials.</p>
-  </div>
-  <form class="newsletter-form flex gap-2">
-    <input type="email" placeholder="${block.props.placeholder || 'you@domain.com'}" required class="input-field" />
-    <button type="submit" class="btn btn-primary shrink-0">${block.props.buttonLabel || 'Subscribe'}</button>
-  </form>
-</div>`;
-
-    case "header": {
-      const { 
-        logoText = "THE BLOG", 
-        logoImageUrl, 
-        showCta = false, 
-        ctaLabel = "Subscribe", 
-        ctaHref = "#" 
-      } = block.props;
-      
-      const {
-        isSticky = false,
-        borderWidth = "1px",
-        borderColor = "#e2e8f0",
-        borderRadius,
-        backgroundColor = "#ffffff",
-        paddingTop,
-        paddingBottom
-      } = block.styles;
-
-      const items = Array.isArray(block.props.navItems) ? block.props.navItems : [
-        { label: "Articles", url: "#", subMenu: [] },
-        { label: "About", url: "#", subMenu: [] },
-        { label: "Newsletter", url: "#", subMenu: [] }
-      ];
-
-      const headerStyles = [
-        `background-color: ${isSticky ? `${backgroundColor}cc` : backgroundColor}`,
-        isSticky ? `backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)` : "",
-        borderRadius ? `border-radius: ${borderRadius}` : "",
-        borderWidth !== "0px" ? `border-bottom: ${borderWidth} solid ${borderColor}` : "border-bottom: none",
-        paddingTop ? `padding-top: ${resolveStyleValue(paddingTop)}` : "",
-        paddingBottom ? `padding-bottom: ${resolveStyleValue(paddingBottom)}` : "",
-      ].filter(Boolean).join("; ");
-
-      const navHtml = items.map((item: any) => {
-        const hasSub = item.subMenu && item.subMenu.length > 0;
-        if (hasSub) {
-          const subItemsHtml = item.subMenu.map((sub: any) => `
-            <a href="${sub.url || '#'}">${sub.label}</a>
-          `).join("");
-          return `
-          <div class="nav-dropdown-wrapper">
-            <a href="${item.url || '#'}" class="nav-dropdown-trigger">${item.label} <span style="font-size: 8px; opacity: 0.6;">▼</span></a>
-            <div class="nav-dropdown-menu">
-              ${subItemsHtml}
-            </div>
-          </div>`;
+        
+        if (inline) {
+          const styleMatch = inline.match(/style="([^"]+)"/);
+          if (styleMatch) {
+            const inlineStylesStr = styleMatch[1];
+            if (attributes.includes('style="')) {
+              attributes = attributes.replace('style="', `style="${inlineStylesStr}; `);
+            } else {
+              attributes = `${attributes} style="${inlineStylesStr}"`;
+            }
+          }
         }
-        return `<a href="${item.url || '#'}">${item.label}</a>`;
-      }).join("\n        ");
-
-      return `
-<div class="site-header-wrapper ${isSticky ? "sticky-header" : ""}" style="${headerStyles}">
-  <header class="site-header flex items-center justify-between py-2 px-6">
-    <div class="site-title font-sans font-bold">
-      ${logoImageUrl ? `
-        <a href="{{@site.url}}"><img src="${logoImageUrl}" alt="${logoText}" style="height: 24px; width: auto; object-fit: contain;" /></a>
-      ` : `
-        <a href="{{@site.url}}" style="text-decoration: none; color: inherit; text-transform: uppercase;">${logoText}</a>
-      `}
-    </div>
-    <div class="flex items-center gap-6">
-      <nav class="site-nav flex gap-5 text-xs font-medium">
-        ${navHtml}
-      </nav>
-      ${showCta ? `
-      <a href="${ctaHref}" class="btn btn-primary" style="padding: 0.35rem 1rem; border-radius: 4px; font-size: 11px;">${ctaLabel}</a>
-      ` : ""}
-    </div>
-  </header>
-</div>`;
-    }
-
-    case "footer":
-      return `
-<footer class="site-footer py-8 border-t border-brand-hairline${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
-    <span>© {{@site.title}} - Visual compiler output.</span>
-    <nav class="flex gap-4">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-    </nav>
-  </div>
-</footer>`;
-
-    case "post-grid":
-      return `
-<div class="post-grid-wrapper py-8${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="grid-columns">
-    {{#foreach posts}}
-    <article class="post-card">
-      {{#if feature_image}}
-      <div class="post-card-image">
-        <a href="{{url}}"><img src="{{img_url feature_image size="m"}}" alt="{{title}}" /></a>
-      </div>
-      {{/if}}
-      <div class="post-card-content">
-        {{#if primary_tag}}
-        <span class="post-tag">{{primary_tag.name}}</span>
-        {{/if}}
-        <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
-        <p class="post-excerpt">{{excerpt words="26"}}</p>
-        <div class="post-card-meta">
-          <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
-          <span>{{reading_time}}</span>
-        </div>
-      </div>
-    </article>
-    {{/foreach}}
-  </div>
-</div>`;
-
-    case "featured-posts":
-      return `
-<div class="featured-posts-block py-8${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="grid-columns">
-    {{#foreach posts featured="true" limit="3"}}
-    <article class="post-card border-brand-hairline shadow-level-1">
-      {{#if feature_image}}
-      <div class="post-card-image">
-        <a href="{{url}}"><img src="{{img_url feature_image size="m"}}" alt="{{title}}" /></a>
-      </div>
-      {{/if}}
-      <div class="post-card-content">
-        <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
-        <p class="post-excerpt">{{excerpt words="20"}}</p>
-      </div>
-    </article>
-    {{/foreach}}
-  </div>
-</div>`;
-
-    case "post-content": {
-      const titleMarkup = block.props.showTitle !== false ? '{{title}}' : '';
-      
-      const headerHtml = `
-  <header class="post-header mb-8">
-    <h1 class="text-3xl font-bold leading-tight">${titleMarkup}</h1>
-    <div class="post-meta text-xs text-muted mt-2">
-      <time datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM DD, YYYY"}}</time>
-    </div>
-  </header>`;
-
-      const imageHtml = `
-  {{#if feature_image}}
-    <figure class="post-feature-image rounded-md overflow-hidden my-6">
-      <img src="{{feature_image}}" alt="{{title}}" class="w-full h-auto" />
-    </figure>
-  {{/if}}`;
-
-      if (isPageContext) {
-        return `
-<article class="post-full-content py-12 max-w-2xl mx-auto px-6${getHoverClass(block)}"${getInlineStyles(block)}>
-  {{#if @page.show_title_and_feature_image}}
-    ${headerHtml}
-    ${imageHtml}
-  {{/if}}
-  <div class="post-body text-sm leading-relaxed mt-4">
-    {{content}}
-  </div>
-</article>`;
-      } else {
-        return `
-<article class="post-full-content py-12 max-w-2xl mx-auto px-6${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${headerHtml}
-  ${imageHtml}
-  <div class="post-body text-sm leading-relaxed mt-4">
-    {{content}}
-  </div>
-</article>`;
+        
+        markup = markup.replace(tagMatch[0], `<${tagName}${attributes}>`);
       }
     }
-
-    case "accordion":
-      return `
-<div class="accordion-wrapper py-6 flex flex-col gap-3${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${(block.props.items || []).map((item: any) => `
-  <div class="accordion-item border border-brand-hairline rounded-sm p-4 bg-white">
-    <h4 class="text-xs font-bold text-brand-ink mb-2 flex justify-between items-center cursor-pointer">
-      <span>${item.question || "FAQ Question"}</span>
-      <span class="text-[10px] text-muted">▼</span>
-    </h4>
-    <p class="text-xs text-muted leading-relaxed">${item.answer || "Answer content."}</p>
-  </div>`).join("\n")}
-</div>`;
-
-    case "testimonials":
-      return `
-<div class="testimonials-wrapper py-6 flex flex-col gap-4${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${(block.props.items || []).map((item: any) => `
-  <div class="testimonial-card border border-brand-hairline rounded-sm p-6 bg-brand-soft">
-    <p class="text-xs italic leading-relaxed mb-4">"${item.quote || ""}"</p>
-    <div class="flex flex-col">
-      <span class="text-xs font-bold">${item.author || "User"}</span>
-      <span class="text-[10px] text-muted font-mono">${item.title || ""}</span>
-    </div>
-  </div>`).join("\n")}
-</div>`;
-
-    case "pricing-table":
-      return `
-<div class="pricing-table-block py-8 text-center${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${block.props.title ? `<h3 class="text-sm font-mono uppercase tracking-wider text-muted mb-6">${block.props.title}</h3>` : ""}
-  <div class="pricing-grid flex flex-col md:flex-row justify-center gap-6 max-w-4xl mx-auto">
-    ${(block.props.tiers || []).map((tier: any) => `
-    <div class="pricing-tier border border-brand-hairline rounded-md p-6 bg-white flex flex-col justify-between flex-1">
-      <div class="mb-6">
-        <span class="tier-name text-[10px] font-mono uppercase tracking-wider text-muted font-semibold">${tier.name}</span>
-        <span class="tier-price block text-3xl font-bold mt-2">${tier.price}</span>
-        <div class="tier-features flex flex-col gap-1 mt-4 text-xs text-muted">
-          ${(tier.features || []).map((f: any) => `<span>✓ ${f}</span>`).join("\n")}
-        </div>
-      </div>
-      <a href="#" class="btn btn-primary">${tier.buttonLabel || "Choose Plan"}</a>
-    </div>`).join("\n")}
-  </div>
-</div>`;
-
-    case "grid-gallery":
-      return `
-<div class="gallery-grid-wrapper py-6${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="gallery-grid">
-    ${(block.props.urls || []).map((url: any) => `
-    <div class="gallery-image">
-      <img src="${url}" alt="Gallery Image" class="w-full h-full object-cover" />
-    </div>`).join("\n")}
-  </div>
-</div>`;
-
-    case "social-links":
-      return `
-<div class="social-links-row py-4 flex justify-center gap-6 text-xs font-mono${getHoverClass(block)}"${getInlineStyles(block)}>
-  ${block.props.github ? `<a href="${block.props.github}" target="_blank" rel="noreferrer">GitHub</a>` : ""}
-  ${block.props.twitter ? `<a href="${block.props.twitter}" target="_blank" rel="noreferrer">Twitter</a>` : ""}
-  ${block.props.website ? `<a href="${block.props.website}" target="_blank" rel="noreferrer">Website</a>` : ""}
-</div>`;
-
-    case "video-player":
-      return `
-<div class="video-player-wrapper py-6 flex justify-center${getHoverClass(block)}"${getInlineStyles(block)}>
-  <div class="video-container aspect-video w-full max-w-2xl bg-black rounded-md overflow-hidden">
-    ${block.props.url ? `<iframe src="${block.props.url}" class="w-full h-full" allowfullscreen></iframe>` : ""}
-  </div>
-</div>`;
-
-    default:
-      return "";
+    return markup;
   }
+  return "";
 }
 
 /**
@@ -522,24 +213,42 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
 /**
  * Returns basic premium global styles to be packaged alongside theme templates.
  */
-export function getCompilerStyles(): string {
+export function getCompilerStyles(doc?: ThemeDocument): string {
+  const settings = doc?.settings;
+  const tokens = settings?.designTokens;
+
+  const fontHeading = tokens?.typography?.headingFont || settings?.fontFamily || "'Geist', 'Inter', sans-serif";
+  const fontBody = tokens?.typography?.bodyFont || settings?.fontFamily || "'Geist', 'Inter', sans-serif";
+  const colorBackground = tokens?.colors?.background || '#fafafa';
+  const colorForeground = tokens?.colors?.foreground || '#171717';
+  const colorPrimary = tokens?.colors?.primary || settings?.primaryColor || '#171717';
+  const colorMuted = tokens?.colors?.muted || '#4d4d4d';
+  const colorAccent = tokens?.colors?.accent || '#3b82f6';
+  const containerWidthVal = settings?.containerWidth ? `${settings.containerWidth}px` : '1200px';
+
   return `
 /* Ghost Custom Theme Fonts Customization System */
 :root {
-  --gh-font-heading: 'Geist', 'Inter', sans-serif;
-  --gh-font-body: 'Geist', 'Inter', sans-serif;
+  --gh-font-heading: ${fontHeading};
+  --gh-font-body: ${fontBody};
+  --color-background: ${colorBackground};
+  --color-foreground: ${colorForeground};
+  --color-primary: ${colorPrimary};
+  --color-muted: ${colorMuted};
+  --color-accent: ${colorAccent};
+  --container-width: ${containerWidthVal};
 }
 
 /* Base styling */
 body {
   font-family: var(--gh-font-body);
-  color: #171717;
-  background-color: #fafafa;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
   margin: 0;
   padding: 0;
 }
 .container-width {
-  max-width: 1200px;
+  max-width: var(--container-width);
 }
 .mx-auto { margin-left: auto; margin-right: auto; }
 .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
@@ -937,8 +646,13 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   });
 
-  // 4. Generate asset stylesheet screen.css
-  files["assets/css/screen.css"] = minifyCss(getCompilerStyles());
+  // 4. Generate navigation partial for Ghost compatibility
+  files["partials/navigation.hbs"] = `{{#foreach navigation}}
+<a href="{{url}}" class="nav-{{slug}}{{#if current}} nav-current{{/if}}">{{label}}</a>
+{{/foreach}}`;
+
+  // 5. Generate asset stylesheet screen.css
+  files["assets/css/screen.css"] = minifyCss(getCompilerStyles(doc));
 
   return files;
 }

@@ -1,0 +1,2 @@
+export const defaultProps = { items: [{ question: "Frequently Asked Question?", answer: "This is a pre-configured response answering this detailed query template." }] };
+export const defaultStyles = {};

@@ -246,7 +246,8 @@ export default function Toolbar() {
               const zip = new JSZip();
 
               import("./compiler").then(({ generateThemeFiles }) => {
-                const files = generateThemeFiles(themeDoc);
+                const latestDoc = useEditorStore.getState().document;
+                const files = generateThemeFiles(latestDoc);
                 
                 // Add files to zip archive
                 Object.entries(files).forEach(([name, content]) => {
@@ -258,7 +259,7 @@ export default function Toolbar() {
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = `${themeDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
+                  a.download = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);

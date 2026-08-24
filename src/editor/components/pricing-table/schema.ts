@@ -1,0 +1,2 @@
+export const defaultProps = { title: "Pricing Plans", tiers: [{ name: "Starter", price: "$0", features: ["1 Site", "Standard support"], buttonLabel: "Free Plan" }, { name: "Pro", price: "$29", features: ["10 Sites", "Priority support", "Full AST export"], buttonLabel: "Upgrade" }] };
+export const defaultStyles = {};

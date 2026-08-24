@@ -246,6 +246,8 @@ interface EditorState {
   redo: () => void;
 }
 
+import { componentRegistry } from "@/editor/components/registry";
+
 const saveToHistory = (state: EditorState) => {
   return {
     past: [...state.past, JSON.parse(JSON.stringify(state.document))],
@@ -255,27 +257,12 @@ const saveToHistory = (state: EditorState) => {
 
 const createNewBlock = (type: string): BuilderBlock => {
   const newId = generateId(type);
+  const def = componentRegistry[type];
   return {
     id: newId,
     type,
-    props: type === "heading" ? { text: "Heading Text", level: 2 } 
-           : type === "text" ? { text: "Add your text content here." }
-           : type === "button" ? { label: "Click here", href: "#", variant: "primary" }
-           : type === "hero" ? { title: "Verve Landing", subtitle: "Build visual layout sections at rapid speeds.", buttonLabel: "Get Started" }
-           : type === "newsletter" ? { title: "Sign up for updates", buttonLabel: "Subscribe", placeholder: "you@example.com" }
-           : type === "featured-posts" ? { title: "Featured Posts" }
-           : type === "image" ? { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80", alt: "Mock Image description" }
-           : type === "spacer" ? { height: "40px" }
-           : type === "author-profile" ? { name: "Praveen", bio: "Engineering lead and visual theme designer focused on edge stacks." }
-           : type === "tag-archive" ? { title: "Browse Topics" }
-           : type === "accordion" ? { items: [{ question: "Frequently Asked Question?", answer: "This is a pre-configured response answering this detailed query template." }] }
-           : type === "testimonials" ? { items: [{ quote: "The interface layout built using this editor compiles faster than manual code.", author: "Reviewer A", title: "Theme Developer" }] }
-           : type === "pricing-table" ? { title: "Pricing Plans", tiers: [{ name: "Starter", price: "$0", features: ["1 Site", "Standard support"], buttonLabel: "Free Plan" }, { name: "Pro", price: "$29", features: ["10 Sites", "Priority support", "Full AST export"], buttonLabel: "Upgrade" }] }
-           : type === "grid-gallery" ? { urls: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=300&q=80", "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=300&q=80"] }
-           : type === "social-links" ? { github: "https://github.com", twitter: "https://twitter.com", website: "https://example.com" }
-           : type === "video-player" ? { url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
-           : {},
-    styles: {},
+    props: def ? JSON.parse(JSON.stringify(def.defaultProps)) : {},
+    styles: def ? JSON.parse(JSON.stringify(def.defaultStyles)) : {},
     childrenIds: type === "section" || type === "container" || type === "columns" ? [] : undefined,
   };
 };
@@ -315,6 +302,85 @@ const triggerAutosave = (get: any) => {
   autosaveTimeout = setTimeout(() => {
     get().saveTheme();
   }, 400);
+};
+
+const syncHeaderFooterAcrossPages = (
+  pages: ThemePages,
+  blocks: Record<string, BuilderBlock>,
+  activePage: string
+): ThemePages => {
+  const activeSections = pages[activePage]?.sections || [];
+  
+  let headerSectionId: string | null = null;
+  let footerSectionId: string | null = null;
+  
+  const isHeaderOrFooter = (blockId: string): { isHeader: boolean; isFooter: boolean } => {
+    const block = blocks[blockId];
+    if (!block) return { isHeader: false, isFooter: false };
+    if (block.type === "header") return { isHeader: true, isFooter: false };
+    if (block.type === "footer") return { isHeader: false, isFooter: true };
+    if (block.childrenIds) {
+      for (const cid of block.childrenIds) {
+        const res = isHeaderOrFooter(cid);
+        if (res.isHeader || res.isFooter) return res;
+      }
+    }
+    return { isHeader: false, isFooter: false };
+  };
+
+  activeSections.forEach((sid) => {
+    const res = isHeaderOrFooter(sid);
+    if (res.isHeader) {
+      headerSectionId = sid;
+    }
+    if (res.isFooter) {
+      footerSectionId = sid;
+    }
+  });
+
+  const newPages = { ...pages };
+  
+  Object.keys(newPages).forEach((pageKey) => {
+    let sections = [...(newPages[pageKey].sections || [])];
+    
+    sections = sections.filter((sid) => {
+      const res = isHeaderOrFooter(sid);
+      if (res.isHeader && sid !== headerSectionId) return false;
+      if (res.isFooter && sid !== footerSectionId) return false;
+      return true;
+    });
+
+    if (headerSectionId) {
+      const idx = sections.indexOf(headerSectionId);
+      if (idx === -1) {
+        sections.unshift(headerSectionId);
+      } else if (idx !== 0) {
+        sections.splice(idx, 1);
+        sections.unshift(headerSectionId);
+      }
+    } else {
+      sections = sections.filter((sid) => !isHeaderOrFooter(sid).isHeader);
+    }
+
+    if (footerSectionId) {
+      const idx = sections.indexOf(footerSectionId);
+      if (idx === -1) {
+        sections.push(footerSectionId);
+      } else if (idx !== sections.length - 1) {
+        sections.splice(idx, 1);
+        sections.push(footerSectionId);
+      }
+    } else {
+      sections = sections.filter((sid) => !isHeaderOrFooter(sid).isFooter);
+    }
+
+    newPages[pageKey] = {
+      ...newPages[pageKey],
+      sections,
+    };
+  });
+
+  return newPages;
 };
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -521,7 +587,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section") {
+      if (type !== "section" && type !== "container") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -540,7 +606,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
       selectedBlockId: newId,
     };
   }),
@@ -559,7 +625,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section") {
+      if (type !== "section" && type !== "container") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -582,7 +648,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
       selectedBlockId: newId,
     };
   }),
@@ -645,7 +711,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: newPages }
+      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) }
     };
   }),
 
@@ -719,7 +785,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
       selectedBlockId: state.selectedBlockId === blockId ? null : state.selectedBlockId,
     };
   }),
@@ -794,7 +860,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
       return {
         ...historyUpdate,
-        document: { ...state.document, pages: newPages },
+        document: { ...state.document, pages: syncHeaderFooterAcrossPages(newPages, state.document.blocks, state.activePage) },
       };
     }
   }),
