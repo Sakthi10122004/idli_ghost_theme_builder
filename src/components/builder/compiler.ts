@@ -363,14 +363,97 @@ body {
   background-color: #fafafa;
 }
 
+/* Site Header (.gh-head) */
+.gh-head {
+  padding: 1rem 2rem;
+  background-color: var(--ghost-accent-color, #ffffff);
+  border-bottom: 1px solid #ebebeb;
+  position: relative;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+.gh-head.palette-dark {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-bottom: 1px solid #333;
+}
+.gh-head.palette-ocean {
+  background-color: #0c4a6e;
+  color: #ffffff;
+  border-bottom: 1px solid #075985;
+}
+.gh-head a {
+  text-decoration: none;
+  color: inherit;
+}
+.gh-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+.gh-head.layout-logo-in-center .gh-head-inner {
+  justify-content: center;
+}
+.gh-head.layout-logo-in-center .gh-head-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.gh-head.layout-logo-in-center .gh-head-menu {
+  flex-grow: 1;
+}
+.gh-head.layout-stacked .gh-head-inner {
+  flex-direction: column;
+  gap: 1rem;
+}
+.gh-head-logo img {
+  display: block;
+}
+.gh-site-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.gh-head-menu {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.gh-head-actions {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+.gh-search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.8;
+}
+.gh-search-btn:hover {
+  opacity: 1;
+}
+.gh-head-btn {
+  background-color: #171717;
+  color: #fff !important;
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.gh-head.palette-dark .gh-head-btn, .gh-head.palette-ocean .gh-head-btn {
+  background-color: #fff;
+  color: #000 !important;
+}
+
 /* Custom Blocks */
 .hero-block {
-  background: radial-gradient(circle at top, rgba(0, 112, 243, 0.05), transparent 70%);
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-  padding: 4rem 1.5rem;
-}
 .hero-content {
   display: flex;
   flex-direction: column;

@@ -17,7 +17,8 @@ function SortableElement({
   onDelete,
   children,
   style = {},
-  className = ""
+  className = "",
+  isGlobal = false
 }: {
   block: BuilderBlock;
   isSelected: boolean;
@@ -26,6 +27,7 @@ function SortableElement({
   children: React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
+  isGlobal?: boolean;
 }) {
   const { isPreviewMode, updateBlockStyles, updateBlockProps, document: themeDoc, activePage, reorderBlocks, deviceMode } = useEditorStore();
 
@@ -70,7 +72,7 @@ function SortableElement({
     transition,
     isDragging,
     isOver
-  } = useSortable({ id: block.id, disabled: isPreviewMode });
+  } = useSortable({ id: block.id, disabled: isPreviewMode || isGlobal });
   const { active } = useDndContext();
   const isSidebarDragOver = active?.id.toString().startsWith("sidebar-") && isOver;
 
@@ -192,7 +194,7 @@ function SortableElement({
       ) : (
         <>
           {/* Floating Grip handle shown on hover OR selection */}
-          {!isPreviewMode && (
+          {!isPreviewMode && !isGlobal && (
             <div className={`absolute -top-6 left-0 bg-brand-primary text-white text-[9px] font-mono px-2 py-0.5 rounded-t-sm flex items-center gap-1.5 z-20 transition-all select-none pointer-events-auto ${
               isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
             }`}>
@@ -236,7 +238,7 @@ function SortableElement({
           )}
 
           {/* Resizing Edge Handles */}
-          {!isPreviewMode && (
+          {!isPreviewMode && !isGlobal && (
             <>
               {/* Outer Section / General Block Width Handle */}
               <div 
@@ -325,7 +327,7 @@ export default function Canvas() {
     return val[deviceMode] || val.desktop || undefined;
   };
 
-  const renderBlock = (blockId: string): React.ReactNode => {
+  const renderBlock = (blockId: string, isGlobal = false): React.ReactNode => {
     const block = themeDoc.blocks[blockId];
     if (!block) return null;
 
@@ -376,6 +378,7 @@ export default function Canvas() {
           isSelected={isSelected}
           onClick={handleClick}
           onDelete={handleDelete}
+          isGlobal={isGlobal}
           style={{
             backgroundColor: resolveStyle(backgroundColor) || undefined,
             paddingTop: resolveStyle(paddingTop) || undefined,
@@ -433,7 +436,10 @@ export default function Canvas() {
               renderChildren={() => (
                 block.childrenIds && block.childrenIds.length > 0 ? (
                   <SortableContext items={block.childrenIds} strategy={verticalListSortingStrategy}>
-                    {block.childrenIds.map((cid) => renderBlock(cid))}
+                    {block.childrenIds.filter(cid => {
+                      const cb = themeDoc.blocks[cid];
+                      return cb && cb.type !== "header" && cb.type !== "footer";
+                    }).map((cid) => renderBlock(cid))}
                   </SortableContext>
                 ) : (
                   block.type === "section" ? (
@@ -464,24 +470,40 @@ export default function Canvas() {
     );
   };
 
+  let headerBlockId: string | undefined;
+  let footerBlockId: string | undefined;
+  Object.values(themeDoc.blocks).forEach((block) => {
+    if (block.type === "header" && !headerBlockId) headerBlockId = block.id;
+    if (block.type === "footer" && !footerBlockId) footerBlockId = block.id;
+  });
+
   return (
     <div className="flex-1 bg-brand-canvas-soft overflow-y-auto p-8 flex justify-center items-start mesh-glow select-none">
       <div 
         ref={setCanvasDropRef}
         onClick={() => selectBlock(null)}
-        className={`${getViewportWidthClass()} bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 p-4 pt-8 pb-8 ${
+        className={`${getViewportWidthClass()} bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
           isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20 scale-[1.002]" : "border-brand-hairline"
         }`}
       >
-        {pageSections.length > 0 ? (
-          <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
-            {pageSections.map((sid) => renderBlock(sid))}
-          </SortableContext>
-        ) : (
-          <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">
-            <p>Drag or click blocks in the sidebar to populate your theme layout.</p>
-          </div>
-        )}
+        {headerBlockId && renderBlock(headerBlockId, true)}
+
+        <div className="flex-1 w-full flex flex-col pt-8 pb-8">
+          {pageSections.length > 0 ? (
+            <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
+              {pageSections.filter(sid => {
+                const b = themeDoc.blocks[sid];
+                return b && b.type !== "header" && b.type !== "footer";
+              }).map((sid) => renderBlock(sid))}
+            </SortableContext>
+          ) : (
+            <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">
+              <p>Drag or click blocks in the sidebar to populate your theme layout.</p>
+            </div>
+          )}
+        </div>
+
+        {footerBlockId && renderBlock(footerBlockId, true)}
       </div>
     </div>
   );
