@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { getPaletteConfig } from "./constants";
 
 const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
   <button 
@@ -38,46 +39,8 @@ const SegmentedControl = ({ options, value, onChange }: {
   </div>
 );
 
-const getPalettePreview = (id: string, isDark: boolean) => {
-  if (isDark) {
-    switch (id) {
-      case 'default': return { bg: '#18181b', main: '#ef4444', accent: '#27272a' };
-      case 'classic': return { bg: '#111827', main: '#3b82f6', accent: '#1f2937' };
-      case 'dynamic': return { bg: '#b91c1c', main: '#ffffff', accent: '#7f1d1d' };
-      case 'sand': return { bg: '#292524', main: '#ef4444', accent: '#44403c' };
-      case 'zinc': return { bg: '#27272a', main: '#ef4444', accent: '#3f3f46' };
-      case 'graphite': return { bg: '#18181b', main: '#ef4444', accent: '#27272a' };
-      case 'stone': return { bg: '#1c1917', main: '#ef4444', accent: '#292524' };
-      case 'ocean': return { bg: '#0c4a6e', main: '#38bdf8', accent: '#0284c7' };
-      case 'indigo': return { bg: '#312e81', main: '#818cf8', accent: '#3730a3' };
-      case 'violet': return { bg: '#4c1d95', main: '#a78bfa', accent: '#5b21b6' };
-      case 'rose': return { bg: '#4c0519', main: '#fb7185', accent: '#881337' };
-      case 'amber': return { bg: '#451a03', main: '#fbbf24', accent: '#78350f' };
-      case 'sage': return { bg: '#064e3b', main: '#34d399', accent: '#065f46' };
-      default: return { bg: '#18181b', main: '#ef4444', accent: '#27272a' };
-    }
-  } else {
-    switch (id) {
-      case 'default': return { bg: '#ffffff', main: '#ef4444', accent: '#f3f4f6' };
-      case 'classic': return { bg: '#f3f4f6', main: '#ef4444', accent: '#e5e7eb' };
-      case 'dynamic': return { bg: '#fee2e2', main: '#ef4444', accent: '#fecaca' };
-      case 'sand': return { bg: '#f5f5f4', main: '#ef4444', accent: '#e7e5e4' };
-      case 'zinc': return { bg: '#f4f4f5', main: '#ef4444', accent: '#e4e4e7' };
-      case 'graphite': return { bg: '#e4e4e7', main: '#ef4444', accent: '#d4d4d8' };
-      case 'stone': return { bg: '#e7e5e4', main: '#ef4444', accent: '#d6d3d1' };
-      case 'ocean': return { bg: '#e0f2fe', main: '#0ea5e9', accent: '#bae6fd' };
-      case 'indigo': return { bg: '#e0e7ff', main: '#6366f1', accent: '#c7d2fe' };
-      case 'violet': return { bg: '#ede9fe', main: '#8b5cf6', accent: '#ddd6fe' };
-      case 'rose': return { bg: '#ffe4e6', main: '#f43f5e', accent: '#fecdd3' };
-      case 'amber': return { bg: '#fef3c7', main: '#d97706', accent: '#fde68a' };
-      case 'sage': return { bg: '#d1fae5', main: '#10b981', accent: '#a7f3d0' };
-      default: return { bg: '#ffffff', main: '#ef4444', accent: '#f3f4f6' };
-    }
-  }
-};
-
 const PaletteButton = ({ id, label, active, isDark, onClick }: { id: string, label: string, active: boolean, isDark: boolean, onClick: () => void }) => {
-  const { bg, main, accent } = getPalettePreview(id, isDark);
+  const { bg, buttonBg } = getPaletteConfig(id, isDark);
   return (
     <button
       type="button"
@@ -91,8 +54,8 @@ const PaletteButton = ({ id, label, active, isDark, onClick }: { id: string, lab
     >
       <span className={`text-[10px] font-medium ${active ? (isDark ? 'text-blue-300' : 'text-blue-700') : (isDark ? 'text-gray-300' : 'text-gray-600')}`}>{label}</span>
       <div className="flex gap-1">
-        <div className="w-5 h-2.5 rounded-full" style={{ backgroundColor: main }} />
-        <div className="w-3.5 h-2.5 rounded-full" style={{ backgroundColor: accent }} />
+        <div className="w-5 h-2.5 rounded-full" style={{ backgroundColor: buttonBg }} />
+        <div className="w-3.5 h-2.5 rounded-full opacity-50" style={{ backgroundColor: buttonBg }} />
       </div>
     </button>
   );
