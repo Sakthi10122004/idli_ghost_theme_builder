@@ -191,6 +191,10 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
 
   const isPageContext = pageName === "page" || pageName.startsWith("custom-");
   const mainContent = page.sections
+    .filter((sectionId) => {
+      const b = doc.blocks[sectionId];
+      return b && b.type !== "header" && b.type !== "footer";
+    })
     .map((sectionId) => compileBlockToHbs(sectionId, doc.blocks, isPageContext))
     .join("\n");
 
@@ -362,6 +366,47 @@ body {
 /* Custom Blocks */
 .hero-block {
   background: radial-gradient(circle at top, rgba(0, 112, 243, 0.05), transparent 70%);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+.hero-eyebrow {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #f1f5f9;
+  color: #3b82f6;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  line-height: 1.2;
+}
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
 }
 .newsletter-block {
   background-color: #fafafa;
@@ -387,18 +432,26 @@ body {
   justify-content: space-between;
   padding: 1rem 1.5rem;
   width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ebebeb;
 }
 .site-header .site-title a {
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 700;
+  font-size: 1rem;
   color: #171717;
   text-decoration: none;
   text-transform: uppercase;
 }
+.site-header .site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
 .site-header .site-nav a {
   color: #4d4d4d;
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   transition: color 0.2s;
 }
 .site-header .site-nav a:hover {
@@ -617,7 +670,22 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   }, null, 2);
 
-  // 2. Generate default.hbs wrapper page
+  // 2. Extract global partials
+  let headerCompiled = "";
+  let footerCompiled = "";
+  Object.values(doc.blocks).forEach((block) => {
+    if (block.type === "header" && !headerCompiled) {
+      headerCompiled = compileBlockToHbs(block.id, doc.blocks, false);
+    }
+    if (block.type === "footer" && !footerCompiled) {
+      footerCompiled = compileBlockToHbs(block.id, doc.blocks, false);
+    }
+  });
+
+  if (headerCompiled) files["partials/header.hbs"] = headerCompiled;
+  if (footerCompiled) files["partials/footer.hbs"] = footerCompiled;
+
+  // 3. Generate default.hbs wrapper page
   files["default.hbs"] = `
 <!DOCTYPE html>
 <html lang="{{@site.locale}}">
@@ -629,9 +697,14 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   {{ghost_head}}
 </head>
 <body class="{{body_class}}">
-  <div class="viewport-wrapper">
-    {{{body}}}
+  <div class="site-wrapper">
+    ${headerCompiled ? '{{> "header"}}' : ''}
+    <main id="site-main" class="site-main">
+      {{{body}}}
+    </main>
+    ${footerCompiled ? '{{> "footer"}}' : ''}
   </div>
+  <script src="{{asset "js/index.js"}}"></script>
   {{ghost_foot}}
 </body>
 </html>`;

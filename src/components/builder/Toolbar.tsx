@@ -287,11 +287,25 @@ export default function Toolbar() {
                       name: compiledPackage.name || originalPackage.name,
                       description: compiledPackage.description || originalPackage.description,
                       version: compiledPackage.version || originalPackage.version,
+                      config: compiledPackage.config || originalPackage.config,
                       author: {
                         ...originalPackage.author,
                         name: compiledPackage.author?.name || originalPackage.author?.name
                       }
                     };
+                    
+                    if (mergedPackage.config && mergedPackage.config.custom) {
+                      // We only keep custom settings that are actually used in the templates we include 
+                      // from Casper (like partials/post-card.hbs).
+                      const feedLayout = mergedPackage.config.custom.feed_layout;
+                      if (feedLayout) {
+                        mergedPackage.config.custom = {
+                          feed_layout: feedLayout
+                        };
+                      } else {
+                        delete mergedPackage.config.custom;
+                      }
+                    }
                     zip.file("package.json", JSON.stringify(mergedPackage, null, 2));
                   } else {
                     zip.file(name, content as string);

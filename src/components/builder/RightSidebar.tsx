@@ -38,7 +38,7 @@ export default function RightSidebar() {
     { label: "Body Text", value: "#4d4d4d" },
     { label: "Mute Gray", value: "#888888" },
     { label: "Vercel Blue", value: "#0070f3" },
-    { label: "Success Green", value: "#0070f3" },
+    { label: "Success Green", value: "#10b981" },
     { label: "Error Red", value: "#ee0000" },
     { label: "Warning Gold", value: "#f5a623" },
   ];
@@ -63,6 +63,16 @@ export default function RightSidebar() {
               <Trash2 size={14} />
             </button>
           </div>
+
+          {/* Global Layout Warning */}
+          {(selectedBlock.type === "header" || selectedBlock.type === "footer") && (
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex gap-2 items-start shadow-sm">
+              <span className="text-amber-500 mt-0.5">ⓘ</span>
+              <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
+                This section belongs to Default layout, so changes here affect every template using that layout.
+              </p>
+            </div>
+          )}
 
           {/* Properties Section */}
           <div className="flex flex-col gap-4">
@@ -144,7 +154,7 @@ export default function RightSidebar() {
                   >
                     <option value="">Default Inherit</option>
                     {vercelColors.map((c) => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
+                      <option key={c.label} value={c.value}>{c.label}</option>
                     ))}
                   </select>
                 </div>
