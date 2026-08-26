@@ -8,8 +8,11 @@ export const defaultProps = {
     customCopyrightText: "",
   },
   colors: {
-    mode: "light",
-    palette: "default",
+    syncWithHeader: false,
+    backgroundColor: "#ffffff",
+    textColor: "#1a1a1a",
+    buttonBgColor: "#000000",
+    buttonTextColor: "#ffffff",
   },
   layout: {
     sectionWidth: "full",

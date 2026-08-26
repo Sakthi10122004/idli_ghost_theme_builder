@@ -144,7 +144,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 
   const def = componentRegistry[block.type];
   if (def) {
-    let markup = def.compileToHbs(block, compiledChildren, isPageContext);
+    let markup = def.compileToHbs(block, compiledChildren, isPageContext, blocks);
     const inline = getInlineStyles(block);
     const hover = getHoverClass(block);
 

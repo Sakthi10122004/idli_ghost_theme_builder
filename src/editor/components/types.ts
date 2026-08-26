@@ -17,5 +17,5 @@ export interface ComponentDefinition {
     onChangeProps: (props: Record<string, any>) => void;
     onChangeStyles: (styles: Record<string, any>) => void;
   }>;
-  compileToHbs: (block: BuilderBlock, compiledChildren: string, isPageContext: boolean) => string;
+  compileToHbs: (block: BuilderBlock, compiledChildren: string, isPageContext: boolean, blocks?: Record<string, BuilderBlock>) => string;
 }
