@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { BuilderBlock } from "@/types/theme";
+import { getPaletteConfig, hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
 
@@ -18,6 +19,10 @@ export const CanvasElement = ({ block }: {
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
+  // FIX (bug 5): local state so "inherit" mode can actually be demoed live in
+  // the canvas by clicking the theme switcher, instead of only opening a toast.
+  const [previewAmbientDark, setPreviewAmbientDark] = useState(false);
+
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
     { label: "Lifestyle", url: "#" },
     { label: "Travel", url: "#" },
@@ -28,84 +33,61 @@ export const CanvasElement = ({ block }: {
   const layout = general.layoutStyle || "Logo on Left";
   const isLogoCenter = layout === "Logo in Center";
   const isStacked = layout === "Stacked";
-  const isDarkForce = appearance.colorMode === "dark";
+
+  // FIX (bug 5): colorMode now has three real states instead of one boolean.
+  // "dark"/"light" force a mode regardless of the site. "inherit" (the
+  // default) must respond to the *ambient* theme, so we compute both a
+  // light class set and a dark: class set instead of picking one statically.
+  const colorMode = appearance.colorMode || "inherit";
+  const isForcedDark = colorMode === "dark";
+  const isForcedLight = colorMode === "light";
+  const isInherit = !isForcedDark && !isForcedLight;
+  // Only used for local hover/contrast decisions when a mode is *forced*.
+  // In "inherit" mode we can't know the ambient state statically, so hover
+  // styles below add a dark: variant instead of relying on this flag.
+  const isDarkForce = isForcedDark || (isInherit && previewAmbientDark);
+
+  // FIX (bug 1): logo size now actually read from props and applied.
+  const logoSize = general.logoSize || 40;
 
   const effectiveContentWidth =
     widthRank(appearance.contentWidth) > widthRank(appearance.sectionWidth)
       ? appearance.sectionWidth
       : appearance.contentWidth;
 
-  // Palette background and text colors
-  const getPaletteClass = (palette: string) => {
-    if (isDarkForce) {
-      switch (palette) {
-        case "dark": return "bg-[#18181b] text-white";
-        case "classic": return "bg-[#111827] text-white";
-        case "dynamic": return "bg-[#b91c1c] text-white";
-        case "sand": return "bg-[#292524] text-white";
-        case "zinc": return "bg-[#27272a] text-white";
-        case "graphite": return "bg-[#18181b] text-white";
-        case "stone": return "bg-[#1c1917] text-white";
-        case "ocean": return "bg-[#0c4a6e] text-[#e0f2fe]";
-        case "indigo": return "bg-[#1e1b4b] text-[#e0e7ff]";
-        case "violet": return "bg-[#2e1065] text-[#ede9fe]";
-        case "rose": return "bg-[#4c0519] text-[#ffe4e6]";
-        case "amber": return "bg-[#451a03] text-[#fef3c7]";
-        case "sage": return "bg-[#064e3b] text-[#d1fae5]";
-        case "default": return "bg-[#18181b] text-white";
-        default: return "bg-[#18181b] text-white";
-      }
-    } else {
-      switch (palette) {
-        case "dark": return "bg-gray-900 text-white";
-        case "classic": return "bg-[#f3f4f6] text-gray-900";
-        case "dynamic": return "bg-[#fee2e2] text-red-900";
-        case "sand": return "bg-[#f5f5f4] text-[#44403c]";
-        case "zinc": return "bg-[#f4f4f5] text-[#27272a]";
-        case "graphite": return "bg-[#e4e4e7] text-[#18181b]";
-        case "stone": return "bg-[#e7e5e4] text-[#1c1917]";
-        case "ocean": return "bg-[#e0f2fe] text-[#0c4a6e]";
-        case "indigo": return "bg-[#1e1b4b] text-[#e0e7ff]";
-        case "violet": return "bg-[#ede9fe] text-[#4c1d95]";
-        case "rose": return "bg-[#ffe4e6] text-[#881337]";
-        case "amber": return "bg-[#fef3c7] text-[#78350f]";
-        case "sage": return "bg-[#d1fae5] text-[#064e3b]";
-        case "default": return "bg-white text-gray-900";
-        default: return "bg-[#1e1b4b] text-[#e0e7ff]";
-      }
-    }
-  };
+  const palette = getPaletteConfig(appearance.colorPalette || "default", isDarkForce);
+  
+  const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
+  const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
 
   // Section Width: Constrains the actual header bar on the canvas
-  const getSectionWidthClass = (width: string) => {
-    switch (width) {
-      case "narrow": return "max-w-4xl mx-auto rounded-xl my-2";
-      case "standard": return "max-w-6xl mx-auto rounded-xl my-2";
-      case "wide": return "max-w-7xl mx-auto";
-      default: return "w-full"; // Full width spans edge-to-edge
-    }
-  };
-  
+  const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
+  const isSectionFull = sectionMaxWidth === "100%";
+  const sectionBaseClass = isSectionFull ? "w-full" : "w-full mx-auto rounded-xl my-2";
+
   // Content Width: Constrains the inner items within the header
-  const getContentWidthClass = (width: string) => {
-    switch (width) {
-      case "narrow": return "max-w-3xl";
-      case "standard": return "max-w-5xl";
-      case "wide": return "max-w-6xl";
-      default: return "w-full";
-    }
-  };
+  const contentMaxWidth = CONTENT_WIDTH_VALUES[effectiveContentWidth || "wide"] || "100%";
+
+  // FIX (bug 3): hover states were hardcoded for a dark background
+  // (hover:text-white, hover:bg-white/10). On light palettes that's
+  // white-on-white — the hover fires, it's just invisible. Nav text now
+  // just goes to full opacity of its own (correct) color on hover, and
+  // icon buttons pick a hover tint based on the current mode, plus a
+  // dark: variant so "inherit" mode adapts to the ambient theme too.
+  const iconHoverClass = isDarkForce
+    ? "hover:bg-white/10"
+    : "hover:bg-black/5 dark:hover:bg-white/10";
 
   const renderActions = () => (
     <div className="flex items-center gap-4 shrink-0">
       {general.showSearch !== false && (
-        <button 
+        <button
           type="button"
-          onClick={() => setActiveModal("Ghost SodoSearch simulation active.")} 
-          className="p-1.5 opacity-80 hover:opacity-100 rounded-full hover:bg-white/10 shrink-0 transition-opacity" 
+          onClick={() => setActiveModal("Ghost SodoSearch simulation active.")}
+          className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
           title="Test Ghost Search"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -113,33 +95,39 @@ export const CanvasElement = ({ block }: {
       )}
 
       {general.showThemeSwitcher !== false && (
-        <button 
+        <button
           type="button"
-          onClick={() => setActiveModal("Theme Switcher toggled.")} 
-          className="p-1.5 opacity-80 hover:opacity-100 rounded-full hover:bg-white/10 shrink-0 transition-opacity" 
+          onClick={() => {
+            // Only meaningful to preview when following the ambient theme;
+            // forced light/dark shouldn't visually change on click.
+            if (isInherit) setPreviewAmbientDark((v) => !v);
+            setActiveModal("Theme Switcher toggled.");
+          }}
+          className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
           title="Toggle Theme"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
       )}
 
       {general.showSignIn !== false && (
-        <button 
+        <button
           type="button"
-          onClick={() => setActiveModal("Ghost Portal Sign In simulation active.")} 
-          className="text-sm font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
+          onClick={() => setActiveModal("Ghost Portal Sign In simulation active.")}
+          className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
         >
           {general.signInText || "Sign in"}
         </button>
       )}
 
       {general.showSubscribe !== false && (
-        <button 
+        <button
           type="button"
-          onClick={() => setActiveModal("Ghost Portal Subscribe simulation active.")} 
-          className="bg-[#6366f1] text-white hover:bg-[#4f46e5] px-5 py-2 rounded-full text-sm font-semibold shadow-sm transition-all whitespace-nowrap"
+          onClick={() => setActiveModal("Ghost Portal Subscribe simulation active.")}
+          className="px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
+          style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
         >
           {general.subscribeText || "Subscribe"}
         </button>
@@ -147,34 +135,49 @@ export const CanvasElement = ({ block }: {
     </div>
   );
 
+  const logoIcon = (paths: string) => (
+    <svg
+      className="fill-current shrink-0"
+      style={{ width: logoSize, height: logoSize }}
+      viewBox="0 0 24 24"
+    >
+      <path d={paths} />
+    </svg>
+  );
+
   return (
     <div className="w-full bg-transparent p-0">
       {/* Header receives Section Width & Colors */}
-      <header 
-        className={`relative transition-all duration-150 ${getPaletteClass(appearance.colorPalette)} ${getSectionWidthClass(appearance.sectionWidth)}`}
+      <header
+        className={`relative transition-all duration-150 ${sectionBaseClass}`}
         style={{
+          maxWidth: sectionMaxWidth,
+          backgroundColor: bgStyle,
+          color: palette.text,
           marginBottom: styles.marginBottom || "0px",
           boxShadow: styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none",
           opacity: styles.opacity ?? 1,
-          backdropFilter: styles.backdropBlur !== "none" ? "blur(12px)" : "none",
+          backdropFilter: glassEnabled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: glassEnabled ? "blur(12px)" : "none",
         }}
       >
         {/* Inner container receives Content Width */}
-        <div className={`w-full mx-auto px-6 py-4 ${getContentWidthClass(effectiveContentWidth)}`}>
-          
+        <div 
+          className="w-full mx-auto px-6 py-5"
+          style={{ maxWidth: contentMaxWidth }}
+        >
+
           {isStacked ? (
             <div className="flex flex-col items-center gap-4 text-center w-full">
               {general.showLogo !== false && (
-                <div className="flex items-center gap-2 font-bold tracking-tight text-lg">
-                  <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
+                <div className="flex items-center gap-2 font-bold tracking-tight text-2xl">
+                  {logoIcon("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5")}
                   <span>Publication</span>
                 </div>
               )}
-              <nav className="flex flex-wrap justify-center items-center gap-8 text-sm font-medium opacity-90">
+              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.0625rem] font-medium opacity-90">
                 {items.map((item: any, idx: number) => (
-                  <span key={idx} className="cursor-pointer hover:opacity-100 hover:text-white transition-opacity whitespace-nowrap">
+                  <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
                     {item.label}
                   </span>
                 ))}
@@ -184,9 +187,9 @@ export const CanvasElement = ({ block }: {
           ) : isLogoCenter ? (
             <div className="flex items-center justify-between w-full gap-6">
               <div className="flex-1 flex items-center justify-start min-w-0">
-                <nav className="flex items-center gap-8 text-sm font-medium opacity-90 overflow-hidden">
+                <nav className="flex items-center gap-8 text-[1.0625rem] font-medium opacity-90 overflow-hidden">
                   {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 hover:text-white transition-opacity whitespace-nowrap">
+                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
                       {item.label}
                     </span>
                   ))}
@@ -195,10 +198,8 @@ export const CanvasElement = ({ block }: {
 
               <div className="shrink-0 flex items-center justify-center font-bold tracking-tight px-4 whitespace-nowrap">
                 {general.showLogo !== false && (
-                  <div className="flex items-center gap-2 text-lg">
-                    <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
+                  <div className="flex items-center gap-2 text-2xl">
+                    {logoIcon("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5")}
                   </div>
                 )}
               </div>
@@ -211,16 +212,14 @@ export const CanvasElement = ({ block }: {
             <div className="flex items-center justify-between w-full gap-8">
               <div className="flex items-center gap-8 min-w-0">
                 {general.showLogo !== false && (
-                  <div className="flex items-center gap-2 font-bold tracking-tight text-xl shrink-0">
-                    <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24">
-                      <path d="M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z"/>
-                    </svg>
+                  <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0">
+                    {logoIcon("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
                   </div>
                 )}
-                
-                <nav className="flex items-center gap-7 text-sm font-medium opacity-90 overflow-hidden">
+
+                <nav className="flex items-center gap-7 text-[1.0625rem] font-medium opacity-90 overflow-hidden">
                   {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 hover:text-white transition-opacity whitespace-nowrap">
+                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
                       {item.label}
                     </span>
                   ))}
