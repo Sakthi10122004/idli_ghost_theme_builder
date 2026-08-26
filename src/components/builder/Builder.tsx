@@ -24,11 +24,11 @@ export default function Builder() {
     // Resolve user details on load
     fetch("/api/auth/me")
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.authenticated) {
           setUserId(data.userId);
           setIsAuthenticated(true);
-          loadTheme();
+          await loadTheme();
         }
       })
       .catch(console.error)
