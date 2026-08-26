@@ -242,11 +242,14 @@ interface EditorState {
   reorderBlocks: (sourceIndex: number, destinationIndex: number, parentId?: string) => void;
   moveBlock: (activeId: string, overId: string) => void;
   
+  applyPageTemplate: (pageKey: string, templateId: string) => void;
+  
   undo: () => void;
   redo: () => void;
 }
 
 import { componentRegistry } from "@/editor/components/registry";
+import { PAGE_TEMPLATES } from "./templates";
 
 const saveToHistory = (state: EditorState) => {
   return {
@@ -572,6 +575,73 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         ...state.document,
         pages: newPages,
       },
+    };
+  }),
+
+  applyPageTemplate: (pageKey, templateId) => set((state) => {
+    const template = PAGE_TEMPLATES.find((t) => t.id === templateId);
+    if (!template) return {};
+    
+    const page = state.document.pages[pageKey];
+    if (!page) return {};
+
+    const historyUpdate = saveToHistory(state);
+    
+    // Find header and footer from current page to preserve them
+    let headerId: string | null = null;
+    let footerId: string | null = null;
+    
+    const isHeaderOrFooter = (blockId: string): { isHeader: boolean; isFooter: boolean } => {
+      const block = state.document.blocks[blockId];
+      if (!block) return { isHeader: false, isFooter: false };
+      if (block.type === "header") return { isHeader: true, isFooter: false };
+      if (block.type === "footer") return { isHeader: false, isFooter: true };
+      if (block.childrenIds) {
+        for (const cid of block.childrenIds) {
+          const res = isHeaderOrFooter(cid);
+          if (res.isHeader || res.isFooter) return res;
+        }
+      }
+      return { isHeader: false, isFooter: false };
+    };
+
+    page.sections.forEach((sid) => {
+      const res = isHeaderOrFooter(sid);
+      if (res.isHeader) headerId = sid;
+      if (res.isFooter) footerId = sid;
+    });
+
+    // Generate new template blocks
+    const { sections, blocks } = template.generateBlocks();
+    
+    const newSections = [...sections];
+    if (headerId) newSections.unshift(headerId);
+    if (footerId) newSections.push(footerId);
+
+    const newBlocks = { ...state.document.blocks, ...blocks };
+    
+    // Remove old sections that belonged to this page (excluding header/footer and shared blocks across other pages if any, 
+    // but for simplicity we can just leave them in blocks dict as orphaned, or we can rely on standard cleanup. 
+    // Orphaned blocks won't break the render, they just take up a tiny bit of state memory.)
+
+    const newPages = {
+      ...state.document.pages,
+      [pageKey]: {
+        ...page,
+        sections: newSections,
+      }
+    };
+
+    setTimeout(() => triggerAutosave(get), 0);
+
+    return {
+      ...historyUpdate,
+      document: {
+        ...state.document,
+        blocks: newBlocks,
+        pages: newPages,
+      },
+      selectedBlockId: null, // Clear selection
     };
   }),
 

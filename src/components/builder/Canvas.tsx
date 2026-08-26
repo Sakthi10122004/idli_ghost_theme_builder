@@ -403,7 +403,7 @@ export default function Canvas() {
             marginBottom: resolveStyle(marginBottom) || undefined,
             color: resolveStyle(textColor) || undefined,
           }}
-          className="relative overflow-hidden w-full"
+          className={`relative w-full ${block.type === "header" || block.type === "footer" ? "overflow-visible z-50" : "overflow-hidden z-10"}`}
         >
           {backgroundVideoUrl && (
             <video

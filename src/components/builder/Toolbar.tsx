@@ -17,10 +17,12 @@ import {
   Copy
 } from "lucide-react";
 
-import React, { useEffect } from "react";
-import { Save, Cloud, Check, Loader2, AlertCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Save, Cloud, Check, Loader2, AlertCircle, LayoutTemplate } from "lucide-react";
+import TemplatePickerModal from "./TemplatePickerModal";
 
 export default function Toolbar() {
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
   const { 
     deviceMode, 
     setDeviceMode, 
@@ -120,6 +122,17 @@ export default function Toolbar() {
         >
           <Copy size={14} />
         </button>
+
+        <div className="flex items-center gap-1.5 ml-2 border-l border-brand-hairline pl-2">
+          <button
+            onClick={() => setShowTemplateModal(true)}
+            className="flex items-center gap-1.5 px-2 py-1 bg-brand-canvas-soft border border-brand-hairline rounded-sm text-xs font-medium hover:bg-gray-100 text-brand-ink transition-colors"
+            title="Choose a layout template for the current page"
+          >
+            <LayoutTemplate size={13} />
+            <span>Templates</span>
+          </button>
+        </div>
 
         <div className="flex items-center gap-1.5 ml-2 border-l border-brand-hairline pl-2">
           <span className="text-[10px] font-mono text-brand-mute uppercase">Tag:</span>
@@ -362,6 +375,11 @@ export default function Toolbar() {
           </button>
         </div>
       </div>
+
+      <TemplatePickerModal 
+        isOpen={showTemplateModal} 
+        onClose={() => setShowTemplateModal(false)} 
+      />
     </header>
   );
 }

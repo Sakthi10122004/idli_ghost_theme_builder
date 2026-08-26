@@ -36,7 +36,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
 
   const brandHtml = general.showLogo !== false ? `
-    <div class="gh-head-brand" style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 24px; white-space: nowrap; flex-shrink: 0;">
+    <div class="gh-head-brand" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 24px; white-space: nowrap; flex-shrink: 0; width: 100%;">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
           <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
@@ -44,7 +44,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
           <span class="gh-site-title">{{@site.title}}</span>
         {{/if}}
       </a>
-    </div>` : "";
+      <button class="gh-burger" aria-label="Main Menu"></button>
+    </div>` : `
+    <div class="gh-head-brand" style="display: flex; align-items: center; justify-content: flex-end; width: 100%;">
+      <button class="gh-burger" aria-label="Main Menu"></button>
+    </div>`;
 
   // FIX (bug 1): the nav had no flex/gap of its own — it only relied on a
   // `.gh-head-menu .nav` selector in the <style> block that doesn't match

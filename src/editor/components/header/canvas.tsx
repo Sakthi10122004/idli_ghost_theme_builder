@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BuilderBlock } from "@/types/theme";
 import { getPaletteConfig, hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
+import { useEditorStore } from "@/store/editorStore";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
 
@@ -19,6 +20,8 @@ export const CanvasElement = ({ block }: {
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [previewAmbientDark, setPreviewAmbientDark] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { deviceMode } = useEditorStore();
 
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
     { label: "Lifestyle", url: "#" },
@@ -140,6 +143,29 @@ export const CanvasElement = ({ block }: {
     </svg>
   );
 
+  const renderMobileMenu = () => (
+    <button 
+      className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50" 
+      aria-label="Menu"
+      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+    >
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        {isMobileMenuOpen ? (
+          <>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </>
+        ) : (
+          <>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </>
+        )}
+      </svg>
+    </button>
+  );
+
   return (
     <div className="w-full bg-transparent p-0">
       {/* Header receives Section Width & Colors */}
@@ -171,25 +197,33 @@ export const CanvasElement = ({ block }: {
                   <span>Publication</span>
                 </div>
               )}
-              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90">
-                {items.map((item: any, idx: number) => (
-                  <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
-                    {item.label}
-                  </span>
-                ))}
-              </nav>
-              {renderActions()}
+              {deviceMode === 'mobile' ? (
+                renderMobileMenu()
+              ) : (
+                <>
+                  <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90">
+                    {items.map((item: any, idx: number) => (
+                      <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
+                        {item.label}
+                      </span>
+                    ))}
+                  </nav>
+                  {renderActions()}
+                </>
+              )}
             </div>
           ) : isLogoCenter ? (
             <div className="flex items-center justify-between w-full gap-6">
               <div className="flex-1 flex items-center justify-start min-w-0">
-                <nav className="flex items-center gap-8 text-[1.15rem] font-medium opacity-90 overflow-hidden">
-                  {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
-                      {item.label}
-                    </span>
-                  ))}
-                </nav>
+                {deviceMode !== 'mobile' && (
+                  <nav className="flex items-center gap-8 text-[1.15rem] font-medium opacity-90 overflow-hidden">
+                    {items.map((item: any, idx: number) => (
+                      <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
+                        {item.label}
+                      </span>
+                    ))}
+                  </nav>
+                )}
               </div>
 
               <div className="shrink-0 flex items-center justify-center font-bold tracking-tight px-4 whitespace-nowrap">
@@ -201,7 +235,7 @@ export const CanvasElement = ({ block }: {
               </div>
 
               <div className="flex-1 flex items-center justify-end min-w-0">
-                {renderActions()}
+                {deviceMode === 'mobile' ? renderMobileMenu() : renderActions()}
               </div>
             </div>
           ) : (
@@ -213,17 +247,19 @@ export const CanvasElement = ({ block }: {
                   </div>
                 )}
 
-                <nav className="flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden">
-                  {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
-                      {item.label}
-                    </span>
-                  ))}
-                </nav>
+                {deviceMode !== 'mobile' && (
+                  <nav className="flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden">
+                    {items.map((item: any, idx: number) => (
+                      <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
+                        {item.label}
+                      </span>
+                    ))}
+                  </nav>
+                )}
               </div>
 
               <div className="shrink-0">
-                {renderActions()}
+                {deviceMode === 'mobile' ? renderMobileMenu() : renderActions()}
               </div>
             </div>
           )}
@@ -235,6 +271,29 @@ export const CanvasElement = ({ block }: {
           <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1 bg-black text-white text-xs rounded shadow-lg z-50 flex items-center gap-2">
             <span>{activeModal}</span>
             <button onClick={() => setActiveModal(null)} className="font-bold ml-2">×</button>
+          </div>
+        )}
+
+        {/* Mobile Menu Dropdown */}
+        {deviceMode === 'mobile' && isMobileMenuOpen && (
+          <div 
+            className="absolute top-full left-0 w-full p-6 flex flex-col items-center gap-6 shadow-xl z-40 border-t border-black/5 dark:border-white/5"
+            style={{
+              backgroundColor: bgStyle,
+              backdropFilter: glassEnabled ? "blur(12px)" : "none",
+              WebkitBackdropFilter: glassEnabled ? "blur(12px)" : "none",
+            }}
+          >
+            <nav className="flex flex-col items-center gap-4 text-lg font-medium opacity-90 w-full">
+              {items.map((item: any, idx: number) => (
+                <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity px-4 py-2 w-full text-center border-b border-black/5 dark:border-white/5 last:border-0">
+                  {item.label}
+                </span>
+              ))}
+            </nav>
+            <div className="w-full flex justify-center pt-2">
+              {renderActions()}
+            </div>
           </div>
         )}
       </header>
