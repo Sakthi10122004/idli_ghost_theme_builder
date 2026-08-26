@@ -248,19 +248,53 @@ export default function Toolbar() {
                 const manifestRes = await fetch("/casper-template/manifest.json");
                 if (!manifestRes.ok) throw new Error("Failed to load template manifest");
                 const manifest: string[] = await manifestRes.json();
+                
+                // Fetch and process global.css and screen.css dynamically to avoid mutating the reference casper-template
+                let globalCssContent = "";
+                let screenCssContent = "";
+                try {
+                  const [gRes, sRes] = await Promise.all([
+                    fetch("/casper-template/assets/css/global.css"),
+                    fetch("/casper-template/assets/css/screen.css")
+                  ]);
+                  if (gRes.ok) globalCssContent = await gRes.text();
+                  if (sRes.ok) screenCssContent = await sRes.text();
+                } catch (e) {
+                  console.error("Failed to load CSS files for merging", e);
+                }
+
+                // Process global.css
+                globalCssContent = globalCssContent.replace(/::not\(/g, ":not(");
+                globalCssContent = globalCssContent.replace(/blockquote\s*{\s*margin:\s*1\.5em\s*0;\s*padding:\s*0\s*1\.6em(?:\s*0\s*1\.6em)?;\s*border-left:\s*#daf2fd\s*}/, "blockquote { margin: 1.5em 0; padding: 0 1.6em; border-left: 3px solid #daf2fd; }");
+                globalCssContent = globalCssContent.replace(/border-left:\s*#daf2fd;/, "border-left: 3px solid #daf2fd;");
+
+                // Process screen.css
+                screenCssContent = screenCssContent.replace(/@import\s+"global\.css";?\n?/, "");
+                
+                // Replace all color-mod instances
+                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+l\(\+([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
+                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+l\(-([0-9]+)%\)\)/g, "color-mix(in srgb, $1, black $2%)");
+                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+lightness\(([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
+                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+lightness\(([0-9]+)%\)\s+saturation\(([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
+                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+a\(0%\)\)/g, "transparent");
+                screenCssContent = screenCssContent.replace(/color-mod\([^)]+\)/g, "inherit"); // Catch-all fallback
+                
+                screenCssContent = screenCssContent.replace(/black 70%/g, "white 15%");
+                screenCssContent = screenCssContent.replace(/var\(--ghost-accent-color(?!\s*,)[^)]*\)/g, "var(--ghost-accent-color, #15171a)");
+
+                const baseMergedCss = `/* 1. Global Reset & Base Typography */\n\n${globalCssContent}\n\n/* 2. Theme Styles (Screen) */\n\n${screenCssContent}`;
 
                 await Promise.all(
                   manifest.map(async (filePath) => {
+                    // Skip global.css and built css files so we can overwrite them cleanly
+                    if (filePath === "assets/css/global.css" || filePath === "assets/built/global.css") return;
+                    if (filePath === "assets/built/screen.css" || filePath === "assets/css/screen.css") return;
+
                     const res = await fetch(`/casper-template/${filePath}`);
                     if (!res.ok) throw new Error(`Failed to load ${filePath}`);
                     
-                    if (filePath === "assets/built/screen.css" || filePath === "assets/css/screen.css") {
-                      const cssText = await res.text();
-                      zip.file(filePath, cssText);
-                    } else {
-                      const buffer = await res.arrayBuffer();
-                      zip.file(filePath, buffer);
-                    }
+                    const buffer = await res.arrayBuffer();
+                    zip.file(filePath, buffer);
                   })
                 );
 
@@ -270,13 +304,9 @@ export default function Toolbar() {
 
                 for (const [name, content] of Object.entries(files)) {
                   if (name === "assets/css/screen.css") {
-                    const originalBuiltCssFile = zip.file("assets/built/screen.css");
-                    const originalBuiltCss = originalBuiltCssFile ? await originalBuiltCssFile.async("text") : "";
-                    zip.file("assets/built/screen.css", originalBuiltCss + "\n\n" + (content as string));
-
-                    const originalCssFile = zip.file("assets/css/screen.css");
-                    const originalCss = originalCssFile ? await originalCssFile.async("text") : "";
-                    zip.file("assets/css/screen.css", originalCss + "\n\n" + (content as string));
+                    const finalCss = baseMergedCss + "\n\n/* 3. Custom Builder Components & Color Palettes */\n\n" + (content as string);
+                    zip.file("assets/built/screen.css", finalCss);
+                    zip.file("assets/css/screen.css", finalCss);
                   } else if (name === "package.json") {
                     const originalPackageFile = zip.file("package.json");
                     const originalPackage = originalPackageFile ? JSON.parse(await originalPackageFile.async("text")) : {};

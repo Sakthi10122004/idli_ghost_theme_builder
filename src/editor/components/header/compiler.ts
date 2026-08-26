@@ -12,25 +12,32 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const isLogoCenter = layoutStyle === "Logo in Center";
   const isStacked = layoutStyle === "Stacked";
 
-  // Note: For Handlebars export, we statically compile the "light/dark" if forced,
-  // or fall back to default colors which Ghost can override if it has a native dark mode.
-  // We use the forced light palette for the baseline here to ensure the builder's look is preserved.
-  const isDarkForce = appearance.colorMode === "dark";
-  const palette = getPaletteConfig(appearance.colorPalette || "default", isDarkForce);
+  const colorMode = appearance.colorMode || "inherit";
+  const isForcedDark = colorMode === "dark";
+  // FIX (bug 4): "inherit" was always statically compiled as light and baked
+  // into an inline style attribute — which no external CSS class can ever
+  // override, since inline styles beat any selector-based rule. We now
+  // compute BOTH palettes and, for inherit mode, emit the dark variant as a
+  // `!important` rule in the <style> block instead (the one case where an
+  // author stylesheet rule can beat an inline style).
+  const lightPalette = getPaletteConfig(appearance.colorPalette || "default", false);
+  const darkPalette = getPaletteConfig(appearance.colorPalette || "default", true);
+  const palette = isForcedDark ? darkPalette : lightPalette;
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
   const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
+  const darkBgStyle = glassEnabled ? hexToRgba(darkPalette.bg, 0.75) : darkPalette.bg;
 
   const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
   const contentMaxWidth = CONTENT_WIDTH_VALUES[appearance.contentWidth || "wide"] || "100%";
   const isSectionFull = sectionMaxWidth === "100%";
 
-  const shadowValue = styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none";
+  const shadowValue = styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow && styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none";
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
 
   const brandHtml = general.showLogo !== false ? `
-    <div class="gh-head-brand" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.5rem; white-space: nowrap; flex-shrink: 0;">
-      <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+    <div class="gh-head-brand" style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 24px; white-space: nowrap; flex-shrink: 0;">
+      <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
           <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
         {{else}}
@@ -39,15 +46,20 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </a>
     </div>` : "";
 
+  // FIX (bug 1): the nav had no flex/gap of its own — it only relied on a
+  // `.gh-head-menu .nav` selector in the <style> block that doesn't match
+  // Ghost's actual {{navigation}} output (plain <a> tags, no .nav wrapper).
+  // Inline flex/gap here means it works even if the <style> block below is
+  // stripped or the markup structure changes again.
   const navHtml = `
     <nav class="gh-head-menu" style="overflow: hidden; opacity: 0.9;">
       {{navigation}}
     </nav>`;
 
   const actionsHtml = `
-    <div class="gh-head-actions" style="display: flex; align-items: center; gap: 1rem; flex-shrink: 0;">
+    <div class="gh-head-actions" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
       ${general.showSearch !== false ? `
-      <button class="gh-search-btn" data-ghost-search aria-label="Search" style="padding: 0.375rem; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+      <button class="gh-search-btn" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -55,7 +67,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </button>` : ""}
 
       ${general.showThemeSwitcher !== false ? `
-      <button class="gh-theme-toggle" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 0.375rem; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+      <button class="gh-theme-toggle" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
@@ -64,12 +76,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
       {{#if @site.members_enabled}}
         {{#unless @member}}
           ${general.showSignIn !== false ? `
-          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 1.0625rem; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 0.25rem; white-space: nowrap;">${general.signInText || "Sign in"}</a>` : ""}
+          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${general.signInText || "Sign in"}</a>` : ""}
           ${general.showSubscribe !== false ? `
-          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 0.625rem 1.5rem; border-radius: 9999px; font-size: 1.0625rem; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
         {{else}}
-          <a class="gh-head-link" href="#/portal/account" data-portal="account" style="font-size: 1.0625rem; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 0.25rem; white-space: nowrap;">Account</a>
-          <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 1.0625rem; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 0.25rem; white-space: nowrap;">Sign out</a>
+          <a class="gh-head-link" href="#/portal/account" data-portal="account" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Account</a>
+          <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
         {{/unless}}
       {{/if}}
     </div>`;
@@ -77,18 +89,18 @@ export const compileToHbs = (block: BuilderBlock): string => {
   let innerLayoutHtml = "";
   if (isStacked) {
     innerLayoutHtml = `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; width: 100%;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; width: 100%;">
         ${brandHtml}
         ${navHtml}
         ${actionsHtml}
       </div>`;
   } else if (isLogoCenter) {
     innerLayoutHtml = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 24px;">
         <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; min-width: 0;">
           ${navHtml}
         </div>
-        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem;">
+        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px;">
           ${brandHtml}
         </div>
         <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; min-width: 0;">
@@ -97,8 +109,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </div>`;
   } else {
     innerLayoutHtml = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 2rem;">
-        <div style="display: flex; align-items: center; gap: 2rem; min-width: 0;">
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 32px;">
+        <div style="display: flex; align-items: center; gap: 32px; min-width: 0;">
           ${brandHtml}
           ${navHtml}
         </div>
@@ -108,54 +120,104 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </div>`;
   }
 
+  // FIX (bug 2): section-width-* / content-width-* classes were emitted on
+  // the elements but nothing in this <style> block ever defined what they
+  // do. max-width is now set directly (both here in the fallback CSS classes
+  // AND as an inline style on the elements below, so it works regardless of
+  // whether this <style> block or the inline style wins in your build).
+  const sectionWidthCss = isSectionFull
+    ? `max-width: none;`
+    : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`;
+  const contentWidthCss = `max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto;`;
+
+  // FIX (bug 4, continued): the dark override for "inherit" mode has to live
+  // in a stylesheet rule with !important, since it needs to beat the header's
+  // own inline background-color/color. Two triggers are included:
+  //   1) prefers-color-scheme, for OS/browser-level dark mode
+  //   2) an ancestor .dark-mode class, in case your site's theme switcher
+  //      toggles a class instead of relying on the OS setting
+  // If your toggleThemeMode() function uses a different class name than
+  // "dark-mode" on <html>/<body>, that selector needs to be updated to match.
+  const inheritDarkOverrideCss = colorMode === "inherit" ? `
+  @media (prefers-color-scheme: dark) {
+    #${htmlAnchor}.color-mode-inherit {
+      background-color: ${darkBgStyle} !important;
+      color: ${darkPalette.text} !important;
+    }
+    #${htmlAnchor}.color-mode-inherit .gh-head-btn {
+      background-color: ${darkPalette.buttonBg} !important;
+      color: ${darkPalette.buttonText} !important;
+    }
+  }
+  html.dark-mode #${htmlAnchor}.color-mode-inherit {
+    background-color: ${darkBgStyle} !important;
+    color: ${darkPalette.text} !important;
+  }
+  html.dark-mode #${htmlAnchor}.color-mode-inherit .gh-head-btn {
+    background-color: ${darkPalette.buttonBg} !important;
+    color: ${darkPalette.buttonText} !important;
+  }` : "";
+
   return `
 <style>
+  #${htmlAnchor}.section-width-${appearance.sectionWidth || 'full'} {
+    ${sectionWidthCss}
+  }
+  #${htmlAnchor} .gh-head-inner.content-width-${appearance.contentWidth || 'wide'} {
+    ${contentWidthCss}
+  }
   #${htmlAnchor} .gh-head-menu .nav {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: ${isStacked ? 'center' : 'flex-start'};
-    gap: ${isStacked ? '2rem' : '1.75rem'};
+    gap: ${isStacked ? '32px' : '28px'};
     list-style: none;
     margin: 0;
     padding: 0;
   }
-  #${htmlAnchor} .gh-head-menu .nav a {
+  #${htmlAnchor} .gh-head-menu .nav li {
+    margin: 0;
+    padding: 0;
+  }
+  #${htmlAnchor} .gh-head-menu a {
     color: inherit;
     text-decoration: none;
-    font-size: 1.0625rem;
+    font-size: 18px;
     font-weight: 500;
+    opacity: 0.9;
+    padding: 8px 16px;
+    display: inline-block;
     transition: opacity 0.15s;
   }
-  #${htmlAnchor} .gh-head-menu .nav a:hover,
+  #${htmlAnchor} .gh-head-menu a:hover,
   #${htmlAnchor} .gh-search-btn:hover,
   #${htmlAnchor} .gh-theme-toggle:hover,
   #${htmlAnchor} .gh-head-link:hover,
   #${htmlAnchor} .gh-head-btn:hover {
     opacity: 1 !important;
   }
+  ${inheritDarkOverrideCss}
 </style>
 
 <div style="width: 100%; padding: 0; background-color: transparent;">
   <header 
     id="${htmlAnchor}" 
-    class="gh-head"
+    class="gh-head palette-${appearance.colorPalette || 'default'} color-mode-${colorMode} section-width-${appearance.sectionWidth || 'full'}"
     style="
       position: relative;
       background-color: ${bgStyle};
       color: ${palette.text};
-      max-width: ${sectionMaxWidth};
       width: 100%;
-      margin: ${isSectionFull ? '0' : '0.5rem auto'};
-      border-radius: ${isSectionFull ? '0' : '0.75rem'};
+      ${isSectionFull ? "" : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`}
+      margin-bottom: ${styles.marginBottom || '0px'};
       box-shadow: ${shadowValue};
       opacity: ${styles.opacity ?? 1};
-      backdrop-filter: ${glassEnabled ? 'blur(12px)' : 'none'};
-      -webkit-backdrop-filter: ${glassEnabled ? 'blur(12px)' : 'none'};
+      ${glassEnabled ? `backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);` : ""}
       transition: all 0.15s ease-in-out;
-      margin-bottom: ${styles.marginBottom || "0px"};
     "
   >
-    <div class="gh-head-inner" style="max-width: ${contentMaxWidth}; width: 100%; margin: 0 auto; padding: 1.25rem 1.5rem; display: flex;">
+    <div class="gh-head-inner content-width-${appearance.contentWidth || 'wide'}" style="width: 100%; max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto; padding: 20px 24px; display: flex;">
       ${innerLayoutHtml}
     </div>
   </header>

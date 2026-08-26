@@ -70,16 +70,16 @@ function getInlineStyles(block: BuilderBlock): string {
     const val = resolveStyleValue(styles.backgroundImage);
     if (val) {
       stylePairs.push(`background-image: url('${val}')`);
-      
+
       const size = resolveStyleValue(styles.backgroundSize) || "cover";
       stylePairs.push(`background-size: ${size}`);
-      
+
       const repeat = resolveStyleValue(styles.backgroundRepeat) || "no-repeat";
       stylePairs.push(`background-repeat: ${repeat}`);
-      
+
       const pos = resolveStyleValue(styles.backgroundPosition) || "center";
       stylePairs.push(`background-position: ${pos}`);
-      
+
       const p = resolveStyleValue(styles.enableParallax) as any;
       if (p === true || p === 'true' || styles.enableParallax === true) {
         stylePairs.push(`background-attachment: fixed`);
@@ -147,13 +147,13 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     let markup = def.compileToHbs(block, compiledChildren, isPageContext);
     const inline = getInlineStyles(block);
     const hover = getHoverClass(block);
-    
+
     if (inline || hover) {
       const tagMatch = markup.match(/^<([a-zA-Z0-9-]+)([^>]*)>/);
       if (tagMatch) {
         const tagName = tagMatch[1];
         let attributes = tagMatch[2];
-        
+
         if (hover) {
           if (attributes.includes('class="')) {
             attributes = attributes.replace('class="', `class="${hover.trim()} `);
@@ -161,7 +161,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
             attributes = `${attributes} class="${hover.trim()}"`;
           }
         }
-        
+
         if (inline) {
           const styleMatch = inline.match(/style="([^"]+)"/);
           if (styleMatch) {
@@ -173,7 +173,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
             }
           }
         }
-        
+
         markup = markup.replace(tagMatch[0], `<${tagName}${attributes}>`);
       }
     }
@@ -243,14 +243,7 @@ export function getCompilerStyles(doc?: ThemeDocument): string {
   --container-width: ${containerWidthVal};
 }
 
-/* Base styling */
-body {
-  font-family: var(--gh-font-body);
-  color: var(--color-foreground);
-  background-color: var(--color-background);
-  margin: 0;
-  padding: 0;
-}
+
 .container-width {
   max-width: var(--container-width);
 }
@@ -293,21 +286,7 @@ body {
   box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
 }
 
-/* Koenig Editor required classes */
-.kg-width-wide {
-  position: relative;
-  width: 85vw;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 1040px;
-}
-.kg-width-full {
-  position: relative;
-  width: 100vw;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 100%;
-}
+
 
 /* Layout Grid components */
 .flex-columns {
@@ -320,22 +299,7 @@ body {
   min-width: 250px;
 }
 
-/* Base Components styling */
-.heading {
-  font-family: var(--gh-font-heading);
-  color: #171717;
-  letter-spacing: -0.03em;
-  margin-top: 0;
-}
-.text-content {
-  color: #4d4d4d;
-  line-height: 1.6;
-}
-.divider-hairline {
-  border: 0;
-  border-top: 1px solid #ebebeb;
-  margin: 1.5rem 0;
-}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -365,8 +329,7 @@ body {
 
 
 /* Custom Blocks */
-.hero-block {
-.hero-content {
+.hero-block .hero-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -374,7 +337,7 @@ body {
   max-width: 48rem;
   margin: 0 auto;
 }
-.hero-eyebrow {
+.hero-block .hero-eyebrow {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   background-color: #f1f5f9;
@@ -385,19 +348,19 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.hero-title {
+.hero-block .hero-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-top: 1rem;
   line-height: 1.2;
 }
-.hero-subtitle {
+.hero-block .hero-subtitle {
   font-size: 1.125rem;
   color: #4b5563;
   margin-top: 1rem;
   line-height: 1.6;
 }
-.hero-actions {
+.hero-block .hero-actions {
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -420,165 +383,7 @@ body {
   border-radius: 4px;
 }
 
-/* Header component styles */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #ebebeb;
-}
-.site-header .site-title a {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #171717;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-.site-header .site-nav {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-.site-header .site-nav a {
-  color: #4d4d4d;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-.site-header .site-nav a:hover {
-  color: #171717;
-}
 
-/* Nav Dropdown Compilation Styles */
-.site-header .nav-dropdown-wrapper {
-  position: relative;
-  display: inline-block;
-}
-.site-header .nav-dropdown-trigger {
-  color: #4d4d4d;
-  text-decoration: none;
-  font-size: 0.75rem;
-  transition: color 0.2s;
-  cursor: pointer;
-}
-.site-header .nav-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0.25rem;
-  background-color: #ffffff;
-  border: 1px solid #ebebeb;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  padding: 0.5rem 0;
-  min-width: 140px;
-  display: none;
-  z-index: 999;
-}
-.site-header .nav-dropdown-menu a {
-  display: block;
-  padding: 0.35rem 1rem;
-  color: #4d4d4d;
-  font-size: 0.7rem;
-  text-decoration: none;
-  transition: background-color 0.2s, color 0.2s;
-}
-.site-header .nav-dropdown-menu a:hover {
-  background-color: #fafafa;
-  color: #171717;
-}
-.site-header .nav-dropdown-wrapper:hover .nav-dropdown-menu {
-  display: block;
-}
-
-/* Footer component styles */
-.site-footer {
-  border-top: 1px solid #ebebeb;
-  padding-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.75rem;
-  color: #888888;
-}
-@media (min-width: 768px) {
-  .site-footer {
-    flex-direction: row;
-  }
-}
-.site-footer a {
-  color: #888888;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.site-footer a:hover {
-  color: #171717;
-}
-
-/* Post Grid & Cards Grid */
-.post-grid-wrapper .grid-columns {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-.post-card {
-  border: 1px solid #ebebeb;
-  border-radius: 6px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background-color: #ffffff;
-  transition: transform 0.2s;
-}
-.post-card:hover {
-  transform: translateY(-2px);
-}
-.post-card-image img {
-  width: 100%;
-  height: 12rem;
-  object-fit: cover;
-}
-.post-card-content {
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  gap: 0.5rem;
-}
-.post-tag {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  color: #888888;
-  font-weight: 600;
-}
-.post-title {
-  font-size: 1rem;
-  margin: 0;
-}
-.post-title a {
-  color: #171717;
-  text-decoration: none;
-}
-.post-excerpt {
-  font-size: 0.75rem;
-  color: #888888;
-  line-height: 1.5;
-}
-.post-card-meta {
-  margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid #ebebeb;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.65rem;
-  color: #888888;
-}
 
 /* Accordion Component */
 .accordion-wrapper {
@@ -635,6 +440,104 @@ body {
 .social-links-row a:hover {
   color: #171717;
 }
+
+/* ============================================================
+   HEADER FIXES — merge these rules into your compiled stylesheet.
+   ============================================================ */
+
+/* ---- 1. Make the style variables actually do something ---- */
+.gh-head{
+  margin-bottom: var(--mb, 0px);
+  box-shadow: var(--shadow, none);
+  opacity: var(--opacity, 1);
+}
+.gh-head[style*="--backdrop-blur"]:not([style*="--backdrop-blur: none"]){
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+}
+
+/* ---- 2. Full palette coverage (light mode) ---- */
+.gh-head.color-mode-light.palette-default,
+.gh-head.palette-default{ background-color:#ffffff; color:#111827; }
+.gh-head.color-mode-light.palette-classic{ background-color:#f3f4f6; color:#111827; }
+.gh-head.color-mode-light.palette-dynamic{ background-color:#fee2e2; color:#7f1d1d; }
+.gh-head.color-mode-light.palette-sand{ background-color:#f5f5f4; color:#44403c; }
+.gh-head.color-mode-light.palette-zinc{ background-color:#f4f4f5; color:#27272a; }
+.gh-head.color-mode-light.palette-graphite{ background-color:#e4e4e7; color:#18181b; }
+.gh-head.color-mode-light.palette-stone{ background-color:#e7e5e4; color:#1c1917; }
+.gh-head.color-mode-light.palette-ocean{ background-color:#e0f2fe; color:#0c4a6e; }
+.gh-head.color-mode-light.palette-indigo{ background-color:#e0e7ff; color:#1e1b4b; }
+.gh-head.color-mode-light.palette-violet{ background-color:#ede9fe; color:#4c1d95; }
+.gh-head.color-mode-light.palette-rose{ background-color:#ffe4e6; color:#881337; }
+.gh-head.color-mode-light.palette-amber{ background-color:#fef3c7; color:#78350f; }
+.gh-head.color-mode-light.palette-sage{ background-color:#d1fae5; color:#064e3b; }
+
+/* ---- 3. Full palette coverage (dark mode) ---- */
+.gh-head.color-mode-dark.palette-default,
+.gh-head.color-mode-dark.palette-dark{ background-color:#18181b; color:#ffffff; }
+.gh-head.color-mode-dark.palette-classic{ background-color:#111827; color:#ffffff; }
+.gh-head.color-mode-dark.palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
+.gh-head.color-mode-dark.palette-sand{ background-color:#292524; color:#ffffff; }
+.gh-head.color-mode-dark.palette-zinc{ background-color:#27272a; color:#ffffff; }
+.gh-head.color-mode-dark.palette-graphite{ background-color:#18181b; color:#ffffff; }
+.gh-head.color-mode-dark.palette-stone{ background-color:#1c1917; color:#ffffff; }
+.gh-head.color-mode-dark.palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
+.gh-head.color-mode-dark.palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
+.gh-head.color-mode-dark.palette-violet{ background-color:#2e1065; color:#ede9fe; }
+.gh-head.color-mode-dark.palette-rose{ background-color:#4c0519; color:#ffe4e6; }
+.gh-head.color-mode-dark.palette-amber{ background-color:#451a03; color:#fef3c7; }
+.gh-head.color-mode-dark.palette-sage{ background-color:#064e3b; color:#d1fae5; }
+
+/* ---- 4. Inherit mode ---- */
+@media (prefers-color-scheme: dark){
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-default,
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dark{ background-color:#18181b; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-classic{ background-color:#111827; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sand{ background-color:#292524; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-zinc{ background-color:#27272a; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-graphite{ background-color:#18181b; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-stone{ background-color:#1c1917; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-violet{ background-color:#2e1065; color:#ede9fe; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-rose{ background-color:#4c0519; color:#ffe4e6; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-amber{ background-color:#451a03; color:#fef3c7; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sage{ background-color:#064e3b; color:#d1fae5; }
+}
+
+/* ---- 5. Subscribe button contrast per palette ---- */
+.gh-head.color-mode-dark .gh-head-btn,
+.gh-head.palette-dynamic .gh-head-btn,
+.gh-head.palette-indigo.color-mode-dark .gh-head-btn,
+.gh-head.palette-violet.color-mode-dark .gh-head-btn,
+.gh-head.palette-rose.color-mode-dark .gh-head-btn{
+  background-color:#ffffff; color:#000 !important;
+}
+@media (prefers-color-scheme: dark){
+  .gh-head:not(.color-mode-light):not(.color-mode-dark) .gh-head-btn{
+    background-color:#ffffff; color:#000 !important;
+  }
+}
+.gh-head-btn:hover{ opacity:0.85; }
+
+/* ---- 6. Missing hover state on nav links ---- */
+.gh-head-menu a{ opacity:0.9; transition:opacity 0.2s ease; }
+.gh-head-menu a:hover{ opacity:1; }
+
+/* ---- 7. Section width & content width ---- */
+@media (min-width: 768px) {
+  .gh-head.section-width-narrow{ max-width:896px; margin:8px auto; border-radius:12px; }
+  .gh-head.section-width-standard{ max-width:1152px; margin:8px auto; border-radius:12px; }
+  .gh-head.section-width-wide{ max-width:1280px; margin:0 auto; }
+  .gh-head.section-width-full{ max-width:none; }
+}
+
+.gh-head-inner{ max-width:none; } /* remove the old hardcoded 1200px */
+.gh-head-inner.content-width-narrow{ max-width:768px; margin:0 auto; }
+.gh-head-inner.content-width-standard{ max-width:1024px; margin:0 auto; }
+.gh-head-inner.content-width-wide{ max-width:1152px; margin:0 auto; }
+.gh-head-inner.content-width-full{ max-width:none; }
 `;
 }
 

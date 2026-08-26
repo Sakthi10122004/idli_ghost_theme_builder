@@ -1,14 +1,14 @@
 export const WIDTH_VALUES: Record<string, string> = {
-  narrow: "56rem",   // max-w-4xl
-  standard: "72rem", // max-w-6xl
-  wide: "80rem",     // max-w-7xl
+  narrow: "896px",   // max-w-4xl
+  standard: "1152px", // max-w-6xl
+  wide: "1280px",     // max-w-7xl
   full: "100%"
 };
 
 export const CONTENT_WIDTH_VALUES: Record<string, string> = {
-  narrow: "48rem",   // max-w-3xl
-  standard: "64rem", // max-w-5xl
-  wide: "72rem",     // max-w-6xl
+  narrow: "768px",   // max-w-3xl
+  standard: "1024px", // max-w-5xl
+  wide: "1152px",     // max-w-6xl
   full: "100%"
 };
 

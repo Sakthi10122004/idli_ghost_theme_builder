@@ -113,3 +113,101 @@ body {
 .shadow-level-5 {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.02), 0 8px 16px -4px rgba(0, 0, 0, 0.04), 0 24px 32px -8px rgba(0, 0, 0, 0.06);
 }
+
+/* ============================================================
+   HEADER FIXES — merge these rules into your compiled stylesheet.
+   ============================================================ */
+
+/* ---- 1. Make the style variables actually do something ---- */
+.gh-head{
+  margin-bottom: var(--mb, 0px);
+  box-shadow: var(--shadow, none);
+  opacity: var(--opacity, 1);
+}
+.gh-head[style*="--backdrop-blur"]:not([style*="--backdrop-blur: none"]){
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+}
+
+/* ---- 2. Full palette coverage (light mode) ---- */
+.gh-head.color-mode-light.palette-default,
+.gh-head.palette-default{ background-color:#ffffff; color:#111827; }
+.gh-head.color-mode-light.palette-classic{ background-color:#f3f4f6; color:#111827; }
+.gh-head.color-mode-light.palette-dynamic{ background-color:#fee2e2; color:#7f1d1d; }
+.gh-head.color-mode-light.palette-sand{ background-color:#f5f5f4; color:#44403c; }
+.gh-head.color-mode-light.palette-zinc{ background-color:#f4f4f5; color:#27272a; }
+.gh-head.color-mode-light.palette-graphite{ background-color:#e4e4e7; color:#18181b; }
+.gh-head.color-mode-light.palette-stone{ background-color:#e7e5e4; color:#1c1917; }
+.gh-head.color-mode-light.palette-ocean{ background-color:#e0f2fe; color:#0c4a6e; }
+.gh-head.color-mode-light.palette-indigo{ background-color:#e0e7ff; color:#1e1b4b; }
+.gh-head.color-mode-light.palette-violet{ background-color:#ede9fe; color:#4c1d95; }
+.gh-head.color-mode-light.palette-rose{ background-color:#ffe4e6; color:#881337; }
+.gh-head.color-mode-light.palette-amber{ background-color:#fef3c7; color:#78350f; }
+.gh-head.color-mode-light.palette-sage{ background-color:#d1fae5; color:#064e3b; }
+
+/* ---- 3. Full palette coverage (dark mode) ---- */
+.gh-head.color-mode-dark.palette-default,
+.gh-head.color-mode-dark.palette-dark{ background-color:#18181b; color:#ffffff; }
+.gh-head.color-mode-dark.palette-classic{ background-color:#111827; color:#ffffff; }
+.gh-head.color-mode-dark.palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
+.gh-head.color-mode-dark.palette-sand{ background-color:#292524; color:#ffffff; }
+.gh-head.color-mode-dark.palette-zinc{ background-color:#27272a; color:#ffffff; }
+.gh-head.color-mode-dark.palette-graphite{ background-color:#18181b; color:#ffffff; }
+.gh-head.color-mode-dark.palette-stone{ background-color:#1c1917; color:#ffffff; }
+.gh-head.color-mode-dark.palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
+.gh-head.color-mode-dark.palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
+.gh-head.color-mode-dark.palette-violet{ background-color:#2e1065; color:#ede9fe; }
+.gh-head.color-mode-dark.palette-rose{ background-color:#4c0519; color:#ffe4e6; }
+.gh-head.color-mode-dark.palette-amber{ background-color:#451a03; color:#fef3c7; }
+.gh-head.color-mode-dark.palette-sage{ background-color:#064e3b; color:#d1fae5; }
+
+/* ---- 4. Inherit mode ---- */
+@media (prefers-color-scheme: dark){
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-default,
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dark{ background-color:#18181b; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-classic{ background-color:#111827; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sand{ background-color:#292524; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-zinc{ background-color:#27272a; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-graphite{ background-color:#18181b; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-stone{ background-color:#1c1917; color:#ffffff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-violet{ background-color:#2e1065; color:#ede9fe; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-rose{ background-color:#4c0519; color:#ffe4e6; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-amber{ background-color:#451a03; color:#fef3c7; }
+  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sage{ background-color:#064e3b; color:#d1fae5; }
+}
+
+/* ---- 5. Subscribe button contrast per palette ---- */
+.gh-head.color-mode-dark .gh-head-btn,
+.gh-head.palette-dynamic .gh-head-btn,
+.gh-head.palette-indigo.color-mode-dark .gh-head-btn,
+.gh-head.palette-violet.color-mode-dark .gh-head-btn,
+.gh-head.palette-rose.color-mode-dark .gh-head-btn{
+  background-color:#ffffff; color:#000 !important;
+}
+@media (prefers-color-scheme: dark){
+  .gh-head:not(.color-mode-light):not(.color-mode-dark) .gh-head-btn{
+    background-color:#ffffff; color:#000 !important;
+  }
+}
+.gh-head-btn:hover{ opacity:0.85; }
+
+/* ---- 6. Missing hover state on nav links ---- */
+.gh-head-menu a{ opacity:0.9; transition:opacity 0.2s ease; }
+.gh-head-menu a:hover{ opacity:1; }
+
+/* ---- 7. Section width & content width ---- */
+@media (min-width: 768px) {
+  .gh-head.section-width-narrow{ max-width:896px; margin:8px auto; border-radius:12px; }
+  .gh-head.section-width-standard{ max-width:1152px; margin:8px auto; border-radius:12px; }
+  .gh-head.section-width-wide{ max-width:1280px; margin:0 auto; }
+  .gh-head.section-width-full{ max-width:none; }
+}
+
+.gh-head-inner{ max-width:none; } /* remove the old hardcoded 1200px */
+.gh-head-inner.content-width-narrow{ max-width:768px; margin:0 auto; }
+.gh-head-inner.content-width-standard{ max-width:1024px; margin:0 auto; }
+.gh-head-inner.content-width-wide{ max-width:1152px; margin:0 auto; }
+.gh-head-inner.content-width-full{ max-width:none; }

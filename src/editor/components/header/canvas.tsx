@@ -18,9 +18,6 @@ export const CanvasElement = ({ block }: {
   const styles = p.styles || {};
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
-
-  // FIX (bug 5): local state so "inherit" mode can actually be demoed live in
-  // the canvas by clicking the theme switcher, instead of only opening a toast.
   const [previewAmbientDark, setPreviewAmbientDark] = useState(false);
 
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
@@ -34,20 +31,12 @@ export const CanvasElement = ({ block }: {
   const isLogoCenter = layout === "Logo in Center";
   const isStacked = layout === "Stacked";
 
-  // FIX (bug 5): colorMode now has three real states instead of one boolean.
-  // "dark"/"light" force a mode regardless of the site. "inherit" (the
-  // default) must respond to the *ambient* theme, so we compute both a
-  // light class set and a dark: class set instead of picking one statically.
   const colorMode = appearance.colorMode || "inherit";
   const isForcedDark = colorMode === "dark";
   const isForcedLight = colorMode === "light";
   const isInherit = !isForcedDark && !isForcedLight;
-  // Only used for local hover/contrast decisions when a mode is *forced*.
-  // In "inherit" mode we can't know the ambient state statically, so hover
-  // styles below add a dark: variant instead of relying on this flag.
   const isDarkForce = isForcedDark || (isInherit && previewAmbientDark);
 
-  // FIX (bug 1): logo size now actually read from props and applied.
   const logoSize = general.logoSize || 40;
 
   const effectiveContentWidth =
@@ -56,24 +45,32 @@ export const CanvasElement = ({ block }: {
       : appearance.contentWidth;
 
   const palette = getPaletteConfig(appearance.colorPalette || "default", isDarkForce);
-  
+
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
   const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
 
-  // Section Width: Constrains the actual header bar on the canvas
+  // FIX (bug: width computed but discarded): these values now actually get
+  // applied as inline maxWidth below, instead of only toggling a Tailwind
+  // rounding/margin class that never constrained the width itself.
   const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
   const isSectionFull = sectionMaxWidth === "100%";
   const sectionBaseClass = isSectionFull ? "w-full" : "w-full mx-auto rounded-xl my-2";
 
-  // Content Width: Constrains the inner items within the header
   const contentMaxWidth = CONTENT_WIDTH_VALUES[effectiveContentWidth || "wide"] || "100%";
 
-  // FIX (bug 3): hover states were hardcoded for a dark background
-  // (hover:text-white, hover:bg-white/10). On light palettes that's
-  // white-on-white — the hover fires, it's just invisible. Nav text now
-  // just goes to full opacity of its own (correct) color on hover, and
-  // icon buttons pick a hover tint based on the current mode, plus a
-  // dark: variant so "inherit" mode adapts to the ambient theme too.
+  // FIX (bug: shadow/opacity/backdrop-blur/margin never applied): previously
+  // only set as unused --mb/--shadow/--opacity/--backdrop-blur custom
+  // properties with nothing consuming them via var(...). Compute the real
+  // values directly instead.
+  const marginBottomValue = styles.marginBottom || "0px";
+  const shadowValue =
+    styles.boxShadow === "dark-glow"
+      ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
+      : styles.boxShadow && styles.boxShadow !== "none"
+        ? "0 4px 6px -1px rgba(0,0,0,0.1)"
+        : "none";
+  const opacityValue = styles.opacity ?? 1;
+
   const iconHoverClass = isDarkForce
     ? "hover:bg-white/10"
     : "hover:bg-black/5 dark:hover:bg-white/10";
@@ -98,8 +95,6 @@ export const CanvasElement = ({ block }: {
         <button
           type="button"
           onClick={() => {
-            // Only meaningful to preview when following the ambient theme;
-            // forced light/dark shouldn't visually change on click.
             if (isInherit) setPreviewAmbientDark((v) => !v);
             setActiveModal("Theme Switcher toggled.");
           }}
@@ -149,22 +144,23 @@ export const CanvasElement = ({ block }: {
     <div className="w-full bg-transparent p-0">
       {/* Header receives Section Width & Colors */}
       <header
-        className={`relative transition-all duration-150 ${sectionBaseClass}`}
+        className={`relative transition-all duration-150 gh-head palette-${appearance.colorPalette || 'default'} color-mode-${colorMode} section-width-${appearance.sectionWidth || 'full'} ${sectionBaseClass}`}
         style={{
-          maxWidth: sectionMaxWidth,
           backgroundColor: bgStyle,
           color: palette.text,
-          marginBottom: styles.marginBottom || "0px",
-          boxShadow: styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none",
-          opacity: styles.opacity ?? 1,
+          maxWidth: sectionMaxWidth,
+          marginBottom: marginBottomValue,
+          boxShadow: shadowValue,
+          opacity: opacityValue,
           backdropFilter: glassEnabled ? "blur(12px)" : "none",
           WebkitBackdropFilter: glassEnabled ? "blur(12px)" : "none",
+          transition: "all 0.15s ease-in-out",
         }}
       >
         {/* Inner container receives Content Width */}
-        <div 
-          className="w-full mx-auto px-6 py-5"
-          style={{ maxWidth: contentMaxWidth }}
+        <div
+          className={`mx-auto px-6 py-5 gh-head-inner content-width-${appearance.contentWidth || 'wide'}`}
+          style={{ maxWidth: contentMaxWidth, width: "100%" }}
         >
 
           {isStacked ? (
@@ -175,9 +171,9 @@ export const CanvasElement = ({ block }: {
                   <span>Publication</span>
                 </div>
               )}
-              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.0625rem] font-medium opacity-90">
+              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90">
                 {items.map((item: any, idx: number) => (
-                  <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
+                  <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
                     {item.label}
                   </span>
                 ))}
@@ -187,9 +183,9 @@ export const CanvasElement = ({ block }: {
           ) : isLogoCenter ? (
             <div className="flex items-center justify-between w-full gap-6">
               <div className="flex-1 flex items-center justify-start min-w-0">
-                <nav className="flex items-center gap-8 text-[1.0625rem] font-medium opacity-90 overflow-hidden">
+                <nav className="flex items-center gap-8 text-[1.15rem] font-medium opacity-90 overflow-hidden">
                   {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
+                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
                       {item.label}
                     </span>
                   ))}
@@ -217,9 +213,9 @@ export const CanvasElement = ({ block }: {
                   </div>
                 )}
 
-                <nav className="flex items-center gap-7 text-[1.0625rem] font-medium opacity-90 overflow-hidden">
+                <nav className="flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden">
                   {items.map((item: any, idx: number) => (
-                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap">
+                    <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
                       {item.label}
                     </span>
                   ))}
