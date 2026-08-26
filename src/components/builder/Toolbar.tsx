@@ -18,11 +18,18 @@ import {
 } from "lucide-react";
 
 import React, { useEffect, useState } from "react";
-import { Save, Cloud, Check, Loader2, AlertCircle, LayoutTemplate } from "lucide-react";
+import { Save, Cloud, Check, Loader2, AlertCircle, LayoutTemplate, X, AlertTriangle } from "lucide-react";
 import TemplatePickerModal from "./TemplatePickerModal";
 
 export default function Toolbar() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  
+  // Gscan Validation State
+  const [isExporting, setIsExporting] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationReport, setValidationReport] = useState<any>(null);
+  const [themeBlob, setThemeBlob] = useState<Blob | null>(null);
+  const [themeFilename, setThemeFilename] = useState<string>("");
   const { 
     deviceMode, 
     setDeviceMode, 
@@ -356,22 +363,52 @@ export default function Toolbar() {
                 }
 
                 const blob = await zip.generateAsync({ type: "blob" });
+                const filename = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
+                
+                setIsExporting(true);
+                
+                const formData = new FormData();
+                formData.append("theme", blob, filename);
+                
+                const validateRes = await fetch("/api/theme/validate", {
+                  method: "POST",
+                  body: formData
+                });
+                
+                const validateData = await validateRes.json();
+                setIsExporting(false);
+                
+                if (validateData.success && validateData.report) {
+                  const hasFatals = Object.keys(validateData.report.fatal || {}).length > 0;
+                  const hasErrors = Object.keys(validateData.report.error || {}).length > 0;
+                  
+                  if (hasFatals || hasErrors) {
+                    setValidationReport(validateData.report);
+                    setThemeBlob(blob);
+                    setThemeFilename(filename);
+                    setShowValidationModal(true);
+                    return;
+                  }
+                }
+                
+                // If clean (or API failed but we still have blob), download directly
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
               } catch (error) {
+                setIsExporting(false);
                 console.error("Export theme error:", error);
                 alert("Error exporting theme. Please check console logs.");
               }
             }}
           >
-            <Download size={12} />
-            <span>Export Theme</span>
+            {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+            <span>{isExporting ? "Validating..." : "Export Theme"}</span>
           </button>
         </div>
       </div>
@@ -380,6 +417,100 @@ export default function Toolbar() {
         isOpen={showTemplateModal} 
         onClose={() => setShowTemplateModal(false)} 
       />
+
+      {showValidationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-red-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-base">Theme Validation Failed</h3>
+                  <p className="text-xs text-gray-500">Ghost validator (gscan) detected issues that may prevent upload.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowValidationModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+              {validationReport?.fatal && Object.keys(validationReport.fatal).length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-bold text-red-700 text-sm mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
+                    Fatal Errors ({Object.keys(validationReport.fatal).length})
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                    {Object.values(validationReport.fatal).map((err: any, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-red-100 shadow-sm">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                        <p className="text-xs text-gray-600 mb-2">{err.details}</p>
+                        {err.failures?.length > 0 && (
+                          <div className="bg-red-50 p-2 rounded text-[11px] font-mono text-red-800 break-all">
+                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {validationReport?.error && Object.keys(validationReport.error).length > 0 && (
+                <div>
+                  <h4 className="font-bold text-orange-600 text-sm mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
+                    Errors ({Object.keys(validationReport.error).length})
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                    {Object.values(validationReport.error).map((err: any, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-orange-100 shadow-sm">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                        <p className="text-xs text-gray-600 mb-2">{err.details}</p>
+                        {err.failures?.length > 0 && (
+                          <div className="bg-orange-50 p-2 rounded text-[11px] font-mono text-orange-800 break-all">
+                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white">
+              <button 
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setShowValidationModal(false)}
+              >
+                Cancel & Fix
+              </button>
+              <button 
+                className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-all"
+                onClick={() => {
+                  if (themeBlob && themeFilename) {
+                    const url = URL.createObjectURL(themeBlob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = themeFilename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }
+                  setShowValidationModal(false);
+                }}
+              >
+                Download Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
