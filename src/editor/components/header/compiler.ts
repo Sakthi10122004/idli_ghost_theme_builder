@@ -1,5 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
-import { getPaletteConfig, hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
+import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
@@ -12,21 +12,15 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const isLogoCenter = layoutStyle === "Logo in Center";
   const isStacked = layoutStyle === "Stacked";
 
-  const colorMode = appearance.colorMode || "inherit";
-  const isForcedDark = colorMode === "dark";
-  // FIX (bug 4): "inherit" was always statically compiled as light and baked
-  // into an inline style attribute — which no external CSS class can ever
-  // override, since inline styles beat any selector-based rule. We now
-  // compute BOTH palettes and, for inherit mode, emit the dark variant as a
-  // `!important` rule in the <style> block instead (the one case where an
-  // author stylesheet rule can beat an inline style).
-  const lightPalette = getPaletteConfig(appearance.colorPalette || "default", false);
-  const darkPalette = getPaletteConfig(appearance.colorPalette || "default", true);
-  const palette = isForcedDark ? darkPalette : lightPalette;
+  const palette = {
+    bg: appearance.backgroundColor || "#ffffff",
+    text: appearance.textColor || "#000000",
+    buttonBg: appearance.buttonBgColor || "#000000",
+    buttonText: appearance.buttonTextColor || "#ffffff",
+  };
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
   const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
-  const darkBgStyle = glassEnabled ? hexToRgba(darkPalette.bg, 0.75) : darkPalette.bg;
 
   const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
   const contentMaxWidth = CONTENT_WIDTH_VALUES[appearance.contentWidth || "wide"] || "100%";
@@ -36,7 +30,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
 
   const brandHtml = general.showLogo !== false ? `
-    <div class="gh-head-brand" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 24px; white-space: nowrap; flex-shrink: 0; width: 100%;">
+    <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
           <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
@@ -44,10 +38,30 @@ export const compileToHbs = (block: BuilderBlock): string => {
           <span class="gh-site-title">{{@site.title}}</span>
         {{/if}}
       </a>
-      <button class="gh-burger" aria-label="Main Menu"></button>
+      <button class="gh-burger" aria-label="Main Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: ${palette.text}; padding: 8px;">
+        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>` : `
-    <div class="gh-head-brand" style="display: flex; align-items: center; justify-content: flex-end; width: 100%;">
-      <button class="gh-burger" aria-label="Main Menu"></button>
+    <div class="gh-head-brand">
+      <button class="gh-burger" aria-label="Main Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: ${palette.text}; padding: 8px;">
+        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none;">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>`;
 
   // FIX (bug 1): the nav had no flex/gap of its own — it only relied on a
@@ -56,12 +70,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // Inline flex/gap here means it works even if the <style> block below is
   // stripped or the markup structure changes again.
   const navHtml = `
-    <nav class="gh-head-menu" style="overflow: hidden; opacity: 0.9;">
+    <nav class="gh-head-menu">
       {{navigation}}
     </nav>`;
 
   const actionsHtml = `
-    <div class="gh-head-actions" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+    <div class="gh-head-actions">
       ${general.showSearch !== false ? `
       <button class="gh-search-btn" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
@@ -82,7 +96,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
           ${general.showSignIn !== false ? `
           <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${general.signInText || "Sign in"}</a>` : ""}
           ${general.showSubscribe !== false ? `
-          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg} !important; color: ${palette.buttonText} !important; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
         {{else}}
           <a class="gh-head-link" href="#/portal/account" data-portal="account" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Account</a>
           <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
@@ -90,38 +104,55 @@ export const compileToHbs = (block: BuilderBlock): string => {
       {{/if}}
     </div>`;
 
-  let innerLayoutHtml = "";
+  let desktopLayoutCss = "";
   if (isStacked) {
-    innerLayoutHtml = `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; width: 100%;">
-        ${brandHtml}
-        ${navHtml}
-        ${actionsHtml}
-      </div>`;
+    desktopLayoutCss = `
+      #${htmlAnchor} .gh-head-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+      }
+      #${htmlAnchor} .gh-head-menu {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+    `;
   } else if (isLogoCenter) {
-    innerLayoutHtml = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 24px;">
-        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; min-width: 0;">
-          ${navHtml}
-        </div>
-        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px;">
-          ${brandHtml}
-        </div>
-        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; min-width: 0;">
-          ${actionsHtml}
-        </div>
-      </div>`;
+    desktopLayoutCss = `
+      #${htmlAnchor} .gh-head-inner {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 24px;
+      }
+      #${htmlAnchor} .gh-head-brand { justify-self: center; order: 2; }
+      #${htmlAnchor} .gh-head-menu { 
+        order: 1; 
+        display: flex; 
+        justify-content: flex-start; 
+        width: 100%;
+      }
+      #${htmlAnchor} .gh-head-actions { justify-self: end; order: 3; }
+    `;
   } else {
-    innerLayoutHtml = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 32px;">
-        <div style="display: flex; align-items: center; gap: 32px; min-width: 0;">
-          ${brandHtml}
-          ${navHtml}
-        </div>
-        <div style="flex-shrink: 0;">
-          ${actionsHtml}
-        </div>
-      </div>`;
+    desktopLayoutCss = `
+      #${htmlAnchor} .gh-head-inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 32px;
+      }
+      #${htmlAnchor} .gh-head-brand { justify-self: start; }
+      #${htmlAnchor} .gh-head-menu { 
+        display: flex; 
+        justify-content: center;
+        width: 100%;
+      }
+      #${htmlAnchor} .gh-head-actions { justify-self: end; }
+    `;
   }
 
   // FIX (bug 2): section-width-* / content-width-* classes were emitted on
@@ -134,34 +165,6 @@ export const compileToHbs = (block: BuilderBlock): string => {
     : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`;
   const contentWidthCss = `max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto;`;
 
-  // FIX (bug 4, continued): the dark override for "inherit" mode has to live
-  // in a stylesheet rule with !important, since it needs to beat the header's
-  // own inline background-color/color. Two triggers are included:
-  //   1) prefers-color-scheme, for OS/browser-level dark mode
-  //   2) an ancestor .dark-mode class, in case your site's theme switcher
-  //      toggles a class instead of relying on the OS setting
-  // If your toggleThemeMode() function uses a different class name than
-  // "dark-mode" on <html>/<body>, that selector needs to be updated to match.
-  const inheritDarkOverrideCss = colorMode === "inherit" ? `
-  @media (prefers-color-scheme: dark) {
-    #${htmlAnchor}.color-mode-inherit {
-      background-color: ${darkBgStyle} !important;
-      color: ${darkPalette.text} !important;
-    }
-    #${htmlAnchor}.color-mode-inherit .gh-head-btn {
-      background-color: ${darkPalette.buttonBg} !important;
-      color: ${darkPalette.buttonText} !important;
-    }
-  }
-  html.dark-mode #${htmlAnchor}.color-mode-inherit {
-    background-color: ${darkBgStyle} !important;
-    color: ${darkPalette.text} !important;
-  }
-  html.dark-mode #${htmlAnchor}.color-mode-inherit .gh-head-btn {
-    background-color: ${darkPalette.buttonBg} !important;
-    color: ${darkPalette.buttonText} !important;
-  }` : "";
-
   return `
 <style>
   #${htmlAnchor}.section-width-${appearance.sectionWidth || 'full'} {
@@ -170,15 +173,42 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${htmlAnchor} .gh-head-inner.content-width-${appearance.contentWidth || 'wide'} {
     ${contentWidthCss}
   }
-  #${htmlAnchor} .gh-head-menu .nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: ${isStacked ? 'center' : 'flex-start'};
-    gap: ${isStacked ? '32px' : '28px'};
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  #${htmlAnchor} .gh-head-brand {
+    font-weight: 700;
+    font-size: 24px;
+    white-space: nowrap;
+  }
+  #${htmlAnchor} .gh-head-inner {
+    padding: 0 4vmin;
+  }
+  @media (min-width: 768px) {
+    #${htmlAnchor} .gh-head-inner {
+      padding: 20px 24px;
+    }
+    ${desktopLayoutCss}
+    #${htmlAnchor} .gh-head-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #${htmlAnchor} .gh-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    #${htmlAnchor} .gh-head-menu {
+      opacity: 0.9;
+    }
+    #${htmlAnchor} .gh-head-menu .nav {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: ${isStacked ? 'center' : 'flex-start'};
+      gap: ${isStacked ? '32px' : '28px'};
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
   }
   #${htmlAnchor} .gh-head-menu .nav li {
     margin: 0;
@@ -201,13 +231,90 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${htmlAnchor} .gh-head-btn:hover {
     opacity: 1 !important;
   }
-  ${inheritDarkOverrideCss}
+  
+  /* Mobile Menu Overrides for Custom Colors and Fullscreen layout */
+  .gh-head-open #${htmlAnchor} {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    z-index: 9999999 !important;
+    overflow-y: scroll !important;
+    background-color: ${bgStyle} !important;
+  }
+  
+  .gh-head-open #${htmlAnchor} .gh-head-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 24px !important;
+  }
+
+  .gh-head-open #${htmlAnchor} .gh-head-brand {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 32px !important;
+  }
+
+  .gh-head-open #${htmlAnchor} .gh-head-actions {
+    background-color: transparent !important;
+    margin-top: 32px !important;
+  }
+  
+  /* Ensure SVG overrides any native ghost lines */
+  #${htmlAnchor} .gh-burger::before,
+  #${htmlAnchor} .gh-burger::after {
+    display: none !important;
+  }
+  .gh-head-open #${htmlAnchor} .gh-burger .burger-icon {
+    display: none !important;
+  }
+  .gh-head-open #${htmlAnchor} .gh-burger .close-icon {
+    display: block !important;
+  }
+  
+  /* Fallback mobile layouts just in case Casper CSS is missing or ID changed */
+  @media (max-width: 767px) {
+    #${htmlAnchor} .gh-burger {
+      display: flex !important;
+    }
+    #${htmlAnchor} .gh-head-menu,
+    #${htmlAnchor} .gh-head-actions {
+      position: fixed;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .gh-head-open #${htmlAnchor} .gh-head-menu,
+    .gh-head-open #${htmlAnchor} .gh-head-actions {
+      position: relative !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    .gh-head-open #${htmlAnchor} .nav {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 24px !important;
+      width: 100% !important;
+    }
+  }
 </style>
 
 <div style="width: 100%; padding: 0; background-color: transparent;">
   <header 
     id="${htmlAnchor}" 
-    class="gh-head palette-${appearance.colorPalette || 'default'} color-mode-${colorMode} section-width-${appearance.sectionWidth || 'full'}"
+    class="gh-head section-width-${appearance.sectionWidth || 'full'}"
     style="
       position: relative;
       background-color: ${bgStyle};
@@ -221,8 +328,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
       transition: all 0.15s ease-in-out;
     "
   >
-    <div class="gh-head-inner content-width-${appearance.contentWidth || 'wide'}" style="width: 100%; max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto; padding: 20px 24px; display: flex;">
-      ${innerLayoutHtml}
+    <div class="gh-head-inner content-width-${appearance.contentWidth || 'wide'}" style="width: 100%; max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto;">
+      ${brandHtml}
+      ${navHtml}
+      ${actionsHtml}
     </div>
   </header>
 </div>`;

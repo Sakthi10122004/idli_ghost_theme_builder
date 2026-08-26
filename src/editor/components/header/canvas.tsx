@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BuilderBlock } from "@/types/theme";
-import { getPaletteConfig, hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
+import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 import { useEditorStore } from "@/store/editorStore";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
@@ -19,7 +19,6 @@ export const CanvasElement = ({ block }: {
   const styles = p.styles || {};
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [previewAmbientDark, setPreviewAmbientDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { deviceMode } = useEditorStore();
 
@@ -34,11 +33,12 @@ export const CanvasElement = ({ block }: {
   const isLogoCenter = layout === "Logo in Center";
   const isStacked = layout === "Stacked";
 
-  const colorMode = appearance.colorMode || "inherit";
-  const isForcedDark = colorMode === "dark";
-  const isForcedLight = colorMode === "light";
-  const isInherit = !isForcedDark && !isForcedLight;
-  const isDarkForce = isForcedDark || (isInherit && previewAmbientDark);
+  const palette = {
+    bg: appearance.backgroundColor || "#ffffff",
+    text: appearance.textColor || "#000000",
+    buttonBg: appearance.buttonBgColor || "#000000",
+    buttonText: appearance.buttonTextColor || "#ffffff",
+  };
 
   const logoSize = general.logoSize || 40;
 
@@ -46,8 +46,6 @@ export const CanvasElement = ({ block }: {
     widthRank(appearance.contentWidth) > widthRank(appearance.sectionWidth)
       ? appearance.sectionWidth
       : appearance.contentWidth;
-
-  const palette = getPaletteConfig(appearance.colorPalette || "default", isDarkForce);
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
   const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
@@ -74,16 +72,17 @@ export const CanvasElement = ({ block }: {
         : "none";
   const opacityValue = styles.opacity ?? 1;
 
-  const iconHoverClass = isDarkForce
-    ? "hover:bg-white/10"
-    : "hover:bg-black/5 dark:hover:bg-white/10";
+  const iconHoverClass = "hover:bg-black/5 dark:hover:bg-white/10";
 
   const renderActions = () => (
     <div className="flex items-center gap-4 shrink-0">
       {general.showSearch !== false && (
         <button
           type="button"
-          onClick={() => setActiveModal("Ghost SodoSearch simulation active.")}
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveModal("Ghost SodoSearch simulation active.");
+          }}
           className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
           title="Test Ghost Search"
         >
@@ -97,8 +96,8 @@ export const CanvasElement = ({ block }: {
       {general.showThemeSwitcher !== false && (
         <button
           type="button"
-          onClick={() => {
-            if (isInherit) setPreviewAmbientDark((v) => !v);
+          onClick={(e) => {
+            e.stopPropagation();
             setActiveModal("Theme Switcher toggled.");
           }}
           className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
@@ -113,7 +112,10 @@ export const CanvasElement = ({ block }: {
       {general.showSignIn !== false && (
         <button
           type="button"
-          onClick={() => setActiveModal("Ghost Portal Sign In simulation active.")}
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveModal("Ghost Portal Sign In simulation active.");
+          }}
           className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
         >
           {general.signInText || "Sign in"}
@@ -123,7 +125,10 @@ export const CanvasElement = ({ block }: {
       {general.showSubscribe !== false && (
         <button
           type="button"
-          onClick={() => setActiveModal("Ghost Portal Subscribe simulation active.")}
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveModal("Ghost Portal Subscribe simulation active.");
+          }}
           className="px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
           style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
         >
@@ -147,7 +152,10 @@ export const CanvasElement = ({ block }: {
     <button 
       className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50" 
       aria-label="Menu"
-      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+      }}
     >
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         {isMobileMenuOpen ? (
@@ -170,7 +178,7 @@ export const CanvasElement = ({ block }: {
     <div className="w-full bg-transparent p-0">
       {/* Header receives Section Width & Colors */}
       <header
-        className={`relative transition-all duration-150 gh-head palette-${appearance.colorPalette || 'default'} color-mode-${colorMode} section-width-${appearance.sectionWidth || 'full'} ${sectionBaseClass}`}
+        className={`relative transition-all duration-150 gh-head section-width-${appearance.sectionWidth || 'full'} ${sectionBaseClass}`}
         style={{
           backgroundColor: bgStyle,
           color: palette.text,

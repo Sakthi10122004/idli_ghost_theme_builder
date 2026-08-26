@@ -12,8 +12,10 @@ export interface HeaderProps {
     sticky: boolean;
   };
   appearance: {
-    colorMode: "inherit" | "light" | "dark";
-    colorPalette: "default" | "classic" | "dynamic" | "sand" | "zinc" | "graphite" | "stone" | "ocean" | "indigo" | "violet" | "rose" | "amber" | "sage";
+    backgroundColor: string;
+    textColor: string;
+    buttonBgColor: string;
+    buttonTextColor: string;
     sectionWidth: "full" | "wide" | "standard" | "narrow";
     contentWidth: "full" | "wide" | "standard" | "narrow";
   };
@@ -43,8 +45,10 @@ export const defaultProps: HeaderProps = {
     sticky: false,
   },
   appearance: {
-    colorMode: "light",
-    colorPalette: "default",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    buttonBgColor: "#000000",
+    buttonTextColor: "#ffffff",
     sectionWidth: "full",
     contentWidth: "wide",
   },

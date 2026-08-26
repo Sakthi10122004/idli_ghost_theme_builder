@@ -1,6 +1,5 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
-import { getPaletteConfig } from "./constants";
 
 const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
   <button 
@@ -39,27 +38,25 @@ const SegmentedControl = ({ options, value, onChange }: {
   </div>
 );
 
-const PaletteButton = ({ id, label, active, isDark, onClick }: { id: string, label: string, active: boolean, isDark: boolean, onClick: () => void }) => {
-  const { bg, buttonBg } = getPaletteConfig(id, isDark);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex flex-col justify-center items-center gap-1.5 p-2 rounded-lg border transition-all ${
-        active 
-          ? (isDark ? 'border-blue-400 shadow-sm scale-[1.02]' : 'border-blue-500 shadow-sm scale-[1.02]') 
-          : (isDark ? 'border-gray-700/80 hover:border-gray-500' : 'border-gray-200/80 hover:border-gray-300')
-      }`}
-      style={{ backgroundColor: bg }}
-    >
-      <span className={`text-[10px] font-medium ${active ? (isDark ? 'text-blue-300' : 'text-blue-700') : (isDark ? 'text-gray-300' : 'text-gray-600')}`}>{label}</span>
-      <div className="flex gap-1">
-        <div className="w-5 h-2.5 rounded-full" style={{ backgroundColor: buttonBg }} />
-        <div className="w-3.5 h-2.5 rounded-full opacity-50" style={{ backgroundColor: buttonBg }} />
-      </div>
-    </button>
-  );
-};
+const ColorPicker = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
+  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+    <span className="text-[12px] font-medium text-gray-800">{label}</span>
+    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+      <input 
+        type="color" 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
+        className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+      />
+      <input 
+        type="text" 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+      />
+    </div>
+  </div>
+);
 
 export const SidebarElement = ({ block, onChangeProps }: {
   block: BuilderBlock;
@@ -80,7 +77,6 @@ export const SidebarElement = ({ block, onChangeProps }: {
     });
   };
 
-  const isDarkPreview = a.colorMode === "dark";
 
   const WIDTH_ORDER = ["narrow", "standard", "wide", "full"];
   const sectionRank = WIDTH_ORDER.indexOf(a.sectionWidth || "full");
@@ -180,37 +176,27 @@ export const SidebarElement = ({ block, onChangeProps }: {
       <div className="flex flex-col gap-3">
         <span className="text-[12px] font-bold text-gray-900 tracking-tight">Colors</span>
         
-        <SegmentedControl 
-          value={a.colorMode || "light"}
-          onChange={(v) => updateCategory("appearance", "colorMode", v)}
-          options={[
-            { label: "Light", value: "light" },
-            { label: "Dark", value: "dark" }
-          ]}
-        />
-
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          <PaletteButton id="default" label="Default" active={(a.colorPalette || "default") === "default"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "default")} />
-        </div>
-
-        <span className="text-[10px] text-gray-400 font-medium mt-1">Neutral (uses your accent)</span>
-        <div className="grid grid-cols-3 gap-2">
-          <PaletteButton id="classic" label="Classic" active={a.colorPalette === "classic"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "classic")} />
-          <PaletteButton id="dynamic" label="Dynamic" active={a.colorPalette === "dynamic"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "dynamic")} />
-          <PaletteButton id="sand" label="Sand" active={a.colorPalette === "sand"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "sand")} />
-          <PaletteButton id="zinc" label="Zinc" active={a.colorPalette === "zinc"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "zinc")} />
-          <PaletteButton id="graphite" label="Graphite" active={a.colorPalette === "graphite"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "graphite")} />
-          <PaletteButton id="stone" label="Stone" active={a.colorPalette === "stone"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "stone")} />
-        </div>
-
-        <span className="text-[10px] text-gray-400 font-medium mt-1">Themed (curated palettes)</span>
-        <div className="grid grid-cols-3 gap-2">
-          <PaletteButton id="ocean" label="Ocean" active={a.colorPalette === "ocean"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "ocean")} />
-          <PaletteButton id="indigo" label="Indigo" active={a.colorPalette === "indigo"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "indigo")} />
-          <PaletteButton id="violet" label="Violet" active={a.colorPalette === "violet"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "violet")} />
-          <PaletteButton id="rose" label="Rose" active={a.colorPalette === "rose"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "rose")} />
-          <PaletteButton id="amber" label="Amber" active={a.colorPalette === "amber"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "amber")} />
-          <PaletteButton id="sage" label="Sage" active={a.colorPalette === "sage"} isDark={isDarkPreview} onClick={() => updateCategory("appearance", "colorPalette", "sage")} />
+        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+          <ColorPicker 
+            label="Background Color" 
+            value={a.backgroundColor || "#ffffff"} 
+            onChange={(v) => updateCategory("appearance", "backgroundColor", v)} 
+          />
+          <ColorPicker 
+            label="Text Color" 
+            value={a.textColor || "#000000"} 
+            onChange={(v) => updateCategory("appearance", "textColor", v)} 
+          />
+          <ColorPicker 
+            label="Button Background" 
+            value={a.buttonBgColor || "#000000"} 
+            onChange={(v) => updateCategory("appearance", "buttonBgColor", v)} 
+          />
+          <ColorPicker 
+            label="Button Text" 
+            value={a.buttonTextColor || "#ffffff"} 
+            onChange={(v) => updateCategory("appearance", "buttonTextColor", v)} 
+          />
         </div>
       </div>
 

@@ -1033,6 +1033,7 @@ production stylesheet in assets/built/screen.css
     font-size: 1.6rem;
     line-height: 1.5;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     word-break: break-word;
 }
@@ -1043,6 +1044,7 @@ production stylesheet in assets/built/screen.css
 
 .post-card:not(.post-card-large):not(.post-card-full):not(.dynamic):not(.no-image) .post-card-excerpt {
     -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 :is(.tag-template, .author-template) .post-card-excerpt {
