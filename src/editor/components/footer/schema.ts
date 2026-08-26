@@ -8,7 +8,7 @@ export const defaultProps = {
     customCopyrightText: "",
   },
   colors: {
-    mode: "inherit",
+    mode: "light",
     palette: "default",
   },
   layout: {
