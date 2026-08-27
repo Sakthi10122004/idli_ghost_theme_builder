@@ -156,11 +156,12 @@ function SortableElement({
 
         if (block.type === 'spacer') {
           updateBlockProps(block.id, { height: `${Math.max(8, snappedHeight)}px` });
-        } else if (block.type === 'section') {
-          const halfPadding = Math.max(16, snappedHeight / 2);
+        } else if (block.type === 'section' || block.type === 'hero') {
+          // Account for estimated inner content height (~100px offset) so padding isn't excessively huge
+          const newPadding = Math.max(0, (snappedHeight - 100) / 2);
           updateBlockStyles(block.id, { 
-            paddingTop: `${halfPadding}px`, 
-            paddingBottom: `${halfPadding}px` 
+            paddingTop: `${newPadding}px`, 
+            paddingBottom: `${newPadding}px` 
           });
         } else {
           updateBlockStyles(block.id, { height: `${Math.max(16, snappedHeight)}px` });
@@ -381,8 +382,8 @@ export default function Canvas() {
           isGlobal={isGlobal}
           style={{
             backgroundColor: resolveStyle(backgroundColor) || undefined,
-            paddingTop: resolveStyle(paddingTop) || undefined,
-            paddingBottom: resolveStyle(paddingBottom) || undefined,
+            paddingTop: block.type === 'hero' ? undefined : (resolveStyle(paddingTop) || undefined),
+            paddingBottom: block.type === 'hero' ? undefined : (resolveStyle(paddingBottom) || undefined),
             backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
             backgroundSize: backgroundImage ? (resolveStyle(backgroundSize) || "cover") : undefined,
             backgroundRepeat: backgroundImage ? (resolveStyle(backgroundRepeat) || "no-repeat") : undefined,
@@ -478,18 +479,18 @@ export default function Canvas() {
   });
 
   return (
-    <div className="flex-1 bg-brand-canvas-soft overflow-y-auto p-8 flex justify-center items-start mesh-glow select-none">
+    <div className="flex-1 bg-brand-canvas-soft overflow-auto p-8 mesh-glow select-none">
       <div 
         id="canvas-preview-frame"
         ref={setCanvasDropRef}
         onClick={() => selectBlock(null)}
-        className={`${getViewportWidthClass()} relative bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
+        className={`${getViewportWidthClass()} mx-auto relative bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
           isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20 scale-[1.002]" : "border-brand-hairline"
         }`}
       >
         {headerBlockId && renderBlock(headerBlockId, true)}
 
-        <div className="flex-1 w-full flex flex-col pt-8 pb-8">
+        <div className="flex-1 w-full flex flex-col">
           {pageSections.length > 0 ? (
             <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
               {pageSections.filter(sid => {

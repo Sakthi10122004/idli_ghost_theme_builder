@@ -217,7 +217,7 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
 /**
  * Returns basic premium global styles to be packaged alongside theme templates.
  */
-export function getCompilerStyles(doc?: ThemeDocument): string {
+export function getSkeletonCss(doc?: ThemeDocument): string {
   const settings = doc?.settings;
   const tokens = settings?.designTokens;
 
@@ -231,313 +231,491 @@ export function getCompilerStyles(doc?: ThemeDocument): string {
   const containerWidthVal = settings?.containerWidth ? `${settings.containerWidth}px` : '1200px';
 
   return `
-/* Ghost Custom Theme Fonts Customization System */
+/* 1. CSS Reset & Base Typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  color: var(--color-fg);
+}
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* 2. Design Tokens */
 :root {
-  --gh-font-heading: ${fontHeading};
-  --gh-font-body: ${fontBody};
-  --color-background: ${colorBackground};
-  --color-foreground: ${colorForeground};
+  --font-heading: ${fontHeading};
+  --font-body: ${fontBody};
+  --gh-font-heading: var(--font-heading);
+  --gh-font-body: var(--font-body);
+  --color-bg: ${colorBackground};
+  --color-fg: ${colorForeground};
   --color-primary: ${colorPrimary};
   --color-muted: ${colorMuted};
   --color-accent: ${colorAccent};
+  
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-section: 5rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-pill: 9999px;
+
   --container-width: ${containerWidthVal};
+  --content-width: 720px;
 }
 
-
+/* 3. Shared Structural Utilities */
 .container-width {
   max-width: var(--container-width);
 }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-.py-16 { padding-top: 4rem; padding-bottom: 4rem; }
-.py-12 { padding-top: 3rem; padding-bottom: 3rem; }
-.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
-.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-.mt-4 { margin-top: 1rem; }
-.mt-6 { margin-top: 1.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-6 { margin-bottom: 1.5rem; }
-
-/* Sticky Header */
-.sticky-header {
-  position: sticky;
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 8px;
+  z-index: 9999;
+  transition: top 0.2s;
+}
+.skip-link:focus {
   top: 0;
-  z-index: 999;
 }
 
-/* Hover effects */
-.hover-effect-scale {
-  transition: transform 0.2s ease !important;
+/* 4. Ghost .gh-content Post Typography & Cards */
+.gh-canvas {
+  display: grid;
+  grid-template-columns: 
+    [full-start] minmax(4vmin, auto)
+    [wide-start] minmax(auto, 240px)
+    [main-start] min(var(--content-width), calc(100% - 8vw)) [main-end]
+    minmax(auto, 240px) [wide-end]
+    minmax(4vmin, auto) [full-end];
 }
-.hover-effect-scale:hover {
-  transform: scale(1.02) !important;
-}
-.hover-effect-float {
-  transition: transform 0.2s ease !important;
-}
-.hover-effect-float:hover {
-  transform: translateY(-4px) !important;
-}
-.hover-effect-glow {
-  transition: box-shadow 0.2s ease !important;
-}
-.hover-effect-glow:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+.gh-canvas > * {
+  grid-column: main-start / main-end;
 }
 
-
-
-/* Layout Grid components */
-.flex-columns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-.column-item {
-  flex: 1;
-  min-width: 250px;
+.gh-content {
+  font-size: 1.125rem;
+  line-height: 1.7;
 }
 
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-.btn-primary {
-  background-color: #171717;
-  color: #ffffff;
-}
-.btn-primary:hover {
-  background-color: #000000;
-}
-.btn-secondary {
-  background-color: #ffffff;
-  color: #171717;
-  border: 1px solid #ebebeb;
-}
-.btn-secondary:hover {
-  background-color: #fafafa;
+.gh-content > * + * {
+  margin-top: 1.5em;
+  margin-bottom: 0;
 }
 
+.gh-content p {
+  margin: 0 0 1.5em 0;
+}
 
-/* Custom Blocks */
-.hero-block .hero-content {
+.gh-content h2, .gh-content h3, .gh-content h4 {
+  margin-top: 2em;
+}
+
+.gh-content a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.gh-content ul, .gh-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.gh-content blockquote {
+  margin: 1.5em 0;
+  padding: 0 1.5em;
+  border-left: 3px solid var(--color-primary);
+  font-style: italic;
+}
+
+.gh-content .kg-blockquote-alt {
+  font-size: 1.5em;
+  font-style: italic;
+  text-align: center;
+  border: none;
+  padding: 0;
+  color: var(--color-muted);
+}
+
+.gh-content hr {
+  border: 0;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  margin: 3em 0;
+}
+
+/* Ghost Image Cards */
+.gh-content .kg-image-card, 
+.gh-content .kg-gallery-card {
+  margin: 2em 0;
+}
+.gh-content .kg-image-card figcaption,
+.gh-content .kg-gallery-card figcaption {
+  font-size: 0.85em;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 0.5em;
+}
+.gh-content .kg-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+.gh-content .kg-width-wide {
+  grid-column: wide-start / wide-end;
+}
+.gh-content .kg-width-full {
+  grid-column: full-start / full-end;
+}
+
+/* Ghost Gallery Cards */
+.gh-content .kg-gallery-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 48rem;
-  margin: 0 auto;
+  gap: 1em;
 }
-.hero-block .hero-eyebrow {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background-color: #f1f5f9;
-  color: #3b82f6;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.hero-block .hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-top: 1rem;
-  line-height: 1.2;
-}
-.hero-block .hero-subtitle {
-  font-size: 1.125rem;
-  color: #4b5563;
-  margin-top: 1rem;
-  line-height: 1.6;
-}
-.hero-block .hero-actions {
+.gh-content .kg-gallery-row {
   display: flex;
-  gap: 1rem;
+  flex-direction: row;
   justify-content: center;
-  margin-top: 2rem;
+  gap: 1em;
 }
-.newsletter-block {
-  background-color: #fafafa;
-  border: 1px solid #ebebeb;
-  border-radius: 6px;
-}
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-.gallery-image img {
+.gh-content .kg-gallery-image img {
+  display: block;
+  margin: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
-
-
-/* Accordion Component */
-.accordion-wrapper {
+/* Ghost Embed Cards */
+.gh-content .kg-embed-card {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  margin: 2em 0;
+  width: 100%;
 }
-.accordion-item {
-  border: 1px solid #ebebeb;
-  border-radius: 6px;
-  padding: 1rem;
-  background-color: #ffffff;
+.gh-content .kg-embed-card iframe {
+  max-width: 100%;
 }
 
-/* Tags Grid Archive */
-.tag-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+/* Ghost Bookmark Cards */
+.gh-content .kg-bookmark-card {
+  margin: 2em 0;
+  width: 100%;
+  background: var(--color-bg);
 }
-.tag-card {
-  border: 1px solid #ebebeb;
-  border-radius: 6px;
-  padding: 1rem;
-  background-color: #ffffff;
+.gh-content .kg-bookmark-container {
+  display: flex;
+  color: var(--color-fg);
+  text-decoration: none;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.gh-content .kg-bookmark-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1.5em;
+  justify-content: flex-start;
+}
+.gh-content .kg-bookmark-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+.gh-content .kg-bookmark-description {
+  font-size: 0.9em;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin-bottom: 1em;
+}
+.gh-content .kg-bookmark-metadata {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.8em;
+  margin-top: auto;
+}
+.gh-content .kg-bookmark-icon {
+  width: 20px;
+  height: 20px;
+}
+.gh-content .kg-bookmark-author, 
+.gh-content .kg-bookmark-publisher {
+  color: var(--color-muted);
+}
+.gh-content .kg-bookmark-thumbnail {
+  position: relative;
+  min-width: 33%;
+  max-height: 100%;
+}
+.gh-content .kg-bookmark-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+@media (max-width: 600px) {
+  .gh-content .kg-bookmark-container {
+    flex-direction: column;
+  }
+  .gh-content .kg-bookmark-thumbnail {
+    min-height: 200px;
+    order: -1;
+  }
+}
+
+/* Ghost Callout Cards */
+.gh-content .kg-callout-card {
+  display: flex;
+  padding: 1.25em 1.75em;
+  border-radius: var(--radius-md);
+  margin: 1.5em 0;
+  background: rgba(0,0,0,0.03);
+}
+.gh-content .kg-callout-card-accent {
+  background: var(--color-accent);
+  color: #fff;
+}
+.gh-content .kg-callout-emoji {
+  margin-right: 1em;
+  font-size: 1.5em;
+}
+.gh-content .kg-callout-text {
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+/* Ghost Button Cards */
+.gh-content .kg-button-card {
+  display: flex;
+  margin: 2em 0;
+}
+.gh-content .kg-button-card.kg-align-center {
+  justify-content: center;
+}
+.gh-content .kg-btn {
+  display: inline-block;
+  padding: 0.8em 1.5em;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: #fff;
+  transition: opacity 0.2s;
+}
+.gh-content .kg-btn-accent {
+  background: var(--color-accent);
+  color: #fff;
+}
+.gh-content .kg-btn:hover {
+  opacity: 0.9;
+}
+
+/* Ghost Toggle Cards */
+.gh-content .kg-toggle-card {
+  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: var(--radius-md);
+  padding: 1.25em;
+  margin: 1.5em 0;
+}
+.gh-content .kg-toggle-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  text-decoration: none;
-  color: #171717;
+  cursor: pointer;
 }
-.tag-card:hover {
-  background-color: #fafafa;
+.gh-content .kg-toggle-heading-text {
+  margin: 0;
+  font-size: 1.1em;
+}
+.gh-content .kg-toggle-card-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--color-muted);
+}
+.gh-content .kg-toggle-card[data-kg-toggle-state="close"] .kg-toggle-content {
+  display: none;
+}
+.gh-content .kg-toggle-content {
+  margin-top: 1em;
+  font-size: 0.95em;
+  color: var(--color-muted);
 }
 
-/* Author Profile */
-.author-profile-card {
-  border: 1px solid #ebebeb;
-  border-radius: 6px;
-  padding: 1.5rem;
-  background-color: #ffffff;
+/* Ghost Header Cards */
+.gh-content .kg-header-card {
+  padding: 4em 2em;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-md);
+  margin: 2em 0;
+}
+.gh-content .kg-header-card-header {
+  font-size: 2.5em;
+  margin-bottom: 0.25em;
+}
+.gh-content .kg-header-card-subheader {
+  font-size: 1.25em;
+  font-weight: normal;
+  opacity: 0.8;
+}
+
+/* Ghost Signup Cards */
+.gh-content .kg-signup-card {
+  background: rgba(0,0,0,0.03);
+  border-radius: var(--radius-md);
+  padding: 2em;
+  margin: 2em 0;
+  text-align: center;
+}
+.gh-content .kg-signup-card-heading {
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+}
+.gh-content .kg-signup-card-subheading {
+  font-size: 1.1em;
+  color: var(--color-muted);
+  margin-bottom: 1.5em;
+}
+.gh-content .kg-signup-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.gh-content .kg-signup-card-input {
+  padding: 0.75em 1em;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+}
+.gh-content .kg-signup-card-button {
+  padding: 0.75em 1em;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: bold;
+  cursor: pointer;
+}
+.gh-content .kg-signup-card-disclaimer {
+  font-size: 0.85em;
+  color: var(--color-muted);
+  margin-top: 1em;
+}
+
+/* Ghost File/Audio Cards */
+.gh-content .kg-audio-card, 
+.gh-content .kg-file-card {
+  display: flex;
+  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: var(--radius-md);
+  padding: 1em;
+  margin: 1.5em 0;
+}
+.gh-content .kg-file-card-container {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-}
-
-/* Social links row */
-.social-links-row a {
-  color: #4d4d4d;
   text-decoration: none;
-  font-size: 0.75rem;
-  transition: color 0.2s;
+  color: inherit;
+  width: 100%;
 }
-.social-links-row a:hover {
-  color: #171717;
+.gh-content .kg-file-card-contents {
+  flex-grow: 1;
 }
-
-/* ============================================================
-   HEADER FIXES — merge these rules into your compiled stylesheet.
-   ============================================================ */
-
-/* ---- 1. Make the style variables actually do something ---- */
-.gh-head{
-  margin-bottom: var(--mb, 0px);
-  box-shadow: var(--shadow, none);
-  opacity: var(--opacity, 1);
+.gh-content .kg-file-card-title {
+  font-weight: bold;
 }
-.gh-head[style*="--backdrop-blur"]:not([style*="--backdrop-blur: none"]){
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
+.gh-content .kg-file-card-caption,
+.gh-content .kg-file-card-metadata {
+  font-size: 0.85em;
+  color: var(--color-muted);
+}
+.gh-content .kg-file-card-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary);
 }
 
-/* ---- 2. Full palette coverage (light mode) ---- */
-.gh-head.color-mode-light.palette-default,
-.gh-head.palette-default{ background-color:#ffffff; color:#111827; }
-.gh-head.color-mode-light.palette-classic{ background-color:#f3f4f6; color:#111827; }
-.gh-head.color-mode-light.palette-dynamic{ background-color:#fee2e2; color:#7f1d1d; }
-.gh-head.color-mode-light.palette-sand{ background-color:#f5f5f4; color:#44403c; }
-.gh-head.color-mode-light.palette-zinc{ background-color:#f4f4f5; color:#27272a; }
-.gh-head.color-mode-light.palette-graphite{ background-color:#e4e4e7; color:#18181b; }
-.gh-head.color-mode-light.palette-stone{ background-color:#e7e5e4; color:#1c1917; }
-.gh-head.color-mode-light.palette-ocean{ background-color:#e0f2fe; color:#0c4a6e; }
-.gh-head.color-mode-light.palette-indigo{ background-color:#e0e7ff; color:#1e1b4b; }
-.gh-head.color-mode-light.palette-violet{ background-color:#ede9fe; color:#4c1d95; }
-.gh-head.color-mode-light.palette-rose{ background-color:#ffe4e6; color:#881337; }
-.gh-head.color-mode-light.palette-amber{ background-color:#fef3c7; color:#78350f; }
-.gh-head.color-mode-light.palette-sage{ background-color:#d1fae5; color:#064e3b; }
-
-/* ---- 3. Full palette coverage (dark mode) ---- */
-.gh-head.color-mode-dark.palette-default,
-.gh-head.color-mode-dark.palette-dark{ background-color:#18181b; color:#ffffff; }
-.gh-head.color-mode-dark.palette-classic{ background-color:#111827; color:#ffffff; }
-.gh-head.color-mode-dark.palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
-.gh-head.color-mode-dark.palette-sand{ background-color:#292524; color:#ffffff; }
-.gh-head.color-mode-dark.palette-zinc{ background-color:#27272a; color:#ffffff; }
-.gh-head.color-mode-dark.palette-graphite{ background-color:#18181b; color:#ffffff; }
-.gh-head.color-mode-dark.palette-stone{ background-color:#1c1917; color:#ffffff; }
-.gh-head.color-mode-dark.palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
-.gh-head.color-mode-dark.palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
-.gh-head.color-mode-dark.palette-violet{ background-color:#2e1065; color:#ede9fe; }
-.gh-head.color-mode-dark.palette-rose{ background-color:#4c0519; color:#ffe4e6; }
-.gh-head.color-mode-dark.palette-amber{ background-color:#451a03; color:#fef3c7; }
-.gh-head.color-mode-dark.palette-sage{ background-color:#064e3b; color:#d1fae5; }
-
-/* ---- 4. Inherit mode ---- */
-@media (prefers-color-scheme: dark){
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-default,
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dark{ background-color:#18181b; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-classic{ background-color:#111827; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-dynamic{ background-color:#b91c1c; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sand{ background-color:#292524; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-zinc{ background-color:#27272a; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-graphite{ background-color:#18181b; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-stone{ background-color:#1c1917; color:#ffffff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-ocean{ background-color:#0c4a6e; color:#e0f2fe; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-indigo{ background-color:#1e1b4b; color:#e0e7ff; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-violet{ background-color:#2e1065; color:#ede9fe; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-rose{ background-color:#4c0519; color:#ffe4e6; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-amber{ background-color:#451a03; color:#fef3c7; }
-  .gh-head:not(.color-mode-light):not(.color-mode-dark).palette-sage{ background-color:#064e3b; color:#d1fae5; }
+/* Ghost Code/Pre */
+.gh-content pre {
+  background: #111;
+  color: #fff;
+  padding: 1.5em;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.9em;
+  margin: 1.5em 0;
+}
+.gh-content code {
+  background: rgba(0,0,0,0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.gh-content pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
 }
 
-/* ---- 5. Subscribe button contrast per palette ---- */
-.gh-head.color-mode-dark .gh-head-btn,
-.gh-head.palette-dynamic .gh-head-btn,
-.gh-head.palette-indigo.color-mode-dark .gh-head-btn,
-.gh-head.palette-violet.color-mode-dark .gh-head-btn,
-.gh-head.palette-rose.color-mode-dark .gh-head-btn{
-  background-color:#ffffff; color:#000 !important;
+/* Ghost Tables */
+.gh-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
 }
-@media (prefers-color-scheme: dark){
-  .gh-head:not(.color-mode-light):not(.color-mode-dark) .gh-head-btn{
-    background-color:#ffffff; color:#000 !important;
-  }
+.gh-content th, .gh-content td {
+  padding: 0.75em;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  text-align: left;
 }
-.gh-head-btn:hover{ opacity:0.85; }
-
-/* ---- 6. Missing hover state on nav links ---- */
-.gh-head-menu a{ opacity:0.9; transition:opacity 0.2s ease; }
-.gh-head-menu a:hover{ opacity:1; }
-
-/* ---- 7. Section width & content width ---- */
-@media (min-width: 768px) {
-  .gh-head.section-width-narrow{ max-width:896px; margin:8px auto; border-radius:12px; }
-  .gh-head.section-width-standard{ max-width:1152px; margin:8px auto; border-radius:12px; }
-  .gh-head.section-width-wide{ max-width:1280px; margin:0 auto; }
-  .gh-head.section-width-full{ max-width:none; }
+.gh-content th {
+  font-weight: bold;
 }
-
-.gh-head-inner{ max-width:none; } /* remove the old hardcoded 1200px */
-.gh-head-inner.content-width-narrow{ max-width:768px; margin:0 auto; }
-.gh-head-inner.content-width-standard{ max-width:1024px; margin:0 auto; }
-.gh-head-inner.content-width-wide{ max-width:1152px; margin:0 auto; }
-.gh-head-inner.content-width-full{ max-width:none; }
 `;
 }
 
@@ -560,14 +738,7 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     ],
     config: {
       posts_per_page: 5,
-      card_assets: true,
-      custom: {
-        feed_layout: {
-          type: "select",
-          options: ["Classic", "Grid", "List"],
-          default: "Classic"
-        }
-      }
+      card_assets: true
     },
     author: {
       name: doc.metadata.author,
@@ -603,13 +774,13 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
 </head>
 <body class="{{body_class}}">
   <div class="site-wrapper">
+    <a class="skip-link" href="#site-main">Skip to content</a>
     ${headerCompiled ? '{{> "header"}}' : ''}
     <main id="site-main" class="site-main">
       {{{body}}}
     </main>
     ${footerCompiled ? '{{> "footer"}}' : ''}
   </div>
-  <script src="{{asset "built/casper.js"}}" defer></script>
   {{ghost_foot}}
 </body>
 </html>`;
@@ -632,7 +803,37 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
 </ul>`;
 
   // 5. Generate asset stylesheet screen.css
-  files["assets/css/screen.css"] = minifyCss(getCompilerStyles(doc));
+  files["assets/css/screen.css"] = minifyCss(getSkeletonCss(doc));
+
+  // 6. Generate post-card.hbs
+  files["partials/post-card.hbs"] = `
+<article class="gh-post-card {{post_class}}">
+  <a class="gh-post-card-link" href="{{url}}">
+    {{#if feature_image}}
+    <div class="gh-post-card-image">
+      <img
+        srcset="{{img_url feature_image size="s"}} 300w,
+                {{img_url feature_image size="m"}} 600w,
+                {{img_url feature_image size="l"}} 1000w,
+                {{img_url feature_image size="xl"}} 2000w"
+        sizes="(max-width: 1000px) 400px, 800px"
+        src="{{img_url feature_image size="m"}}"
+        alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}"
+        loading="lazy"
+      />
+    </div>
+    {{/if}}
+    <div class="gh-post-card-content">
+      <h2 class="gh-post-card-title">{{title}}</h2>
+      <p class="gh-post-card-excerpt">{{excerpt}}</p>
+      <footer class="gh-post-card-meta">
+        <span class="gh-post-card-date"><time datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM YYYY"}}</time></span>
+        <span class="gh-post-card-reading-time">{{reading_time}}</span>
+      </footer>
+    </div>
+  </a>
+</article>
+`;
 
   return files;
 }

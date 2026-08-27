@@ -301,7 +301,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Section/Spacing Styles */}
-            {selectedBlock.type === "section" && (
+            {(selectedBlock.type === "section" || selectedBlock.type === "hero") && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>

@@ -54,9 +54,65 @@ export default function Toolbar() {
     isSaving
   } = useEditorStore();
 
+  const [liveScore, setLiveScore] = useState<{ value: number, level: string } | null>(null);
+  const [isValidatingLive, setIsValidatingLive] = useState(false);
+
   useEffect(() => {
     loadTheme();
   }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      try {
+        setIsValidatingLive(true);
+        const zip = new JSZip();
+        
+        // Fetch minimal required ghost assets for accurate score
+        const manifestRes = await fetch("/casper-template/manifest.json");
+        if (manifestRes.ok) {
+          const manifest: string[] = await manifestRes.json();
+          await Promise.all(
+            manifest.map(async (filePath) => {
+              if (!filePath.startsWith("locales/") && !filePath.startsWith("partials/icons/")) return;
+              const res = await fetch(`/casper-template/${filePath}`);
+              if (res.ok) {
+                zip.file(filePath, await res.arrayBuffer());
+              }
+            })
+          );
+        }
+
+        const { generateThemeFiles } = await import("./compiler");
+        const files = generateThemeFiles(themeDoc as any);
+        Object.entries(files).forEach(([name, content]) => {
+          zip.file(name, content as string);
+        });
+
+        const blob = await zip.generateAsync({ type: "blob" });
+        const formData = new FormData();
+        formData.append("theme", blob, "live-theme.zip");
+
+        const validateRes = await fetch("/api/theme/validate", {
+          method: "POST",
+          body: formData
+        });
+        
+        if (validateRes.ok) {
+          const validateData = await validateRes.json();
+          if (validateData.success && validateData.report?.score) {
+            setLiveScore(validateData.report.score);
+            setValidationReport(validateData.report);
+          }
+        }
+      } catch (e) {
+        // Silently ignore background validation errors
+      } finally {
+        setIsValidatingLive(false);
+      }
+    }, 4000); // 4s debounce
+
+    return () => clearTimeout(handler);
+  }, [themeDoc]);
 
   const allPageKeys = Object.keys(themeDoc.pages);
 
@@ -79,7 +135,8 @@ export default function Toolbar() {
   };
 
   return (
-    <header className="h-[64px] border-b border-brand-hairline bg-white px-6 flex items-center justify-between shrink-0 select-none shadow-level-1 z-10">
+    <>
+      <header className="h-[64px] border-b border-brand-hairline bg-white px-6 flex items-center justify-between shrink-0 select-none shadow-level-1 z-10">
       {/* Brand Logo & Name */}
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 bg-brand-primary flex items-center justify-center rounded-sm">
@@ -227,6 +284,18 @@ export default function Toolbar() {
 
         {/* Export / Action Buttons */}
         <div className="flex items-center gap-3">
+          {/* Live Score Badge */}
+          {liveScore && (
+            <button 
+              onClick={() => setShowValidationModal(true)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border transition-colors ${liveScore.level === 'error' ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : liveScore.level === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'}`} 
+              title="Click to view GScan validation report"
+            >
+              <span className="text-[10px] font-bold font-mono tracking-tight">GSCAN: {liveScore.value}/100</span>
+              {isValidatingLive && <Loader2 size={10} className="animate-spin opacity-50" />}
+            </button>
+          )}
+
           {/* Autosave / DB Status Badge */}
           <div className="flex items-center gap-1.5 text-xs text-brand-body pr-2">
             {saveStatus === "saving" && (
@@ -268,47 +337,11 @@ export default function Toolbar() {
                 const manifestRes = await fetch("/casper-template/manifest.json");
                 if (!manifestRes.ok) throw new Error("Failed to load template manifest");
                 const manifest: string[] = await manifestRes.json();
-                
-                // Fetch and process global.css and screen.css dynamically to avoid mutating the reference casper-template
-                let globalCssContent = "";
-                let screenCssContent = "";
-                try {
-                  const [gRes, sRes] = await Promise.all([
-                    fetch("/casper-template/assets/css/global.css"),
-                    fetch("/casper-template/assets/css/screen.css")
-                  ]);
-                  if (gRes.ok) globalCssContent = await gRes.text();
-                  if (sRes.ok) screenCssContent = await sRes.text();
-                } catch (e) {
-                  console.error("Failed to load CSS files for merging", e);
-                }
-
-                // Process global.css
-                globalCssContent = globalCssContent.replace(/::not\(/g, ":not(");
-                globalCssContent = globalCssContent.replace(/blockquote\s*{\s*margin:\s*1\.5em\s*0;\s*padding:\s*0\s*1\.6em(?:\s*0\s*1\.6em)?;\s*border-left:\s*#daf2fd\s*}/, "blockquote { margin: 1.5em 0; padding: 0 1.6em; border-left: 3px solid #daf2fd; }");
-                globalCssContent = globalCssContent.replace(/border-left:\s*#daf2fd;/, "border-left: 3px solid #daf2fd;");
-
-                // Process screen.css
-                screenCssContent = screenCssContent.replace(/@import\s+"global\.css";?\n?/, "");
-                
-                // Replace all color-mod instances
-                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+l\(\+([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
-                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+l\(-([0-9]+)%\)\)/g, "color-mix(in srgb, $1, black $2%)");
-                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+lightness\(([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
-                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+lightness\(([0-9]+)%\)\s+saturation\(([0-9]+)%\)\)/g, "color-mix(in srgb, $1, white $2%)");
-                screenCssContent = screenCssContent.replace(/color-mod\((var\(--[a-zA-Z0-9-]+\))\s+a\(0%\)\)/g, "transparent");
-                screenCssContent = screenCssContent.replace(/color-mod\([^)]+\)/g, "inherit"); // Catch-all fallback
-                
-                screenCssContent = screenCssContent.replace(/black 70%/g, "white 15%");
-                screenCssContent = screenCssContent.replace(/var\(--ghost-accent-color(?!\s*,)[^)]*\)/g, "var(--ghost-accent-color, #15171a)");
-
-                const baseMergedCss = `/* 1. Global Reset & Base Typography */\n\n${globalCssContent}\n\n/* 2. Theme Styles (Screen) */\n\n${screenCssContent}`;
 
                 await Promise.all(
                   manifest.map(async (filePath) => {
-                    // Skip global.css and built css files so we can overwrite them cleanly
-                    if (filePath === "assets/css/global.css" || filePath === "assets/built/global.css") return;
-                    if (filePath === "assets/built/screen.css" || filePath === "assets/css/screen.css") return;
+                    // Only cherry-pick locales and icons
+                    if (!filePath.startsWith("locales/") && !filePath.startsWith("partials/icons/")) return;
 
                     const res = await fetch(`/casper-template/${filePath}`);
                     if (!res.ok) throw new Error(`Failed to load ${filePath}`);
@@ -324,39 +357,11 @@ export default function Toolbar() {
 
                 for (const [name, content] of Object.entries(files)) {
                   if (name === "assets/css/screen.css") {
-                    const finalCss = baseMergedCss + "\n\n/* 3. Custom Builder Components & Color Palettes */\n\n" + (content as string);
-                    zip.file("assets/built/screen.css", finalCss);
-                    zip.file("assets/css/screen.css", finalCss);
+                    zip.file("assets/built/screen.css", content as string);
+                    zip.file("assets/css/screen.css", content as string);
                   } else if (name === "package.json") {
-                    const originalPackageFile = zip.file("package.json");
-                    const originalPackage = originalPackageFile ? JSON.parse(await originalPackageFile.async("text")) : {};
                     const compiledPackage = JSON.parse(content as string);
-                    
-                    const mergedPackage = {
-                      ...originalPackage,
-                      name: compiledPackage.name || originalPackage.name,
-                      description: compiledPackage.description || originalPackage.description,
-                      version: compiledPackage.version || originalPackage.version,
-                      config: compiledPackage.config || originalPackage.config,
-                      author: {
-                        ...originalPackage.author,
-                        name: compiledPackage.author?.name || originalPackage.author?.name
-                      }
-                    };
-                    
-                    if (mergedPackage.config && mergedPackage.config.custom) {
-                      // We only keep custom settings that are actually used in the templates we include 
-                      // from Casper (like partials/post-card.hbs).
-                      const feedLayout = mergedPackage.config.custom.feed_layout;
-                      if (feedLayout) {
-                        mergedPackage.config.custom = {
-                          feed_layout: feedLayout
-                        };
-                      } else {
-                        delete mergedPackage.config.custom;
-                      }
-                    }
-                    zip.file("package.json", JSON.stringify(mergedPackage, null, 2));
+                    zip.file("package.json", JSON.stringify(compiledPackage, null, 2));
                   } else {
                     zip.file(name, content as string);
                   }
@@ -378,11 +383,15 @@ export default function Toolbar() {
                 const validateData = await validateRes.json();
                 setIsExporting(false);
                 
-                if (validateData.success && validateData.report) {
+                if (!validateRes.ok || validateData.error) {
+                  console.warn("Theme validation API failed:", validateData.error);
+                  alert(`Warning: The theme validation service encountered an error (${validateData.error || 'Server Error'}). We will download the theme anyway, but it has not been fully verified.`);
+                } else if (validateData.success && validateData.report) {
                   const hasFatals = Object.keys(validateData.report.fatal || {}).length > 0;
                   const hasErrors = Object.keys(validateData.report.error || {}).length > 0;
+                  const hasWarnings = Object.keys(validateData.report.warning || {}).length > 0;
                   
-                  if (hasFatals || hasErrors) {
+                  if (hasFatals || hasErrors || hasWarnings) {
                     setValidationReport(validateData.report);
                     setThemeBlob(blob);
                     setThemeFilename(filename);
@@ -412,6 +421,7 @@ export default function Toolbar() {
           </button>
         </div>
       </div>
+    </header>
 
       <TemplatePickerModal 
         isOpen={showTemplateModal} 
@@ -419,15 +429,24 @@ export default function Toolbar() {
       />
 
       {showValidationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-red-50/50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
+          <div className="bg-white rounded-xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" style={{ width: '600px', maxWidth: '90vw' }}>
+            <div className={`flex justify-between items-center px-6 py-4 border-b border-gray-100 ${validationReport?.score?.level === 'error' ? 'bg-red-50/50' : validationReport?.score?.level === 'warning' ? 'bg-yellow-50/50' : 'bg-green-50/50'}`}>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
-                  <AlertTriangle size={20} />
+                <div className={`p-2 rounded-lg ${validationReport?.score?.level === 'error' ? 'bg-red-100 text-red-600' : validationReport?.score?.level === 'warning' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                  {validationReport?.score?.level === 'passing' ? <Check size={20} /> : <AlertTriangle size={20} />}
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 text-base">Theme Validation Failed</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-gray-900 text-base">
+                      {validationReport?.score?.level === 'passing' ? 'Theme Validation Passed' : 'Theme Validation Issues'}
+                    </h3>
+                    {validationReport?.score && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${validationReport.score.level === 'error' ? 'bg-red-100 text-red-700' : validationReport.score.level === 'warning' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
+                        Score: {validationReport.score.value}/100
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500">Ghost validator (gscan) detected issues that may prevent upload.</p>
                 </div>
               </div>
@@ -437,6 +456,18 @@ export default function Toolbar() {
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+              {(!validationReport?.fatal || Object.keys(validationReport.fatal).length === 0) &&
+               (!validationReport?.error || Object.keys(validationReport.error).length === 0) &&
+               (!validationReport?.warning || Object.keys(validationReport.warning).length === 0) && (
+                 <div className="text-center py-12">
+                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                     <Check size={32} />
+                   </div>
+                   <h4 className="font-bold text-gray-900 text-lg mb-2">Theme is fully compatible!</h4>
+                   <p className="text-gray-500">No issues were found. Your theme is ready to be exported and uploaded to Ghost.</p>
+                 </div>
+               )}
+
               {validationReport?.fatal && Object.keys(validationReport.fatal).length > 0 && (
                 <div className="mb-6">
                   <h4 className="font-bold text-red-700 text-sm mb-3 flex items-center gap-2">
@@ -480,6 +511,28 @@ export default function Toolbar() {
                   </div>
                 </div>
               )}
+              
+              {validationReport?.warning && Object.keys(validationReport.warning).length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-bold text-yellow-600 text-sm mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+                    Warnings ({Object.keys(validationReport.warning).length})
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                    {Object.values(validationReport.warning).map((err: any, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-yellow-100 shadow-sm">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                        <p className="text-xs text-gray-600 mb-2">{err.details}</p>
+                        {err.failures?.length > 0 && (
+                          <div className="bg-yellow-50 p-2 rounded text-[11px] font-mono text-yellow-800 break-all">
+                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white">
@@ -487,30 +540,32 @@ export default function Toolbar() {
                 className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 onClick={() => setShowValidationModal(false)}
               >
-                Cancel & Fix
+                {themeBlob ? "Cancel & Fix" : "Close"}
               </button>
-              <button 
-                className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-all"
-                onClick={() => {
-                  if (themeBlob && themeFilename) {
-                    const url = URL.createObjectURL(themeBlob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = themeFilename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }
-                  setShowValidationModal(false);
-                }}
-              >
-                Download Anyway
-              </button>
+              {themeBlob && (
+                <button 
+                  className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-all"
+                  onClick={() => {
+                    if (themeBlob && themeFilename) {
+                      const url = URL.createObjectURL(themeBlob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = themeFilename;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }
+                    setShowValidationModal(false);
+                  }}
+                >
+                  Download Anyway
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

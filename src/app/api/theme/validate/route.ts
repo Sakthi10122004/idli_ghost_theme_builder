@@ -28,13 +28,28 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    logger.info("Running gscan validation on zip buffer");
+    logger.info("Writing zip buffer to temporary file for gscan");
+    const os = require('os');
+    const path = require('path');
+    const fs = require('fs/promises');
+    const tempFilePath = path.join(os.tmpdir(), `theme-${Date.now()}.zip`);
+    await fs.writeFile(tempFilePath, buffer);
     
-    // According to gscan docs, checkZip takes a zip and an options object
-    const report = await gscan.checkZip(buffer, {
-      keepExtractedDir: false,
-      checkVersion: 'latest' // Target the latest Ghost version
-    });
+    let report: any;
+    try {
+      // According to gscan docs, checkZip takes a file path and an options object
+      report = await gscan.checkZip(tempFilePath, {
+        keepExtractedDir: false,
+        checkVersion: 'v5' // Target Ghost v5
+      });
+    } finally {
+      // Clean up temporary file
+      await fs.unlink(tempFilePath).catch(() => {});
+    }
+
+    if (report) {
+      report = gscan.format(report, { checkVersion: 'v5' });
+    }
 
     logger.info({
       hasErrors: report.results?.error?.length > 0,
@@ -45,6 +60,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       report: {
+        score: report.results?.score || null,
         error: report.results?.error || {},
         fatal: report.results?.fatal || {},
         warning: report.results?.warning || {}

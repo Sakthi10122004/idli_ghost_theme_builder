@@ -24,7 +24,7 @@ export default function TemplatePickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm" style={{ zIndex: 9999 }}>
       <div className="bg-white w-[500px] max-w-full rounded-lg shadow-xl overflow-hidden flex flex-col">
         <div className="p-4 border-b border-brand-hairline flex items-center justify-between">
           <h2 className="font-semibold text-brand-ink">Choose a Layout Template</h2>
