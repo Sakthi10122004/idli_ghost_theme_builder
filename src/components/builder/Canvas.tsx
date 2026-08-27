@@ -480,9 +480,10 @@ export default function Canvas() {
   return (
     <div className="flex-1 bg-brand-canvas-soft overflow-y-auto p-8 flex justify-center items-start mesh-glow select-none">
       <div 
+        id="canvas-preview-frame"
         ref={setCanvasDropRef}
         onClick={() => selectBlock(null)}
-        className={`${getViewportWidthClass()} bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
+        className={`${getViewportWidthClass()} relative bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
           isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20 scale-[1.002]" : "border-brand-hairline"
         }`}
       >

@@ -38,7 +38,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
           <span class="gh-site-title">{{@site.title}}</span>
         {{/if}}
       </a>
-      <button class="gh-burger" aria-label="Main Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: ${palette.text}; padding: 8px;">
+      <button class="gh-burger" aria-label="Main Menu">
         <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -51,13 +51,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </button>
     </div>` : `
     <div class="gh-head-brand">
-      <button class="gh-burger" aria-label="Main Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: ${palette.text}; padding: 8px;">
-        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <button class="gh-burger" aria-label="Main Menu">
+        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
-        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none;">
+        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -71,7 +71,9 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // stripped or the markup structure changes again.
   const navHtml = `
     <nav class="gh-head-menu">
-      {{navigation}}
+      <ul class="nav">
+        {{navigation}}
+      </ul>
     </nav>`;
 
   const actionsHtml = `
@@ -214,7 +216,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     margin: 0;
     padding: 0;
   }
-  #${htmlAnchor} .gh-head-menu a {
+  #${htmlAnchor} .gh-head-menu .nav a {
     color: inherit;
     text-decoration: none;
     font-size: 18px;
@@ -232,84 +234,271 @@ export const compileToHbs = (block: BuilderBlock): string => {
     opacity: 1 !important;
   }
   
-  /* Mobile Menu Overrides for Custom Colors and Fullscreen layout */
-  .gh-head-open #${htmlAnchor} {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    height: 100vh !important;
-    z-index: 9999999 !important;
-    overflow-y: scroll !important;
-    background-color: ${bgStyle} !important;
-  }
-  
-  .gh-head-open #${htmlAnchor} .gh-head-inner {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding-top: 24px !important;
-  }
-
-  .gh-head-open #${htmlAnchor} .gh-head-brand {
-    width: 100% !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin-bottom: 32px !important;
-  }
-
-  .gh-head-open #${htmlAnchor} .gh-head-actions {
-    background-color: transparent !important;
-    margin-top: 32px !important;
-  }
-  
-  /* Ensure SVG overrides any native ghost lines */
-  #${htmlAnchor} .gh-burger::before,
-  #${htmlAnchor} .gh-burger::after {
-    display: none !important;
-  }
-  .gh-head-open #${htmlAnchor} .gh-burger .burger-icon {
-    display: none !important;
-  }
-  .gh-head-open #${htmlAnchor} .gh-burger .close-icon {
-    display: block !important;
-  }
-  
-  /* Fallback mobile layouts just in case Casper CSS is missing or ID changed */
+  /* ===== Mobile Menu ===== */
+  /* 
+   * These rules use doubled-up class selectors to beat Casper's built-in
+   * #gh-head specificity on the same elements. The .gh-head class is always
+   * present on the <header> alongside the #gh-head id.
+   */
   @media (max-width: 767px) {
-    #${htmlAnchor} .gh-burger {
+    /* -- Closed state: compact 64px bar -- */
+    #${htmlAnchor}.gh-head {
+      height: 64px !important;
+    }
+
+    #${htmlAnchor}.gh-head .gh-head-inner {
+      grid-template-rows: auto 1fr auto !important;
+      grid-template-columns: 1fr !important;
+      gap: 48px !important;
+    }
+
+    #${htmlAnchor}.gh-head .gh-head-brand {
+      display: grid !important;
+      grid-template-columns: 1fr auto !important;
+      align-items: center !important;
+      height: 64px !important;
+    }
+
+    #${htmlAnchor}.gh-head .gh-burger {
       display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      color: ${palette.text} !important;
+      padding: 8px !important;
     }
-    #${htmlAnchor} .gh-head-menu,
-    #${htmlAnchor} .gh-head-actions {
-      position: fixed;
-      justify-content: center;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+
+    #${htmlAnchor}.gh-head .gh-head-menu,
+    #${htmlAnchor}.gh-head .gh-head-actions {
+      position: fixed !important;
+      justify-content: center !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
     }
-    .gh-head-open #${htmlAnchor} .gh-head-menu,
-    .gh-head-open #${htmlAnchor} .gh-head-actions {
-      position: relative !important;
-      visibility: visible !important;
-      opacity: 1 !important;
+
+    #${htmlAnchor}.gh-head .gh-head-menu {
+      margin: 0 !important;
+      transform: translateY(0) !important;
+    }
+
+    #${htmlAnchor}.gh-head .nav li {
+      opacity: 0 !important;
+      transform: translateY(-4px) !important;
+      transition: transform 0.2s ease, opacity 0.2s ease !important;
+    }
+
+    #${htmlAnchor}.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn) {
+      opacity: 0 !important;
+      transform: translateY(8px) !important;
+      transition: transform 0.4s ease, opacity 0.4s ease !important;
+    }
+
+    /* -- Open state: full viewport overlay -- */
+    .gh-head-open #${htmlAnchor}.gh-head {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 100% !important;
+      max-height: none !important;
+      z-index: 3999999 !important;
+      overflow-y: scroll !important;
+      -webkit-overflow-scrolling: touch !important;
+      background-color: ${bgStyle} !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-inner {
       display: flex !important;
       flex-direction: column !important;
-      width: 100% !important;
+      height: 100% !important;
+      box-sizing: border-box !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      padding-top: 0 !important;
+      gap: 48px !important;
     }
-    .gh-head-open #${htmlAnchor} .nav {
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-brand {
+      width: 100% !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      height: 64px !important;
+      flex-shrink: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-menu,
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions {
+      position: static !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      gap: 24px !important;
       width: 100% !important;
+      background-color: transparent !important;
+      margin: 0 !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-menu {
+      gap: 16px !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions {
+      position: sticky !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      display: inline-flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
+      align-items: center !important;
+      padding: max(4vmin, 20px) 0 max(4vmin, 28px) !important;
+      background-color: ${bgStyle} !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .nav {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 16px !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
+      line-height: 1.4 !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .nav li {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      text-align: center !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition: transform 0.2s ease, opacity 0.2s ease !important;
+    }
+
+    /* Staggered delays for nav items */
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(1) { transition-delay: 0.05s !important; }
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(2) { transition-delay: 0.10s !important; }
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(3) { transition-delay: 0.15s !important; }
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(4) { transition-delay: 0.20s !important; }
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(5) { transition-delay: 0.25s !important; }
+    .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(6) { transition-delay: 0.30s !important; }
+
+    .gh-head-open #${htmlAnchor}.gh-head .nav a {
+      font-size: 2.6rem !important;
+      font-weight: 600 !important;
+      width: 100% !important;
+      display: inline-block !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn) {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition: transform 0.4s ease, opacity 0.4s ease !important;
+      transition-delay: 0.3s !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-btn {
+      width: 100% !important;
+      max-width: 280px !important;
+      text-align: center !important;
+    }
+
+    /* SVG burger icon toggle */
+    #${htmlAnchor}.gh-head .gh-burger::before,
+    #${htmlAnchor}.gh-head .gh-burger::after {
+      display: none !important;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .gh-burger .burger-icon {
+      display: none !important;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .gh-burger .close-icon {
+      display: block !important;
     }
   }
 </style>
+
+<script>
+(function() {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  function init() {
+    const head = document.getElementById('${htmlAnchor}');
+    const burger = head ? head.querySelector('.gh-burger') : null;
+    
+    if (!head || !burger) return;
+
+    // Check if there's a pre-existing open state (e.g., from server-side)
+    const isOpen = head.classList.contains('gh-head-open');
+    
+    // Toggle function
+    function toggleMenu(e) {
+      e.stopPropagation();
+      head.classList.toggle('gh-head-open');
+      document.body.classList.toggle('gh-head-open');
+      
+      // Toggle burger/close icons
+      const burgerIcon = burger.querySelector('.burger-icon');
+      const closeIcon = burger.querySelector('.close-icon');
+      if (burgerIcon && closeIcon) {
+        const open = head.classList.contains('gh-head-open');
+        burgerIcon.style.display = open ? 'none' : 'block';
+        closeIcon.style.display = open ? 'block' : 'none';
+      }
+    }
+
+    // Click handler
+    burger.addEventListener('click', toggleMenu);
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (head.classList.contains('gh-head-open')) {
+        const isClickInside = head.contains(e.target);
+        if (!isClickInside) {
+          head.classList.remove('gh-head-open');
+          document.body.classList.remove('gh-head-open');
+          
+          const burgerIcon = burger.querySelector('.burger-icon');
+          const closeIcon = burger.querySelector('.close-icon');
+          if (burgerIcon && closeIcon) {
+            burgerIcon.style.display = 'block';
+            closeIcon.style.display = 'none';
+          }
+        }
+      }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && head.classList.contains('gh-head-open')) {
+        head.classList.remove('gh-head-open');
+        document.body.classList.remove('gh-head-open');
+        
+        const burgerIcon = burger.querySelector('.burger-icon');
+        const closeIcon = burger.querySelector('.close-icon');
+        if (burgerIcon && closeIcon) {
+          burgerIcon.style.display = 'block';
+          closeIcon.style.display = 'none';
+        }
+      }
+    });
+  }
+})();
+</script>
 
 <div style="width: 100%; padding: 0; background-color: transparent;">
   <header 

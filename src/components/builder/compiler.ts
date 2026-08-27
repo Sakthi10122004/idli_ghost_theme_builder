@@ -598,7 +598,7 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{meta_title}}</title>
-  <link rel="stylesheet" type="text/css" href="{{asset "css/screen.css"}}" />
+  <link rel="stylesheet" type="text/css" href="{{asset "built/screen.css"}}" />
   {{ghost_head}}
 </head>
 <body class="{{body_class}}">
@@ -609,7 +609,7 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     </main>
     ${footerCompiled ? '{{> "footer"}}' : ''}
   </div>
-  <script src="{{asset "js/index.js"}}"></script>
+  <script src="{{asset "built/casper.js"}}" defer></script>
   {{ghost_foot}}
 </body>
 </html>`;
@@ -625,9 +625,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   });
 
   // 4. Generate navigation partial for Ghost compatibility
-  files["partials/navigation.hbs"] = `{{#foreach navigation}}
-<a href="{{url}}" class="nav-{{slug}}{{#if current}} nav-current{{/if}}">{{label}}</a>
-{{/foreach}}`;
+  files["partials/navigation.hbs"] = `<ul class="nav">
+{{#foreach navigation}}
+  <li class="nav-{{slug}}{{#if current}} nav-current{{/if}}"><a href="{{url}}">{{label}}</a></li>
+{{/foreach}}
+</ul>`;
 
   // 5. Generate asset stylesheet screen.css
   files["assets/css/screen.css"] = minifyCss(getCompilerStyles(doc));
