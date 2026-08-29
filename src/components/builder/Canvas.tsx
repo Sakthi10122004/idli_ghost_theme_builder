@@ -391,6 +391,7 @@ export default function Canvas() {
             backgroundAttachment: (backgroundImage && enableParallax) ? "fixed" : undefined,
             clipPath: (backgroundVideoUrl && enableParallax) ? "inset(0px)" : undefined,
             width: resolveStyle(width) || undefined,
+            maxWidth: "100%",
             marginLeft: resolveStyle(width) ? "auto" : undefined,
             marginRight: resolveStyle(width) ? "auto" : undefined,
             display: resolveStyle(display) || undefined,
@@ -404,7 +405,7 @@ export default function Canvas() {
             marginBottom: resolveStyle(marginBottom) || undefined,
             color: resolveStyle(textColor) || undefined,
           }}
-          className={`relative w-full ${block.type === "header" || block.type === "footer" ? "overflow-visible z-50" : "overflow-hidden z-10"}`}
+          className={`builder-block builder-block-${block.type} relative w-full ${block.type === "header" || block.type === "footer" ? "overflow-visible z-50" : "overflow-hidden z-10"}`}
         >
           {backgroundVideoUrl && (
             <video

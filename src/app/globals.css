@@ -43,6 +43,57 @@
   --gradient-ship-end: #f9cb28;
 }
 
+html.dark #canvas-preview-frame,
+html.dark body:not(:has(#canvas-preview-frame)) {
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
+  --color-ink: #ffffff;
+  --color-body: #a1a1a1;
+  --color-mute: #888888;
+  --color-hairline: #333333;
+  --color-hairline-strong: #555555;
+  --color-canvas: #111111;
+  --color-canvas-soft: #000000;
+  --color-canvas-soft-2: #222222;
+}
+
+/* Exported Theme Body */
+html.dark body:not(:has(#canvas-preview-frame)) {
+  background-color: var(--color-canvas) !important;
+  color: var(--color-ink) !important;
+}
+
+/* Editor Canvas Frame */
+html.dark #canvas-preview-frame {
+  background-color: var(--color-canvas) !important;
+  color: var(--color-ink) !important;
+}
+
+/* Ensure components inside the editor canvas flip correctly */
+html.dark #canvas-preview-frame .builder-block-section,
+html.dark .gh-head,
+html.dark .gh-head-open .gh-head,
+html.dark .gh-head-actions,
+html.dark .gh-head-open .gh-head-actions,
+html.dark .site-footer {
+  background-color: var(--color-canvas) !important;
+  color: var(--color-ink) !important;
+}
+
+/* Force header and footer buttons to invert so black buttons don't disappear in dark mode */
+html.dark #canvas-preview-frame .gh-head-btn,
+html.dark .gh-head .gh-head-btn,
+html.dark #canvas-preview-frame .footer-subscribe-btn,
+html.dark .site-footer .footer-subscribe-btn {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+html.dark .icon-moon { display: none !important; }
+html.dark .icon-sun { display: block !important; }
+html:not(.dark) .icon-sun { display: none !important; }
+html:not(.dark) .icon-moon { display: block !important; }
+
 @theme {
   --color-brand-primary: var(--color-primary);
   --color-brand-on-primary: var(--color-on-primary);

@@ -4,6 +4,8 @@ export interface HeroProps {
   subtitle: string;
   buttonLabel: string;
   buttonUrl: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
   showSecondaryButton: boolean;
   secondaryButtonLabel: string;
   secondaryButtonUrl: string;

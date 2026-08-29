@@ -71,49 +71,55 @@ export const CanvasElement = ({ block }: {
 
   const isMobile = deviceMode === 'mobile';
 
+  const searchButton = general.showSearch !== false && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveModal("Ghost SodoSearch simulation active.");
+      }}
+      className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
+      title="Test Ghost Search"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  );
+
+  const themeButton = general.showThemeSwitcher !== false && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        document.documentElement.classList.toggle('dark');
+      }}
+      className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
+      title="Toggle Theme"
+    >
+      <svg className="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg className="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'none' }}>
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
+  );
+
   /**
-   * Renders action buttons (search, theme toggle, sign in, subscribe).
-   * FIX (bug 1): previously `vertical` forced every single action into one
-   * flex-col stack, so the two small icon buttons each took a full-width
-   * row of their own instead of sitting side by side. Icons are now grouped
-   * into their own horizontal row regardless of orientation; only the
-   * overall arrangement (icons row -> sign in -> subscribe) stacks
-   * vertically on mobile.
+   * Renders action buttons (sign in, subscribe).
+   * Search and theme toggle are now handled separately for mobile placement.
    */
   const renderActions = (vertical = false) => {
-    const searchButton = general.showSearch !== false && (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveModal("Ghost SodoSearch simulation active.");
-        }}
-        className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
-        title="Test Ghost Search"
-      >
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-    );
-
-    const themeButton = general.showThemeSwitcher !== false && (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveModal("Theme Switcher toggled.");
-        }}
-        className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
-        title="Toggle Theme"
-      >
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      </button>
-    );
-
     const signInButton = general.showSignIn !== false && (
       <button
         type="button"
@@ -135,8 +141,8 @@ export const CanvasElement = ({ block }: {
           setActiveModal("Ghost Portal Subscribe simulation active.");
         }}
         className={vertical
-          ? "w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
-          : "px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
+          ? "gh-head-btn gh-btn w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
+          : "gh-head-btn gh-btn px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
         }
         style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
       >
@@ -155,18 +161,10 @@ export const CanvasElement = ({ block }: {
       );
     }
 
-    const hasIcons = !!(searchButton || themeButton);
-
     return (
       <div className="flex flex-col items-center gap-5 w-full">
-        {hasIcons && (
-          <div className="flex items-center gap-6">
-            {searchButton}
-            {themeButton}
-          </div>
-        )}
-        {signInButton}
         {subscribeButton}
+        {signInButton}
       </div>
     );
   };
@@ -201,24 +199,24 @@ export const CanvasElement = ({ block }: {
           </>
         ) : (
           <>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="8" x2="21" y2="8"></line>
+            <line x1="3" y1="16" x2="21" y2="16"></line>
           </>
         )}
       </svg>
     </button>
   );
 
+  const renderMobileTopBarActions = () => (
+    <div className="flex items-center gap-2">
+      {searchButton}
+      {themeButton}
+      {renderBurgerButton()}
+    </div>
+  );
+
   /**
    * Renders the full-screen mobile menu overlay.
-   * FIX (bug 2): was `position: absolute` with `bottom: 0` on a wrapper that
-   * has no defined height of its own, so the browser fell back to
-   * `minHeight: 100vh` — the FULL page/browser-window height, not the
-   * mobile preview frame. That's what pushed Subscribe far down with a big
-   * empty gap beneath it. `position: fixed` binds to the nearest viewport
-   * (the preview frame's own, if this renders inside one) and needs no
-   * height fallback at all.
    */
   const renderMobileOverlay = () => {
     if (!isMobile) return null;
@@ -226,12 +224,14 @@ export const CanvasElement = ({ block }: {
     // Always render but control visibility via CSS
     const overlayContent = (
       <div
+        className="gh-head"
         style={{
-          position: "fixed",
+          position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
+          height: "100%",
+          maxHeight: "850px",
           backgroundColor: bgStyle,
           color: palette.text,
           zIndex: 9999,
@@ -248,23 +248,11 @@ export const CanvasElement = ({ block }: {
       >
         {/* Top bar: logo + close button */}
         <div
-          className="flex items-center justify-between w-full px-6"
+          className="flex items-center justify-between w-full px-4"
           style={{ height: "64px", flexShrink: 0 }}
         >
           {renderLogo("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
-          <button
-            className="p-2 opacity-80 hover:opacity-100 transition-opacity"
-            aria-label="Close Menu"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMobileMenuOpen(false);
-            }}
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          {renderMobileTopBarActions()}
         </div>
 
         {/* Nav items with staggered animation */}
@@ -273,7 +261,7 @@ export const CanvasElement = ({ block }: {
             {items.map((item: any, idx: number) => (
               <span
                 key={idx}
-                className="cursor-pointer hover:opacity-100 transition-opacity text-[2.15rem] leading-[1.3] font-semibold"
+                className="cursor-pointer hover:opacity-100 transition-opacity text-[1.5rem] leading-[1.3] font-semibold"
                 style={{
                   opacity: isMobileMenuOpen ? 1 : 0,
                   transform: isMobileMenuOpen ? 'translateY(0)' : 'translateY(-12px)',
@@ -288,7 +276,7 @@ export const CanvasElement = ({ block }: {
 
         {/* Actions: sticky at the bottom */}
         <div
-          className="flex flex-col items-center gap-3 px-6 py-6 mt-auto"
+          className="flex flex-col items-center gap-3 px-6 py-6 mt-auto gh-head-actions"
           style={{
             flexShrink: 0,
             backgroundColor: bgStyle,
@@ -385,7 +373,7 @@ export const CanvasElement = ({ block }: {
             /* ============ MOBILE LAYOUT ============ */
             <div className="flex items-center justify-between w-full" style={{ height: "64px" }}>
               {renderLogo("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
-              {renderBurgerButton()}
+              {renderMobileTopBarActions()}
             </div>
           ) : isStacked ? (
             /* ============ STACKED DESKTOP ============ */

@@ -10,47 +10,41 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 }) => {
   const { eyebrowText, title, subtitle, buttonLabel, showSecondaryButton, secondaryButtonLabel, useSiteData } = block.props;
 
-  const bgStyle = useSiteData
-    ? { backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=2000&q=80')", backgroundSize: "cover", backgroundPosition: "center", color: "#fff" }
-    : {};
-
   return (
-    // FIX: compiler.ts's compiled output has `overflow: hidden` on this same
-    // wrapper (added when the boxed-card bug was fixed), but that fix was
-    // never mirrored here in the editor preview. Without it, anything wider
-    // than the box (background layer, mesh-glow bleed) spills past the right
-    // edge — which also throws off any resize-handle UI anchored to this
-    // element's real bounding box, since the visible edge and the actual
-    // DOM edge no longer match.
     <div
       className={`w-full text-center relative overflow-hidden ${!useSiteData ? 'mesh-glow' : ''}`}
       style={{
-        ...bgStyle,
         paddingTop: (block.styles?.paddingTop as string) || '3rem',
         paddingBottom: (block.styles?.paddingBottom as string) || '5rem'
       }}
     >
       <div 
-        className="mx-auto px-6 flex flex-col items-center gap-4 relative z-10"
-        style={{ maxWidth: block.styles?.contentWidth || '700px' }}
+        className="mx-auto px-6 flex flex-col items-center gap-5 relative z-10"
+        style={{ maxWidth: block.styles?.contentWidth || '800px' }}
       >
         {eyebrowText && (
-          <span className="text-[10px] font-mono uppercase tracking-wider text-brand-link font-semibold bg-brand-link-bg-soft px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-brand-link font-semibold bg-brand-link-bg-soft px-3 py-1 rounded-full mb-2">
             {eyebrowText}
           </span>
         )}
-        <h1 className={`text-4xl md:text-5xl font-sans font-bold leading-tight tracking-tighter ${useSiteData ? 'text-white' : 'text-brand-ink'}`}>
+        <h1 className="text-[2.75rem] md:text-[3.5rem] font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full text-[var(--color-ink)]">
           {useSiteData ? "{{@site.title}}" : (title || "Build beautiful templates.")}
         </h1>
-        <p className={`text-base leading-relaxed max-w-[500px] ${useSiteData ? 'text-white/80' : 'text-brand-body'}`}>
+        <p className="text-lg md:text-xl leading-relaxed max-w-[600px] break-words text-[var(--color-body)]">
           {useSiteData ? "{{@site.description}}" : (subtitle || "A visual workspace built directly on layout AST compilation logic, adhering strictly to Geist presets.")}
         </p>
-        <div className="mt-4 flex gap-3">
-          <button className="bg-brand-primary text-white hover:bg-black px-6 py-2.5 rounded-pill text-xs font-semibold shadow-level-3">
+        <div className="mt-6 flex flex-wrap justify-center gap-4">
+          <button 
+            className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-sm flex items-center justify-center"
+            style={{ 
+              backgroundColor: block.props.buttonBgColor || 'var(--color-primary)', 
+              color: block.props.buttonTextColor || 'var(--color-on-primary)' 
+            }}
+          >
             {buttonLabel || "Start Free"}
           </button>
           {(showSecondaryButton ?? true) && (
-            <button className="bg-white border border-brand-hairline text-brand-ink px-6 py-2.5 rounded-pill text-xs font-semibold shadow-level-2">
+            <button className="border-2 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all flex items-center justify-center border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]">
               {secondaryButtonLabel || "Documentation"}
             </button>
           )}

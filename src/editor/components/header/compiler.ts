@@ -29,6 +29,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const shadowValue = styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow && styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none";
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
 
+  const searchSvg = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+
+  const themeSvg = `
+    <svg class="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  `;
+
   const brandHtml = general.showLogo !== false ? `
     <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
@@ -38,30 +45,36 @@ export const compileToHbs = (block: BuilderBlock): string => {
           <span class="gh-site-title">{{@site.title}}</span>
         {{/if}}
       </a>
-      <button class="gh-burger" aria-label="Main Menu">
-        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px;">
+        ${general.showSearch !== false ? `<button class="gh-search-btn gh-mobile-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${searchSvg}</button>` : ""}
+        ${general.showThemeSwitcher !== false ? `<button class="gh-theme-toggle gh-mobile-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${themeSvg}</button>` : ""}
+        <button class="gh-burger" aria-label="Main Menu">
+          <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
+            <line x1="3" y1="8" x2="21" y2="8"></line>
+            <line x1="3" y1="16" x2="21" y2="16"></line>
+          </svg>
+          <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
     </div>` : `
     <div class="gh-head-brand">
-      <button class="gh-burger" aria-label="Main Menu">
-        <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        ${general.showSearch !== false ? `<button class="gh-search-btn gh-mobile-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${searchSvg}</button>` : ""}
+        ${general.showThemeSwitcher !== false ? `<button class="gh-theme-toggle gh-mobile-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${themeSvg}</button>` : ""}
+        <button class="gh-burger" aria-label="Main Menu">
+          <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
+            <line x1="3" y1="8" x2="21" y2="8"></line>
+            <line x1="3" y1="16" x2="21" y2="16"></line>
+          </svg>
+          <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
     </div>`;
 
   // FIX (bug 1): the nav had no flex/gap of its own — it only relied on a
@@ -79,7 +92,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const actionsHtml = `
     <div class="gh-head-actions">
       ${general.showSearch !== false ? `
-      <button class="gh-search-btn" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+      <button class="gh-search-btn gh-desktop-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -87,7 +100,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </button>` : ""}
 
       ${general.showThemeSwitcher !== false ? `
-      <button class="gh-theme-toggle" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+      <button class="gh-theme-toggle gh-desktop-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
@@ -98,7 +111,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
           ${general.showSignIn !== false ? `
           <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${general.signInText || "Sign in"}</a>` : ""}
           ${general.showSubscribe !== false ? `
-          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg} !important; color: ${palette.buttonText} !important; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
         {{else}}
           <a class="gh-head-link" href="#/portal/account" data-portal="account" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Account</a>
           <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
@@ -175,6 +188,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${htmlAnchor} .gh-head-inner.content-width-${appearance.contentWidth || 'wide'} {
     ${contentWidthCss}
   }
+
   #${htmlAnchor} .gh-head-brand {
     font-weight: 700;
     font-size: 24px;
@@ -192,6 +206,9 @@ export const compileToHbs = (block: BuilderBlock): string => {
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    #${htmlAnchor} .gh-burger {
+      display: none !important;
     }
     #${htmlAnchor} .gh-head-actions {
       display: flex;
@@ -234,6 +251,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
     opacity: 1 !important;
   }
   
+  #${htmlAnchor} .gh-mobile-only {
+    display: none !important;
+  }
+  
   /* ===== Mobile Menu ===== */
   /* 
    * These rules use doubled-up class selectors to beat Casper's built-in
@@ -244,6 +265,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
     /* -- Closed state: compact 64px bar -- */
     #${htmlAnchor}.gh-head {
       height: 64px !important;
+    }
+    #${htmlAnchor}.gh-head .gh-desktop-only {
+      display: none !important;
+    }
+    #${htmlAnchor}.gh-head .gh-mobile-only {
+      display: block !important;
     }
 
     #${htmlAnchor}.gh-head .gh-head-inner {
@@ -356,7 +383,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       left: 0 !important;
       right: 0 !important;
       display: inline-flex !important;
-      flex-direction: column !important;
+      flex-direction: column-reverse !important;
       gap: 12px !important;
       align-items: center !important;
       padding: max(4vmin, 20px) 0 max(4vmin, 28px) !important;
@@ -394,7 +421,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     .gh-head-open #${htmlAnchor}.gh-head .nav li:nth-child(6) { transition-delay: 0.30s !important; }
 
     .gh-head-open #${htmlAnchor}.gh-head .nav a {
-      font-size: 2.6rem !important;
+      font-size: 1.5rem !important;
       font-weight: 600 !important;
       width: 100% !important;
       display: inline-block !important;
@@ -425,6 +452,26 @@ export const compileToHbs = (block: BuilderBlock): string => {
       display: block !important;
     }
   }
+
+  /* Dark mode overrides (placed at the end to ensure they win over previous styles) */
+  html.dark #${htmlAnchor}.gh-head,
+  html.dark #${htmlAnchor}.gh-head.gh-head-open,
+  html.dark .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions,
+  html.dark #${htmlAnchor}.gh-head .gh-head-actions {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+  }
+  
+  html.dark #${htmlAnchor}.gh-head .gh-head-btn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  html.dark #${htmlAnchor}.gh-head .icon-moon { display: none !important; }
+  html.dark #${htmlAnchor}.gh-head .icon-sun { display: block !important; }
+  html:not(.dark) #${htmlAnchor}.gh-head .icon-sun { display: none !important; }
+  html:not(.dark) #${htmlAnchor}.gh-head .icon-moon { display: block !important; }
+
 </style>
 
 <script>
@@ -496,6 +543,22 @@ export const compileToHbs = (block: BuilderBlock): string => {
         }
       }
     });
+  }
+})();
+
+function toggleThemeMode() {
+  document.documentElement.classList.toggle('dark');
+  if (document.documentElement.classList.contains('dark')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+(function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
   }
 })();
 </script>

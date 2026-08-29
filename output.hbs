@@ -1,0 +1,131 @@
+{{!< default}}
+
+
+<style>
+  #hero-mnefon3.hero-block {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 4rem 0;
+  }
+  #hero-mnefon3 .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  #hero-mnefon3 .hero-eyebrow {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #f1f5f9;
+    color: #3b82f6;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  #hero-mnefon3 .hero-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    line-height: 1.2;
+  }
+  @media (min-width: 768px) {
+    #hero-mnefon3 .hero-title {
+      font-size: 3rem;
+    }
+  }
+  #hero-mnefon3 .hero-subtitle {
+    font-size: 1.125rem;
+    color: #4b5563;
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+  #hero-mnefon3 .hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+</style>
+<div id="hero-mnefon3" class="hero-block mesh-glow" >
+  <div class="hero-content">
+    
+    <h1 class="hero-title heading">Test Hero</h1>
+    <p class="hero-subtitle text-content">Test Subtitle</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Start Free</a>
+      <a href="#" class="btn btn-secondary">Documentation</a>
+    </div>
+  </div>
+</div>
+<style>
+  #post-grid-post-grid-1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  #post-grid-post-grid-1 .gh-post-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  #post-grid-post-grid-1 .gh-post-card:hover {
+    transform: translateY(-4px);
+  }
+  #post-grid-post-grid-1 .gh-post-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  #post-grid-post-grid-1 .gh-post-card-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+  #post-grid-post-grid-1 .gh-post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #post-grid-post-grid-1 .gh-post-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1.5rem;
+  }
+  #post-grid-post-grid-1 .gh-post-card-title {
+    font-size: 1.25rem;
+    font-family: var(--font-heading);
+    margin: 0 0 0.5rem 0;
+  }
+  #post-grid-post-grid-1 .gh-post-card-excerpt {
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  #post-grid-post-grid-1 .gh-post-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-top: auto;
+  }
+</style>
+<div id="post-grid-post-grid-1" class="post-feed">
+  {{#foreach posts}}
+    {{> "post-card"}}
+  {{/foreach}}
+</div>

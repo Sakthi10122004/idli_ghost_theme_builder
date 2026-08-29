@@ -79,7 +79,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             <p className="opacity-80 mb-6">Get the latest posts delivered right to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-[400px] mx-auto">
               <input type="email" placeholder="Your email address" className="flex-1 px-4 py-3 rounded-md outline-none text-black" readOnly />
-              <button className="px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || '#000', color: p.colors?.buttonTextColor || '#fff' }}>Subscribe</button>
+              <button className="footer-subscribe-btn px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || '#000', color: p.colors?.buttonTextColor || '#fff' }}>Subscribe</button>
             </div>
           </div>
         )}

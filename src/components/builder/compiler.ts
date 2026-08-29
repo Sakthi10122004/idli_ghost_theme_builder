@@ -281,6 +281,20 @@ a {
   --content-width: 720px;
 }
 
+html.dark, html.dark-mode {
+  --color-bg: #111111;
+  --color-fg: #ffffff;
+  --color-muted: #a3a3a3;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --color-bg: #111111;
+    --color-fg: #ffffff;
+    --color-muted: #a3a3a3;
+  }
+}
+
 /* 3. Shared Structural Utilities */
 .container-width {
   max-width: var(--container-width);

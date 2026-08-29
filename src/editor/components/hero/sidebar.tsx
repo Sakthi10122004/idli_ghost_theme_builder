@@ -11,6 +11,26 @@ const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean
   </button>
 );
 
+const ColorPicker = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
+  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+    <span className="text-[12px] font-medium text-gray-800">{label}</span>
+    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+      <input 
+        type="color" 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
+        className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+      />
+      <input 
+        type="text" 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+      />
+    </div>
+  </div>
+);
+
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
   onChangeProps: (props: Record<string, any>) => void;
@@ -79,9 +99,21 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           type="text"
           value={p.buttonUrl || ""}
           onChange={(e) => onChangeProps({ buttonUrl: e.target.value })}
-          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft mb-2"
           placeholder="https://example.com"
         />
+        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+          <ColorPicker 
+            label="Background Color" 
+            value={p.buttonBgColor || "#171717"} 
+            onChange={(v) => onChangeProps({ buttonBgColor: v })} 
+          />
+          <ColorPicker 
+            label="Text Color" 
+            value={p.buttonTextColor || "#ffffff"} 
+            onChange={(v) => onChangeProps({ buttonTextColor: v })} 
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">

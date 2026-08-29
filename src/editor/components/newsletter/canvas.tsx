@@ -25,7 +25,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             disabled
             className="flex-1 px-3 py-2 border border-brand-hairline rounded-sm text-xs font-sans bg-white focus:outline-none cursor-not-allowed"
           />
-          <button className="bg-brand-primary text-white hover:bg-black px-4 rounded-sm text-xs font-semibold shrink-0 cursor-pointer shadow-level-3">
+          <button className="bg-brand-primary text-brand-on-primary hover:opacity-90 px-4 rounded-sm text-xs font-semibold shrink-0 cursor-pointer shadow-level-3">
             {buttonLabel || "Subscribe"}
           </button>
         </div>
