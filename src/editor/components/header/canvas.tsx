@@ -36,9 +36,9 @@ export const CanvasElement = ({ block }: {
   const isStacked = layout === "Stacked";
 
   const palette = {
-    bg: appearance.backgroundColor || "#ffffff",
-    text: appearance.textColor || "#000000",
-    buttonBg: appearance.buttonBgColor || "#000000",
+    bg: appearance.backgroundColor || "var(--color-canvas)",
+    text: appearance.textColor || "var(--color-ink)",
+    buttonBg: appearance.buttonBgColor || "var(--ghost-accent-color, var(--color-primary))",
     buttonText: appearance.buttonTextColor || "#ffffff",
   };
 

@@ -301,7 +301,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Section/Spacing Styles */}
-            {(selectedBlock.type === "section" || selectedBlock.type === "hero") && (
+            {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
@@ -369,79 +369,7 @@ export default function RightSidebar() {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Background Image URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={getInputValue(selectedBlock.styles.backgroundImage)}
-                    onChange={(e) => handleStyleChange("backgroundImage", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Background Video URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://...mp4"
-                    value={getInputValue(selectedBlock.styles.backgroundVideoUrl)}
-                    onChange={(e) => handleStyleChange("backgroundVideoUrl", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                {(!!getInputValue(selectedBlock.styles.backgroundImage) || !!getInputValue(selectedBlock.styles.backgroundVideoUrl)) && (
-                  <>
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id="enableParallax"
-                        checked={!!selectedBlock.styles.enableParallax}
-                        onChange={(e) => handleStyleChange("enableParallax", e.target.checked)}
-                        className="rounded-xs border-brand-hairline accent-brand-primary cursor-pointer"
-                      />
-                      <label htmlFor="enableParallax" className="text-[11px] font-sans font-semibold text-brand-body cursor-pointer">Enable Parallax Effect</label>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Size</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundSize) || "cover"}
-                        onChange={(e) => handleStyleChange("backgroundSize", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="cover">Cover (Fill)</option>
-                        <option value="contain">Contain (Fit)</option>
-                        <option value="auto">Auto (Original)</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Repeat</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundRepeat) || "no-repeat"}
-                        onChange={(e) => handleStyleChange("backgroundRepeat", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="no-repeat">No Repeat</option>
-                        <option value="repeat">Repeat (Tile)</option>
-                        <option value="repeat-x">Repeat X (Horizontal)</option>
-                        <option value="repeat-y">Repeat Y (Vertical)</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Position</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundPosition) || "center"}
-                        onChange={(e) => handleStyleChange("backgroundPosition", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="center">Center</option>
-                        <option value="top">Top</option>
-                        <option value="bottom">Bottom</option>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                      </select>
-                    </div>
-                  </>
-                )}
+
               </>
             )}
           </div>

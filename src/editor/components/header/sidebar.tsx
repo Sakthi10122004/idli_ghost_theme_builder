@@ -38,25 +38,48 @@ const SegmentedControl = ({ options, value, onChange }: {
   </div>
 );
 
-const ColorPicker = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
-  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-[12px] font-medium text-gray-800">{label}</span>
-    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
-      <input 
-        type="color" 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)}
-        className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
-      />
-      <input 
-        type="text" 
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
-      />
+const ColorPicker = ({ label, value, onChange, defaultTokenLabel = "Theme Default" }: { label: string, value: string, onChange: (v: string) => void, defaultTokenLabel?: string }) => {
+  const isCustom = !!value;
+  return (
+    <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+      <div className="flex flex-col">
+        <span className="text-[12px] font-medium text-gray-800">{label}</span>
+        <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={isCustom} 
+            onChange={(e) => {
+              if (e.target.checked) onChange("#000000");
+              else onChange("");
+            }}
+            className="rounded-xs border-gray-300 w-3 h-3 accent-brand-primary"
+          />
+          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Custom</span>
+        </label>
+      </div>
+      {isCustom ? (
+        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+          <input 
+            type="color" 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)}
+            className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+          />
+          <input 
+            type="text" 
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+          />
+        </div>
+      ) : (
+        <div className="text-[10px] font-mono text-brand-primary bg-brand-primary/10 px-2 py-1 rounded font-semibold tracking-tight">
+          {defaultTokenLabel}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export const SidebarElement = ({ block, onChangeProps }: {
   block: BuilderBlock;
@@ -179,22 +202,22 @@ export const SidebarElement = ({ block, onChangeProps }: {
         <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm">
           <ColorPicker 
             label="Background Color" 
-            value={a.backgroundColor || "#ffffff"} 
+            value={a.backgroundColor || ""} 
             onChange={(v) => updateCategory("appearance", "backgroundColor", v)} 
           />
           <ColorPicker 
             label="Text Color" 
-            value={a.textColor || "#000000"} 
+            value={a.textColor || ""} 
             onChange={(v) => updateCategory("appearance", "textColor", v)} 
           />
           <ColorPicker 
             label="Button Background" 
-            value={a.buttonBgColor || "#000000"} 
+            value={a.buttonBgColor || ""} 
             onChange={(v) => updateCategory("appearance", "buttonBgColor", v)} 
           />
           <ColorPicker 
             label="Button Text" 
-            value={a.buttonTextColor || "#ffffff"} 
+            value={a.buttonTextColor || ""} 
             onChange={(v) => updateCategory("appearance", "buttonTextColor", v)} 
           />
         </div>

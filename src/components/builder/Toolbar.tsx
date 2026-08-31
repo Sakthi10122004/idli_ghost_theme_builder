@@ -198,17 +198,7 @@ export default function Toolbar() {
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 ml-2 border-l border-brand-hairline pl-2">
-          <span className="text-[10px] font-mono text-brand-mute uppercase">Tag:</span>
-          <input
-            type="text"
-            value={themeDoc.pages[activePage]?.tagFilter || ""}
-            onChange={(e) => updatePageTagFilter(activePage, e.target.value)}
-            placeholder="e.g. engineering"
-            className="w-[90px] px-1.5 py-0.5 border border-brand-hairline rounded-xs text-[10px] bg-brand-canvas-soft font-mono focus:outline-none focus:border-brand-primary"
-            title="Filter articles on this page by tag (e.g. 'engineering')"
-          />
-        </div>
+
       </div>
 
       {/* View Mode & History Toggles */}

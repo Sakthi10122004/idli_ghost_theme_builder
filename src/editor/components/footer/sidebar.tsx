@@ -11,25 +11,48 @@ const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean
     <div className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-3.5' : 'translate-x-0'}`} />
   </button>
 );
-const ColorPicker = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
-  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-[12px] font-medium text-gray-800">{label}</span>
-    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
-      <input 
-        type="color" 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)}
-        className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
-      />
-      <input 
-        type="text" 
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
-      />
+const ColorPicker = ({ label, value, onChange, defaultTokenLabel = "Theme Default" }: { label: string, value: string, onChange: (v: string) => void, defaultTokenLabel?: string }) => {
+  const isCustom = !!value;
+  return (
+    <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+      <div className="flex flex-col">
+        <span className="text-[12px] font-medium text-gray-800">{label}</span>
+        <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={isCustom} 
+            onChange={(e) => {
+              if (e.target.checked) onChange("#000000");
+              else onChange("");
+            }}
+            className="rounded-xs border-gray-300 w-3 h-3 accent-brand-primary"
+          />
+          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Custom</span>
+        </label>
+      </div>
+      {isCustom ? (
+        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+          <input 
+            type="color" 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)}
+            className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+          />
+          <input 
+            type="text" 
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+          />
+        </div>
+      ) : (
+        <div className="text-[10px] font-mono text-brand-primary bg-brand-primary/10 px-2 py-1 rounded font-semibold tracking-tight">
+          {defaultTokenLabel}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export const SidebarElement = ({ block, onChangeProps }: {
   block: BuilderBlock;
@@ -110,12 +133,12 @@ export const SidebarElement = ({ block, onChangeProps }: {
         
         {!p.colors?.syncWithHeader && (
           <div className="flex flex-col rounded-md border border-gray-200 overflow-hidden mt-1 shadow-sm">
-            <ColorPicker label="Background" value={p.colors?.backgroundColor || "#ffffff"} onChange={(v) => updateNestedProp("colors", "backgroundColor", v)} />
-            <ColorPicker label="Text Color" value={p.colors?.textColor || "#1a1a1a"} onChange={(v) => updateNestedProp("colors", "textColor", v)} />
+            <ColorPicker label="Background" value={p.colors?.backgroundColor || ""} onChange={(v) => updateNestedProp("colors", "backgroundColor", v)} />
+            <ColorPicker label="Text Color" value={p.colors?.textColor || ""} onChange={(v) => updateNestedProp("colors", "textColor", v)} />
             {p.general?.showSubscribeBox && (
               <>
-                <ColorPicker label="Button Base" value={p.colors?.buttonBgColor || "#000000"} onChange={(v) => updateNestedProp("colors", "buttonBgColor", v)} />
-                <ColorPicker label="Button Text" value={p.colors?.buttonTextColor || "#ffffff"} onChange={(v) => updateNestedProp("colors", "buttonTextColor", v)} />
+                <ColorPicker label="Button Base" value={p.colors?.buttonBgColor || ""} onChange={(v) => updateNestedProp("colors", "buttonBgColor", v)} />
+                <ColorPicker label="Button Text" value={p.colors?.buttonTextColor || ""} onChange={(v) => updateNestedProp("colors", "buttonTextColor", v)} />
               </>
             )}
           </div>
