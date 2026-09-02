@@ -74,7 +74,7 @@ const getBackgroundStyle = (styles: any): React.CSSProperties => {
       const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
       return {
         backgroundColor: defaultBg,
-        backgroundImage: `linear-gradient(${overlay}, ${overlay})${url ? `, url(${url})` : ""}`,
+        backgroundImage: `linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""}`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       };

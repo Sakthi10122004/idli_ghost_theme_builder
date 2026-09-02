@@ -1,5 +1,83 @@
 import { BuilderBlock } from "@/types/theme";
 
+const getBackgroundCSS = (styles: any): string => {
+  const bgType = styles?.backgroundType || "solid";
+  const defaultBg = "transparent";
+
+  switch (bgType) {
+    case "solid":
+      return `background-color: ${styles?.backgroundColor || defaultBg};`;
+    case "linear": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2});`;
+    }
+    case "radial": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const pos = styles?.gradientPosition || "center";
+      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2});`;
+    }
+    case "mesh": {
+      const m1 = styles?.meshColor1 || "#ff0080";
+      const m2 = styles?.meshColor2 || "#7928ca";
+      const m3 = styles?.meshColor3 || "#0070f3";
+      return `
+    background-color: ${defaultBg};
+    background-image: 
+      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
+      `;
+    }
+    case "pattern": {
+      const pType = styles?.patternType || "dots";
+      const pColor = styles?.patternColor || "#000000";
+      if (pType === "dots") {
+        return `
+    background-color: ${defaultBg};
+    background-image: radial-gradient(${pColor} 1px, transparent 1px);
+    background-size: 20px 20px;
+        `;
+      } else if (pType === "lines") {
+        return `
+    background-color: ${defaultBg};
+    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px);
+        `;
+      } else if (pType === "noise") {
+        return `
+    background-color: ${pColor};
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+        `;
+      }
+      return `background-color: ${defaultBg};`;
+    }
+    case "image": {
+      const url = styles?.bgImageUrl || "";
+      const overlayColor = styles?.bgOverlayColor || "#000000";
+      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+      
+      let r = 0, g = 0, b = 0;
+      if (overlayColor.length === 7) {
+        r = parseInt(overlayColor.slice(1, 3), 16);
+        g = parseInt(overlayColor.slice(3, 5), 16);
+        b = parseInt(overlayColor.slice(5, 7), 16);
+      }
+      
+      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return `
+    background-color: ${defaultBg};
+    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""};
+    background-size: cover;
+    background-position: center;
+      `;
+    }
+    default:
+      return `background-color: ${defaultBg};`;
+  }
+};
+
 export const compileToHbs = (block: BuilderBlock) => {
   const p = block.props || {};
   const useSiteData = p.useSiteData ?? false;
@@ -41,10 +119,12 @@ export const compileToHbs = (block: BuilderBlock) => {
 
   const pt = block.styles?.paddingTop || '3rem';
   const pb = block.styles?.paddingBottom || '5rem';
+  const bgCSS = getBackgroundCSS(block.styles);
 
   return `
 <style>
   #${uid}.hero-block {
+    ${!useSiteData ? bgCSS : ''}
     position: relative;
     overflow: hidden;
     text-align: center;
@@ -145,7 +225,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     color: #ffffff;
   }
 </style>
-<div id="${uid}" class="hero-block ${!useSiteData ? 'mesh-glow' : ''}" ${useSiteData ? `{{#if @site.cover_image}}style="background-color: #111111; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url({{@site.cover_image}}); background-size: cover; background-position: center;"{{/if}}` : ''}>
+<div id="${uid}" class="hero-block ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}" ${useSiteData ? `{{#if @site.cover_image}}style="background-color: #111111; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url({{@site.cover_image}}); background-size: cover; background-position: center;"{{else}}style="background-color: #111111; color: #ffffff;"{{/if}}` : ''}>
   <div class="hero-content">
     ${eyebrowHtml}
     <h1 class="hero-title heading">${title}</h1>

@@ -68,4 +68,4 @@ export const defaultProps: HeaderProps = {
   ]
 };
 
-export const defaultStyles = {};
+export const defaultStyles = { backgroundType: "solid" };

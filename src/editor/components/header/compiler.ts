@@ -1,11 +1,90 @@
 import { BuilderBlock } from "@/types/theme";
 import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 
+const getBackgroundCSS = (styles: any, appearance: any, important = false): string => {
+  const bgType = styles?.backgroundType || "solid";
+  const defaultBg = appearance?.backgroundColor || "#ffffff";
+  const imp = important ? " !important" : "";
+
+  switch (bgType) {
+    case "solid":
+      return `background-color: ${appearance?.backgroundColor || "#ffffff"}${imp};`;
+    case "linear": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2})${imp};`;
+    }
+    case "radial": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const pos = styles?.gradientPosition || "center";
+      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2})${imp};`;
+    }
+    case "mesh": {
+      const m1 = styles?.meshColor1 || "#ff0080";
+      const m2 = styles?.meshColor2 || "#7928ca";
+      const m3 = styles?.meshColor3 || "#0070f3";
+      return `
+    background-color: ${defaultBg}${imp};
+    background-image: 
+      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%)${imp};
+      `;
+    }
+    case "pattern": {
+      const pType = styles?.patternType || "dots";
+      const pColor = styles?.patternColor || "#000000";
+      if (pType === "dots") {
+        return `
+    background-color: ${defaultBg}${imp};
+    background-image: radial-gradient(${pColor} 1px, transparent 1px)${imp};
+    background-size: 20px 20px${imp};
+        `;
+      } else if (pType === "lines") {
+        return `
+    background-color: ${defaultBg}${imp};
+    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px)${imp};
+        `;
+      } else if (pType === "noise") {
+        return `
+    background-color: ${pColor}${imp};
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")${imp};
+        `;
+      }
+      return `background-color: ${defaultBg}${imp};`;
+    }
+    case "image": {
+      const url = styles?.bgImageUrl || "";
+      const overlayColor = styles?.bgOverlayColor || "#000000";
+      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+      
+      let r = 0, g = 0, b = 0;
+      if (overlayColor.length === 7) {
+        r = parseInt(overlayColor.slice(1, 3), 16);
+        g = parseInt(overlayColor.slice(3, 5), 16);
+        b = parseInt(overlayColor.slice(5, 7), 16);
+      }
+      
+      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return `
+    background-color: ${defaultBg}${imp};
+    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""}${imp};
+    background-size: cover${imp};
+    background-position: center${imp};
+      `;
+    }
+    default:
+      return `background-color: ${appearance?.backgroundColor || "#ffffff"}${imp};`;
+  }
+};
+
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
   const general = p.general || {};
   const appearance = p.appearance || {};
-  const styles = p.styles || {};
+  const styles = block.styles || {};
   const advanced = p.advanced || {};
 
   const layoutStyle = general.layoutStyle || "Logo on Left";
@@ -20,7 +99,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
   };
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
-  const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
+  let inlineBgCss = getBackgroundCSS(styles, appearance, false);
+  let importantBgCss = getBackgroundCSS(styles, appearance, true);
+
+  if (glassEnabled && (styles?.backgroundType === "solid" || !styles?.backgroundType)) {
+      inlineBgCss = `background-color: ${hexToRgba(palette.bg, 0.75)};`;
+      importantBgCss = `background-color: ${hexToRgba(palette.bg, 0.75)} !important;`;
+  }
 
   const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
   const contentMaxWidth = CONTENT_WIDTH_VALUES[appearance.contentWidth || "wide"] || "100%";
@@ -335,7 +420,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       z-index: 3999999 !important;
       overflow-y: scroll !important;
       -webkit-overflow-scrolling: touch !important;
-      background-color: ${bgStyle} !important;
+      ${importantBgCss}
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .gh-head-inner {
@@ -387,7 +472,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       gap: 12px !important;
       align-items: center !important;
       padding: max(4vmin, 20px) 0 max(4vmin, 28px) !important;
-      background-color: ${bgStyle} !important;
+      ${importantBgCss}
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .nav {
@@ -566,10 +651,10 @@ function toggleThemeMode() {
 <div style="width: 100%; padding: 0; background-color: transparent;">
   <header 
     id="${htmlAnchor}" 
-    class="gh-head section-width-${appearance.sectionWidth || 'full'}"
+    class="gh-head section-width-${appearance.sectionWidth || 'full'} ${styles.backgroundType === "mesh" ? 'mesh-glow' : ''}"
     style="
       position: relative;
-      background-color: ${bgStyle};
+      ${inlineBgCss}
       color: ${palette.text};
       width: 100%;
       ${isSectionFull ? "" : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`}

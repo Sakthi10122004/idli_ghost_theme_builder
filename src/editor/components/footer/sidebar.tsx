@@ -54,10 +54,10 @@ const ColorPicker = ({ label, value, onChange, defaultTokenLabel = "Theme Defaul
   );
 };
 
-export const SidebarElement = ({ block, onChangeProps }: {
+export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
   onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles: (styles: Record<string, any>) => void;
+  onChangeStyles?: (styles: Record<string, any>) => void;
 }) => {
   const p = block.props;
 
@@ -132,16 +132,192 @@ export const SidebarElement = ({ block, onChangeProps }: {
         </div>
         
         {!p.colors?.syncWithHeader && (
-          <div className="flex flex-col rounded-md border border-gray-200 overflow-hidden mt-1 shadow-sm">
-            <ColorPicker label="Background" value={p.colors?.backgroundColor || ""} onChange={(v) => updateNestedProp("colors", "backgroundColor", v)} />
-            <ColorPicker label="Text Color" value={p.colors?.textColor || ""} onChange={(v) => updateNestedProp("colors", "textColor", v)} />
-            {p.general?.showSubscribeBox && (
+          <>
+            <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5 mt-4">
+              <span className="text-[12px] font-bold text-gray-900 tracking-tight">Background</span>
+              
+              <label className="text-[11px] font-sans font-semibold text-brand-body mt-2">Background Type</label>
+              <select
+                value={block.styles?.backgroundType || "solid"}
+                onChange={(e) => onChangeStyles && onChangeStyles({ backgroundType: e.target.value })}
+                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+              >
+                <option value="solid">Solid Color</option>
+                <option value="linear">Linear Gradient</option>
+                <option value="radial">Radial Gradient</option>
+                <option value="mesh">Mesh Gradient</option>
+                <option value="pattern">Pattern</option>
+              </select>
+            </div>
+
+            {(block.styles?.backgroundType || "solid") === "solid" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Background Color</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={p.colors?.backgroundColor || "#ffffff"}
+                    onChange={(e) => updateNestedProp("colors", "backgroundColor", e.target.value)}
+                    className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                  />
+                  <input
+                    type="text"
+                    value={p.colors?.backgroundColor || "#ffffff"}
+                    onChange={(e) => updateNestedProp("colors", "backgroundColor", e.target.value)}
+                    className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                  />
+                </div>
+              </div>
+            )}
+
+            {(block.styles?.backgroundType) === "linear" && (
               <>
-                <ColorPicker label="Button Base" value={p.colors?.buttonBgColor || ""} onChange={(v) => updateNestedProp("colors", "buttonBgColor", v)} />
-                <ColorPicker label="Button Text" value={p.colors?.buttonTextColor || ""} onChange={(v) => updateNestedProp("colors", "buttonTextColor", v)} />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Gradient Colors</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={block.styles?.gradientColor1 || "#000000"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })}
+                      className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                    />
+                    <input
+                      type="color"
+                      value={block.styles?.gradientColor2 || "#333333"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })}
+                      className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-sans font-semibold text-brand-body">Angle (deg)</label>
+                    <span className="text-[10px] text-brand-muted">{block.styles?.gradientAngle || 90}°</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    value={block.styles?.gradientAngle || 90}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ gradientAngle: parseInt(e.target.value) })}
+                    className="w-full accent-brand-primary"
+                  />
+                </div>
               </>
             )}
-          </div>
+
+            {(block.styles?.backgroundType) === "radial" && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Gradient Colors</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={block.styles?.gradientColor1 || "#000000"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })}
+                      className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                    />
+                    <input
+                      type="color"
+                      value={block.styles?.gradientColor2 || "#333333"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })}
+                      className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Position</label>
+                  <select
+                    value={block.styles?.gradientPosition || "center"}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ gradientPosition: e.target.value })}
+                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                  >
+                    <option value="center">Center</option>
+                    <option value="top left">Top Left</option>
+                    <option value="top right">Top Right</option>
+                    <option value="bottom left">Bottom Left</option>
+                    <option value="bottom right">Bottom Right</option>
+                    <option value="top">Top</option>
+                    <option value="bottom">Bottom</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            {(block.styles?.backgroundType) === "mesh" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Mesh Colors</label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={block.styles?.meshColor1 || "#ff0080"}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ meshColor1: e.target.value })}
+                    className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                  />
+                  <input
+                    type="color"
+                    value={block.styles?.meshColor2 || "#7928ca"}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ meshColor2: e.target.value })}
+                    className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                  />
+                  <input
+                    type="color"
+                    value={block.styles?.meshColor3 || "#0070f3"}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ meshColor3: e.target.value })}
+                    className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                  />
+                </div>
+              </div>
+            )}
+
+            {(block.styles?.backgroundType) === "pattern" && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Pattern Type</label>
+                  <select
+                    value={block.styles?.patternType || "dots"}
+                    onChange={(e) => onChangeStyles && onChangeStyles({ patternType: e.target.value })}
+                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                  >
+                    <option value="dots">Dots</option>
+                    <option value="lines">Diagonal Lines</option>
+                    <option value="noise">Noise / Grain</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Pattern Base Color</label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      value={block.styles?.patternColor || "#000000"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })}
+                      className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
+                    />
+                    <input
+                      type="text"
+                      value={block.styles?.patternColor || "#000000"}
+                      onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })}
+                      className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                    />
+                  </div>
+                  <p className="text-[10px] text-brand-muted">Controls the color of dots/lines/noise over the default background.</p>
+                </div>
+              </>
+            )}
+
+            <div className="flex flex-col gap-3 border-t border-gray-100 mt-5 pt-3">
+              <span className="text-[12px] font-bold text-gray-900 tracking-tight">Colors</span>
+              <div className="flex flex-col rounded-md border border-gray-200 overflow-hidden shadow-sm">
+                <ColorPicker label="Text Color" value={p.colors?.textColor || ""} onChange={(v) => updateNestedProp("colors", "textColor", v)} />
+                {p.general?.showSubscribeBox && (
+                  <>
+                    <ColorPicker label="Button Base" value={p.colors?.buttonBgColor || ""} onChange={(v) => updateNestedProp("colors", "buttonBgColor", v)} />
+                    <ColorPicker label="Button Text" value={p.colors?.buttonTextColor || ""} onChange={(v) => updateNestedProp("colors", "buttonTextColor", v)} />
+                  </>
+                )}
+              </div>
+            </div>
+          </>
         )}
         
         <label className="text-[11px] font-sans font-semibold text-brand-body mt-3">Section Width</label>

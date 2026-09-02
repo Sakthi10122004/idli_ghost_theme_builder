@@ -10,15 +10,96 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 }) => {
   const p = block.props;
   
+  const getBackgroundStyle = (styles: any, appearance: any): React.CSSProperties => {
+    const bgType = styles?.backgroundType || "solid";
+    const defaultBg = appearance?.backgroundColor || "var(--color-canvas)";
+
+    switch (bgType) {
+      case "solid":
+        return { backgroundColor: appearance?.backgroundColor || "var(--color-canvas)" };
+      case "linear": {
+        const c1 = styles?.gradientColor1 || "#000000";
+        const c2 = styles?.gradientColor2 || "#333333";
+        const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+        return { backgroundImage: `linear-gradient(${angle}deg, ${c1}, ${c2})` };
+      }
+      case "radial": {
+        const c1 = styles?.gradientColor1 || "#000000";
+        const c2 = styles?.gradientColor2 || "#333333";
+        const pos = styles?.gradientPosition || "center";
+        return { backgroundImage: `radial-gradient(circle at ${pos}, ${c1}, ${c2})` };
+      }
+      case "mesh": {
+        const m1 = styles?.meshColor1 || "#ff0080";
+        const m2 = styles?.meshColor2 || "#7928ca";
+        const m3 = styles?.meshColor3 || "#0070f3";
+        return {
+          backgroundColor: defaultBg,
+          backgroundImage: `
+            radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+            radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+            radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%)
+          `
+        };
+      }
+      case "pattern": {
+        const pType = styles?.patternType || "dots";
+        const pColor = styles?.patternColor || "#000000";
+        if (pType === "dots") {
+          return {
+            backgroundColor: defaultBg,
+            backgroundImage: `radial-gradient(${pColor} 1px, transparent 1px)`,
+            backgroundSize: "20px 20px"
+          };
+        } else if (pType === "lines") {
+          return {
+            backgroundColor: defaultBg,
+            backgroundImage: `repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px)`
+          };
+        } else if (pType === "noise") {
+          return {
+            backgroundColor: pColor,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")`
+          };
+        }
+        return { backgroundColor: defaultBg };
+      }
+      case "image": {
+        const url = styles?.bgImageUrl || "";
+        const overlayColor = styles?.bgOverlayColor || "#000000";
+        const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+        
+        let r = 0, g = 0, b = 0;
+        if (overlayColor.length === 7) {
+          r = parseInt(overlayColor.slice(1, 3), 16);
+          g = parseInt(overlayColor.slice(3, 5), 16);
+          b = parseInt(overlayColor.slice(5, 7), 16);
+        }
+        
+        const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        return {
+          backgroundColor: defaultBg,
+          backgroundImage: `linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""}`,
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        };
+      }
+      default:
+        return { backgroundColor: appearance?.backgroundColor || "var(--color-canvas)" };
+    }
+  };
+  
   const document = useEditorStore(state => state.document);
   const headerBlock = Object.values(document.blocks).find(b => b.type === "header");
   const headerAppearance = headerBlock?.props?.appearance || {};
   
   const isSync = p.colors?.syncWithHeader;
-  const headerBg = headerAppearance.backgroundColor || "var(--color-canvas)";
-  const headerText = headerAppearance.textColor || "var(--color-ink)";
-  const bg = isSync ? headerBg : (p.colors?.backgroundColor || "var(--color-canvas)");
-  const text = isSync ? headerText : (p.colors?.textColor || "var(--color-ink)");
+  const activeStyles = isSync ? (headerBlock?.styles || {}) : (block.styles || {});
+  const activeAppearance = isSync ? headerAppearance : (p.colors || {});
+  
+  const bgStyleObj = getBackgroundStyle(activeStyles, activeAppearance);
+  const bgFallbackColor = activeAppearance.backgroundColor || "var(--color-canvas)";
+  const text = isSync ? (headerAppearance.textColor || "var(--color-ink)") : (p.colors?.textColor || "var(--color-ink)");
 
   const layoutStyle = p.general?.layoutStyle || "Simple Minimal";
   const showSecondaryNav = p.general?.showSecondaryNav !== false;
@@ -39,8 +120,8 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 
   return (
     <footer 
-      className="site-footer w-full py-10 px-6 transition-all"
-      style={{ backgroundColor: bg, color: text }}
+      className={`site-footer w-full py-10 px-6 transition-all ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
+      style={{ ...bgStyleObj, color: text }}
       onClick={onClick}
     >
       <div className="max-w-[1200px] mx-auto w-full flex flex-col gap-8">
@@ -74,7 +155,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
         )}
 
         {layoutStyle === "Newsletter Integrated" && showSubscribeBox && (
-          <div className="text-center max-w-[600px] mx-auto mb-10 p-12 rounded-xl" style={{ backgroundColor: 'currentColor', color: bg }}>
+          <div className="text-center max-w-[600px] mx-auto mb-10 p-12 rounded-xl" style={{ backgroundColor: 'currentColor', color: bgFallbackColor }}>
             <h3 className="text-2xl font-bold mb-3">Subscribe to our newsletter</h3>
             <p className="opacity-80 mb-6">Get the latest posts delivered right to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-[400px] mx-auto">

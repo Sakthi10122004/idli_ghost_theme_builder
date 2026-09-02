@@ -6,6 +6,85 @@ import { useEditorStore } from "@/store/editorStore";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
 
+const getBackgroundStyle = (styles: any, appearance: any): React.CSSProperties => {
+  const bgType = styles?.backgroundType || "solid";
+  const defaultBg = appearance?.backgroundColor || "var(--color-canvas)";
+
+  switch (bgType) {
+    case "solid":
+      return { backgroundColor: appearance?.backgroundColor || "#ffffff" };
+    case "linear": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+      return { backgroundImage: `linear-gradient(${angle}deg, ${c1}, ${c2})` };
+    }
+    case "radial": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const pos = styles?.gradientPosition || "center";
+      return { backgroundImage: `radial-gradient(circle at ${pos}, ${c1}, ${c2})` };
+    }
+    case "mesh": {
+      const m1 = styles?.meshColor1 || "#ff0080";
+      const m2 = styles?.meshColor2 || "#7928ca";
+      const m3 = styles?.meshColor3 || "#0070f3";
+      return {
+        backgroundColor: defaultBg,
+        backgroundImage: `
+          radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+          radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+          radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%)
+        `
+      };
+    }
+    case "pattern": {
+      const pType = styles?.patternType || "dots";
+      const pColor = styles?.patternColor || "#000000";
+      if (pType === "dots") {
+        return {
+          backgroundColor: defaultBg,
+          backgroundImage: `radial-gradient(${pColor} 1px, transparent 1px)`,
+          backgroundSize: "20px 20px"
+        };
+      } else if (pType === "lines") {
+        return {
+          backgroundColor: defaultBg,
+          backgroundImage: `repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px)`
+        };
+      } else if (pType === "noise") {
+        return {
+          backgroundColor: pColor,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")`
+        };
+      }
+      return { backgroundColor: defaultBg };
+    }
+    case "image": {
+      const url = styles?.bgImageUrl || "";
+      const overlayColor = styles?.bgOverlayColor || "#000000";
+      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+      
+      let r = 0, g = 0, b = 0;
+      if (overlayColor.length === 7) {
+        r = parseInt(overlayColor.slice(1, 3), 16);
+        g = parseInt(overlayColor.slice(3, 5), 16);
+        b = parseInt(overlayColor.slice(5, 7), 16);
+      }
+      
+      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return {
+        backgroundColor: defaultBg,
+        backgroundImage: `linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""}`,
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      };
+    }
+    default:
+      return { backgroundColor: appearance?.backgroundColor || "#ffffff" };
+  }
+};
+
 const widthRank = (w: string | undefined) => {
   const i = WIDTH_ORDER.indexOf((w as typeof WIDTH_ORDER[number]) ?? "full");
   return i === -1 ? WIDTH_ORDER.length - 1 : i;
@@ -17,7 +96,7 @@ export const CanvasElement = ({ block }: {
   const p = block.props || {};
   const general = p.general || {};
   const appearance = p.appearance || {};
-  const styles = p.styles || {};
+  const styles = block.styles || {};
   const advanced = p.advanced || {};
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -50,7 +129,10 @@ export const CanvasElement = ({ block }: {
       : appearance.contentWidth;
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
-  const bgStyle = glassEnabled ? hexToRgba(palette.bg, 0.75) : palette.bg;
+  const bgStyleObj = getBackgroundStyle(styles, appearance);
+  if (glassEnabled && bgStyleObj.backgroundColor && bgStyleObj.backgroundColor.startsWith('#')) {
+    bgStyleObj.backgroundColor = hexToRgba(bgStyleObj.backgroundColor, 0.75);
+  }
 
   const sectionMaxWidth = WIDTH_VALUES[appearance.sectionWidth || "full"] || "100%";
   const isSectionFull = sectionMaxWidth === "100%";
@@ -58,7 +140,7 @@ export const CanvasElement = ({ block }: {
 
   const contentMaxWidth = CONTENT_WIDTH_VALUES[effectiveContentWidth || "wide"] || "100%";
 
-  const marginBottomValue = styles.marginBottom || "0px";
+  const marginBottomValue = (typeof styles.marginBottom === 'object' ? (styles.marginBottom as any).desktop : styles.marginBottom as string) || "0px";
   const shadowValue =
     styles.boxShadow === "dark-glow"
       ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)"
@@ -232,7 +314,7 @@ export const CanvasElement = ({ block }: {
           right: 0,
           height: "100%",
           maxHeight: "850px",
-          backgroundColor: bgStyle,
+          ...bgStyleObj,
           color: palette.text,
           zIndex: 9999,
           display: "flex",
@@ -279,7 +361,7 @@ export const CanvasElement = ({ block }: {
           className="flex flex-col items-center gap-3 px-6 py-6 mt-auto gh-head-actions"
           style={{
             flexShrink: 0,
-            backgroundColor: bgStyle,
+            ...(bgStyleObj.backgroundColor ? { backgroundColor: bgStyleObj.backgroundColor } : {}),
             opacity: isMobileMenuOpen ? 1 : 0,
             transform: isMobileMenuOpen ? 'translateY(0)' : 'translateY(16px)',
             transition: `opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s`,
@@ -343,9 +425,9 @@ export const CanvasElement = ({ block }: {
       {/* Header receives Section Width & Colors */}
       <header
         id={advanced.htmlAnchor || "gh-head"}
-        className={`relative transition-all duration-150 gh-head section-width-${appearance.sectionWidth || 'full'} ${sectionBaseClass}`}
+        className={`relative transition-all duration-150 gh-head section-width-${appearance.sectionWidth || 'full'} ${sectionBaseClass} ${styles.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
         style={{
-          backgroundColor: bgStyle,
+          ...bgStyleObj,
           color: palette.text,
           maxWidth: sectionMaxWidth,
           marginBottom: marginBottomValue,

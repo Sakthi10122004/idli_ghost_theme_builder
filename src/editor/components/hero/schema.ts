@@ -29,4 +29,4 @@ export const defaultProps: HeroProps = {
   useSiteData: false,
 };
 
-export const defaultStyles = {};
+export const defaultStyles = { backgroundType: "solid" };

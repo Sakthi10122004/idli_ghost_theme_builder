@@ -29,4 +29,4 @@ export const defaultProps = {
     htmlAnchor: "site-footer",
   }
 };
-export const defaultStyles = {};
+export const defaultStyles = { backgroundType: "solid" };

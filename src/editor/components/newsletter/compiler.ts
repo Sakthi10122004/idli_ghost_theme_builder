@@ -68,7 +68,7 @@ const getBackgroundCSS = (styles: any): string => {
       const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
       return `
     background-color: ${defaultBg};
-    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url(${url})` : ""};
+    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""};
     background-size: cover;
     background-position: center;
       `;

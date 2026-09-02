@@ -1,5 +1,83 @@
 import { BuilderBlock } from "@/types/theme";
 
+const getBackgroundCSS = (styles: any, appearance: any): string => {
+  const bgType = styles?.backgroundType || "solid";
+  const defaultBg = appearance?.backgroundColor || "#ffffff";
+
+  switch (bgType) {
+    case "solid":
+      return `background-color: ${appearance?.backgroundColor || "#ffffff"};`;
+    case "linear": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2});`;
+    }
+    case "radial": {
+      const c1 = styles?.gradientColor1 || "#000000";
+      const c2 = styles?.gradientColor2 || "#333333";
+      const pos = styles?.gradientPosition || "center";
+      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2});`;
+    }
+    case "mesh": {
+      const m1 = styles?.meshColor1 || "#ff0080";
+      const m2 = styles?.meshColor2 || "#7928ca";
+      const m3 = styles?.meshColor3 || "#0070f3";
+      return `
+    background-color: ${defaultBg};
+    background-image: 
+      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
+      `;
+    }
+    case "pattern": {
+      const pType = styles?.patternType || "dots";
+      const pColor = styles?.patternColor || "#000000";
+      if (pType === "dots") {
+        return `
+    background-color: ${defaultBg};
+    background-image: radial-gradient(${pColor} 1px, transparent 1px);
+    background-size: 20px 20px;
+        `;
+      } else if (pType === "lines") {
+        return `
+    background-color: ${defaultBg};
+    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px);
+        `;
+      } else if (pType === "noise") {
+        return `
+    background-color: ${pColor};
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+        `;
+      }
+      return `background-color: ${defaultBg};`;
+    }
+    case "image": {
+      const url = styles?.bgImageUrl || "";
+      const overlayColor = styles?.bgOverlayColor || "#000000";
+      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+      
+      let r = 0, g = 0, b = 0;
+      if (overlayColor.length === 7) {
+        r = parseInt(overlayColor.slice(1, 3), 16);
+        g = parseInt(overlayColor.slice(3, 5), 16);
+        b = parseInt(overlayColor.slice(5, 7), 16);
+      }
+      
+      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return `
+    background-color: ${defaultBg};
+    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""};
+    background-size: cover;
+    background-position: center;
+      `;
+    }
+    default:
+      return `background-color: ${appearance?.backgroundColor || "#ffffff"};`;
+  }
+};
+
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPageContext: boolean, blocks?: Record<string, BuilderBlock>) => {
   const p = block.props;
   const general = p.general || {};
@@ -8,17 +86,21 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   const spacing = p.spacing || {};
   const advanced = p.advanced || {};
   
-  let bg = colors.backgroundColor || '#ffffff';
+  let activeStyles = block.styles || {};
+  let activeAppearance = colors;
   let text = colors.textColor || '#1a1a1a';
   
   if (colors.syncWithHeader && blocks) {
     const headerBlock = Object.values(blocks).find((b: BuilderBlock) => b.type === "header");
     if (headerBlock) {
-      const headerAppearance = headerBlock.props?.appearance || {};
-      bg = headerAppearance.backgroundColor || "#ffffff";
-      text = headerAppearance.textColor || "#000000";
+      activeStyles = headerBlock.styles || {};
+      activeAppearance = headerBlock.props?.appearance || {};
+      text = activeAppearance.textColor || "#000000";
     }
   }
+
+  const bgCss = getBackgroundCSS(activeStyles, activeAppearance);
+  const bgFallbackColor = activeAppearance.backgroundColor || "#ffffff";
 
   const htmlAnchor = advanced.htmlAnchor || 'site-footer';
   
@@ -86,7 +168,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   } else if (general.layoutStyle === "Newsletter Integrated") {
     innerHtml = `
       ${general.showSubscribeBox !== false ? `
-      <div style="text-align: center; max-width: 600px; margin: 0 auto 64px auto; padding: 48px 24px; background: currentColor; color: ${bg}; border-radius: 12px;">
+      <div style="text-align: center; max-width: 600px; margin: 0 auto 64px auto; padding: 48px 24px; background: currentColor; color: ${bgFallbackColor}; border-radius: 12px;">
         <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">Subscribe to our newsletter</h3>
         <p style="opacity: 0.8; margin-bottom: 24px;">Get the latest posts delivered right to your inbox.</p>
         <form data-members-form="subscribe" style="display: flex; flex-direction: column; gap: 8px; max-width: 400px; margin: 0 auto;">
@@ -120,7 +202,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   return `
 <style>
   #${htmlAnchor} {
-    background-color: ${bg};
+    ${bgCss}
     color: ${text};
     padding-top: ${spacing.padding?.topBottom || 40}px;
     padding-bottom: ${spacing.padding?.topBottom || 40}px;
@@ -157,7 +239,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
 </style>
 <footer 
   id="${htmlAnchor}" 
-  class="site-footer section-width-${layout.sectionWidth || 'full'}"
+  class="site-footer section-width-${layout.sectionWidth || 'full'} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}"
 >
   <div class="gh-container footer-inner content-width-${layout.contentWidth || 'standard'} align-${layout.align || 'center'}">
     ${innerHtml}
