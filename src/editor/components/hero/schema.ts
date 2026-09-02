@@ -10,6 +10,8 @@ export interface HeroProps {
   secondaryButtonLabel: string;
   secondaryButtonUrl: string;
   useSiteData?: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 // FIX: previously "Introducing Builder V2" (the page-builder's own internal
@@ -27,6 +29,8 @@ export const defaultProps: HeroProps = {
   secondaryButtonLabel: "Documentation",
   secondaryButtonUrl: "#",
   useSiteData: false,
+  imageUrl: "",
+  imageAlt: "Hero Image",
 };
 
-export const defaultStyles = { backgroundType: "solid" };
+export const defaultStyles = { backgroundType: "solid", layout: "center" };

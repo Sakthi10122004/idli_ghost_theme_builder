@@ -78,6 +78,42 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </span>
       </div>
 
+      <div className="flex flex-col gap-1.5 border-b border-gray-100 pb-4">
+        <label className="text-[11px] font-sans font-semibold text-brand-body">Layout</label>
+        <select
+          value={block.styles?.layout || "center"}
+          onChange={(e) => onChangeStyles({ layout: e.target.value })}
+          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+        >
+          <option value="center">Centered</option>
+          <option value="left">Left Aligned</option>
+          <option value="split-left">Split (Image Left)</option>
+          <option value="split-right">Split (Image Right)</option>
+          <option value="bottom">Full-Bleed (Pinned Bottom)</option>
+        </select>
+        
+        {(block.styles?.layout === "split-left" || block.styles?.layout === "split-right") && (
+          <div className="flex flex-col gap-2 pt-2">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Split Image URL</label>
+            <input
+              type="text"
+              value={p.imageUrl || ""}
+              onChange={(e) => onChangeProps({ imageUrl: e.target.value })}
+              className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+              placeholder="https://example.com/image.jpg"
+            />
+            <label className="text-[11px] font-sans font-semibold text-brand-body mt-1">Image Alt Text</label>
+            <input
+              type="text"
+              value={p.imageAlt || ""}
+              onChange={(e) => onChangeProps({ imageAlt: e.target.value })}
+              className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+              placeholder="Hero Image"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label className="text-[11px] font-sans font-semibold text-brand-body">Eyebrow Text</label>
         <input
