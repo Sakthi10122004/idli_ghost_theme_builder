@@ -91,6 +91,9 @@ export const compileToHbs = (block: BuilderBlock) => {
   const showSecondaryButton = p.showSecondaryButton ?? true;
   const secondaryButtonLabel = p.secondaryButtonLabel || "Documentation";
   const secondaryButtonUrl = p.secondaryButtonUrl || "#";
+  const imageUrl = p.imageUrl || "";
+  const imageAlt = p.imageAlt || "Hero Image";
+  const layout = block.styles?.layout || "center";
 
   // FIX: the eyebrow badge used to be `subtitle ? "Introducing Builder V2" :
   // "Introducing"` — text with no relationship to whether a subtitle exists,
@@ -121,26 +124,108 @@ export const compileToHbs = (block: BuilderBlock) => {
   const pb = block.styles?.paddingBottom || '5rem';
   const bgCSS = getBackgroundCSS(block.styles);
 
+  let blockTextAlign = "center";
+  let contentFlexDirectionDesktop = "column";
+  let contentFlexDirectionMobile = "column";
+  let contentAlignItems = "center";
+  let textContainerAlignItems = "center";
+  let actionsJustifyContent = "center";
+  let contentMaxWidth = "800px";
+  let blockDisplay = "block";
+  let blockFlexDirection = "column";
+  let blockJustifyContent = "flex-start";
+  
+  switch(layout) {
+    case "left":
+      blockTextAlign = "left";
+      contentAlignItems = "flex-start";
+      textContainerAlignItems = "flex-start";
+      actionsJustifyContent = "flex-start";
+      break;
+    case "bottom":
+      blockTextAlign = "center";
+      blockDisplay = "flex";
+      blockJustifyContent = "flex-end";
+      break;
+    case "split-left":
+      blockTextAlign = "left";
+      contentFlexDirectionDesktop = "row";
+      contentAlignItems = "center";
+      textContainerAlignItems = "flex-start";
+      actionsJustifyContent = "flex-start";
+      contentMaxWidth = "1200px";
+      break;
+    case "split-right":
+      blockTextAlign = "left";
+      contentFlexDirectionDesktop = "row-reverse";
+      contentAlignItems = "center";
+      textContainerAlignItems = "flex-start";
+      actionsJustifyContent = "flex-start";
+      contentMaxWidth = "1200px";
+      break;
+    case "center":
+    default:
+      break;
+  }
+
   return `
 <style>
   #${uid}.hero-block {
     ${!useSiteData ? bgCSS : ''}
     position: relative;
     overflow: hidden;
-    text-align: center;
+    text-align: ${blockTextAlign};
     padding: ${pt} 0 ${pb} 0;
+    ${blockDisplay === 'flex' ? `display: flex; flex-direction: ${blockFlexDirection}; justify-content: ${blockJustifyContent};` : ''}
   }
   #${uid} .hero-content {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: ${contentFlexDirectionMobile};
+    align-items: ${contentAlignItems};
     justify-content: center;
-    gap: 1.25rem;
-    max-width: 800px;
+    gap: 2.5rem;
+    max-width: ${contentMaxWidth};
     margin: 0 auto;
     padding: 0 1.5rem;
     position: relative;
     z-index: 10;
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    #${uid} .hero-content {
+      flex-direction: ${contentFlexDirectionDesktop};
+    }
+  }
+  #${uid} .hero-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: ${textContainerAlignItems};
+    gap: 1.25rem;
+    ${layout.startsWith('split') ? 'width: 100%; flex: 1;' : ''}
+  }
+  @media (min-width: 768px) {
+    #${uid} .hero-text-container {
+      ${layout.startsWith('split') ? 'width: 50%;' : ''}
+    }
+  }
+  #${uid} .hero-image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+  }
+  @media (min-width: 768px) {
+    #${uid} .hero-image-container {
+      width: 50%;
+    }
+  }
+  #${uid} .hero-image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-height: 600px;
+    object-fit: cover;
   }
   #${uid} .hero-eyebrow {
     display: inline-block;
@@ -184,8 +269,9 @@ export const compileToHbs = (block: BuilderBlock) => {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    justify-content: center;
+    justify-content: ${actionsJustifyContent};
     margin-top: 1.5rem;
+    width: 100%;
   }
   #${uid} .hero-btn {
     display: inline-flex;
@@ -227,13 +313,20 @@ export const compileToHbs = (block: BuilderBlock) => {
 </style>
 <div id="${uid}" class="hero-block ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}" ${useSiteData ? `{{#if @site.cover_image}}style="background-color: #111111; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url({{@site.cover_image}}); background-size: cover; background-position: center;"{{else}}style="background-color: #111111; color: #ffffff;"{{/if}}` : ''}>
   <div class="hero-content">
-    ${eyebrowHtml}
-    <h1 class="hero-title heading">${title}</h1>
-    <p class="hero-subtitle text-content">${subtitle}</p>
-    <div class="hero-actions">
-      <a href="${buttonUrl}" class="hero-btn hero-btn-primary" ${buttonBgColor || buttonTextColor ? `style="${buttonBgColor ? `background-color: ${buttonBgColor}; border-color: ${buttonBgColor};` : ''} ${buttonTextColor ? `color: ${buttonTextColor};` : ''}"` : ''}>${buttonLabel}</a>
-      ${showSecondaryButton ? `<a href="${secondaryButtonUrl}" class="hero-btn hero-btn-secondary">${secondaryButtonLabel}</a>` : ''}
+    <div class="hero-text-container">
+      ${eyebrowHtml}
+      <h1 class="hero-title heading">${title}</h1>
+      <p class="hero-subtitle text-content">${subtitle}</p>
+      <div class="hero-actions">
+        <a href="${buttonUrl}" class="hero-btn hero-btn-primary" ${buttonBgColor || buttonTextColor ? `style="${buttonBgColor ? `background-color: ${buttonBgColor}; border-color: ${buttonBgColor};` : ''} ${buttonTextColor ? `color: ${buttonTextColor};` : ''}"` : ''}>${buttonLabel}</a>
+        ${showSecondaryButton ? `<a href="${secondaryButtonUrl}" class="hero-btn hero-btn-secondary">${secondaryButtonLabel}</a>` : ''}
+      </div>
     </div>
+    ${layout.startsWith('split') && imageUrl ? `
+    <div class="hero-image-container">
+      <img src="${imageUrl}" alt="${imageAlt}" />
+    </div>
+    ` : ''}
   </div>
 </div>`;
 };

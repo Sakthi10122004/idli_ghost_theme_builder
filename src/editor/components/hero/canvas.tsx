@@ -87,16 +87,57 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
-  const { eyebrowText, title, subtitle, buttonLabel, showSecondaryButton, secondaryButtonLabel, useSiteData } = block.props;
+  const { eyebrowText, title, subtitle, buttonLabel, showSecondaryButton, secondaryButtonLabel, useSiteData, imageUrl, imageAlt } = block.props;
   
   const bgStyle = getBackgroundStyle(block.styles);
-  // If useSiteData is true, we should probably preview what that might look like, or just keep it simple.
-  // We'll apply bgStyle unless useSiteData overrides it.
   const dynamicStyle = useSiteData ? { backgroundColor: '#111', color: '#fff' } : bgStyle;
+  const layout = block.styles?.layout || "center";
+
+  let wrapperClasses = `w-full relative overflow-hidden ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`;
+  let contentClasses = "mx-auto px-6 flex relative z-10 w-full";
+  let textContainerClasses = "flex flex-col gap-5";
+  let buttonGroupClasses = "mt-6 flex flex-wrap gap-4";
+  
+  switch(layout) {
+    case "left":
+      wrapperClasses += " text-left";
+      contentClasses += " flex-col items-start";
+      textContainerClasses += " items-start";
+      buttonGroupClasses += " justify-start";
+      break;
+    case "bottom":
+      wrapperClasses += " text-center flex flex-col justify-end";
+      contentClasses += " flex-col items-center mt-auto";
+      textContainerClasses += " items-center";
+      buttonGroupClasses += " justify-center";
+      break;
+    case "split-left":
+      wrapperClasses += " text-left";
+      contentClasses += " flex-col md:flex-row items-center gap-10";
+      textContainerClasses += " items-start md:w-1/2 flex-shrink-0";
+      buttonGroupClasses += " justify-start";
+      break;
+    case "split-right":
+      wrapperClasses += " text-left";
+      contentClasses += " flex-col md:flex-row-reverse items-center gap-10";
+      textContainerClasses += " items-start md:w-1/2 flex-shrink-0";
+      buttonGroupClasses += " justify-start";
+      break;
+    case "center":
+    default:
+      wrapperClasses += " text-center";
+      contentClasses += " flex-col items-center";
+      textContainerClasses += " items-center";
+      buttonGroupClasses += " justify-center";
+      break;
+  }
+
+  const textColorClass = useSiteData ? "text-inherit" : "text-[var(--color-ink)]";
+  const subtitleColorClass = useSiteData ? "text-inherit opacity-80" : "text-[var(--color-body)]";
 
   return (
     <div
-      className={`w-full text-center relative overflow-hidden ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
+      className={wrapperClasses}
       style={{
         ...dynamicStyle,
         paddingTop: (block.styles?.paddingTop as string) || '3rem',
@@ -104,36 +145,50 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       }}
     >
       <div 
-        className="mx-auto px-6 flex flex-col items-center gap-5 relative z-10"
-        style={{ maxWidth: block.styles?.contentWidth || '800px' }}
+        className={contentClasses}
+        style={{ maxWidth: block.styles?.contentWidth || (layout.startsWith('split') ? '1200px' : '800px') }}
       >
-        {eyebrowText && (
-          <span className="text-[11px] font-mono uppercase tracking-wider text-brand-link font-semibold bg-brand-link-bg-soft px-3 py-1 rounded-full mb-2">
-            {eyebrowText}
-          </span>
-        )}
-        <h1 className="text-[2.75rem] md:text-[3.5rem] font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full text-[var(--color-ink)]">
-          {useSiteData ? "{{@site.title}}" : (title || "Build beautiful templates.")}
-        </h1>
-        <p className="text-lg md:text-xl leading-relaxed max-w-[600px] break-words text-[var(--color-body)]">
-          {useSiteData ? "{{@site.description}}" : (subtitle || "A visual workspace built directly on layout AST compilation logic, adhering strictly to Geist presets.")}
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-4">
-          <button 
-            className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-sm flex items-center justify-center"
-            style={{ 
-              backgroundColor: block.props.buttonBgColor || 'var(--color-primary)', 
-              color: block.props.buttonTextColor || 'var(--color-on-primary)' 
-            }}
-          >
-            {buttonLabel || "Start Free"}
-          </button>
-          {(showSecondaryButton ?? true) && (
-            <button className="border-2 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all flex items-center justify-center border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]">
-              {secondaryButtonLabel || "Documentation"}
-            </button>
+        <div className={textContainerClasses}>
+          {eyebrowText && (
+            <span className="text-[11px] font-mono uppercase tracking-wider text-brand-link font-semibold bg-brand-link-bg-soft px-3 py-1 rounded-full mb-2">
+              {eyebrowText}
+            </span>
           )}
+          <h1 className={`text-[2.75rem] md:text-[3.5rem] font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
+            {useSiteData ? "{{@site.title}}" : (title || "Build beautiful templates.")}
+          </h1>
+          <p className={`text-lg md:text-xl leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
+            {useSiteData ? "{{@site.description}}" : (subtitle || "A visual workspace built directly on layout AST compilation logic, adhering strictly to Geist presets.")}
+          </p>
+          <div className={buttonGroupClasses}>
+            <button 
+              className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-sm flex items-center justify-center"
+              style={{ 
+                backgroundColor: block.props.buttonBgColor || 'var(--color-primary)', 
+                color: block.props.buttonTextColor || 'var(--color-on-primary)' 
+              }}
+            >
+              {buttonLabel || "Start Free"}
+            </button>
+            {(showSecondaryButton ?? true) && (
+              <button className="border-2 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all flex items-center justify-center border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]">
+                {secondaryButtonLabel || "Documentation"}
+              </button>
+            )}
+          </div>
         </div>
+
+        {layout.startsWith('split') && (
+          <div className="w-full md:w-1/2 flex justify-center">
+            {imageUrl ? (
+              <img src={imageUrl} alt={imageAlt || "Hero Image"} className="w-full h-auto rounded-lg shadow-lg object-cover max-h-[600px]" />
+            ) : (
+              <div className="w-full aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
+                Image Placeholder
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
