@@ -85,7 +85,11 @@ export default function Toolbar() {
         const { generateThemeFiles } = await import("./compiler");
         const files = generateThemeFiles(themeDoc as any);
         Object.entries(files).forEach(([name, content]) => {
-          zip.file(name, content as string);
+          if (name.startsWith("assets/images/") && !name.endsWith(".svg")) {
+            zip.file(name, content as string, { base64: true });
+          } else {
+            zip.file(name, content as string);
+          }
         });
 
         const blob = await zip.generateAsync({ type: "blob" });
@@ -352,6 +356,8 @@ export default function Toolbar() {
                   } else if (name === "package.json") {
                     const compiledPackage = JSON.parse(content as string);
                     zip.file("package.json", JSON.stringify(compiledPackage, null, 2));
+                  } else if (name.startsWith("assets/images/") && !name.endsWith(".svg")) {
+                    zip.file(name, content as string, { base64: true });
                   } else {
                     zip.file(name, content as string);
                   }

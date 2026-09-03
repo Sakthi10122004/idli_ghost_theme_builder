@@ -76,7 +76,7 @@ const TextInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
 
 interface FilterRule { field: "tag" | "author" | "featured"; value: string; }
 
-export const SidebarElement = ({ block, onChangeProps }: {
+export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
   onChangeProps: (props: Record<string, any>) => void;
   onChangeStyles?: (styles: Record<string, any>) => void;
@@ -338,16 +338,144 @@ export const SidebarElement = ({ block, onChangeProps }: {
         </div>
       </div>
 
+      {/* BACKGROUND */}
+      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
+        <SectionLabel>Background</SectionLabel>
+        
+        <FieldLabel>Background Type</FieldLabel>
+        <select
+          value={block.styles?.backgroundType || "solid"}
+          onChange={(e) => onChangeStyles && onChangeStyles({ backgroundType: e.target.value })}
+          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+        >
+          <option value="solid">Solid Color</option>
+          <option value="linear">Linear Gradient</option>
+          <option value="radial">Radial Gradient</option>
+          <option value="mesh">Mesh Gradient</option>
+          <option value="pattern">Pattern</option>
+          <option value="image">Image URL</option>
+        </select>
+      </div>
+
+      {(block.styles?.backgroundType || "solid") === "solid" && (
+        <div className="flex flex-col gap-1.5 mt-2">
+          <FieldLabel>Background Color</FieldLabel>
+          <div className="flex gap-2 items-center">
+            <input
+              type="color"
+              value={appearance.backgroundColor || "#ffffff"}
+              onChange={(e) => updateCategory("appearance", "backgroundColor", e.target.value)}
+              className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
+            />
+            <input
+              type="text"
+              value={appearance.backgroundColor || "#ffffff"}
+              onChange={(e) => updateCategory("appearance", "backgroundColor", e.target.value)}
+              className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+            />
+          </div>
+        </div>
+      )}
+
+      {block.styles?.backgroundType === "linear" && (
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Gradient Colors</FieldLabel>
+            <div className="flex gap-2">
+              <input type="color" value={block.styles?.gradientColor1 || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="color" value={block.styles?.gradientColor2 || "#333333"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center">
+              <FieldLabel>Angle (deg)</FieldLabel>
+              <span className="text-[10px] text-brand-muted">{block.styles?.gradientAngle || 90}°</span>
+            </div>
+            <input type="range" min="0" max="360" value={block.styles?.gradientAngle || 90} onChange={(e) => onChangeStyles && onChangeStyles({ gradientAngle: parseInt(e.target.value) })} className="w-full accent-brand-primary" />
+          </div>
+        </div>
+      )}
+
+      {block.styles?.backgroundType === "radial" && (
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Gradient Colors</FieldLabel>
+            <div className="flex gap-2">
+              <input type="color" value={block.styles?.gradientColor1 || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="color" value={block.styles?.gradientColor2 || "#333333"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Position</FieldLabel>
+            <select value={block.styles?.gradientPosition || "center"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientPosition: e.target.value })} className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft">
+              <option value="center">Center</option>
+              <option value="top left">Top Left</option>
+              <option value="top right">Top Right</option>
+              <option value="bottom left">Bottom Left</option>
+              <option value="bottom right">Bottom Right</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {block.styles?.backgroundType === "mesh" && (
+        <div className="flex flex-col gap-1.5 mt-2">
+          <FieldLabel>Mesh Colors</FieldLabel>
+          <div className="flex gap-2">
+            <input type="color" value={block.styles?.meshColor1 || "#ff0080"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+            <input type="color" value={block.styles?.meshColor2 || "#7928ca"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+            <input type="color" value={block.styles?.meshColor3 || "#0070f3"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor3: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+          </div>
+        </div>
+      )}
+
+      {block.styles?.backgroundType === "pattern" && (
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Pattern Type</FieldLabel>
+            <select value={block.styles?.patternType || "dots"} onChange={(e) => onChangeStyles && onChangeStyles({ patternType: e.target.value })} className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft">
+              <option value="dots">Dots</option>
+              <option value="lines">Diagonal Lines</option>
+              <option value="noise">Noise / Grain</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Pattern Base Color</FieldLabel>
+            <div className="flex gap-2 items-center">
+              <input type="color" value={block.styles?.patternColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="text" value={block.styles?.patternColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })} className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {block.styles?.backgroundType === "image" && (
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Image URL</FieldLabel>
+            <TextInput value={block.styles?.bgImageUrl || ""} onChange={(e) => onChangeStyles && onChangeStyles({ bgImageUrl: e.target.value })} placeholder="https://example.com/image.jpg" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Overlay Color</FieldLabel>
+            <input type="color" value={block.styles?.bgOverlayColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ bgOverlayColor: e.target.value })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center">
+              <FieldLabel>Overlay Opacity</FieldLabel>
+              <span className="text-[10px] text-brand-muted">{Math.round((block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.5) * 100)}%</span>
+            </div>
+            <input type="range" min="0" max="1" step="0.05" value={block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.5} onChange={(e) => onChangeStyles && onChangeStyles({ bgOverlayOpacity: parseFloat(e.target.value) })} className="w-full accent-brand-primary" />
+          </div>
+        </div>
+      )}
+
       {/* COLORS — open picker (intentional exception, see note above the
           ColorPicker component definition) */}
       <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
         <SectionLabel>Colors</SectionLabel>
         <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm mt-1">
-          <ColorPicker
-            label="Background Color"
-            value={appearance.backgroundColor || "#ffffff"}
-            onChange={(v) => updateCategory("appearance", "backgroundColor", v)}
-          />
           <ColorPicker
             label="Text Color"
             value={appearance.textColor || "#111827"}

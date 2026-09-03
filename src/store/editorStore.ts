@@ -246,6 +246,7 @@ interface EditorState {
   
   undo: () => void;
   redo: () => void;
+  addAsset: (path: string, dataUri: string) => void;
 }
 
 import { componentRegistry } from "@/editor/components/registry";
@@ -803,8 +804,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       ...historyUpdate,
       document: {
         ...state.document,
-        blocks: { ...state.document.blocks, [blockId]: updatedBlock },
+        blocks: {
+          ...state.document.blocks,
+          [blockId]: updatedBlock,
+        },
       },
+    };
+  }),
+
+  addAsset: (path, dataUri) => set((state) => {
+    const newAssets = { ...(state.document.assets || {}), [path]: dataUri };
+    return {
+      document: { ...state.document, assets: newAssets }
     };
   }),
 

@@ -69,10 +69,10 @@ import * as tagArchiveCanvas from "./tag-archive/canvas";
 import * as tagArchiveSidebar from "./tag-archive/sidebar";
 import * as tagArchiveCompiler from "./tag-archive/compiler";
 
-import * as accordion from "./accordion/schema";
-import * as accordionCanvas from "./accordion/canvas";
-import * as accordionSidebar from "./accordion/sidebar";
-import * as accordionCompiler from "./accordion/compiler";
+import * as faq from "./faq/schema";
+import * as faqCanvas from "./faq/canvas";
+import * as faqSidebar from "./faq/sidebar";
+import * as faqCompiler from "./faq/compiler";
 
 import * as testimonials from "./testimonials/schema";
 import * as testimonialsCanvas from "./testimonials/canvas";
@@ -129,6 +129,16 @@ import * as errorViewCanvas from "./error-view/canvas";
 import * as errorViewSidebar from "./error-view/sidebar";
 import * as errorViewCompiler from "./error-view/compiler";
 
+import * as logoCloud from "./logo-cloud/schema";
+import * as logoCloudCanvas from "./logo-cloud/canvas";
+import * as logoCloudSidebar from "./logo-cloud/sidebar";
+import * as logoCloudCompiler from "./logo-cloud/compiler";
+
+import * as stats from "./stats/schema";
+import * as statsCanvas from "./stats/canvas";
+import * as statsSidebar from "./stats/sidebar";
+import * as statsCompiler from "./stats/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -144,7 +154,7 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "featured-posts": { type: "featured-posts", ...featuredPosts, ...featuredPostsCanvas, ...featuredPostsSidebar, ...featuredPostsCompiler },
   "author-profile": { type: "author-profile", ...authorProfile, ...authorProfileCanvas, ...authorProfileSidebar, ...authorProfileCompiler },
   "tag-archive": { type: "tag-archive", ...tagArchive, ...tagArchiveCanvas, ...tagArchiveSidebar, ...tagArchiveCompiler },
-  accordion: { type: "accordion", ...accordion, ...accordionCanvas, ...accordionSidebar, ...accordionCompiler },
+  faq: { type: "faq", ...faq, ...faqCanvas, ...faqSidebar, ...faqCompiler },
   testimonials: { type: "testimonials", ...testimonials, ...testimonialsCanvas, ...testimonialsSidebar, ...testimonialsCompiler },
   "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
   "grid-gallery": { type: "grid-gallery", ...gridGallery, ...gridGalleryCanvas, ...gridGallerySidebar, ...gridGalleryCompiler },
@@ -156,4 +166,6 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "post-content": { type: "post-content", ...postContent, ...postContentCanvas, ...postContentSidebar, ...postContentCompiler },
   "page-detail": { type: "page-detail", ...pageDetail, ...pageDetailCanvas, ...pageDetailSidebar, ...pageDetailCompiler },
   "error-view": { type: "error-view", ...errorView, ...errorViewCanvas, ...errorViewSidebar, ...errorViewCompiler },
+  "logo-cloud": { type: "logo-cloud", ...logoCloud, ...logoCloudCanvas, ...logoCloudSidebar, ...logoCloudCompiler },
+  stats: { type: "stats", ...stats, ...statsCanvas, ...statsSidebar, ...statsCompiler },
 };
