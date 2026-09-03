@@ -287,13 +287,6 @@ html.dark, html.dark-mode {
   --color-muted: #a3a3a3;
 }
 
-@media (prefers-color-scheme: dark) {
-  html:not(.light) {
-    --color-bg: #111111;
-    --color-fg: #ffffff;
-    --color-muted: #a3a3a3;
-  }
-}
 
 /* 3. Shared Structural Utilities */
 .container-width {
@@ -848,6 +841,17 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   </a>
 </article>
 `;
+
+  // 7. Inject bundled assets
+  if (doc.assets) {
+    Object.entries(doc.assets).forEach(([path, dataUri]) => {
+      // Strip 'data:image/png;base64,' prefix
+      const base64Data = dataUri.split(',')[1];
+      if (base64Data) {
+        files[path] = base64Data;
+      }
+    });
+  }
 
   return files;
 }

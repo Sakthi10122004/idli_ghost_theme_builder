@@ -80,4 +80,5 @@ export interface ThemeDocument {
   pages: ThemePages;
   // A flat dictionary of all blocks on the canvas to make reordering and manipulation simple
   blocks: Record<string, BuilderBlock>;
+  assets?: Record<string, string>; // Maps asset:// URI to base64 Data URI
 }

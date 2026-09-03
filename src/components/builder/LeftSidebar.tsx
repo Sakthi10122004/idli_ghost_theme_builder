@@ -27,7 +27,9 @@ import {
   DollarSign,
   Image as GalleryIcon,
   Share2,
-  Play
+  Play,
+  Cloud,
+  BarChart
 } from "lucide-react";
 
 interface BlockTemplate {
@@ -81,7 +83,9 @@ export default function LeftSidebar() {
     { type: "image", label: "Image Block", category: "Content", icon: ImageIcon },
     { type: "hero", label: "Hero Component", category: "Content", icon: Sparkles },
     { type: "newsletter", label: "Newsletter", category: "Content", icon: Mail },
-    { type: "accordion", label: "Accordion", category: "Content", icon: HelpCircle },
+    { type: "faq", label: "FAQ", category: "Content", icon: HelpCircle },
+    { type: "logo-cloud", label: "Logo Cloud", category: "Content", icon: Cloud },
+    { type: "stats", label: "Stats", category: "Content", icon: BarChart },
     { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare },
     { type: "pricing-table", label: "Pricing Table", category: "Content", icon: DollarSign },
     { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon },

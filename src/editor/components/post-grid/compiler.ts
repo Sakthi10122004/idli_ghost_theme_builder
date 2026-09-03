@@ -6,6 +6,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   const postCard = p.postCard || {};
   const button = p.button || {};
   const appearance = p.appearance || {};
+  const styles = block.styles || {};
   const advanced = p.advanced || {};
 
   const spacing = p.spacing || {};
@@ -13,6 +14,76 @@ export const compileToHbs = (block: BuilderBlock) => {
   const limit = general.limit || 3;
   const columns = general.columns || 3;
   const layoutStyle = general.layoutStyle || "grid";
+
+  const getBackgroundCSS = (styles: any, appearance: any): string => {
+    const bgType = styles?.backgroundType || "solid";
+    const defaultBg = appearance?.backgroundColor || "#ffffff";
+
+    switch (bgType) {
+      case "solid":
+        return `background-color: ${defaultBg};`;
+      case "linear": {
+        const c1 = styles?.gradientColor1 || "#000000";
+        const c2 = styles?.gradientColor2 || "#333333";
+        const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
+        return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2}); background-color: ${defaultBg};`;
+      }
+      case "radial": {
+        const c1 = styles?.gradientColor1 || "#000000";
+        const c2 = styles?.gradientColor2 || "#333333";
+        const pos = styles?.gradientPosition || "center";
+        return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2}); background-color: ${defaultBg};`;
+      }
+      case "mesh": {
+        const m1 = styles?.meshColor1 || "#ff0080";
+        const m2 = styles?.meshColor2 || "#7928ca";
+        const m3 = styles?.meshColor3 || "#0070f3";
+        return `
+          background-color: ${defaultBg};
+          background-image: 
+            radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
+            radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
+            radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
+        `;
+      }
+      case "pattern": {
+        const pType = styles?.patternType || "dots";
+        const pColor = styles?.patternColor || "#000000";
+        if (pType === "dots") {
+          return `
+            background-color: ${defaultBg};
+            background-image: radial-gradient(${pColor} 1px, transparent 1px);
+            background-size: 20px 20px;
+          `;
+        } else if (pType === "lines") {
+          return `
+            background-color: ${defaultBg};
+            background-image: repeating-linear-gradient(45deg, ${pColor} 0, ${pColor} 1px, transparent 1px, transparent 10px);
+          `;
+        } else if (pType === "noise") {
+          return `
+            background-color: ${defaultBg};
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+          `;
+        }
+        return `background-color: ${defaultBg};`;
+      }
+      case "image": {
+        const url = styles?.bgImageUrl || "";
+        const overlay = styles?.bgOverlayColor || "#000000";
+        const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+        const hexOpacity = Math.round(opacity * 255).toString(16).padStart(2, '0');
+        return url 
+          ? `background-color: ${defaultBg}; background-image: linear-gradient(to right, ${overlay}${hexOpacity}, ${overlay}${hexOpacity}), url('${url}'); background-size: cover; background-position: center;`
+          : `background-color: ${defaultBg};`;
+      }
+      default:
+        return `background-color: ${defaultBg};`;
+    }
+  };
+
+  const bgCss = getBackgroundCSS(styles, appearance);
+  const wrapperId = advanced.htmlAnchor || `post-grid-${block.id}`;
 
   const showFeatureImage = postCard.showFeatureImage ?? true;
   const showPrimaryTag = postCard.showPrimaryTag ?? true;
@@ -75,101 +146,101 @@ export const compileToHbs = (block: BuilderBlock) => {
   `;
 
   return `<style>
-  #post-grid-${block.id} .post-grid-title {
+  #${wrapperId} .post-grid-title {
     font-size: 2rem;
     font-family: var(--font-heading);
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: var(--color-ink);
+    color: var(--color-fg);
     margin: 0 0 2rem 0;
     text-align: center;
   }
-  #post-grid-${block.id} .post-feed {
+  #${wrapperId} .post-feed {
     display: grid;
     ${gridTemplate}
     gap: 2rem;
   }
-  #post-grid-${block.id} .magazine-layout {
+  #${wrapperId} .magazine-layout {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
   }
   @media (min-width: 992px) {
-    #post-grid-${block.id} .magazine-layout {
+    #${wrapperId} .magazine-layout {
       grid-template-columns: 7fr 5fr;
       gap: 3rem;
     }
   }
-  #post-grid-${block.id} .magazine-list-col {
+  #${wrapperId} .magazine-list-col {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
-  #post-grid-${block.id} .gh-post-card {
+  #${wrapperId} .gh-post-card {
     display: flex;
     flex-direction: column;
     background: ${appearance.backgroundColor || "var(--color-bg)"};
-    color: ${appearance.textColor || "var(--color-ink)"};
+    color: ${appearance.textColor || "var(--color-fg)"};
     border: 1px solid rgba(0,0,0,0.05);
     border-radius: var(--radius-md);
     overflow: hidden;
     transition: transform 0.2s;
   }
-  #post-grid-${block.id} .magazine-list-item {
+  #${wrapperId} .magazine-list-item {
     flex-direction: row;
     gap: 1rem;
     background: ${appearance.backgroundColor || "var(--color-bg)"};
-    color: ${appearance.textColor || "var(--color-ink)"};
+    color: ${appearance.textColor || "var(--color-fg)"};
     border: 1px solid rgba(0,0,0,0.05);
     border-radius: var(--radius-md);
     overflow: hidden;
     transition: transform 0.2s;
   }
-  #post-grid-${block.id} .magazine-list-item .gh-post-card-link {
+  #${wrapperId} .magazine-list-item .gh-post-card-link {
     flex-direction: row;
     align-items: center;
     gap: 1rem;
   }
-  #post-grid-${block.id} .gh-post-card:hover, #post-grid-${block.id} .magazine-list-item:hover {
+  #${wrapperId} .gh-post-card:hover, #${wrapperId} .magazine-list-item:hover {
     transform: translateY(-4px);
   }
-  #post-grid-${block.id} .gh-post-card-link {
+  #${wrapperId} .gh-post-card-link {
     display: flex;
     flex-direction: column;
     height: 100%;
     color: inherit;
     text-decoration: none;
   }
-  #post-grid-${block.id} .gh-post-card-image {
+  #${wrapperId} .gh-post-card-image {
     width: 100%;
     overflow: hidden;
   }
-  #post-grid-${block.id} .gh-post-card-image-feature {
+  #${wrapperId} .gh-post-card-image-feature {
     aspect-ratio: 16 / 9;
   }
-  #post-grid-${block.id} .gh-post-card-image-list {
+  #${wrapperId} .gh-post-card-image-list {
     width: 120px;
     height: 120px;
     min-width: 120px;
     flex-shrink: 0;
   }
-  #post-grid-${block.id} .gh-post-card-image img {
+  #${wrapperId} .gh-post-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  #post-grid-${block.id} .gh-post-card-content {
+  #${wrapperId} .gh-post-card-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     padding: 1.5rem;
     justify-content: center;
   }
-  #post-grid-${block.id} .magazine-list-item .gh-post-card-content {
+  #${wrapperId} .magazine-list-item .gh-post-card-content {
     padding: 1rem;
     padding-left: 0;
   }
-  #post-grid-${block.id} .gh-post-card-tag {
+  #${wrapperId} .gh-post-card-tag {
     font-size: 0.75rem;
     font-family: var(--font-mono);
     text-transform: uppercase;
@@ -178,38 +249,38 @@ export const compileToHbs = (block: BuilderBlock) => {
     color: ${appearance.accentColor || "var(--color-primary)"};
     margin-bottom: 0.5rem;
   }
-  #post-grid-${block.id} .gh-post-card-title {
+  #${wrapperId} .gh-post-card-title {
     font-family: var(--font-heading);
     margin: 0 0 0.5rem 0;
   }
-  #post-grid-${block.id} .gh-post-card-title-feature {
+  #${wrapperId} .gh-post-card-title-feature {
     font-size: 1.75rem;
     line-height: 1.2;
   }
-  #post-grid-${block.id} .gh-post-card-title-list {
+  #${wrapperId} .gh-post-card-title-list {
     font-size: 1.125rem;
     line-height: 1.3;
   }
-  #post-grid-${block.id} .gh-post-card-excerpt {
+  #${wrapperId} .gh-post-card-excerpt {
     font-size: 0.95rem;
     opacity: 0.8;
     margin: 0 0 1.5rem 0;
     line-height: 1.5;
     flex-grow: 1;
   }
-  #post-grid-${block.id} .gh-post-card-excerpt-list {
+  #${wrapperId} .gh-post-card-excerpt-list {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 0;
   }
-  #post-grid-${block.id} .post-grid-button-wrapper {
+  #${wrapperId} .post-grid-button-wrapper {
     display: flex;
     justify-content: center;
     margin-top: 2.5rem;
   }
-  #post-grid-${block.id} .post-grid-button {
+  #${wrapperId} .post-grid-button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;
@@ -220,15 +291,15 @@ export const compileToHbs = (block: BuilderBlock) => {
     background: ${appearance.accentColor || "var(--color-primary)"};
     color: #ffffff;
   }
-  #post-grid-${block.id} .post-grid-button:hover {
+  #${wrapperId}:hover .post-grid-button {
     opacity: 0.9;
   }
 </style>
-<div id="${advanced.htmlAnchor ? advanced.htmlAnchor : `post-grid-${block.id}`}" class="post-feed-wrapper outer" style="padding-top: ${spacing.paddingTop || '4rem'}; padding-bottom: ${spacing.paddingBottom || '4rem'};">
+<div id="${wrapperId}" class="post-feed-wrapper outer ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}" style="${bgCss} padding-top: ${spacing.paddingTop || '4rem'}; padding-bottom: ${spacing.paddingBottom || '4rem'};">
   <div class="inner" style="max-width: ${appearance.sectionWidth === 'wide' ? '1200px' : appearance.sectionWidth === 'narrow' ? '800px' : '100%'}">
     ${p.title ? `<h2 class="post-grid-title">${p.title}</h2>` : ''}
     ${getHelperStart}
-    <div id="post-grid-${block.id}">
+    <div class="post-grid-inner-container">
       ${isMagazine ? `
       <div class="magazine-layout">
         <div class="magazine-feature-col">
