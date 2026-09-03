@@ -87,13 +87,28 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
-  const { eyebrowText, title, subtitle, buttonLabel, showSecondaryButton, secondaryButtonLabel, useSiteData, imageUrl, imageAlt } = block.props;
+  const { eyebrowText, title, subtitle, buttonLabel, showSecondaryButton, secondaryButtonLabel, useSiteData, imageUrl, imageAlt, useCoverImageAsBackground = true, textColor } = block.props;
   
   const bgStyle = getBackgroundStyle(block.styles);
-  const dynamicStyle = useSiteData ? { backgroundColor: '#111', color: '#fff' } : bgStyle;
+  const showCover = useSiteData && useCoverImageAsBackground;
+  
+  let r = 0, g = 0, b = 0;
+  const overlayColor = block.styles?.bgOverlayColor || "#000000";
+  if (overlayColor.length === 7) {
+    r = parseInt(overlayColor.slice(1, 3), 16);
+    g = parseInt(overlayColor.slice(3, 5), 16);
+    b = parseInt(overlayColor.slice(5, 7), 16);
+  }
+  const opacity = block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.6;
+  const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+
+  const dynamicStyle = showCover 
+    ? { backgroundColor: '#111', backgroundImage: `linear-gradient(${overlay}, ${overlay})` }
+    : bgStyle;
+    
   const layout = block.styles?.layout || "center";
 
-  let wrapperClasses = `w-full relative overflow-hidden ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`;
+  let wrapperClasses = `w-full relative overflow-hidden ${!showCover && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`;
   let contentClasses = "mx-auto px-6 flex relative z-10 w-full";
   let textContainerClasses = "flex flex-col gap-5";
   let buttonGroupClasses = "mt-6 flex flex-wrap gap-4";
@@ -132,14 +147,16 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       break;
   }
 
-  const textColorClass = useSiteData ? "text-inherit" : "text-[var(--color-ink)]";
-  const subtitleColorClass = useSiteData ? "text-inherit opacity-80" : "text-[var(--color-body)]";
+  const applyCustomColor = showCover || !!textColor;
+  const textColorClass = applyCustomColor ? "text-inherit" : "text-[var(--color-ink)]";
+  const subtitleColorClass = applyCustomColor ? "text-inherit opacity-80" : "text-[var(--color-body)]";
 
   return (
     <div
       className={wrapperClasses}
       style={{
         ...dynamicStyle,
+        ...(textColor ? { color: textColor } : (showCover ? { color: '#ffffff' } : {})),
         paddingTop: (block.styles?.paddingTop as string) || '3rem',
         paddingBottom: (block.styles?.paddingBottom as string) || '5rem'
       }}
@@ -150,7 +167,10 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       >
         <div className={textContainerClasses}>
           {eyebrowText && (
-            <span className="text-[11px] font-mono uppercase tracking-wider text-brand-link font-semibold bg-brand-link-bg-soft px-3 py-1 rounded-full mb-2">
+            <span 
+              className={`text-[11px] font-mono uppercase tracking-wider font-semibold px-3 py-1 rounded-full mb-2 ${applyCustomColor ? 'bg-white/10' : 'bg-brand-link-bg-soft text-brand-link'}`}
+              style={applyCustomColor ? { color: textColor || '#ffffff' } : {}}
+            >
               {eyebrowText}
             </span>
           )}
@@ -180,7 +200,12 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 
         {layout.startsWith('split') && (
           <div className="w-full md:w-1/2 flex justify-center">
-            {imageUrl ? (
+            {useSiteData ? (
+              <div className="w-full aspect-video bg-[#222] rounded-lg border-2 border-dashed border-[#444] flex flex-col gap-2 items-center justify-center text-gray-400 text-sm font-mono shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                {`{{@site.cover_image}}`}
+              </div>
+            ) : imageUrl ? (
               <img src={imageUrl} alt={imageAlt || "Hero Image"} className="w-full h-auto rounded-lg shadow-lg object-cover max-h-[600px]" />
             ) : (
               <div className="w-full aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">

@@ -81,6 +81,9 @@ const getBackgroundCSS = (styles: any): string => {
 export const compileToHbs = (block: BuilderBlock) => {
   const p = block.props || {};
   const useSiteData = p.useSiteData ?? false;
+  const useCoverImageAsBackground = p.useCoverImageAsBackground ?? true;
+  const showCover = useSiteData && useCoverImageAsBackground;
+  const textColor = p.textColor || "";
   const eyebrowText = p.eyebrowText || "";
   const title = useSiteData ? "{{@site.title}}" : (p.title || "Build beautiful templates.");
   const subtitle = useSiteData ? "{{@site.description}}" : (p.subtitle || "A visual workspace built directly on layout AST compilation logic.");
@@ -123,6 +126,16 @@ export const compileToHbs = (block: BuilderBlock) => {
   const pt = block.styles?.paddingTop || '3rem';
   const pb = block.styles?.paddingBottom || '5rem';
   const bgCSS = getBackgroundCSS(block.styles);
+  
+  let r = 0, g = 0, b = 0;
+  const overlayColor = block.styles?.bgOverlayColor || "#000000";
+  if (overlayColor.length === 7) {
+    r = parseInt(overlayColor.slice(1, 3), 16);
+    g = parseInt(overlayColor.slice(3, 5), 16);
+    b = parseInt(overlayColor.slice(5, 7), 16);
+  }
+  const overlayOpacity = block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.6;
+  const overlay = `rgba(${r}, ${g}, ${b}, ${overlayOpacity})`;
 
   let blockTextAlign = "center";
   let contentFlexDirectionDesktop = "column";
@@ -171,12 +184,13 @@ export const compileToHbs = (block: BuilderBlock) => {
   return `
 <style>
   #${uid}.hero-block {
-    ${!useSiteData ? bgCSS : ''}
+    ${showCover ? 'background-color: #111111; background-size: cover; background-position: center;' : bgCSS}
     position: relative;
     overflow: hidden;
     text-align: ${blockTextAlign};
     padding: ${pt} 0 ${pb} 0;
     ${blockDisplay === 'flex' ? `display: flex; flex-direction: ${blockFlexDirection}; justify-content: ${blockJustifyContent};` : ''}
+    ${textColor ? `color: ${textColor};` : (showCover ? 'color: #ffffff;' : '')}
   }
   #${uid} .hero-content {
     display: flex;
@@ -230,8 +244,8 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${uid} .hero-eyebrow {
     display: inline-block;
     padding: 0.25rem 0.75rem;
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background-color: ${(showCover || textColor) ? 'rgba(255, 255, 255, 0.15)' : 'rgba(59, 130, 246, 0.15)'};
+    color: ${textColor ? textColor : (showCover ? '#ffffff' : '#3b82f6')};
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -297,11 +311,11 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${uid} .hero-btn-secondary {
     background-color: transparent;
     color: inherit;
-    border: 2px solid ${useSiteData ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
+    border: 2px solid ${(showCover || textColor) ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
   }
   #${uid} .hero-btn-secondary:hover {
-    border-color: ${useSiteData ? '#ffffff' : '#171717'};
-    ${!useSiteData ? 'color: #171717;' : ''}
+    border-color: ${(showCover || textColor) ? (textColor || '#ffffff') : '#171717'};
+    ${!(showCover || textColor) ? 'color: #171717;' : ''}
   }
   html.dark #${uid} .hero-btn-secondary {
     border-color: rgba(255,255,255,0.2);
@@ -311,7 +325,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     color: #ffffff;
   }
 </style>
-<div id="${uid}" class="hero-block ${!useSiteData && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}" ${useSiteData ? `{{#if @site.cover_image}}style="background-color: #111111; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url({{@site.cover_image}}); background-size: cover; background-position: center;"{{else}}style="background-color: #111111; color: #ffffff;"{{/if}}` : ''}>
+<div id="${uid}" class="hero-block ${!showCover && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}" ${showCover ? `{{#if @site.cover_image}}style="background-image: linear-gradient(${overlay}, ${overlay}), url({{@site.cover_image}});"{{/if}}` : ''}>
   <div class="hero-content">
     <div class="hero-text-container">
       ${eyebrowHtml}
@@ -322,11 +336,19 @@ export const compileToHbs = (block: BuilderBlock) => {
         ${showSecondaryButton ? `<a href="${secondaryButtonUrl}" class="hero-btn hero-btn-secondary">${secondaryButtonLabel}</a>` : ''}
       </div>
     </div>
-    ${layout.startsWith('split') && imageUrl ? `
+    ${layout.startsWith('split') ? (
+      useSiteData ? `
+    {{#if @site.cover_image}}
+    <div class="hero-image-container">
+      <img src="{{@site.cover_image}}" alt="{{@site.title}}" />
+    </div>
+    {{/if}}
+      ` : (imageUrl ? `
     <div class="hero-image-container">
       <img src="${imageUrl}" alt="${imageAlt}" />
     </div>
-    ` : ''}
+      ` : '')
+    ) : ''}
   </div>
 </div>`;
 };

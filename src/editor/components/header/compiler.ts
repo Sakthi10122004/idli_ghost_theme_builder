@@ -186,9 +186,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
       ${general.showThemeSwitcher !== false ? `
       <button class="gh-theme-toggle gh-desktop-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+        ${themeSvg}
       </button>` : ""}
 
       {{#if @site.members_enabled}}

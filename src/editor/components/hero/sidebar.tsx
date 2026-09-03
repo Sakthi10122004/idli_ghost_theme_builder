@@ -92,7 +92,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <option value="bottom">Full-Bleed (Pinned Bottom)</option>
         </select>
         
-        {(block.styles?.layout === "split-left" || block.styles?.layout === "split-right") && (
+        {(block.styles?.layout === "split-left" || block.styles?.layout === "split-right") && !useSiteData && (
           <div className="flex flex-col gap-2 pt-2">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Split Image URL</label>
             <input
@@ -217,19 +217,77 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         )}
       </div>
 
-      {useSiteData ? (
+      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5 pb-4">
+        <span className="text-[12px] font-bold text-gray-900 tracking-tight">Text Color</span>
+        <div className="mt-2 border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+          <ColorPicker
+            label="Main Text Color"
+            value={p.textColor || ""}
+            onChange={(v) => onChangeProps({ textColor: v })}
+            defaultTokenLabel={(useSiteData && (p.useCoverImageAsBackground ?? true)) ? "#FFFFFF" : "Theme Default"}
+          />
+        </div>
+      </div>
+
+      {(useSiteData && (p.useCoverImageAsBackground ?? true)) ? (
         <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
-          <span className="text-[12px] font-bold text-gray-900 tracking-tight">Background</span>
-          <div className="bg-brand-canvas-soft p-3 rounded-md border border-brand-hairline mt-2">
-            <span className="text-[11px] text-brand-body leading-relaxed">
-              Background settings are hidden because <strong>Use Dynamic Ghost Data</strong> is enabled. Your Ghost publication's cover image will be used automatically.
-            </span>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[12px] font-bold text-gray-900 tracking-tight">Background</span>
+            {useSiteData && (
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] text-gray-500 font-medium">Show Cover Image</label>
+                <Switch
+                  checked={p.useCoverImageAsBackground ?? true}
+                  onChange={(c) => onChangeProps({ useCoverImageAsBackground: c })}
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Overlay Color</label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="color"
+                value={block.styles?.bgOverlayColor || "#000000"}
+                onChange={(e) => onChangeStyles({ bgOverlayColor: e.target.value })}
+                className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 mt-2">
+            <div className="flex justify-between items-center">
+              <label className="text-[11px] font-sans font-semibold text-brand-body">Overlay Opacity</label>
+              <span className="text-[10px] text-brand-muted">
+                {Math.round((block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.6) * 100)}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.6}
+              onChange={(e) => onChangeStyles({ bgOverlayOpacity: parseFloat(e.target.value) })}
+              className="w-full accent-brand-primary"
+            />
           </div>
         </div>
       ) : (
         <>
           <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
-            <span className="text-[12px] font-bold text-gray-900 tracking-tight">Background</span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[12px] font-bold text-gray-900 tracking-tight">Background</span>
+              {useSiteData && (
+                <div className="flex items-center gap-2">
+                  <label className="text-[10px] text-gray-500 font-medium">Show Cover Image</label>
+                  <Switch
+                    checked={p.useCoverImageAsBackground ?? true}
+                    onChange={(c) => onChangeProps({ useCoverImageAsBackground: c })}
+                  />
+                </div>
+              )}
+            </div>
             <label className="text-[11px] font-sans font-semibold text-brand-body mt-2">Background Type</label>
             <select
               value={bgType}

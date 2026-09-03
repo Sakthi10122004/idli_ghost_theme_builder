@@ -10,6 +10,8 @@ export interface HeroProps {
   secondaryButtonLabel: string;
   secondaryButtonUrl: string;
   useSiteData?: boolean;
+  useCoverImageAsBackground?: boolean;
+  textColor?: string;
   imageUrl?: string;
   imageAlt?: string;
 }
@@ -29,6 +31,8 @@ export const defaultProps: HeroProps = {
   secondaryButtonLabel: "Documentation",
   secondaryButtonUrl: "#",
   useSiteData: false,
+  useCoverImageAsBackground: true,
+  textColor: "",
   imageUrl: "",
   imageAlt: "Hero Image",
 };
