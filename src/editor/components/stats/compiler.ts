@@ -310,7 +310,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     margin: 0;
   }
 </style>
-<div id="${wrapperId}" class="stats-section ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}">
+<div id="${wrapperId}" class="stats-section kg-width-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}">
   <div class="stats-inner">
     ${general.layoutStyle === 'split' ? `
       <div class="stats-split-container">
