@@ -139,6 +139,11 @@ import * as statsCanvas from "./stats/canvas";
 import * as statsSidebar from "./stats/sidebar";
 import * as statsCompiler from "./stats/compiler";
 
+import * as team from "./team/schema";
+import * as teamCanvas from "./team/canvas";
+import * as teamSidebar from "./team/sidebar";
+import * as teamCompiler from "./team/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -168,4 +173,5 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "error-view": { type: "error-view", ...errorView, ...errorViewCanvas, ...errorViewSidebar, ...errorViewCompiler },
   "logo-cloud": { type: "logo-cloud", ...logoCloud, ...logoCloudCanvas, ...logoCloudSidebar, ...logoCloudCompiler },
   stats: { type: "stats", ...stats, ...statsCanvas, ...statsSidebar, ...statsCompiler },
+  team: { type: "team", ...team, ...teamCanvas, ...teamSidebar, ...teamCompiler },
 };

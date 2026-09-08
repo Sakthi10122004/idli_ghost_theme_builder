@@ -29,7 +29,8 @@ import {
   Share2,
   Play,
   Cloud,
-  BarChart
+  BarChart,
+  Users
 } from "lucide-react";
 
 interface BlockTemplate {
@@ -83,6 +84,7 @@ export default function LeftSidebar() {
     { type: "image", label: "Image Block", category: "Content", icon: ImageIcon },
     { type: "hero", label: "Hero Component", category: "Content", icon: Sparkles },
     { type: "newsletter", label: "Newsletter", category: "Content", icon: Mail },
+    { type: "team", label: "Team", category: "Content", icon: Users },
     { type: "faq", label: "FAQ", category: "Content", icon: HelpCircle },
     { type: "logo-cloud", label: "Logo Cloud", category: "Content", icon: Cloud },
     { type: "stats", label: "Stats", category: "Content", icon: BarChart },

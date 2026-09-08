@@ -21,7 +21,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     let resolvedUrl = logo.imageUrl;
     if (resolvedUrl && resolvedUrl.startsWith("asset://")) {
       const path = resolvedUrl.replace("asset://", "");
-      resolvedUrl = assets[path] || resolvedUrl;
+      resolvedUrl = assets[path] || assets[`assets/${path}`] || resolvedUrl;
     }
 
     return (

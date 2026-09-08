@@ -49,7 +49,11 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   return (
     <section 
       className={`relative w-full ${backgroundVideoUrl ? 'overflow-hidden' : ''} ${block.styles?.backgroundType === 'mesh' ? 'mesh-glow' : ''}`}
-      style={{ ...bgStyle, paddingTop: block.styles?.paddingTop, paddingBottom: block.styles?.paddingBottom }}
+      style={{ 
+        ...bgStyle, 
+        paddingTop: typeof block.styles?.paddingTop === "string" ? block.styles.paddingTop : (block.styles?.paddingTop as any)?.desktop, 
+        paddingBottom: typeof block.styles?.paddingBottom === "string" ? block.styles.paddingBottom : (block.styles?.paddingBottom as any)?.desktop 
+      }}
     >
       {backgroundVideoUrl && (
         <video 
