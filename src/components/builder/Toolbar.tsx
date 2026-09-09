@@ -1,4 +1,6 @@
 "use client";
+
+import React, { useEffect, useState } from "react";
 import JSZip from "jszip";
 
 import { useEditorStore } from "@/store/editorStore";
@@ -14,12 +16,37 @@ import {
   Code,
   HelpCircle,
   Plus,
-  Copy
+  Copy,
+  Save, 
+  Cloud, 
+  Check, 
+  Loader2, 
+  AlertCircle, 
+  LayoutTemplate, 
+  X, 
+  AlertTriangle 
 } from "lucide-react";
-
-import React, { useEffect, useState } from "react";
-import { Save, Cloud, Check, Loader2, AlertCircle, LayoutTemplate, X, AlertTriangle } from "lucide-react";
 import TemplatePickerModal from "./TemplatePickerModal";
+
+interface GscanFailure {
+  ref?: string;
+  message?: string;
+}
+
+interface GscanIssue {
+  rule: string;
+  details?: string;
+  failures?: GscanFailure[];
+  code?: string;
+  level?: string;
+}
+
+interface ValidationReport {
+  score?: { value: number; level: string };
+  fatal?: Record<string, GscanIssue>;
+  error?: Record<string, GscanIssue>;
+  warning?: Record<string, GscanIssue>;
+}
 
 export default function Toolbar() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -27,9 +54,11 @@ export default function Toolbar() {
   // Gscan Validation State
   const [isExporting, setIsExporting] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
-  const [validationReport, setValidationReport] = useState<any>(null);
+  const [validationReport, setValidationReport] = useState<ValidationReport | null>(null);
   const [themeBlob, setThemeBlob] = useState<Blob | null>(null);
   const [themeFilename, setThemeFilename] = useState<string>("");
+  const [copiedError, setCopiedError] = useState(false);
+  const [copiedSingleId, setCopiedSingleId] = useState<string | null>(null);
   const { 
     deviceMode, 
     setDeviceMode, 
@@ -47,7 +76,6 @@ export default function Toolbar() {
     toggleShortcutsHelp,
     createCustomPage,
     duplicateCustomPage,
-    updatePageTagFilter,
     loadTheme,
     saveTheme,
     saveStatus,
@@ -56,6 +84,72 @@ export default function Toolbar() {
 
   const [liveScore, setLiveScore] = useState<{ value: number, level: string } | null>(null);
   const [isValidatingLive, setIsValidatingLive] = useState(false);
+
+  const getValidationReportText = (): string => {
+    if (!validationReport) return "No validation report available.";
+    const lines: string[] = [];
+    lines.push("Ghost Theme Validation Report");
+    if (validationReport.score) {
+      lines.push(`Score: ${validationReport.score.value}/100 (${validationReport.score.level})`);
+    }
+    lines.push("");
+
+    const formatItems = (
+      sectionTitle: string,
+      itemsObj: Record<string, { rule?: string; details?: string; failures?: Array<{ ref?: string }>; code?: string; level?: string }> | undefined
+    ) => {
+      if (!itemsObj || Object.keys(itemsObj).length === 0) return;
+      const items = Object.values(itemsObj);
+      lines.push(`=== ${sectionTitle} (${items.length}) ===`);
+      items.forEach((item, idx) => {
+        lines.push(`${idx + 1}. ${item.rule || "Issue"}`);
+        if (item.details) {
+          const cleanDetails = item.details.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          lines.push(`   Details: ${cleanDetails}`);
+        }
+        if (item.failures && item.failures.length > 0) {
+          lines.push(`   Affected: ${item.failures.map(f => f.ref).filter(Boolean).join(", ")}`);
+        }
+        if (item.code) {
+          lines.push(`   Code: ${item.code}`);
+        }
+        lines.push("");
+      });
+    };
+
+    formatItems("Fatal Errors", validationReport.fatal);
+    formatItems("Errors", validationReport.error);
+    formatItems("Warnings", validationReport.warning);
+
+    return lines.join("\n").trim();
+  };
+
+  const handleCopyErrors = async () => {
+    const text = getValidationReportText();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedError(true);
+      setTimeout(() => setCopiedError(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy validation report:", err);
+    }
+  };
+
+  const handleCopySingleIssue = async (
+    issue: { rule?: string; details?: string; failures?: Array<{ ref?: string }>; code?: string; level?: string },
+    id: string
+  ) => {
+    const cleanDetails = (issue.details || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const affected = issue.failures && issue.failures.length > 0 ? `\nAffected: ${issue.failures.map(f => f.ref).filter(Boolean).join(", ")}` : "";
+    const text = `[${issue.level || "Issue"}] ${issue.rule || ""}\n${cleanDetails}${affected}${issue.code ? `\nCode: ${issue.code}` : ""}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedSingleId(id);
+      setTimeout(() => setCopiedSingleId(null), 2000);
+    } catch (error) {
+      console.error("Failed to copy single issue:", error);
+    }
+  };
 
   useEffect(() => {
     loadTheme();
@@ -83,12 +177,12 @@ export default function Toolbar() {
         }
 
         const { generateThemeFiles } = await import("./compiler");
-        const files = generateThemeFiles(themeDoc as any);
+        const files = generateThemeFiles(themeDoc);
         Object.entries(files).forEach(([name, content]) => {
           if (name.startsWith("assets/images/") && !name.endsWith(".svg")) {
-            zip.file(name, content as string, { base64: true });
+            zip.file(name, content, { base64: true });
           } else {
-            zip.file(name, content as string);
+            zip.file(name, content);
           }
         });
 
@@ -108,7 +202,7 @@ export default function Toolbar() {
             setValidationReport(validateData.report);
           }
         }
-      } catch (e) {
+      } catch {
         // Silently ignore background validation errors
       } finally {
         setIsValidatingLive(false);
@@ -446,9 +540,26 @@ export default function Toolbar() {
                   <p className="text-xs text-gray-500">Ghost validator (gscan) detected issues that may prevent upload.</p>
                 </div>
               </div>
-              <button onClick={() => setShowValidationModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {Boolean(
+                  (validationReport?.fatal && Object.keys(validationReport.fatal).length > 0) ||
+                  (validationReport?.error && Object.keys(validationReport.error).length > 0) ||
+                  (validationReport?.warning && Object.keys(validationReport.warning).length > 0)
+                ) && (
+                  <button
+                    type="button"
+                    onClick={handleCopyErrors}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-md shadow-xs transition-colors cursor-pointer"
+                    title="Copy all validation issues to clipboard"
+                  >
+                    {copiedError ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+                    <span>{copiedError ? "Copied!" : "Copy Errors"}</span>
+                  </button>
+                )}
+                <button onClick={() => setShowValidationModal(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors" aria-label="Close">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
@@ -471,13 +582,23 @@ export default function Toolbar() {
                     Fatal Errors ({Object.keys(validationReport.fatal).length})
                   </h4>
                   <div className="flex flex-col gap-3">
-                    {Object.values(validationReport.fatal).map((err: any, i: number) => (
-                      <div key={i} className="bg-white p-4 rounded-lg border border-red-100 shadow-sm">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                    {Object.values(validationReport.fatal).map((err: GscanIssue, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-red-100 shadow-sm relative group">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="text-sm font-semibold text-gray-900">{err.rule}</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCopySingleIssue(err, `fatal-${i}`)}
+                            className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
+                            title="Copy this error"
+                          >
+                            {copiedSingleId === `fatal-${i}` ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+                          </button>
+                        </div>
                         <p className="text-xs text-gray-600 mb-2">{err.details}</p>
-                        {err.failures?.length > 0 && (
+                        {err.failures && err.failures.length > 0 && (
                           <div className="bg-red-50 p-2 rounded text-[11px] font-mono text-red-800 break-all">
-                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                            Affected: {err.failures.map((f: GscanFailure) => f.ref).filter(Boolean).join(', ')}
                           </div>
                         )}
                       </div>
@@ -493,13 +614,23 @@ export default function Toolbar() {
                     Errors ({Object.keys(validationReport.error).length})
                   </h4>
                   <div className="flex flex-col gap-3">
-                    {Object.values(validationReport.error).map((err: any, i: number) => (
-                      <div key={i} className="bg-white p-4 rounded-lg border border-orange-100 shadow-sm">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                    {Object.values(validationReport.error).map((err: GscanIssue, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-orange-100 shadow-sm relative group">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="text-sm font-semibold text-gray-900">{err.rule}</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCopySingleIssue(err, `error-${i}`)}
+                            className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
+                            title="Copy this error"
+                          >
+                            {copiedSingleId === `error-${i}` ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+                          </button>
+                        </div>
                         <p className="text-xs text-gray-600 mb-2">{err.details}</p>
-                        {err.failures?.length > 0 && (
+                        {err.failures && err.failures.length > 0 && (
                           <div className="bg-orange-50 p-2 rounded text-[11px] font-mono text-orange-800 break-all">
-                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                            Affected: {err.failures.map((f: GscanFailure) => f.ref).filter(Boolean).join(', ')}
                           </div>
                         )}
                       </div>
@@ -515,13 +646,23 @@ export default function Toolbar() {
                     Warnings ({Object.keys(validationReport.warning).length})
                   </h4>
                   <div className="flex flex-col gap-3">
-                    {Object.values(validationReport.warning).map((err: any, i: number) => (
-                      <div key={i} className="bg-white p-4 rounded-lg border border-yellow-100 shadow-sm">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">{err.rule}</p>
+                    {Object.values(validationReport.warning).map((err: GscanIssue, i: number) => (
+                      <div key={i} className="bg-white p-4 rounded-lg border border-yellow-100 shadow-sm relative group">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="text-sm font-semibold text-gray-900">{err.rule}</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCopySingleIssue(err, `warn-${i}`)}
+                            className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
+                            title="Copy this warning"
+                          >
+                            {copiedSingleId === `warn-${i}` ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+                          </button>
+                        </div>
                         <p className="text-xs text-gray-600 mb-2">{err.details}</p>
-                        {err.failures?.length > 0 && (
+                        {err.failures && err.failures.length > 0 && (
                           <div className="bg-yellow-50 p-2 rounded text-[11px] font-mono text-yellow-800 break-all">
-                            Affected: {err.failures.map((f: any) => f.ref).join(', ')}
+                            Affected: {err.failures.map((f: GscanFailure) => f.ref).filter(Boolean).join(', ')}
                           </div>
                         )}
                       </div>
@@ -533,31 +674,48 @@ export default function Toolbar() {
             
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white">
               <button 
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
                 onClick={() => setShowValidationModal(false)}
               >
                 {themeBlob ? "Cancel & Fix" : "Close"}
               </button>
-              {themeBlob && (
-                <button 
-                  className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-all"
-                  onClick={() => {
-                    if (themeBlob && themeFilename) {
-                      const url = URL.createObjectURL(themeBlob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = themeFilename;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    }
-                    setShowValidationModal(false);
-                  }}
-                >
-                  Download Anyway
-                </button>
-              )}
+
+              <div className="flex items-center gap-2.5">
+                {Boolean(
+                  (validationReport?.fatal && Object.keys(validationReport.fatal).length > 0) ||
+                  (validationReport?.error && Object.keys(validationReport.error).length > 0) ||
+                  (validationReport?.warning && Object.keys(validationReport.warning).length > 0)
+                ) && (
+                  <button 
+                    type="button"
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
+                    onClick={handleCopyErrors}
+                  >
+                    {copiedError ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                    <span>{copiedError ? "Copied to Clipboard!" : "Copy Errors"}</span>
+                  </button>
+                )}
+                {themeBlob && (
+                  <button 
+                    className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-all cursor-pointer"
+                    onClick={() => {
+                      if (themeBlob && themeFilename) {
+                        const url = URL.createObjectURL(themeBlob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = themeFilename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }
+                      setShowValidationModal(false);
+                    }}
+                  >
+                    Download Anyway
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
-import { LogoCloudProps, defaultProps, GENERIC_SVG_PLACEHOLDER } from "./schema";
+import { LogoCloudProps, resolveLogoCloudProps, GENERIC_SVG_PLACEHOLDER } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
 
@@ -41,12 +41,12 @@ const SegmentedControl = ({ options, value, onChange }: {
   </div>
 );
 
-export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
+export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
-}) => {
-  const p = { ...defaultProps, ...block.props } as LogoCloudProps;
+  onChangeProps: (props: Partial<LogoCloudProps>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
+}) {
+  const p = resolveLogoCloudProps(block.props);
   const general = p.general;
   const logos = p.logos || [];
   const addAsset = useEditorStore(s => s.addAsset);
@@ -55,7 +55,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
     onChangeProps({ general: { ...general, ...patch } });
   };
 
-  const renderLogoItem = (item: any, update: (patch: any) => void) => (
+  type LogoItem = LogoCloudProps['logos'][number];
+  const renderLogoItem = (item: LogoItem, update: (patch: Partial<LogoItem>) => void) => (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         <label className="text-[10px] font-semibold text-gray-500">Image URL</label>
@@ -126,7 +127,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               { label: "Ghost Data", value: "dynamic" }
             ]}
             value={general.dataSource || "static"}
-            onChange={(v: any) => updateGeneral({ dataSource: v })}
+            onChange={(v) => updateGeneral({ dataSource: v as "static" | "dynamic" })}
           />
         </div>
 
@@ -158,7 +159,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               { label: "Marquee", value: "marquee" }
             ]}
             value={general.layoutStyle}
-            onChange={(v: any) => updateGeneral({ layoutStyle: v })}
+            onChange={(v) => updateGeneral({ layoutStyle: v as "row" | "grid" | "marquee" })}
           />
         </div>
 
@@ -173,7 +174,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 { label: "6", value: "6" }
               ]}
               value={String(general.columns)}
-              onChange={(v: any) => updateGeneral({ columns: parseInt(v) as any })}
+              onChange={(v) => updateGeneral({ columns: parseInt(v, 10) as 3 | 4 | 5 | 6 })}
             />
           </div>
         )}
@@ -181,6 +182,14 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         <div className="flex items-center justify-between mt-2">
           <label className="text-[11px] font-sans font-semibold text-brand-body">Grayscale Logos</label>
           <Switch checked={general.grayscale} onChange={(c) => updateGeneral({ grayscale: c })} />
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex flex-col">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Invert in Dark Mode</label>
+            <span className="text-[10px] text-brand-mute">Adapts dark logos for dark backgrounds</span>
+          </div>
+          <Switch checked={general.invertInDark !== false} onChange={(c) => updateGeneral({ invertInDark: c })} />
         </div>
       </div>
 
@@ -198,7 +207,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 className="w-full px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                 placeholder="e.g. hash-partner-logo"
               />
-              <p className="text-[10px] text-brand-mute leading-tight">Must match a tag in Ghost. Use 'hash-' prefix for internal tags.</p>
+              <p className="text-[10px] text-brand-mute leading-tight">Must match a tag in Ghost. Use &apos;hash-&apos; prefix for internal tags.</p>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-sans font-semibold text-brand-body">Max Logos (Limit)</label>
@@ -216,7 +225,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             items={logos}
             onChange={(newLogos) => onChangeProps({ logos: newLogos })}
             renderItem={renderLogoItem}
-            newItem={() => ({ id: Math.random().toString(36).substring(7), name: "New Logo", imageUrl: GENERIC_SVG_PLACEHOLDER })}
+            newItem={() => ({ id: Math.random().toString(36).substring(7), name: "New Brand", imageUrl: GENERIC_SVG_PLACEHOLDER })}
             addLabel="Add Logo"
           />
         )}

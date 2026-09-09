@@ -13,11 +13,20 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   // Extract background styles from inline styles that the builder applies
   const appearance = block.props?.appearance || {};
   const bgType = block.styles?.backgroundType || "solid";
-  const defaultBg = appearance?.backgroundColor || "transparent";
+  let defaultBg = appearance?.backgroundColor || "transparent";
+  if (defaultBg === "#ffffff" || defaultBg === "#fff") {
+    defaultBg = "var(--color-canvas)";
+  }
   
   let bgStyle: React.CSSProperties = { backgroundColor: defaultBg };
-  
-  if (bgType === "linear") {
+
+  if (bgType === "solid") {
+    const rawBg = block.styles?.backgroundColor || appearance?.backgroundColor;
+    if (rawBg) {
+      const bg = (rawBg === "#ffffff" || rawBg === "#fff") ? "var(--color-canvas)" : rawBg;
+      bgStyle = { backgroundColor: bg };
+    }
+  } else if (bgType === "linear") {
     const c1 = block.styles?.gradientColor1 || "#000000";
     const c2 = block.styles?.gradientColor2 || "#333333";
     const angle = block.styles?.gradientAngle !== undefined ? block.styles.gradientAngle : 90;
@@ -45,14 +54,23 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       backgroundPosition: "center"
     };
   }
+  const getStyleValue = (val: unknown): string | undefined => {
+    if (!val) return undefined;
+    if (typeof val === "string") return val;
+    if (typeof val === "object" && val !== null) {
+      const resp = val as Record<string, string>;
+      return resp.desktop || resp.tablet || resp.mobile;
+    }
+    return undefined;
+  };
 
   return (
     <section 
       className={`relative w-full ${backgroundVideoUrl ? 'overflow-hidden' : ''} ${block.styles?.backgroundType === 'mesh' ? 'mesh-glow' : ''}`}
       style={{ 
         ...bgStyle, 
-        paddingTop: typeof block.styles?.paddingTop === "string" ? block.styles.paddingTop : (block.styles?.paddingTop as any)?.desktop, 
-        paddingBottom: typeof block.styles?.paddingBottom === "string" ? block.styles.paddingBottom : (block.styles?.paddingBottom as any)?.desktop 
+        paddingTop: getStyleValue(block.styles?.paddingTop), 
+        paddingBottom: getStyleValue(block.styles?.paddingBottom) 
       }}
     >
       {backgroundVideoUrl && (

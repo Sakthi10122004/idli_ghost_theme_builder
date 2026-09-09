@@ -425,6 +425,59 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
 
       </div>
 
+      {/* SPACING */}
+      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+        <span className="text-[12px] font-bold text-gray-900 tracking-tight">Spacing</span>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Top Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {p.spacing?.paddingTop ?? 20}px
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="80"
+            step="2"
+            value={p.spacing?.paddingTop ?? 20}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              updateCategory("spacing", "paddingTop", val);
+              if (onChangeStyles) {
+                onChangeStyles({ paddingTop: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Bottom Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {p.spacing?.paddingBottom ?? 20}px
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="80"
+            step="2"
+            value={p.spacing?.paddingBottom ?? 20}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              updateCategory("spacing", "paddingBottom", val);
+              if (onChangeStyles) {
+                onChangeStyles({ paddingBottom: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+        </div>
+      </div>
+
     </div>
   );
 };

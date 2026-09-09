@@ -30,7 +30,8 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
   - `page.hbs` markup must gate titles/images with `{{#if @page.show_title_and_feature_image}}`.
   - Direct queries (like `{{#get "tags"}}`) must specify a safe maximum limit (e.g. `limit="100"` instead of `"all"`).
   - Theme assets (`assets/css/screen.css`) must be automatically minified (stripping whitespace and comments) during compilation.
-  - **Dynamic Navigation Integration**: The compiler must output a dedicated `partials/navigation.hbs` template containing the `{{#foreach navigation}}` loop, and the compiled header layout must render the dynamic list using Ghost's native `{{navigation}}` helper, ensuring absolute compatibility with Ghost backend menu settings.
+  - **Dynamic Navigation Integration**: The compiler must output a dedicated `partials/navigation.hbs` template containing the `{{#foreach navigation}}` loop differentiating primary and secondary navigation via `{{#if isSecondary}}`, and the compiled header and footer layouts must render dynamic lists using Ghost's native `{{navigation}}` and `{{navigation type="secondary"}}` helpers, ensuring absolute compatibility with Ghost backend menu settings.
+  - **Casper Template Asset Bundling**: The theme export pipeline must inject required locales (`locales/en.json`) and core icons from `/casper-template/manifest.json` into the generated ZIP to ensure 100% clean passes in `gscan` validation.
 
 ## Editor Lifecycle & State Rules
 
@@ -38,6 +39,8 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 - **Hydration safety**: Client-side layout drag-and-drop structures (`dnd-kit` contexts) must delay rendering until client-side hydration completes to prevent server-rendered HTML mismatches.
 - **Node native module isolation**: Native Node packages (e.g. `bunyan`, `fs`) must be dynamically imported/required behind server-only scope checks (e.g. `typeof window === 'undefined'`) to prevent client-side bundler compilation failures.
 - **Direct Zustand State Queries**: For operations that require the absolute latest state at execution time (e.g., manual saves, theme export compile cycles), query the Zustand store directly using `useEditorStore.getState()` instead of destructured React state variables to bypass React render closure lag.
+- **Responsive Style Resolution**: AST style properties can be either raw strings (`"64px"`) or responsive objects (`ResponsiveStyleValue<T>` = `{ desktop, tablet?, mobile? }`). Never assign raw style properties directly into React inline styles or HTML strings without resolving them. Use `resolveStyleLocal(val)` (or `val[deviceMode] || val.desktop || val`) in Canvas elements, `resolveStyleValue(val)` in the compiler, and `getInputValue(val)` in sidebar controls to prevent `[object Object]` rendering bugs.
+- **Shared Background Utilities**: Always reuse `getBackgroundStyle` and `getBackgroundCSS` from `src/editor/components/shared/background.ts` for all complex backgrounds (solid, linear, radial, mesh, pattern, image overlay) to guarantee consistent rendering between the Canvas and exported CSS.
 
 ## Modular Component Registration Rules
 
@@ -46,7 +49,9 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
   - `canvas.tsx`: A modular React component for visual block rendering inside the builder canvas workspace.
   - `sidebar.tsx`: A modular React component containing properties settings inputs for the block.
   - `compiler.ts`: A compiler function translating the AST block and its children into standard Ghost Handlebars markup.
-- **Central Registry**: Register all modular components in `src/editor/components/registry.ts` to expose them dynamically to the Canvas, compiler, RightSidebar, and editor stores.
+- **Central Registry & Palette**: Register all modular components in:
+  1. `src/editor/components/registry.ts`: To expose them dynamically to the Canvas, compiler, RightSidebar, and editor stores.
+  2. `src/components/builder/LeftSidebar.tsx`: In `blocksList` with appropriate category (`Layout`, `Content`, or `Ghost Core`), label, and Lucide icon for drag-and-drop insertion.
 
 
 

@@ -5,8 +5,13 @@ const getBackgroundCSS = (styles: any): string => {
   const defaultBg = "transparent";
 
   switch (bgType) {
-    case "solid":
-      return `background-color: ${styles?.backgroundColor || defaultBg};`;
+    case "solid": {
+      const bg = styles?.backgroundColor;
+      if (!bg || bg === "#ffffff" || bg === "#fff") {
+        return `background-color: var(--color-bg, #ffffff);`;
+      }
+      return `background-color: ${bg};`;
+    }
     case "linear": {
       const c1 = styles?.gradientColor1 || "#000000";
       const c2 = styles?.gradientColor2 || "#333333";
@@ -139,13 +144,13 @@ export const compileToHbs = (block: BuilderBlock) => {
 
   let blockTextAlign = "center";
   let contentFlexDirectionDesktop = "column";
-  let contentFlexDirectionMobile = "column";
+  const contentFlexDirectionMobile = "column";
   let contentAlignItems = "center";
   let textContainerAlignItems = "center";
   let actionsJustifyContent = "center";
   let contentMaxWidth = "800px";
   let blockDisplay = "block";
-  let blockFlexDirection = "column";
+  const blockFlexDirection = "column";
   let blockJustifyContent = "flex-start";
   
   switch(layout) {
@@ -317,12 +322,24 @@ export const compileToHbs = (block: BuilderBlock) => {
     border-color: ${(showCover || textColor) ? (textColor || '#ffffff') : '#171717'};
     ${!(showCover || textColor) ? 'color: #171717;' : ''}
   }
+  html.dark #${uid}.hero-block {
+    ${!showCover && (!block.styles?.backgroundType || block.styles?.backgroundType === 'solid') && (!block.styles?.backgroundColor || block.styles?.backgroundColor === '#ffffff' || block.styles?.backgroundColor === '#fff') ? 'background-color: var(--color-bg, #111111);' : ''}
+    ${!textColor && !showCover ? 'color: var(--color-fg, #ffffff);' : ''}
+  }
+  html.dark #${uid} .hero-btn-primary {
+    background-color: ${buttonBgColor && buttonBgColor !== '#171717' ? buttonBgColor : '#ffffff'};
+    color: ${buttonTextColor && buttonTextColor !== '#ffffff' ? buttonTextColor : '#000000'};
+  }
   html.dark #${uid} .hero-btn-secondary {
     border-color: rgba(255,255,255,0.2);
   }
   html.dark #${uid} .hero-btn-secondary:hover {
     border-color: #ffffff;
     color: #ffffff;
+  }
+  html.dark #${uid} .hero-eyebrow {
+    background-color: ${(showCover || textColor) ? 'rgba(255, 255, 255, 0.15)' : 'rgba(59, 130, 246, 0.25)'};
+    color: ${textColor ? textColor : (showCover ? '#ffffff' : '#60a5fa')};
   }
 </style>
 <div id="${uid}" class="hero-block ${!showCover && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}" ${showCover ? `{{#if @site.cover_image}}style="background-image: linear-gradient(${overlay}, ${overlay}), url({{@site.cover_image}});"{{/if}}` : ''}>

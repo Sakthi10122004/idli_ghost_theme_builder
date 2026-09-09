@@ -12,6 +12,9 @@
   --color-canvas: #ffffff;
   --color-canvas-soft: #fafafa;
   --color-canvas-soft-2: #f5f5f5;
+  --color-bg: var(--color-canvas);
+  --color-fg: var(--color-ink);
+  --color-muted: var(--color-mute);
   --color-link: #0070f3;
   --color-link-deep: #0761d1;
   --color-link-bg-soft: #d3e5ff;
@@ -55,6 +58,9 @@ html.dark body:not(:has(#canvas-preview-frame)) {
   --color-canvas: #111111;
   --color-canvas-soft: #000000;
   --color-canvas-soft-2: #222222;
+  --color-bg: var(--color-canvas);
+  --color-fg: var(--color-ink);
+  --color-muted: var(--color-mute);
 }
 
 /* Exported Theme Body */
@@ -71,6 +77,11 @@ html.dark #canvas-preview-frame {
 
 /* Ensure components inside the editor canvas flip correctly */
 html.dark #canvas-preview-frame .builder-block-section,
+html.dark #canvas-preview-frame .builder-block-hero,
+html.dark #canvas-preview-frame .hero-block,
+html.dark #canvas-preview-frame .builder-block-logo-cloud,
+html.dark #canvas-preview-frame .logo-cloud-section,
+html.dark .logo-cloud-section,
 html.dark .gh-head,
 html.dark .gh-head-open .gh-head,
 html.dark .gh-head-actions,
@@ -80,19 +91,80 @@ html.dark .site-footer {
   color: var(--color-ink) !important;
 }
 
-/* Force header and footer buttons to invert so black buttons don't disappear in dark mode */
+/* Logo Cloud dark mode in canvas */
+html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-heading {
+  color: var(--color-ink) !important;
+}
+
+html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-subheading {
+  color: var(--color-mute) !important;
+}
+
+html.dark #canvas-preview-frame .logo-cloud-item img {
+  filter: invert(1) brightness(0.95);
+}
+
+html.dark #canvas-preview-frame .logo-cloud-item:hover img {
+  filter: invert(1) brightness(1);
+}
+
+/* Force hero, header, footer and button blocks to invert properly in dark mode */
 html.dark #canvas-preview-frame .gh-head-btn,
 html.dark .gh-head .gh-head-btn,
 html.dark #canvas-preview-frame .footer-subscribe-btn,
-html.dark .site-footer .footer-subscribe-btn {
+html.dark .site-footer .footer-subscribe-btn,
+html.dark #canvas-preview-frame .hero-btn-primary,
+html.dark #canvas-preview-frame .builder-block-button button:not([class*="secondary"]),
+html.dark #canvas-preview-frame .btn-primary {
   background-color: #ffffff !important;
   color: #000000 !important;
+}
+
+html.dark #canvas-preview-frame .hero-btn-secondary,
+html.dark #canvas-preview-frame .builder-block-button button[class*="secondary"],
+html.dark #canvas-preview-frame .btn-secondary {
+  background-color: var(--color-canvas) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Ensure default body text inside canvas adapts cleanly in dark mode */
+html.dark #canvas-preview-frame [style*="color: #4d4d4d"],
+html.dark #canvas-preview-frame [style*="color: rgb(77, 77, 77)"],
+html.dark #canvas-preview-frame [style*="color:#4d4d4d"],
+html.dark #canvas-preview-frame [style*="color: #666666"],
+html.dark #canvas-preview-frame [style*="color: rgb(102, 102, 102)"],
+html.dark #canvas-preview-frame [style*="color:#666666"] {
+  color: var(--color-body) !important;
 }
 
 html.dark .icon-moon { display: none !important; }
 html.dark .icon-sun { display: block !important; }
 html:not(.dark) .icon-sun { display: none !important; }
 html:not(.dark) .icon-moon { display: block !important; }
+
+/* Logo Cloud marquee animation & masks */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-scroll {
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.mask-marquee {
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
 
 @theme {
   --color-brand-primary: var(--color-primary);

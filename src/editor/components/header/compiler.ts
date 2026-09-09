@@ -1,7 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 
-const getBackgroundCSS = (styles: any, appearance: any, important = false): string => {
+const getBackgroundCSS = (styles: Record<string, unknown> | undefined, appearance: Record<string, unknown> | undefined, important = false): string => {
   const bgType = styles?.backgroundType || "solid";
   const defaultBg = appearance?.backgroundColor || "#ffffff";
   const imp = important ? " !important" : "";
@@ -57,8 +57,8 @@ const getBackgroundCSS = (styles: any, appearance: any, important = false): stri
     }
     case "image": {
       const url = styles?.bgImageUrl || "";
-      const overlayColor = styles?.bgOverlayColor || "#000000";
-      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
+      const overlayColor = String(styles?.bgOverlayColor || "#000000");
+      const opacity = typeof styles?.bgOverlayOpacity === "number" ? styles.bgOverlayOpacity : 0.5;
       
       let r = 0, g = 0, b = 0;
       if (overlayColor.length === 7) {
@@ -113,6 +113,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
   const shadowValue = styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow && styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none";
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
+  const headerPt = p.spacing?.paddingTop !== undefined ? `${p.spacing.paddingTop}px` : (styles?.paddingTop || '20px');
+  const headerPb = p.spacing?.paddingBottom !== undefined ? `${p.spacing.paddingBottom}px` : (styles?.paddingBottom || '20px');
 
   const searchSvg = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
 
@@ -169,9 +171,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // stripped or the markup structure changes again.
   const navHtml = `
     <nav class="gh-head-menu">
-      <ul class="nav">
-        {{navigation}}
-      </ul>
+      {{navigation}}
     </nav>`;
 
   const actionsHtml = `
@@ -282,7 +282,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
   @media (min-width: 768px) {
     #${htmlAnchor} .gh-head-inner {
-      padding: 20px 24px;
+      padding: ${headerPt} 24px ${headerPb} 24px;
     }
     ${desktopLayoutCss}
     #${htmlAnchor} .gh-head-brand {

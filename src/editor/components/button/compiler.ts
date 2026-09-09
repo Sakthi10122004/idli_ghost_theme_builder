@@ -15,7 +15,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     transition: all 0.2s ease;
     ${isPrimary ? `
     background-color: var(--color-primary);
-    color: #ffffff;
+    color: var(--color-on-primary, #ffffff);
     ` : `
     background-color: var(--color-bg);
     color: var(--color-fg);
@@ -27,6 +27,17 @@ export const compileToHbs = (block: BuilderBlock) => {
     opacity: 0.85;
     ` : `
     background-color: rgba(0,0,0,0.02);
+    `}
+  }
+  html.dark #btn-${block.id},
+  html.dark-mode #btn-${block.id} {
+    ${isPrimary ? `
+    background-color: #ffffff;
+    color: #000000;
+    ` : `
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    border-color: rgba(255, 255, 255, 0.2);
     `}
   }
 </style>

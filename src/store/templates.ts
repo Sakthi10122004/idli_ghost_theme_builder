@@ -72,7 +72,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: heroTextId,
             type: "text",
             props: { text: "Discover our latest stories, insights, and updates." },
-            styles: { fontSize: "18px", textColor: "#666666" },
+            styles: { fontSize: "18px" },
           },
           [gridSecId]: {
             id: gridSecId,
