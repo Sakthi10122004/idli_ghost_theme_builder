@@ -28,6 +28,10 @@ export interface HeaderProps {
   advanced: {
     htmlAnchor: string;
   };
+  spacing?: {
+    paddingTop?: number;
+    paddingBottom?: number;
+  };
   navItems?: Array<{ label: string; url: string }>;
 }
 
@@ -51,6 +55,10 @@ export const defaultProps: HeaderProps = {
     buttonTextColor: "#ffffff",
     sectionWidth: "full",
     contentWidth: "wide",
+  },
+  spacing: {
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   styles: {
     marginBottom: "0px",

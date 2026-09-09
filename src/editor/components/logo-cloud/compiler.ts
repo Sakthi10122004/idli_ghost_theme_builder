@@ -1,10 +1,10 @@
 import { BuilderBlock } from "@/types/theme";
-import { LogoCloudProps, defaultProps } from "./schema";
+import { LogoCloudProps, resolveLogoCloudProps, GENERIC_SVG_PLACEHOLDER } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
 import { LOGO_CLOUD_MAX_WIDTH } from "./constants";
 
 export const generateHTML = (block: BuilderBlock): string => {
-  const p = { ...defaultProps, ...block.props } as LogoCloudProps;
+  const p: LogoCloudProps = resolveLogoCloudProps(block.props);
   const general = p.general;
   const logos = p.logos || [];
   const appearance = p.appearance;
@@ -14,45 +14,49 @@ export const generateHTML = (block: BuilderBlock): string => {
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `logo-cloud-${block.id}`;
   
-  const grayscaleClass = general.grayscale ? "grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" : "transition-all duration-300 opacity-80 hover:opacity-100";
+  const grayscaleClass = general.grayscale 
+    ? "grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" 
+    : "transition-all duration-300 opacity-80 hover:opacity-100";
 
-  const renderLogo = (logo: any) => {
-    let src = logo.imageUrl;
+  const renderLogo = (logo: { id: string; name: string; imageUrl?: string; linkUrl?: string }) => {
+    let src = logo.imageUrl?.trim();
     if (src && src.startsWith("asset://")) {
       const path = src.replace("asset://", "");
       src = `{{asset "${path}"}}`;
     }
+    const finalSrc = src || GENERIC_SVG_PLACEHOLDER;
 
     const inner = logo.linkUrl
-      ? `<a href="${logo.linkUrl}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="${src}" alt="${logo.name}" class="logo-cloud-img" /></a>`
-      : `<img src="${src}" alt="${logo.name}" class="logo-cloud-img" />`;
+      ? `<a href="${logo.linkUrl}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" /></a>`
+      : `<img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" />`;
     return `<div class="logo-cloud-item ${grayscaleClass}">${inner}</div>`;
   };
 
   let contentHtml = "";
 
   if (general.dataSource === "dynamic") {
-    const limit = general.dynamicLimit || 10;
+    const limit = general.dynamicLimit === "all" ? 100 : (general.dynamicLimit || 10);
     const tag = general.dynamicTag || "hash-partner-logo";
     
     const ghostLoop = `
       {{#foreach posts}}
-        <div class="logo-cloud-item ${grayscaleClass}">
-          {{#if custom_excerpt}}
-            <a href="{{custom_excerpt}}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" /></a>
-          {{else}}
-            <img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" />
-          {{/if}}
-        </div>
+        {{#if feature_image}}
+          <div class="logo-cloud-item ${grayscaleClass}">
+            {{#if custom_excerpt}}
+              <a href="{{custom_excerpt}}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" /></a>
+            {{else}}
+              <img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" />
+            {{/if}}
+          </div>
+        {{/if}}
       {{/foreach}}
     `;
 
     if (general.layoutStyle === "marquee") {
       contentHtml = `
         <div class="logo-cloud-marquee-wrapper mask-edges">
-          <div class="logo-cloud-marquee animate-marquee">
+          <div class="logo-cloud-marquee-track">
             {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
-              ${ghostLoop}
               ${ghostLoop}
               ${ghostLoop}
             {{/get}}
@@ -69,21 +73,27 @@ export const generateHTML = (block: BuilderBlock): string => {
       `;
     } else {
       contentHtml = `
-        {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
+        <div class="logo-cloud-row-wrapper">
           <div class="logo-cloud-row">
-            ${ghostLoop}
+            {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
+              ${ghostLoop}
+            {{/get}}
           </div>
-        {{/get}}
+        </div>
       `;
     }
   } else {
     // Static layout rendering
     if (general.layoutStyle === "marquee") {
-      // Duplicate logos to enable infinite scroll without gap
-      const marqueeLogos = [...logos, ...logos, ...logos].map(renderLogo).join("");
+      const baseList = logos.length > 0
+        ? logos.length < 6
+          ? [...logos, ...logos, ...logos]
+          : logos
+        : [];
+      const marqueeLogos = [...baseList, ...baseList].map(renderLogo).join("");
       contentHtml = `
         <div class="logo-cloud-marquee-wrapper mask-edges">
-          <div class="logo-cloud-marquee animate-marquee">
+          <div class="logo-cloud-marquee-track">
             ${marqueeLogos}
           </div>
         </div>
@@ -97,8 +107,10 @@ export const generateHTML = (block: BuilderBlock): string => {
     } else {
       // row layout
       contentHtml = `
-        <div class="logo-cloud-row">
-          ${logos.map(renderLogo).join("")}
+        <div class="logo-cloud-row-wrapper">
+          <div class="logo-cloud-row">
+            ${logos.map(renderLogo).join("")}
+          </div>
         </div>
       `;
     }
@@ -117,6 +129,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     padding-top: ${spacing.paddingTop || '4rem'};
     padding-bottom: ${spacing.paddingBottom || '4rem'};
     position: relative;
+    width: 100%;
   }
   #${wrapperId} .logo-cloud-inner {
     max-width: ${LOGO_CLOUD_MAX_WIDTH};
@@ -131,59 +144,74 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.5;
-    color: var(--color-fg);
+    color: var(--color-fg, #171717);
     margin: 0;
   }
   #${wrapperId} .logo-cloud-subheading {
     margin-top: 0.5rem;
     font-size: 0.875rem;
     line-height: 1.5;
-    color: var(--color-mute);
+    color: var(--color-muted, var(--color-mute, #888888));
   }
   #${wrapperId} .logo-cloud-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
   }
   #${wrapperId} .logo-cloud-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-height: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   #${wrapperId} .logo-cloud-img {
-    max-width: 100%;
-    max-height: 4rem;
+    height: 2rem;
+    max-height: 2.25rem;
+    width: auto;
+    max-width: 10rem;
     object-fit: contain;
+    transition: all 0.3s ease;
   }
   #${wrapperId} .logo-cloud-grid {
     display: grid;
     align-items: center;
+    justify-items: center;
     gap: 2.5rem 2rem;
     max-width: 32rem;
     margin: 0 auto;
-  }
-  #${wrapperId} .logo-cloud-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 2.5rem 3rem;
-  }
-  #${wrapperId} .logo-cloud-row .logo-cloud-item {
-    width: 8rem;
-    flex-shrink: 0;
   }
   @media (min-width: 768px) {
     #${wrapperId} .logo-cloud-grid {
       max-width: none;
     }
-    #${wrapperId} .logo-cloud-row .logo-cloud-item {
-      width: 10rem;
+  }
+
+  /* Row layout */
+  #${wrapperId} .logo-cloud-row-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0.5rem 0;
+  }
+  #${wrapperId} .logo-cloud-row-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+  #${wrapperId} .logo-cloud-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    min-width: max-content;
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) {
+    #${wrapperId} .logo-cloud-row {
+      gap: 3.5rem;
     }
   }
 
@@ -195,35 +223,51 @@ export const generateHTML = (block: BuilderBlock): string => {
     display: flex;
     align-items: center;
     position: relative;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
   #${wrapperId} .mask-edges {
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
   }
-  #${wrapperId} .logo-cloud-marquee {
+  #${wrapperId} .logo-cloud-marquee-track {
     display: flex;
     width: max-content;
-    gap: 4rem;
     align-items: center;
+    gap: 3rem;
+    padding-right: 3rem;
+    animation: marquee-${block.id} 28s linear infinite;
   }
-  #${wrapperId} .logo-cloud-marquee .logo-cloud-item {
-    flex-shrink: 0;
-    width: 8rem;
-  }
-  @media (min-width: 768px) {
-    #${wrapperId} .logo-cloud-marquee .logo-cloud-item { width: 10rem; }
-  }
-  @keyframes marquee-${block.id} {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-33.33%); }
-  }
-  #${wrapperId} .animate-marquee {
-    animation: marquee-${block.id} 20s linear infinite;
-  }
-  #${wrapperId} .animate-marquee:hover {
+  #${wrapperId} .logo-cloud-marquee-track:hover {
     animation-play-state: paused;
   }
+  @keyframes marquee-${block.id} {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Dark mode overrides */
+  html.dark #${wrapperId},
+  html.dark-mode #${wrapperId} {
+    background-color: var(--color-bg) !important;
+  }
+  html.dark #${wrapperId} .logo-cloud-heading,
+  html.dark-mode #${wrapperId} .logo-cloud-heading {
+    color: var(--color-fg) !important;
+  }
+  html.dark #${wrapperId} .logo-cloud-subheading,
+  html.dark-mode #${wrapperId} .logo-cloud-subheading {
+    color: var(--color-muted, var(--color-mute, #a3a3a3)) !important;
+  }
+  ${general.invertInDark !== false ? `
+  html.dark #${wrapperId} .logo-cloud-item img,
+  html.dark-mode #${wrapperId} .logo-cloud-item img {
+    filter: invert(1) brightness(0.95);
+  }
+  html.dark #${wrapperId} .logo-cloud-item:hover img,
+  html.dark-mode #${wrapperId} .logo-cloud-item:hover img {
+    filter: invert(1) brightness(1);
+  }
+  ` : ''}
 </style>
 <div id="${wrapperId}" class="logo-cloud-section ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}">
   <div class="logo-cloud-inner">

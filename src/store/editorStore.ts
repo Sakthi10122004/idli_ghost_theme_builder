@@ -74,7 +74,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       id: "hero-text-1",
       type: "text",
       props: { text: "Visual builder for clean, lightweight, and modern Ghost templates styled with Geist UI guidelines." },
-      styles: { fontSize: "18px", textColor: "#4d4d4d", marginBottom: "24px" },
+      styles: { fontSize: "18px", marginBottom: "24px" },
     },
     "hero-cta-row-1": {
       id: "hero-cta-row-1",
@@ -658,7 +658,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -696,7 +696,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,

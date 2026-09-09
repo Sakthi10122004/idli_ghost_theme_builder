@@ -1,82 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
-
-const getBackgroundCSS = (styles: any, appearance: any): string => {
-  const bgType = styles?.backgroundType || "solid";
-  const defaultBg = appearance?.backgroundColor || "#ffffff";
-
-  switch (bgType) {
-    case "solid":
-      return `background-color: ${appearance?.backgroundColor || "#ffffff"};`;
-    case "linear": {
-      const c1 = styles?.gradientColor1 || "#000000";
-      const c2 = styles?.gradientColor2 || "#333333";
-      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
-      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2});`;
-    }
-    case "radial": {
-      const c1 = styles?.gradientColor1 || "#000000";
-      const c2 = styles?.gradientColor2 || "#333333";
-      const pos = styles?.gradientPosition || "center";
-      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2});`;
-    }
-    case "mesh": {
-      const m1 = styles?.meshColor1 || "#ff0080";
-      const m2 = styles?.meshColor2 || "#7928ca";
-      const m3 = styles?.meshColor3 || "#0070f3";
-      return `
-    background-color: ${defaultBg};
-    background-image: 
-      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
-      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
-      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
-      `;
-    }
-    case "pattern": {
-      const pType = styles?.patternType || "dots";
-      const pColor = styles?.patternColor || "#000000";
-      if (pType === "dots") {
-        return `
-    background-color: ${defaultBg};
-    background-image: radial-gradient(${pColor} 1px, transparent 1px);
-    background-size: 20px 20px;
-        `;
-      } else if (pType === "lines") {
-        return `
-    background-color: ${defaultBg};
-    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px);
-        `;
-      } else if (pType === "noise") {
-        return `
-    background-color: ${pColor};
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
-        `;
-      }
-      return `background-color: ${defaultBg};`;
-    }
-    case "image": {
-      const url = styles?.bgImageUrl || "";
-      const overlayColor = styles?.bgOverlayColor || "#000000";
-      const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
-      
-      let r = 0, g = 0, b = 0;
-      if (overlayColor.length === 7) {
-        r = parseInt(overlayColor.slice(1, 3), 16);
-        g = parseInt(overlayColor.slice(3, 5), 16);
-        b = parseInt(overlayColor.slice(5, 7), 16);
-      }
-      
-      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      return `
-    background-color: ${defaultBg};
-    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""};
-    background-size: cover;
-    background-position: center;
-      `;
-    }
-    default:
-      return `background-color: ${appearance?.backgroundColor || "#ffffff"};`;
-  }
-};
+import { getBackgroundCSS } from "../shared/background";
+import { WIDTH_VALUES } from "./schema";
+import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPageContext: boolean, blocks?: Record<string, BuilderBlock>) => {
   const p = block.props;
@@ -108,29 +33,49 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     ? general.customCopyrightText 
     : `&copy; {{date format="YYYY"}} {{@site.title}}. Published with <a href="https://ghost.org" target="_blank" rel="noopener">Ghost</a>.`;
 
-  const socialIconsHtml = `
-    <div style="display: flex; gap: 16px; align-items: center;">
-      {{#social_accounts @site}}
-        <a href="{{href}}" target="_blank" rel="noopener" aria-label="{{name}}">
-          {{#match type "=" "facebook"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.998 12c0-6.628-5.372-12-11.999-12C5.372 0 0 5.372 0 12c0 5.988 4.388 10.954 10.124 11.852v-8.384H7.078v-3.469h3.046V9.356c0-3.008 1.792-4.669 4.532-4.669 1.313 0 2.686.234 2.686.234v2.953H15.83c-1.49 0-1.955.925-1.955 1.874V12h3.328l-.532 3.469h-2.796v8.384c5.736-.898 10.124-5.864 10.124-11.853z"/></svg>
-          {{else match type "=" "twitter"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
-          {{else match type "=" "x"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
-          {{else match type "=" "instagram"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-          {{else match type "=" "linkedin"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          {{else match type "=" "youtube"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          {{else match type "=" "bluesky"}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.193.18-.403.352-.63.505-3.147 2.116-4.362 5.476-2.13 6.947 1.127.743 3.55.5 5.56-.84 1.52-1.01 2.373-2.618 2.778-3.411.405.793 1.258 2.401 2.778 3.412 2.01 1.34 4.433 1.583 5.56.84 2.232-1.47 1.017-4.831-2.13-6.947-.227-.153-.437-.325-.63-.505.14.017.28.035.416.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.789.624-6.478 0-.69-.139-1.861-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"/></svg>
-          {{else}}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-          {{/match}}
+  const activePlatforms: SocialPlatform[] = Array.isArray(general.socialPlatforms) && general.socialPlatforms.length > 0
+    ? general.socialPlatforms
+    : DEFAULT_SOCIAL_PLATFORMS;
+
+  const socialLinksParts = activePlatforms.map(platform => {
+    const config = ALL_SOCIAL_PLATFORMS.find(p => p.id === platform);
+    if (!config) return "";
+    const label = config.label;
+    const partial = config.casperIconPartial;
+    
+    if (platform === "facebook") {
+      return `{{#if (social_url type="facebook")}}
+        <a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/facebook"}}
         </a>
-      {{/social_accounts}}
+      {{else}}{{#if @site.facebook}}
+        <a href="{{@site.facebook}}" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/facebook"}}
+        </a>
+      {{/if}}{{/if}}`;
+    }
+    if (platform === "twitter") {
+      return `{{#if (social_url type="twitter")}}
+        <a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/x"}}
+        </a>
+      {{else}}{{#if @site.twitter}}
+        <a href="{{@site.twitter}}" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/x"}}
+        </a>
+      {{/if}}{{/if}}`;
+    }
+
+    return `{{#if (social_url type="${platform}")}}
+        <a href="{{social_url type="${platform}"}}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "${partial}"}}
+        </a>
+      {{/if}}`;
+  }).filter(Boolean).join("\n      ");
+
+  const socialIconsHtml = `
+    <div class="footer-social-links" style="display: flex; gap: 16px; align-items: center; justify-content: center;">
+      ${socialLinksParts}
     </div>
   `;
 
@@ -144,18 +89,30 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
           <p style="opacity: 0.8; line-height: 1.5; margin-bottom: 24px;">{{@site.description}}</p>
           ${general.showSocialIcons ? socialIconsHtml : ''}
         </div>
-        <div>
+        <div class="footer-nav-column">
           <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">Navigation</h4>
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+          {{#if @site.navigation}}
             {{navigation}}
-          </div>
+          {{else}}
+            <ul class="nav" role="menu">
+              <li class="nav-home" role="menuitem"><a href="/">Home</a></li>
+              <li class="nav-about" role="menuitem"><a href="/about/">About</a></li>
+              <li class="nav-collection" role="menuitem"><a href="/collection/">Collection</a></li>
+            </ul>
+          {{/if}}
         </div>
-        ${general.showSecondaryNav ? `
-        <div>
-          <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">More</h4>
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+        ${general.showSecondaryNav !== false ? `
+        <div class="footer-nav-column">
+          <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">${general.secondaryNavTitle || 'More'}</h4>
+          {{#if @site.secondary_navigation}}
             {{navigation type="secondary"}}
-          </div>
+          {{else}}
+            <ul class="nav nav-secondary" role="menu">
+              <li class="nav-privacy" role="menuitem"><a href="/privacy/">Privacy Policy</a></li>
+              <li class="nav-terms" role="menuitem"><a href="/terms/">Terms of Service</a></li>
+              <li class="nav-contact" role="menuitem"><a href="/contact/">Contact</a></li>
+            </ul>
+          {{/if}}
         </div>
         ` : ''}
       </div>
@@ -180,8 +137,20 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
       
       <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; ${general.showSubscribeBox !== false ? 'padding-top: 24px; border-top: 1px solid currentColor;' : ''}">
         ${general.showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
-          ${general.showSecondaryNav ? `{{navigation type="secondary"}}` : ''}
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+          ${general.showSecondaryNav !== false ? `
+          <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
+            {{#if @site.secondary_navigation}}
+              {{navigation type="secondary"}}
+            {{else}}
+              <ul class="nav nav-secondary" role="menu">
+                <li class="nav-privacy" role="menuitem"><a href="/privacy/">Privacy Policy</a></li>
+                <li class="nav-terms" role="menuitem"><a href="/terms/">Terms of Service</a></li>
+                <li class="nav-contact" role="menuitem"><a href="/contact/">Contact</a></li>
+              </ul>
+            {{/if}}
+          </nav>
+          ` : ''}
           ${general.showSocialIcons ? socialIconsHtml : ''}
         </div>
       </div>
@@ -191,23 +160,55 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     innerHtml = `
       <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
         ${general.showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
-          ${general.showSecondaryNav ? `{{navigation type="secondary"}}` : ''}
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+          ${general.showSecondaryNav !== false ? `
+          <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
+            {{#if @site.secondary_navigation}}
+              {{navigation type="secondary"}}
+            {{else}}
+              <ul class="nav nav-secondary" role="menu">
+                <li class="nav-privacy" role="menuitem"><a href="/privacy/">Privacy Policy</a></li>
+                <li class="nav-terms" role="menuitem"><a href="/terms/">Terms of Service</a></li>
+                <li class="nav-contact" role="menuitem"><a href="/contact/">Contact</a></li>
+              </ul>
+            {{/if}}
+          </nav>
+          ` : ''}
           ${general.showSocialIcons ? socialIconsHtml : ''}
         </div>
       </div>
     `;
   }
 
+  const pt = spacing.paddingTop !== undefined 
+    ? (typeof spacing.paddingTop === 'number' ? `${spacing.paddingTop}px` : spacing.paddingTop)
+    : (block.styles?.paddingTop 
+        ? (typeof block.styles.paddingTop === 'number' ? `${block.styles.paddingTop}px` : block.styles.paddingTop)
+        : `${spacing.padding?.topBottom || 40}px`);
+
+  const pb = spacing.paddingBottom !== undefined 
+    ? (typeof spacing.paddingBottom === 'number' ? `${spacing.paddingBottom}px` : spacing.paddingBottom)
+    : (block.styles?.paddingBottom 
+        ? (typeof block.styles.paddingBottom === 'number' ? `${block.styles.paddingBottom}px` : block.styles.paddingBottom)
+        : `${spacing.padding?.topBottom || 40}px`);
+
+  const sectionWidth = layout.sectionWidth || "full";
+  const sectionMaxWidth = WIDTH_VALUES[sectionWidth] || "100%";
+  const isSectionFull = sectionWidth === "full";
+
   return `
 <style>
   #${htmlAnchor} {
     ${bgCss}
     color: ${text};
-    padding-top: ${spacing.padding?.topBottom || 40}px;
-    padding-bottom: ${spacing.padding?.topBottom || 40}px;
+    padding-top: ${pt};
+    padding-bottom: ${pb};
     padding-left: ${spacing.padding?.leftRight || 24}px;
     padding-right: ${spacing.padding?.leftRight || 24}px;
+    max-width: ${sectionMaxWidth};
+    margin-left: auto;
+    margin-right: auto;
+    ${!isSectionFull ? 'border-radius: 12px; margin-top: 24px; margin-bottom: 24px;' : ''}
   }
   #${htmlAnchor} a {
     color: inherit;
@@ -217,6 +218,103 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   #${htmlAnchor} a:hover {
     opacity: 0.7;
   }
+
+  #${htmlAnchor} .footer-social-links:empty,
+  #${htmlAnchor} .footer-secondary-nav:empty,
+  #${htmlAnchor} .footer-secondary-column:empty {
+    display: none !important;
+  }
+  #${htmlAnchor} .footer-social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  #${htmlAnchor} .footer-social-links a:hover {
+    opacity: 1;
+  }
+  #${htmlAnchor} .footer-social-links svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  /* Footer Navigation Columns (Multi-Column) */
+  #${htmlAnchor} .footer-nav-column .nav,
+  #${htmlAnchor} .footer-nav-column .nav-secondary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #${htmlAnchor} .footer-nav-column .nav li,
+  #${htmlAnchor} .footer-nav-column .nav-secondary li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  #${htmlAnchor} .footer-nav-column .nav a,
+  #${htmlAnchor} .footer-nav-column .nav-secondary a {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+  }
+  #${htmlAnchor} .footer-nav-column .nav a:hover,
+  #${htmlAnchor} .footer-nav-column .nav-secondary a:hover {
+    opacity: 1;
+  }
+
+  /* Footer Secondary Navigation (Horizontal row in bottom bar) */
+  #${htmlAnchor} .footer-secondary-nav,
+  #${htmlAnchor} .footer-secondary-nav .nav,
+  #${htmlAnchor} .footer-secondary-nav .nav-secondary,
+  #${htmlAnchor} .footer-bottom ul.nav,
+  #${htmlAnchor} .footer-bottom ul.nav-secondary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px 24px;
+  }
+  #${htmlAnchor} .footer-secondary-nav .nav li,
+  #${htmlAnchor} .footer-secondary-nav .nav-secondary li,
+  #${htmlAnchor} .footer-bottom ul.nav li,
+  #${htmlAnchor} .footer-bottom ul.nav-secondary li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+  #${htmlAnchor} .footer-secondary-nav .nav a,
+  #${htmlAnchor} .footer-secondary-nav .nav-secondary a,
+  #${htmlAnchor} .footer-bottom ul.nav a,
+  #${htmlAnchor} .footer-bottom ul.nav-secondary a {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    font-size: 0.875rem;
+    transition: opacity 0.2s;
+  }
+  #${htmlAnchor} .footer-secondary-nav .nav a:hover,
+  #${htmlAnchor} .footer-secondary-nav .nav-secondary a:hover,
+  #${htmlAnchor} .footer-bottom ul.nav a:hover,
+  #${htmlAnchor} .footer-bottom ul.nav-secondary a:hover {
+    opacity: 1;
+  }
+
   html.dark #${htmlAnchor} {
     background-color: #111111 !important;
     color: #ffffff !important;
@@ -227,13 +325,19 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   }
   #${htmlAnchor} .footer-inner {
     margin: 0 auto;
-    max-width: 1200px; /* fallback, but mostly controlled by container class */
+    max-width: 1200px;
   }
   @media (min-width: 768px) {
     #${htmlAnchor} .footer-bottom {
       flex-direction: row !important;
       justify-content: space-between !important;
       text-align: left !important;
+    }
+    #${htmlAnchor} .footer-secondary-nav,
+    #${htmlAnchor} .footer-secondary-nav .nav,
+    #${htmlAnchor} .footer-bottom ul.nav,
+    #${htmlAnchor} .footer-bottom ul.nav-secondary {
+      justify-content: flex-end;
     }
   }
 </style>

@@ -4,10 +4,13 @@ import { componentRegistry } from "@/editor/components/registry";
 /**
  * Resolves a responsive style property (using desktop value by default for server-side theme files)
  */
-function resolveStyleValue(val: any): string | undefined {
+function resolveStyleValue(val: unknown): string | undefined {
   if (!val) return undefined;
   if (typeof val === "string") return val;
-  return val.desktop || undefined;
+  if (typeof val === "object" && val !== null && "desktop" in val) {
+    return (val as { desktop?: string }).desktop || undefined;
+  }
+  return undefined;
 }
 
 /**
@@ -80,8 +83,8 @@ function getInlineStyles(block: BuilderBlock): string {
       const pos = resolveStyleValue(styles.backgroundPosition) || "center";
       stylePairs.push(`background-position: ${pos}`);
 
-      const p = resolveStyleValue(styles.enableParallax) as any;
-      if (p === true || p === 'true' || styles.enableParallax === true) {
+      const p = resolveStyleValue(styles.enableParallax);
+      if (p === 'true' || styles.enableParallax === true) {
         stylePairs.push(`background-attachment: fixed`);
       }
     }
@@ -183,6 +186,19 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 }
 
 /**
+ * Checks whether a block or any of its descendants is a header or footer.
+ */
+function isHeaderOrFooterBlock(blockId: string, blocks: Record<string, BuilderBlock>): boolean {
+  const block = blocks[blockId];
+  if (!block) return false;
+  if (block.type === "header" || block.type === "footer") return true;
+  if (block.childrenIds && block.childrenIds.length > 0) {
+    return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
+  }
+  return false;
+}
+
+/**
  * Compiles a page definition section list to a complete Handlebars markup string.
  */
 export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
@@ -191,10 +207,7 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
 
   const isPageContext = pageName === "page" || pageName.startsWith("custom-");
   const mainContent = page.sections
-    .filter((sectionId) => {
-      const b = doc.blocks[sectionId];
-      return b && b.type !== "header" && b.type !== "footer";
-    })
+    .filter((sectionId) => !isHeaderOrFooterBlock(sectionId, doc.blocks))
     .map((sectionId) => compileBlockToHbs(sectionId, doc.blocks, isPageContext))
     .join("\n");
 
@@ -253,6 +266,39 @@ a {
   color: var(--color-primary);
   text-decoration: none;
 }
+ul.nav, ul.nav-secondary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-footer .footer-bottom ul.nav,
+.site-footer .footer-bottom ul.nav-secondary,
+.site-footer .footer-secondary-nav ul.nav,
+.site-footer .footer-secondary-nav ul.nav-secondary,
+.site-footer .footer-nav-column ul.nav,
+.site-footer .footer-nav-column ul.nav-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+.site-footer .footer-nav-column ul.nav,
+.site-footer .footer-nav-column ul.nav-secondary {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.site-footer .footer-bottom ul.nav li,
+.site-footer .footer-bottom ul.nav-secondary li,
+.site-footer .footer-secondary-nav ul.nav li,
+.site-footer .footer-secondary-nav ul.nav-secondary li,
+.site-footer .footer-nav-column ul.nav li,
+.site-footer .footer-nav-column ul.nav-secondary li {
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+}
 
 /* 2. Design Tokens */
 :root {
@@ -264,7 +310,10 @@ a {
   --color-fg: ${colorForeground};
   --color-primary: ${colorPrimary};
   --color-muted: ${colorMuted};
+  --color-mute: var(--color-muted);
   --color-accent: ${colorAccent};
+  --color-canvas: var(--color-bg);
+  --color-ink: var(--color-fg);
   
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -284,7 +333,44 @@ a {
 html.dark, html.dark-mode {
   --color-bg: #111111;
   --color-fg: #ffffff;
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
   --color-muted: #a3a3a3;
+  --color-mute: #a3a3a3;
+  --color-hairline: #333333;
+  --color-canvas: #111111;
+  --color-ink: #ffffff;
+}
+
+/* Ensure sections and buttons adapt cleanly in Ghost dark mode */
+html.dark .section,
+html.dark-mode .section,
+html.dark .logo-cloud-section,
+html.dark-mode .logo-cloud-section {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+}
+
+html.dark .section[style*="background-color: #ffffff"],
+html.dark-mode .section[style*="background-color: #ffffff"],
+html.dark .section[style*="background-color:#ffffff"],
+html.dark-mode .section[style*="background-color:#ffffff"],
+html.dark .section[style*="background-color: rgb(255, 255, 255)"],
+html.dark-mode .section[style*="background-color: rgb(255, 255, 255)"] {
+  background-color: var(--color-bg) !important;
+}
+
+html.dark .btn-primary,
+html.dark-mode .btn-primary {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+html.dark .btn-secondary,
+html.dark-mode .btn-secondary {
+  background-color: var(--color-bg) !important;
+  color: var(--color-fg) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 
@@ -802,12 +888,24 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   });
 
-  // 4. Generate navigation partial for Ghost compatibility
-  files["partials/navigation.hbs"] = `<ul class="nav">
-{{#foreach navigation}}
-  <li class="nav-{{slug}}{{#if current}} nav-current{{/if}}"><a href="{{url}}">{{label}}</a></li>
-{{/foreach}}
-</ul>`;
+  // 4. Generate navigation partial for Ghost compatibility (supporting both primary and secondary navigation)
+  files["partials/navigation.hbs"] = `{{#if isSecondary}}
+<ul class="nav nav-secondary" role="menu">
+  {{#foreach navigation}}
+    <li class="{{link_class for=(url) class=(concat "nav-" slug)}}" role="menuitem">
+      <a href="{{url absolute="true"}}">{{label}}</a>
+    </li>
+  {{/foreach}}
+</ul>
+{{else}}
+<ul class="nav" role="menu">
+  {{#foreach navigation}}
+    <li class="{{link_class for=(url) class=(concat "nav-" slug)}}" role="menuitem">
+      <a href="{{url absolute="true"}}">{{label}}</a>
+    </li>
+  {{/foreach}}
+</ul>
+{{/if}}`;
 
   // 5. Generate asset stylesheet screen.css
   files["assets/css/screen.css"] = minifyCss(getSkeletonCss(doc));

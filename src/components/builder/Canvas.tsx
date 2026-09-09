@@ -76,10 +76,14 @@ function SortableElement({
   const { active } = useDndContext();
   const isSidebarDragOver = active?.id.toString().startsWith("sidebar-") && isOver;
 
-  const resolveStyleLocal = (val: any): string | undefined => {
+  const resolveStyleLocal = (val: unknown): string | undefined => {
     if (!val) return undefined;
     if (typeof val === "string") return val;
-    return val[deviceMode] || val.desktop || undefined;
+    if (typeof val === "object" && val !== null) {
+      const rec = val as Record<string, string | undefined>;
+      return rec[deviceMode] || rec.desktop || undefined;
+    }
+    return undefined;
   };
 
   const {
@@ -322,10 +326,14 @@ export default function Canvas() {
     return "w-full max-w-[1280px]";
   };
 
-  const resolveStyle = (val: any): string | undefined => {
+  const resolveStyle = (val: unknown): string | undefined => {
     if (!val) return undefined;
     if (typeof val === "string") return val;
-    return val[deviceMode] || val.desktop || undefined;
+    if (typeof val === "object" && val !== null) {
+      const rec = val as Record<string, string | undefined>;
+      return rec[deviceMode] || rec.desktop || undefined;
+    }
+    return undefined;
   };
 
   const renderBlock = (blockId: string, isGlobal = false): React.ReactNode => {
@@ -372,6 +380,16 @@ export default function Canvas() {
         textColor
       } = block.styles;
 
+      const rawBg = resolveStyle(backgroundColor);
+      const resolvedBg = (rawBg === "#ffffff" || rawBg === "#fff" || rawBg === "#fafafa") ? "var(--color-canvas)" : rawBg;
+
+      const rawText = resolveStyle(textColor);
+      const resolvedText = (rawText === "#171717" || rawText === "#000000")
+        ? "var(--color-ink)"
+        : (rawText === "#4d4d4d" || rawText === "#666666")
+          ? "var(--color-body)"
+          : rawText;
+
       return (
         <SortableElement
           key={block.id}
@@ -381,7 +399,7 @@ export default function Canvas() {
           onDelete={handleDelete}
           isGlobal={isGlobal}
           style={{
-            backgroundColor: resolveStyle(backgroundColor) || undefined,
+            backgroundColor: resolvedBg || undefined,
             paddingTop: block.type === 'hero' ? undefined : (resolveStyle(paddingTop) || undefined),
             paddingBottom: block.type === 'hero' ? undefined : (resolveStyle(paddingBottom) || undefined),
             backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
@@ -397,13 +415,13 @@ export default function Canvas() {
             display: resolveStyle(display) || undefined,
             gap: resolveStyle(gap) || undefined,
             justifyContent: resolveStyle(justifyContent) || undefined,
-            textAlign: (resolveStyle(textAlign) as any) || undefined,
+            textAlign: (resolveStyle(textAlign) as React.CSSProperties["textAlign"]) || undefined,
             borderRadius: resolveStyle(borderRadius) || undefined,
             fontSize: resolveStyle(fontSize) || undefined,
             fontWeight: resolveStyle(fontWeight) || undefined,
             letterSpacing: resolveStyle(letterSpacing) || undefined,
             marginBottom: resolveStyle(marginBottom) || undefined,
-            color: resolveStyle(textColor) || undefined,
+            color: resolvedText || undefined,
           }}
           className={`builder-block builder-block-${block.type} relative w-full ${block.type === "header" || block.type === "footer" ? "overflow-visible z-50" : "overflow-hidden z-10"}`}
         >
@@ -479,6 +497,16 @@ export default function Canvas() {
     if (block.type === "footer" && !footerBlockId) footerBlockId = block.id;
   });
 
+  const isHeaderOrFooterBlock = (blockId: string, blocks: Record<string, BuilderBlock>): boolean => {
+    const block = blocks[blockId];
+    if (!block) return false;
+    if (block.type === "header" || block.type === "footer") return true;
+    if (block.childrenIds && block.childrenIds.length > 0) {
+      return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
+    }
+    return false;
+  };
+
   return (
     <div className="flex-1 bg-brand-canvas-soft overflow-auto p-8 mesh-glow select-none">
       <div 
@@ -494,10 +522,7 @@ export default function Canvas() {
         <div className="flex-1 w-full flex flex-col">
           {pageSections.length > 0 ? (
             <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
-              {pageSections.filter(sid => {
-                const b = themeDoc.blocks[sid];
-                return b && b.type !== "header" && b.type !== "footer";
-              }).map((sid) => renderBlock(sid))}
+              {pageSections.filter(sid => !isHeaderOrFooterBlock(sid, themeDoc.blocks)).map((sid) => renderBlock(sid))}
             </SortableContext>
           ) : (
             <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">

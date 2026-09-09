@@ -6,8 +6,13 @@ const getBackgroundStyle = (styles: any): React.CSSProperties => {
   const defaultBg = "transparent";
 
   switch (bgType) {
-    case "solid":
-      return { backgroundColor: styles?.backgroundColor || defaultBg };
+    case "solid": {
+      const bg = styles?.backgroundColor;
+      if (!bg || bg === "#ffffff" || bg === "#fff") {
+        return { backgroundColor: "var(--color-canvas)" };
+      }
+      return { backgroundColor: bg };
+    }
     case "linear": {
       const c1 = styles?.gradientColor1 || "#000000";
       const c2 = styles?.gradientColor2 || "#333333";
@@ -108,7 +113,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
     
   const layout = block.styles?.layout || "center";
 
-  let wrapperClasses = `w-full relative overflow-hidden ${!showCover && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`;
+  let wrapperClasses = `hero-block w-full relative overflow-hidden transition-colors ${!showCover && block.styles?.backgroundType === "mesh" ? 'mesh-glow' : ''}`;
   let contentClasses = "mx-auto px-6 flex relative z-10 w-full";
   let textContainerClasses = "flex flex-col gap-5";
   let buttonGroupClasses = "mt-6 flex flex-wrap gap-4";
@@ -168,7 +173,11 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
         <div className={textContainerClasses}>
           {eyebrowText && (
             <span 
-              className={`text-[11px] font-mono uppercase tracking-wider font-semibold px-3 py-1 rounded-full mb-2 ${applyCustomColor ? 'bg-white/10' : 'bg-brand-link-bg-soft text-brand-link'}`}
+              className={`text-[11px] font-mono uppercase tracking-wider font-semibold px-3 py-1 rounded-full mb-2 ${
+                applyCustomColor 
+                  ? 'bg-white/10 text-white' 
+                  : 'bg-brand-link-bg-soft text-brand-link dark:bg-white/10 dark:text-brand-ink'
+              }`}
               style={applyCustomColor ? { color: textColor || '#ffffff' } : {}}
             >
               {eyebrowText}
@@ -182,16 +191,24 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
           </p>
           <div className={buttonGroupClasses}>
             <button 
-              className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-sm flex items-center justify-center"
+              className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-sm flex items-center justify-center cursor-pointer"
               style={{ 
-                backgroundColor: block.props.buttonBgColor || 'var(--color-primary)', 
-                color: block.props.buttonTextColor || 'var(--color-on-primary)' 
+                backgroundColor: block.props.buttonBgColor && block.props.buttonBgColor !== '#171717'
+                  ? block.props.buttonBgColor 
+                  : 'var(--color-primary)', 
+                color: block.props.buttonTextColor && block.props.buttonTextColor !== '#ffffff'
+                  ? block.props.buttonTextColor 
+                  : 'var(--color-on-primary)' 
               }}
             >
               {buttonLabel || "Start Free"}
             </button>
             {(showSecondaryButton ?? true) && (
-              <button className="border-2 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all flex items-center justify-center border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]">
+              <button className={`border-2 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all flex items-center justify-center cursor-pointer ${
+                applyCustomColor 
+                  ? 'border-white/20 text-white hover:border-white' 
+                  : 'border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]'
+              }`}>
                 {secondaryButtonLabel || "Documentation"}
               </button>
             )}
@@ -208,7 +225,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             ) : imageUrl ? (
               <img src={imageUrl} alt={imageAlt || "Hero Image"} className="w-full h-auto rounded-lg shadow-lg object-cover max-h-[600px]" />
             ) : (
-              <div className="w-full aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
+              <div className="w-full aspect-video bg-gray-100 dark:bg-white/5 rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
                 Image Placeholder
               </div>
             )}

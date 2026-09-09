@@ -415,6 +415,9 @@ export const CanvasElement = ({ block }: {
     </nav>
   );
 
+  const headerPt = p.spacing?.paddingTop !== undefined ? `${p.spacing.paddingTop}px` : (block.styles?.paddingTop || "20px");
+  const headerPb = p.spacing?.paddingBottom !== undefined ? `${p.spacing.paddingBottom}px` : (block.styles?.paddingBottom || "20px");
+
   return (
     <div
       className="w-full bg-transparent p-0"
@@ -445,7 +448,7 @@ export const CanvasElement = ({ block }: {
             maxWidth: contentMaxWidth,
             width: "100%",
             height: isMobile ? "64px" : "auto",
-            padding: isMobile ? "0 16px" : "20px 24px",
+            padding: isMobile ? "0 16px" : `${headerPt} 24px ${headerPb} 24px`,
             display: "flex",
             alignItems: "center",
           }}
