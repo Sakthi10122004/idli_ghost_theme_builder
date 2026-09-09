@@ -76,20 +76,32 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     >
       <style>{`
         #team-${block.id} .team-grid {
-          display: grid;
-          grid-template-columns: repeat(1, minmax(0, 1fr));
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
           gap: 2.5rem 1.5rem;
+        }
+        #team-${block.id} .team-grid > * {
+          width: 100%;
+          max-width: 24rem;
+          flex-shrink: 0;
         }
         @container (min-width: 580px) {
           #team-${block.id} .team-grid {
-            grid-template-columns: repeat(${Math.min(2, columns)}, minmax(0, 1fr));
             gap: 3rem 2rem;
+          }
+          #team-${block.id} .team-grid > * {
+            width: calc((100% - ${(Math.min(2, columns) - 1) * 2}rem) / ${Math.min(2, columns)});
+            max-width: none;
           }
         }
         @container (min-width: 900px) {
           #team-${block.id} .team-grid {
-            grid-template-columns: repeat(${columns}, minmax(0, 1fr));
             gap: 3.5rem 2rem;
+          }
+          #team-${block.id} .team-grid > * {
+            width: calc((100% - ${(columns - 1) * 2}rem) / ${columns});
+            max-width: none;
           }
         }
       `}</style>

@@ -62,9 +62,12 @@ export const generateHTML = (block: BuilderBlock): string => {
       : "";
 
   const tag = general.dynamicTag || "team";
-  const dynamicMembersHtml = `{{#get "posts" filter="tag:${tag}" limit="100"}}
+  const dynamicMembersHtml = `{{#get "posts" filter="tag:${tag}" limit="100" formats="html"}}
       {{#foreach posts}}
         <div class="team-card">
+          {{#if canonical_url}}
+            <a href="{{canonical_url}}" target="_blank" rel="noopener" class="team-photo-link">
+          {{/if}}
           {{#if feature_image}}
             <div class="team-photo-container">
               <img src="{{img_url feature_image size="m"}}" alt="{{title}}" class="team-photo" loading="lazy" />
@@ -74,13 +77,18 @@ export const generateHTML = (block: BuilderBlock): string => {
               <span class="team-initials">{{#if title}}{{title}}{{else}}T{{/if}}</span>
             </div>
           {{/if}}
+          {{#if canonical_url}}
+            </a>
+          {{/if}}
           <div class="team-info">
             <h3 class="team-name">{{title}}</h3>
             {{#if custom_excerpt}}
               <p class="team-role">{{custom_excerpt}}</p>
             {{/if}}
-            {{#if content}}
-              <div class="team-bio">{{content}}</div>
+            {{#if html}}
+              <div class="team-bio">{{{html}}}</div>
+            {{else if content}}
+              <div class="team-bio">{{{content}}}</div>
             {{/if}}
           </div>
         </div>
@@ -127,27 +135,43 @@ export const generateHTML = (block: BuilderBlock): string => {
     margin-bottom: 0;
   }
   #${wrapperId} .team-grid {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 2.5rem 1.5rem;
-  }
-  @media (min-width: 640px) {
-    #${wrapperId} .team-grid {
-      grid-template-columns: repeat(${Math.min(2, columns)}, minmax(0, 1fr));
-      gap: 3rem 2rem;
-    }
-  }
-  @media (min-width: 1024px) {
-    #${wrapperId} .team-grid {
-      grid-template-columns: repeat(${columns}, minmax(0, 1fr));
-      gap: 3.5rem 2rem;
-    }
   }
   #${wrapperId} .team-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    width: 100%;
+    max-width: 24rem;
+    flex-shrink: 0;
+  }
+  @media (min-width: 640px) {
+    #${wrapperId} .team-grid {
+      gap: 3rem 2rem;
+    }
+    #${wrapperId} .team-card {
+      width: calc((100% - ${(Math.min(2, columns) - 1) * 2}rem) / ${Math.min(2, columns)});
+      max-width: none;
+    }
+  }
+  @media (min-width: 1024px) {
+    #${wrapperId} .team-grid {
+      gap: 3.5rem 2rem;
+    }
+    #${wrapperId} .team-card {
+      width: calc((100% - ${(columns - 1) * 2}rem) / ${columns});
+      max-width: none;
+    }
+  }
+  #${wrapperId} .team-photo-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: ${borderRadiusCss};
   }
   #${wrapperId} .team-photo-container {
     width: 7rem;
