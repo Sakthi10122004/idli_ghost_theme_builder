@@ -22,8 +22,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     photoShape === "circle"
       ? "rounded-full"
       : photoShape === "square"
-      ? "rounded-none"
-      : "rounded-2xl";
+        ? "rounded-none"
+        : "rounded-2xl";
 
   const renderPhoto = (member: TeamMember) => {
     let resolvedUrl = member.photoUrl;
@@ -66,12 +66,11 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   return (
     <div
       id={`team-${block.id}`}
-      className={`relative w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`}
+      className={`relative w-full min-w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`}
       style={{
         ...bgStyle,
         paddingTop: spacing.paddingTop || "5rem",
         paddingBottom: spacing.paddingBottom || "5rem",
-        containerType: "inline-size",
       }}
     >
       <style>{`
@@ -80,13 +79,14 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           flex-wrap: wrap;
           justify-content: center;
           gap: 2.5rem 1.5rem;
+          width: 100%;
         }
         #team-${block.id} .team-grid > * {
           width: 100%;
           max-width: 24rem;
           flex-shrink: 0;
         }
-        @container (min-width: 580px) {
+        @media (min-width: 580px) {
           #team-${block.id} .team-grid {
             gap: 3rem 2rem;
           }
@@ -95,7 +95,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             max-width: none;
           }
         }
-        @container (min-width: 900px) {
+        @media (min-width: 900px) {
           #team-${block.id} .team-grid {
             gap: 3.5rem 2rem;
           }
@@ -106,7 +106,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">
         {/* Dynamic Badge Banner in Editor */}
         {general.useDynamicData && (
           <div className="mb-8 flex items-center justify-center gap-2 text-xs font-mono font-medium text-blue-700 bg-blue-50/80 border border-blue-200/80 rounded-full px-3.5 py-1 w-fit mx-auto shadow-xs">
@@ -117,10 +117,10 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
         {/* Section Header */}
         {(general.heading || general.subheading) && (
-          <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="w-full min-w-full max-w-2xl mx-auto text-center mb-14">
             {general.heading && (
               <h2
-                className="text-3xl sm:text-4xl font-semibold tracking-tight text-brand-ink"
+                className="w-full text-3xl sm:text-4xl font-semibold tracking-tight text-brand-ink"
                 style={{ color: appearance?.headingColor || "var(--color-ink)" }}
               >
                 {general.heading}
@@ -128,7 +128,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             )}
             {general.subheading && (
               <p
-                className="mt-3 text-base sm:text-lg leading-relaxed text-brand-body"
+                className="w-full mt-3 text-base sm:text-lg leading-relaxed text-brand-body"
                 style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}
               >
                 {general.subheading}
@@ -138,7 +138,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         )}
 
         {/* Member Grid */}
-        <div className="team-grid">
+        <div className="team-grid w-full min-w-full">
           {members.map((member, idx) => (
             <div
               key={member.id || idx}
