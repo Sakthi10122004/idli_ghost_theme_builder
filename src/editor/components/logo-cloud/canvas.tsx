@@ -55,7 +55,7 @@ export function CanvasElement({ block }: { block: BuilderBlock }) {
     let resolvedUrl = logo.imageUrl?.trim();
     if (resolvedUrl && resolvedUrl.startsWith("asset://")) {
       const path = resolvedUrl.replace("asset://", "");
-      resolvedUrl = assets[path] || resolvedUrl;
+      resolvedUrl = assets[path] || assets[`assets/${path}`] || resolvedUrl;
     }
 
     const finalSrc = resolvedUrl || GENERIC_SVG_PLACEHOLDER;
