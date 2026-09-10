@@ -41,6 +41,23 @@ const SegmentedControl = ({ options, value, onChange }: {
   </div>
 );
 
+const parsePaddingNum = (val: unknown, fallback = 40): number => {
+  if (typeof val === "number") return isNaN(val) ? fallback : val;
+  if (typeof val === "string") {
+    if (val.endsWith("rem")) {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? fallback : Math.round(parsed * 16);
+    }
+    const parsed = parseInt(val, 10);
+    return isNaN(parsed) ? fallback : parsed;
+  }
+  if (typeof val === "object" && val !== null) {
+    const resp = val as Record<string, unknown>;
+    return parsePaddingNum(resp.desktop || resp.mobile || resp.tablet, fallback);
+  }
+  return fallback;
+};
+
 export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
   onChangeProps: (props: Partial<LogoCloudProps>) => void;
@@ -50,6 +67,9 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
   const general = p.general;
   const logos = p.logos || [];
   const addAsset = useEditorStore(s => s.addAsset);
+
+  const topPaddingNum = parsePaddingNum(p.spacing?.paddingTop ?? block.styles?.paddingTop, 40);
+  const bottomPaddingNum = parsePaddingNum(p.spacing?.paddingBottom ?? block.styles?.paddingBottom, 40);
 
   const updateGeneral = (patch: Partial<LogoCloudProps['general']>) => {
     onChangeProps({ general: { ...general, ...patch } });
@@ -98,17 +118,32 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
             value={item.name} 
             onChange={(e) => update({ name: e.target.value })}
             className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
+            placeholder="Brand Name"
           />
         </div>
-        <div className="flex flex-col gap-1 flex-1">
-          <label className="text-[10px] font-semibold text-gray-500">Link URL (Optional)</label>
-          <input 
-            type="text" 
-            value={item.linkUrl || ""} 
-            onChange={(e) => update({ linkUrl: e.target.value })}
-            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-          />
-        </div>
+        {general.enableLinks !== false && (
+          <div className="flex flex-col gap-1 flex-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-semibold text-gray-500">Hyperlink URL</label>
+              {item.linkUrl && (
+                <span className="text-[8px] text-blue-600 font-mono font-medium">✓ Linked</span>
+              )}
+            </div>
+            <input 
+              type="text" 
+              value={item.linkUrl || ""} 
+              onChange={(e) => update({ linkUrl: e.target.value })}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                if (val && !/^(https?:[/][/]|[/][/]|mailto:|tel:|#)/i.test(val)) {
+                  update({ linkUrl: `https://${val}` });
+                }
+              }}
+              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none font-mono text-[11px]"
+              placeholder="https://example.com"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -119,15 +154,11 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
       <div className="flex flex-col gap-2">
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">General</span>
         
-        <div className="flex flex-col gap-1.5 mb-2 border-b border-brand-hairline pb-3">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">Data Source</label>
-          <SegmentedControl
-            options={[
-              { label: "Static Assets", value: "static" },
-              { label: "Ghost Data", value: "dynamic" }
-            ]}
-            value={general.dataSource || "static"}
-            onChange={(v) => updateGeneral({ dataSource: v as "static" | "dynamic" })}
+        <div className="flex items-center justify-between mb-2 border-b border-brand-hairline pb-3">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Use Dynamic Ghost Data</label>
+          <Switch
+            checked={general.dataSource === "dynamic"}
+            onChange={(c) => updateGeneral({ dataSource: c ? "dynamic" : "static" })}
           />
         </div>
 
@@ -191,6 +222,88 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
           </div>
           <Switch checked={general.invertInDark !== false} onChange={(c) => updateGeneral({ invertInDark: c })} />
         </div>
+
+        {/* Logo Size Adjustment */}
+        <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-brand-hairline">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Logo Size (Height)</label>
+            <span className="text-[10px] font-mono text-brand-ink bg-gray-100 px-1.5 py-0.5 rounded font-bold">
+              {general.logoHeight || 36}px
+            </span>
+          </div>
+          <input
+            type="range"
+            min="20"
+            max="80"
+            step="2"
+            value={general.logoHeight || 36}
+            onChange={(e) => updateGeneral({ logoHeight: parseInt(e.target.value, 10) })}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+          <div className="flex gap-1 mt-0.5">
+            {[
+              { label: "S (28px)", size: 28 },
+              { label: "M (36px)", size: 36 },
+              { label: "L (48px)", size: 48 },
+              { label: "XL (64px)", size: 64 }
+            ].map(preset => (
+              <button
+                key={preset.size}
+                type="button"
+                onClick={() => updateGeneral({ logoHeight: preset.size })}
+                className={`flex-1 py-1 text-[9px] rounded-xs border transition-all ${
+                  (general.logoHeight || 36) === preset.size
+                    ? 'bg-brand-ink text-white border-brand-ink font-semibold shadow-2xs'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Hyperlink Logos Toggle */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-brand-hairline">
+          <div className="flex flex-col">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Hyperlink Logos</label>
+            <span className="text-[10px] text-brand-mute">Allow clicking logos to open links</span>
+          </div>
+          <Switch checked={general.enableLinks !== false} onChange={(c) => updateGeneral({ enableLinks: c })} />
+        </div>
+
+        {general.enableLinks !== false && (
+          <div className="flex flex-col gap-2 pl-3 border-l-2 border-brand-hairline ml-1 my-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-sans text-brand-body">Open in New Tab</label>
+              <input
+                type="checkbox"
+                checked={general.openInNewTab !== false}
+                onChange={(e) => updateGeneral({ openInNewTab: e.target.checked })}
+                className="rounded-xs border-gray-300 w-3.5 h-3.5 accent-brand-primary cursor-pointer"
+              />
+            </div>
+
+            {general.dataSource === "dynamic" && (
+              <div className="flex flex-col gap-1 mt-1">
+                <label className="text-[10px] font-semibold text-gray-600">Dynamic Link Target</label>
+                <select
+                  value={general.dynamicLinkSource || "excerpt"}
+                  onChange={(e) => updateGeneral({ dynamicLinkSource: e.target.value as "post" | "excerpt" })}
+                  className="w-full px-2 py-1 border border-brand-hairline rounded-sm text-xs focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="excerpt">Excerpt URL (External Partner Site)</option>
+                  <option value="post">Post URL (Ghost Post / Story)</option>
+                </select>
+                <p className="text-[9px] text-brand-mute leading-snug">
+                  {general.dynamicLinkSource === "post"
+                    ? "Links directly to the internal Ghost post / story on your site (e.g. /my-post/)."
+                    : "External partner website URL from the post excerpt (e.g. https://www.tech4goodcommunity.com). Automatically prepends https:// if omitted."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Logos List or Dynamic Settings */}
@@ -240,27 +353,55 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
       />
 
       {/* Spacing */}
-      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-3 mt-1">
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Spacing</span>
-        <div className="flex gap-2">
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-[10px] font-semibold text-gray-500">Top Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingTop || ""} 
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            />
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Top Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {topPaddingNum}px
+            </span>
           </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-[10px] font-semibold text-gray-500">Bottom Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingBottom || ""} 
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            />
+          <input
+            type="range"
+            min="0"
+            max="160"
+            step="4"
+            value={topPaddingNum}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              onChangeProps({ spacing: { ...p.spacing, paddingTop: `${val}px` } });
+              if (onChangeStyles) {
+                onChangeStyles({ paddingTop: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Bottom Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {bottomPaddingNum}px
+            </span>
           </div>
+          <input
+            type="range"
+            min="0"
+            max="160"
+            step="4"
+            value={bottomPaddingNum}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              onChangeProps({ spacing: { ...p.spacing, paddingBottom: `${val}px` } });
+              if (onChangeStyles) {
+                onChangeStyles({ paddingBottom: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
         </div>
       </div>
 

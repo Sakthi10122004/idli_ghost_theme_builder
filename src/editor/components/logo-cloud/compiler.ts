@@ -18,6 +18,22 @@ export const generateHTML = (block: BuilderBlock): string => {
     ? "grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" 
     : "transition-all duration-300 opacity-80 hover:opacity-100";
 
+  const logoHeight = general.logoHeight || 36;
+  const maxLogoWidth = Math.round(logoHeight * 4.5);
+  const enableLinks = general.enableLinks !== false;
+  const openInNewTab = general.openInNewTab !== false;
+  const targetAttr = openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+
+  const normalizeUrl = (url?: string): string => {
+    if (!url) return "";
+    const trimmed = url.trim();
+    if (!trimmed) return "";
+    if (/^(https?:[/][/]|[/][/]|mailto:|tel:|#)/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   const renderLogo = (logo: { id: string; name: string; imageUrl?: string; linkUrl?: string }) => {
     let src = logo.imageUrl?.trim();
     if (src && src.startsWith("asset://")) {
@@ -26,27 +42,35 @@ export const generateHTML = (block: BuilderBlock): string => {
     }
     const finalSrc = src || GENERIC_SVG_PLACEHOLDER;
 
-    const inner = logo.linkUrl
-      ? `<a href="${logo.linkUrl}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" /></a>`
+    const isLinked = enableLinks && !!logo.linkUrl;
+    const finalUrl = isLinked ? normalizeUrl(logo.linkUrl) : "";
+    const inner = isLinked
+      ? `<a href="${finalUrl}" ${targetAttr} class="logo-cloud-link" title="${logo.name || 'Logo'}"><img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" /></a>`
       : `<img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" />`;
     return `<div class="logo-cloud-item ${grayscaleClass}">${inner}</div>`;
   };
 
   let contentHtml = "";
+  const isExcerptSource = general.dynamicLinkSource !== "post";
 
   if (general.dataSource === "dynamic") {
     const limit = general.dynamicLimit === "all" ? 100 : (general.dynamicLimit || 10);
     const tag = general.dynamicTag || "hash-partner-logo";
+    const dynamicLinkField = isExcerptSource ? "custom_excerpt" : "url";
     
     const ghostLoop = `
       {{#foreach posts}}
         {{#if feature_image}}
           <div class="logo-cloud-item ${grayscaleClass}">
-            {{#if custom_excerpt}}
-              <a href="{{custom_excerpt}}" target="_blank" rel="noopener noreferrer" class="logo-cloud-link"><img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" /></a>
-            {{else}}
+            ${enableLinks ? `
+              {{#if ${dynamicLinkField}}}
+                <a href="{{${dynamicLinkField}}}" ${targetAttr} class="logo-cloud-link" ${isExcerptSource ? 'data-link-source="excerpt"' : 'data-link-source="post"'} title="{{title}}"><img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" /></a>
+              {{else}}
+                <img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" />
+              {{/if}}
+            ` : `
               <img src="{{feature_image}}" alt="{{title}}" class="logo-cloud-img" />
-            {{/if}}
+            `}
           </div>
         {{/if}}
       {{/foreach}}
@@ -123,11 +147,58 @@ export const generateHTML = (block: BuilderBlock): string => {
     </div>
   ` : '';
 
+  const resolveStyleStr = (val: unknown, fallback: string): string => {
+    if (!val) return fallback;
+    if (typeof val === "string") return val;
+    if (typeof val === "number") return `${val}px`;
+    if (typeof val === "object" && val !== null) {
+      const resp = val as Record<string, unknown>;
+      const resolved = resp.desktop || resp.mobile || resp.tablet;
+      if (typeof resolved === "string") return resolved;
+      if (typeof resolved === "number") return `${resolved}px`;
+    }
+    return fallback;
+  };
+
+  const pt = resolveStyleStr(spacing?.paddingTop ?? styles?.paddingTop, "40px");
+  const pb = resolveStyleStr(spacing?.paddingBottom ?? styles?.paddingBottom, "40px");
+  const excerptFixScript = (general.dataSource === "dynamic" && enableLinks && isExcerptSource) ? `
+<script>
+(function() {
+  function normalizeLogoCloudLinks() {
+    var wrapper = document.getElementById("${wrapperId}");
+    if (!wrapper) return;
+    var links = wrapper.querySelectorAll("a.logo-cloud-link[data-link-source='excerpt']");
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i];
+      var raw = (a.getAttribute("href") || "").trim();
+      if (raw && !/^(https?:[/][/]|[/][/]|mailto:|tel:|#)/i.test(raw)) {
+        a.setAttribute("href", "https://" + raw);
+      }
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", normalizeLogoCloudLinks);
+  } else {
+    normalizeLogoCloudLinks();
+  }
+  document.addEventListener("click", function(e) {
+    var a = e.target && e.target.closest ? e.target.closest("#${wrapperId} a.logo-cloud-link[data-link-source='excerpt']") : null;
+    if (a) {
+      var raw = (a.getAttribute("href") || "").trim();
+      if (raw && !/^(https?:[/][/]|[/][/]|mailto:|tel:|#)/i.test(raw)) {
+        a.setAttribute("href", "https://" + raw);
+      }
+    }
+  }, true);
+})();
+</script>` : '';
+
   return `<style>
   #${wrapperId} {
     ${bgCss}
-    padding-top: ${spacing.paddingTop || '4rem'};
-    padding-bottom: ${spacing.paddingBottom || '4rem'};
+    padding-top: ${pt};
+    padding-bottom: ${pb};
     position: relative;
     width: 100%;
   }
@@ -162,15 +233,20 @@ export const generateHTML = (block: BuilderBlock): string => {
     transition: all 0.3s ease;
   }
   #${wrapperId} .logo-cloud-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  #${wrapperId} .logo-cloud-link:hover {
+    transform: translateY(-2px);
   }
   #${wrapperId} .logo-cloud-img {
-    height: 2rem;
-    max-height: 2.25rem;
+    height: ${logoHeight}px;
+    max-height: ${logoHeight}px;
     width: auto;
-    max-width: 10rem;
+    max-width: ${maxLogoWidth}px;
     object-fit: contain;
     transition: all 0.3s ease;
   }
@@ -274,7 +350,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     ${headingHtml}
     ${contentHtml}
   </div>
-</div>`;
+</div>${excerptFixScript}`;
 };
 
 export const compileToHbs = generateHTML;

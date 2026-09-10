@@ -36,6 +36,21 @@ export function CanvasElement({ block }: { block: BuilderBlock }) {
     ? "dark-invert dark:invert dark:brightness-95 dark:hover:brightness-100" 
     : "";
 
+  const logoHeight = general.logoHeight || 36;
+  const maxLogoWidth = Math.round(logoHeight * 4.5);
+  const enableLinks = general.enableLinks !== false;
+  const openInNewTab = general.openInNewTab !== false;
+
+  const normalizeUrl = (url?: string): string => {
+    if (!url) return "";
+    const trimmed = url.trim();
+    if (!trimmed) return "";
+    if (/^(https?:[/][/]|[/][/]|mailto:|tel:|#)/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   const renderLogo = (logo: { id: string; name: string; imageUrl?: string; linkUrl?: string }, keySuffix?: string | number) => {
     let resolvedUrl = logo.imageUrl?.trim();
     if (resolvedUrl && resolvedUrl.startsWith("asset://")) {
@@ -45,41 +60,65 @@ export function CanvasElement({ block }: { block: BuilderBlock }) {
 
     const finalSrc = resolvedUrl || GENERIC_SVG_PLACEHOLDER;
     const key = keySuffix !== undefined ? `${logo.id}-${keySuffix}` : logo.id;
+    const isLinked = enableLinks && !!logo.linkUrl;
+    const finalLinkUrl = isLinked ? normalizeUrl(logo.linkUrl) : "";
+
+    const imgElement = (
+      <img
+        src={finalSrc}
+        alt={logo.name || "Logo"}
+        className={`logo-cloud-img w-auto object-contain transition-all duration-300 ${darkInvertClass} ${isLinked ? "hover:scale-105" : ""}`}
+        style={{
+          height: `${logoHeight}px`,
+          maxHeight: `${logoHeight}px`,
+          maxWidth: `${maxLogoWidth}px`,
+        }}
+      />
+    );
 
     return (
-      <div key={key} className={`logo-cloud-item flex items-center justify-center px-4 py-2 transition-all duration-300 shrink-0 ${grayscaleClass}`}>
-        {logo.linkUrl ? (
+      <div key={key} className={`logo-cloud-item flex items-center justify-center px-4 py-2 transition-all duration-300 shrink-0 ${grayscaleClass} ${isLinked ? "cursor-pointer" : ""}`}>
+        {isLinked ? (
           <a
-            href={logo.linkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={finalLinkUrl}
+            target={openInNewTab ? "_blank" : "_self"}
+            rel={openInNewTab ? "noopener noreferrer" : undefined}
             className="logo-cloud-link block flex items-center justify-center"
+            title={`${logo.name || "Logo"}${finalLinkUrl ? ` (${finalLinkUrl})` : ""}`}
             onClick={(e) => e.preventDefault()}
           >
-            <img
-              src={finalSrc}
-              alt={logo.name || "Logo"}
-              className={`logo-cloud-img h-8 md:h-9 w-auto max-w-[140px] md:max-w-[160px] object-contain transition-all duration-300 ${darkInvertClass}`}
-            />
+            {imgElement}
           </a>
         ) : (
-          <img
-            src={finalSrc}
-            alt={logo.name || "Logo"}
-            className={`logo-cloud-img h-8 md:h-9 w-auto max-w-[140px] md:max-w-[160px] object-contain transition-all duration-300 ${darkInvertClass}`}
-          />
+          imgElement
         )}
       </div>
     );
   };
+
+  const resolveStyleStr = (val: unknown, fallback: string): string => {
+    if (!val) return fallback;
+    if (typeof val === "string") return val;
+    if (typeof val === "number") return `${val}px`;
+    if (typeof val === "object" && val !== null) {
+      const resp = val as Record<string, unknown>;
+      const resolved = resp.desktop || resp.mobile || resp.tablet;
+      if (typeof resolved === "string") return resolved;
+      if (typeof resolved === "number") return `${resolved}px`;
+    }
+    return fallback;
+  };
+
+  const paddingTop = resolveStyleStr(spacing?.paddingTop ?? styles?.paddingTop, "40px");
+  const paddingBottom = resolveStyleStr(spacing?.paddingBottom ?? styles?.paddingBottom, "40px");
 
   return (
     <div 
       className={`logo-cloud-section relative w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`} 
       style={{ 
         ...bgStyle, 
-        paddingTop: spacing.paddingTop, 
-        paddingBottom: spacing.paddingBottom,
+        paddingTop, 
+        paddingBottom,
         color: "var(--color-ink)",
       }}
     >
