@@ -1,5 +1,6 @@
 import { ThemeDocument, BuilderBlock } from "../../types/theme";
 import { componentRegistry } from "@/editor/components/registry";
+import { toTranslucent } from "@/editor/components/shared/background";
 
 /**
  * Resolves a responsive style property (using desktop value by default for server-side theme files)
@@ -65,9 +66,18 @@ function getInlineStyles(block: BuilderBlock): string {
   }
 
   // 3. Backgrounds & Borders & Shadows
+  const isLogoCloud = block.type === "logo-cloud";
+  const glassBlur = isLogoCloud ? undefined : resolveStyleValue(styles.backdropBlur);
+  const glassEnabled = !!glassBlur && glassBlur !== "none" && glassBlur !== "0px";
+
   if (styles.backgroundColor) {
-    const val = resolveStyleValue(styles.backgroundColor);
+    let val = resolveStyleValue(styles.backgroundColor);
+    if (glassEnabled && val) {
+      val = toTranslucent(val);
+    }
     if (val) stylePairs.push(`background-color: ${val}`);
+  } else if (glassEnabled) {
+    stylePairs.push(`background-color: rgba(255, 255, 255, 0.75)`);
   }
   if (styles.backgroundImage) {
     const val = resolveStyleValue(styles.backgroundImage);
@@ -93,21 +103,18 @@ function getInlineStyles(block: BuilderBlock): string {
     const val = resolveStyleValue(styles.borderRadius);
     if (val) stylePairs.push(`border-radius: ${val}`);
   }
-  if (styles.boxShadow) {
+  if (styles.boxShadow && !isLogoCloud) {
     const val = resolveStyleValue(styles.boxShadow);
-    if (val) stylePairs.push(`box-shadow: ${val}`);
+    if (val && val !== "none") stylePairs.push(`box-shadow: ${val}`);
   }
   if (styles.borderWidth && styles.borderWidth !== "0px") {
     const w = resolveStyleValue(styles.borderWidth);
     const c = resolveStyleValue(styles.borderColor) || "#e2e8f0";
     stylePairs.push(`border: ${w} solid ${c}`);
   }
-  if (styles.backdropBlur) {
-    const b = resolveStyleValue(styles.backdropBlur);
-    if (b) {
-      stylePairs.push(`backdrop-filter: blur(${b})`);
-      stylePairs.push(`-webkit-backdrop-filter: blur(${b})`);
-    }
+  if (glassEnabled && glassBlur) {
+    stylePairs.push(`backdrop-filter: blur(${glassBlur})`);
+    stylePairs.push(`-webkit-backdrop-filter: blur(${glassBlur})`);
   }
   if (styles.opacity) {
     const o = resolveStyleValue(styles.opacity);
@@ -152,10 +159,22 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     const hover = getHoverClass(block);
 
     if (inline || hover) {
-      const tagMatch = markup.match(/^<([a-zA-Z0-9-]+)([^>]*)>/);
+      // Find the first non-style HTML opening tag to inject attributes
+      const tagRegex = /<([a-zA-Z0-9-]+)([^>]*)>/g;
+      let tagMatch: RegExpExecArray | null = null;
+      let m: RegExpExecArray | null;
+      while ((m = tagRegex.exec(markup)) !== null) {
+        if (m[1].toLowerCase() !== "style") {
+          tagMatch = m;
+          break;
+        }
+      }
+
       if (tagMatch) {
         const tagName = tagMatch[1];
         let attributes = tagMatch[2];
+        const matchIndex = tagMatch.index;
+        const matchLength = tagMatch[0].length;
 
         if (hover) {
           if (attributes.includes('class="')) {
@@ -177,7 +196,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
           }
         }
 
-        markup = markup.replace(tagMatch[0], `<${tagName}${attributes}>`);
+        markup = markup.substring(0, matchIndex) + `<${tagName}${attributes}>` + markup.substring(matchIndex + matchLength);
       }
     }
     return markup;
@@ -374,7 +393,31 @@ html.dark-mode .btn-secondary {
 }
 
 
-/* 3. Shared Structural Utilities */
+/* 3. Shared Structural Utilities & Hover Micro-Interactions */
+.hover-effect-scale {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-scale:hover {
+  transform: scale(1.02) !important;
+  z-index: 30 !important;
+}
+
+.hover-effect-float {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-float:hover {
+  transform: translateY(-4px) !important;
+  z-index: 30 !important;
+}
+
+.hover-effect-glow {
+  transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+.hover-effect-glow:hover {
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+  z-index: 30 !important;
+}
+
 .container-width {
   max-width: var(--container-width);
 }

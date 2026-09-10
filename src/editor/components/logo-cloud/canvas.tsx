@@ -27,7 +27,10 @@ export function CanvasElement({ block }: { block: BuilderBlock }) {
         : appearance.backgroundColor,
   };
 
-  const bgStyle = getBackgroundStyle(styles, resolvedAppearance);
+  const cleanStyles = { ...styles };
+  delete cleanStyles.backdropBlur;
+  delete cleanStyles.boxShadow;
+  const bgStyle = getBackgroundStyle(cleanStyles, resolvedAppearance);
   const invertInDark = general.invertInDark !== false;
   const grayscaleClass = general.grayscale 
     ? "grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" 
@@ -133,12 +136,20 @@ export function CanvasElement({ block }: { block: BuilderBlock }) {
         {(general.heading || general.subheading) && (
           <div className="text-center mb-8 md:mb-10">
             {general.heading && (
-              <h2 className="logo-cloud-heading text-lg font-semibold leading-8 tracking-tight" style={{ color: "var(--color-ink)" }}>
+              <h2 
+                className="logo-cloud-heading text-lg font-semibold leading-8 tracking-tight" 
+                data-custom-color={appearance?.headingColor ? "true" : undefined}
+                style={{ color: appearance?.headingColor || "var(--color-ink)" }}
+              >
                 {general.heading}
               </h2>
             )}
             {general.subheading && (
-              <p className="logo-cloud-subheading mt-2 text-sm leading-6" style={{ color: "var(--color-mute)" }}>
+              <p 
+                className="logo-cloud-subheading mt-2 text-sm leading-6" 
+                data-custom-color={appearance?.subheadingColor ? "true" : undefined}
+                style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}
+              >
                 {general.subheading}
               </p>
             )}

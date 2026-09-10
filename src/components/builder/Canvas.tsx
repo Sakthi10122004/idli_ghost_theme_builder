@@ -95,24 +95,29 @@ function SortableElement({
     hoverEffect
   } = block.styles;
 
+  const isLogoCloud = block.type === "logo-cloud";
+  const resolvedShadow = isLogoCloud ? undefined : (resolveStyleLocal(boxShadow) || style.boxShadow || undefined);
+  const resolvedBlur = isLogoCloud ? undefined : resolveStyleLocal(backdropBlur);
+  const isGlassActive = !isLogoCloud && !!resolvedBlur && resolvedBlur !== "none" && resolvedBlur !== "0px";
+
   const combinedStyle: React.CSSProperties = {
     ...style,
     transform: CSS.Transform.toString(transform),
     transition: transition || undefined,
     position: "relative",
-    boxShadow: resolveStyleLocal(boxShadow) || style.boxShadow || undefined,
+    zIndex: resolvedShadow ? 20 : (isGlobal ? 50 : undefined),
+    boxShadow: resolvedShadow,
     border: borderWidth && borderWidth !== "0px" ? `${resolveStyleLocal(borderWidth)} solid ${resolveStyleLocal(borderColor) || "#e2e8f0"}` : undefined,
-    backdropFilter: backdropBlur ? `blur(${resolveStyleLocal(backdropBlur)})` : undefined,
-    WebkitBackdropFilter: backdropBlur ? `blur(${resolveStyleLocal(backdropBlur)})` : undefined,
+    backdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
+    WebkitBackdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     opacity: isDragging ? 0.3 : (opacity ? parseFloat(resolveStyleLocal(opacity) || "1") : undefined),
   };
 
   const getHoverClass = () => {
-    if (isPreviewMode) return "";
     const effect = resolveStyleLocal(hoverEffect);
-    if (effect === "scale") return "hover:scale-[1.02] transition-transform duration-200";
-    if (effect === "float") return "hover:-translate-y-1 transition-transform duration-200";
-    if (effect === "glow") return "hover:shadow-md transition-shadow duration-200";
+    if (effect === "scale") return "hover-effect-scale";
+    if (effect === "float") return "hover-effect-float";
+    if (effect === "glow") return "hover-effect-glow";
     return "";
   };
 
@@ -390,6 +395,26 @@ export default function Canvas() {
           ? "var(--color-body)"
           : rawText;
 
+      const isLogoCloud = block.type === "logo-cloud";
+      const rawShadow = isLogoCloud ? undefined : resolveStyle(block.styles?.boxShadow);
+      const hasShadow = !isLogoCloud && !!(rawShadow && rawShadow !== "none");
+      const hasHover = !!(block.styles?.hoverEffect && block.styles.hoverEffect !== "none");
+      const hasBackdrop = !isLogoCloud && !!(block.styles?.backdropBlur && block.styles.backdropBlur !== "none" && block.styles.backdropBlur !== "0px");
+
+      let effectiveBg = resolvedBg || undefined;
+      if (hasBackdrop) {
+        if (!effectiveBg || effectiveBg === "var(--color-canvas)" || effectiveBg === "var(--color-bg)" || effectiveBg === "#fafafa" || effectiveBg === "#ffffff" || effectiveBg === "#fff") {
+          effectiveBg = "rgba(255, 255, 255, 0.75)";
+        } else if (effectiveBg === "#171717" || effectiveBg === "#000000" || effectiveBg === "#111111") {
+          effectiveBg = "rgba(23, 23, 23, 0.75)";
+        } else if (effectiveBg.startsWith("#") && effectiveBg.length === 7) {
+          const r = parseInt(effectiveBg.slice(1, 3), 16);
+          const g = parseInt(effectiveBg.slice(3, 5), 16);
+          const b = parseInt(effectiveBg.slice(5, 7), 16);
+          effectiveBg = `rgba(${r}, ${g}, ${b}, 0.75)`;
+        }
+      }
+
       return (
         <SortableElement
           key={block.id}
@@ -399,7 +424,7 @@ export default function Canvas() {
           onDelete={handleDelete}
           isGlobal={isGlobal}
           style={{
-            backgroundColor: resolvedBg || undefined,
+            backgroundColor: effectiveBg,
             paddingTop: block.type === 'hero' ? undefined : (resolveStyle(paddingTop) || undefined),
             paddingBottom: block.type === 'hero' ? undefined : (resolveStyle(paddingBottom) || undefined),
             backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
@@ -423,7 +448,11 @@ export default function Canvas() {
             marginBottom: resolveStyle(marginBottom) || undefined,
             color: resolvedText || undefined,
           }}
-          className={`builder-block builder-block-${block.type} relative w-full ${block.type === "header" || block.type === "footer" ? "overflow-visible z-50" : "overflow-hidden z-10"}`}
+          className={`builder-block builder-block-${block.type} relative w-full ${
+            block.type === "header" || block.type === "footer" || hasShadow || hasHover
+              ? "overflow-visible"
+              : "overflow-hidden"
+          } ${block.type === "header" || block.type === "footer" ? "z-50" : hasShadow ? "z-20" : "z-10"}`}
         >
           {backgroundVideoUrl && (
             <video
