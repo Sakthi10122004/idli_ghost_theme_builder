@@ -852,6 +852,32 @@ html.dark-mode .btn-secondary {
 .gh-content th {
   font-weight: bold;
 }
+
+/* Micro-Interactions: Hover Effects */
+.hover-effect-scale {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-scale:hover {
+  transform: scale(1.02) !important;
+  z-index: 30 !important;
+}
+.hover-effect-float {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-float:hover {
+  transform: translateY(-4px) !important;
+  z-index: 30 !important;
+}
+.hover-effect-glow {
+  transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.hover-effect-glow:hover {
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.12), 0 12px 32px -4px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+  z-index: 30 !important;
+}
+html.dark .hover-effect-glow:hover {
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.15), 0 12px 32px -4px rgba(0, 0, 0, 0.6) !important;
+}
 `;
 }
 
