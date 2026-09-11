@@ -92,11 +92,11 @@ html.dark .site-footer {
 }
 
 /* Logo Cloud dark mode in canvas */
-html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-heading {
+html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-heading:not([data-custom-color="true"]) {
   color: var(--color-ink) !important;
 }
 
-html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-subheading {
+html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-subheading:not([data-custom-color="true"]) {
   color: var(--color-mute) !important;
 }
 
@@ -269,3 +269,29 @@ body {
 .gh-head-inner.content-width-standard{ max-width:1024px; margin:0 auto; }
 .gh-head-inner.content-width-wide{ max-width:1152px; margin:0 auto; }
 .gh-head-inner.content-width-full{ max-width:none; }
+
+/* ---- 4. Builder Block Visual Micro-Interactions (Hover Effects) ---- */
+.hover-effect-scale {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-scale:hover {
+  transform: scale(1.02) !important;
+  z-index: 30 !important;
+}
+
+.hover-effect-float {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
+}
+.hover-effect-float:hover {
+  transform: translateY(-4px) !important;
+  z-index: 30 !important;
+}
+
+.hover-effect-glow {
+  transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+.hover-effect-glow:hover {
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+  z-index: 30 !important;
+}
+

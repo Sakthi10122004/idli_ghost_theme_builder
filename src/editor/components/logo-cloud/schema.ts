@@ -16,7 +16,11 @@ export interface LogoCloudProps {
     dynamicLimit: number | "all";
   };
   logos: Array<{ id: string; name: string; imageUrl: string; linkUrl?: string }>;
-  appearance: { backgroundColor?: string };
+  appearance: { 
+    backgroundColor?: string;
+    headingColor?: string;
+    subheadingColor?: string;
+  };
   spacing: { paddingTop?: string | number; paddingBottom?: string | number };
   advanced: { htmlAnchor?: string };
 }
@@ -79,7 +83,11 @@ export const defaultProps: Partial<LogoCloudProps> = {
     dynamicLimit: 10
   },
   logos: DEFAULT_LOGOS,
-  appearance: { backgroundColor: "var(--color-bg)" },
+  appearance: { 
+    backgroundColor: "var(--color-bg)",
+    headingColor: "",
+    subheadingColor: "",
+  },
   spacing: { paddingTop: "40px", paddingBottom: "40px" },
   advanced: { htmlAnchor: "logo-cloud" },
 };
@@ -102,6 +110,8 @@ export function resolveLogoCloudProps(props?: Record<string, unknown>): LogoClou
     appearance: {
       ...defaultProps.appearance,
       ...(p?.appearance || {}),
+      headingColor: p?.appearance?.headingColor || (p as Record<string, unknown> | undefined)?.headingColor as string || "",
+      subheadingColor: p?.appearance?.subheadingColor || (p as Record<string, unknown> | undefined)?.subheadingColor as string || "",
     },
     spacing: {
       ...defaultProps.spacing,

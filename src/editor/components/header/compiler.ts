@@ -111,7 +111,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const contentMaxWidth = CONTENT_WIDTH_VALUES[appearance.contentWidth || "wide"] || "100%";
   const isSectionFull = sectionMaxWidth === "100%";
 
-  const shadowValue = styles.boxShadow === "dark-glow" ? "0 10px 25px -5px rgba(0, 0, 0, 0.3)" : styles.boxShadow && styles.boxShadow !== "none" ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none";
+  const shadowValue = styles.boxShadow && styles.boxShadow !== "none" ? styles.boxShadow : "none";
   const htmlAnchor = advanced.htmlAnchor || "gh-head";
   const headerPt = p.spacing?.paddingTop !== undefined ? `${p.spacing.paddingTop}px` : (styles?.paddingTop || '20px');
   const headerPb = p.spacing?.paddingBottom !== undefined ? `${p.spacing.paddingBottom}px` : (styles?.paddingBottom || '20px');
@@ -659,7 +659,7 @@ function toggleThemeMode() {
       margin-bottom: ${styles.marginBottom || '0px'};
       box-shadow: ${shadowValue};
       opacity: ${styles.opacity ?? 1};
-      ${glassEnabled ? `backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);` : ""}
+      ${glassEnabled ? `backdrop-filter: blur(${styles.backdropBlur || '12px'}); -webkit-backdrop-filter: blur(${styles.backdropBlur || '12px'});` : ""}
       transition: all 0.15s ease-in-out;
     "
   >

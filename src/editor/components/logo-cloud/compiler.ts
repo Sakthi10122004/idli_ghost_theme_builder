@@ -11,7 +11,10 @@ export const generateHTML = (block: BuilderBlock): string => {
   const spacing = p.spacing;
   const styles = block.styles || {};
   
-  const bgCss = getBackgroundCSS(styles, appearance);
+  const cleanStyles = { ...styles };
+  delete cleanStyles.backdropBlur;
+  delete cleanStyles.boxShadow;
+  const bgCss = getBackgroundCSS(cleanStyles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `logo-cloud-${block.id}`;
   
   const grayscaleClass = general.grayscale 
@@ -194,6 +197,9 @@ export const generateHTML = (block: BuilderBlock): string => {
 })();
 </script>` : '';
 
+  const headingColor = appearance?.headingColor;
+  const subheadingColor = appearance?.subheadingColor;
+
   return `<style>
   #${wrapperId} {
     ${bgCss}
@@ -215,14 +221,14 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.5;
-    color: var(--color-fg, #171717);
+    color: ${headingColor || "var(--color-fg, #171717)"};
     margin: 0;
   }
   #${wrapperId} .logo-cloud-subheading {
     margin-top: 0.5rem;
     font-size: 0.875rem;
     line-height: 1.5;
-    color: var(--color-muted, var(--color-mute, #888888));
+    color: ${subheadingColor || "var(--color-muted, var(--color-mute, #888888))"};
   }
   #${wrapperId} .logo-cloud-item {
     display: flex;
@@ -326,14 +332,17 @@ export const generateHTML = (block: BuilderBlock): string => {
   html.dark-mode #${wrapperId} {
     background-color: var(--color-bg) !important;
   }
+  ${!headingColor ? `
   html.dark #${wrapperId} .logo-cloud-heading,
   html.dark-mode #${wrapperId} .logo-cloud-heading {
     color: var(--color-fg) !important;
   }
+  ` : ''}${!subheadingColor ? `
   html.dark #${wrapperId} .logo-cloud-subheading,
   html.dark-mode #${wrapperId} .logo-cloud-subheading {
     color: var(--color-muted, var(--color-mute, #a3a3a3)) !important;
   }
+  ` : ''}
   ${general.invertInDark !== false ? `
   html.dark #${wrapperId} .logo-cloud-item img,
   html.dark-mode #${wrapperId} .logo-cloud-item img {

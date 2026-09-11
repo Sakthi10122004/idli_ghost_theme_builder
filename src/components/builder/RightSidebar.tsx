@@ -215,21 +215,23 @@ export default function RightSidebar() {
             </div>
 
             {/* Box Shadow Setting */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
-              <select
-                value={getInputValue(selectedBlock.styles.boxShadow)}
-                onChange={(e) => handleStyleChange("boxShadow", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="0 2px 8px rgba(0,0,0,0.04)">Soft (Level 1)</option>
-                <option value="0 8px 16px rgba(0,0,0,0.06)">Medium (Level 2)</option>
-                <option value="0 16px 32px rgba(0,0,0,0.08)">Large (Level 3)</option>
-                <option value="0 8px 24px rgba(23,23,23,0.06)">Dark Glow</option>
-                <option value="0 8px 24px rgba(0,112,243,0.12)">Accent Blue Glow</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "logo-cloud" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.boxShadow)}
+                  onChange={(e) => handleStyleChange("boxShadow", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="0 2px 8px rgba(0,0,0,0.04)">Soft (Level 1)</option>
+                  <option value="0 8px 16px rgba(0,0,0,0.06)">Medium (Level 2)</option>
+                  <option value="0 16px 32px rgba(0,0,0,0.08)">Large (Level 3)</option>
+                  <option value="0 8px 24px rgba(23,23,23,0.06)">Dark Glow</option>
+                  <option value="0 8px 24px rgba(0,112,243,0.12)">Accent Blue Glow</option>
+                </select>
+              </div>
+            )}
 
             {/* General Styling Controls */}
             {selectedBlock.type !== "header" && (
@@ -259,19 +261,21 @@ export default function RightSidebar() {
                 )}
               </>
             )}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
-              <select
-                value={getInputValue(selectedBlock.styles.backdropBlur)}
-                onChange={(e) => handleStyleChange("backdropBlur", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="4px">Light (4px)</option>
-                <option value="8px">Medium (8px)</option>
-                <option value="16px">Heavy (16px)</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "logo-cloud" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.backdropBlur)}
+                  onChange={(e) => handleStyleChange("backdropBlur", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="4px">Light (4px)</option>
+                  <option value="8px">Medium (8px)</option>
+                  <option value="16px">Heavy (16px)</option>
+                </select>
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-sans font-semibold text-brand-body">Opacity</label>
               <select

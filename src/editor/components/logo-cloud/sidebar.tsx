@@ -58,6 +58,64 @@ const parsePaddingNum = (val: unknown, fallback = 40): number => {
   return fallback;
 };
 
+const ColorPicker = ({ 
+  label, 
+  value, 
+  onChange, 
+  defaultTokenLabel = "Theme Default" 
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (v: string) => void; 
+  defaultTokenLabel?: string; 
+}) => {
+  const isCustom = !!value;
+  return (
+    <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+      <div className="flex flex-col">
+        <span className="text-[12px] font-medium text-gray-800">{label}</span>
+        <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={isCustom} 
+            onChange={(e) => {
+              if (e.target.checked) onChange(defaultTokenLabel.toLowerCase().includes("mute") ? "#6b7280" : "#171717");
+              else onChange("");
+            }}
+            className="rounded-xs border-gray-300 w-3 h-3 accent-brand-primary cursor-pointer"
+          />
+          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Custom</span>
+        </label>
+      </div>
+      {isCustom ? (
+        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+          <input 
+            type="color" 
+            value={value.startsWith("#") && (value.length === 7 || value.length === 4) ? value : (defaultTokenLabel.toLowerCase().includes("mute") ? "#6b7280" : "#171717")} 
+            onChange={(e) => onChange(e.target.value)}
+            className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+          />
+          <input 
+            type="text" 
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-16 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => onChange(defaultTokenLabel.toLowerCase().includes("mute") ? "#6b7280" : "#171717")}
+          className="text-[10px] font-mono text-brand-primary bg-brand-primary/10 px-2 py-1 rounded font-semibold tracking-tight hover:bg-brand-primary/20 transition-colors cursor-pointer"
+          title="Click to customize color"
+        >
+          {defaultTokenLabel}
+        </button>
+      )}
+    </div>
+  );
+};
+
 export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
   onChangeProps: (props: Partial<LogoCloudProps>) => void;
@@ -163,7 +221,15 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
+            {p.appearance?.headingColor && (
+              <span className="inline-flex items-center gap-1 text-[9px] font-mono text-brand-mute">
+                <span className="w-2 h-2 rounded-full border border-gray-300" style={{ backgroundColor: p.appearance.headingColor }} />
+                {p.appearance.headingColor}
+              </span>
+            )}
+          </div>
           <input
             type="text"
             value={general.heading || ""}
@@ -173,7 +239,15 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
         </div>
 
         <div className="flex flex-col gap-1.5 mt-1">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
+            {p.appearance?.subheadingColor && (
+              <span className="inline-flex items-center gap-1 text-[9px] font-mono text-brand-mute">
+                <span className="w-2 h-2 rounded-full border border-gray-300" style={{ backgroundColor: p.appearance.subheadingColor }} />
+                {p.appearance.subheadingColor}
+              </span>
+            )}
+          </div>
           <textarea
             value={general.subheading || ""}
             onChange={(e) => updateGeneral({ subheading: e.target.value })}
@@ -351,6 +425,25 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
         onChangeStyles={onChangeStyles || (() => {})} 
         updateAppearance={(key, val) => onChangeProps({ appearance: { ...p.appearance, [key]: val } })}
       />
+
+      {/* Text Colors */}
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Text Colors</span>
+        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-xs">
+          <ColorPicker
+            label="Heading Color"
+            value={p.appearance?.headingColor || ""}
+            onChange={(v) => onChangeProps({ appearance: { ...p.appearance, headingColor: v } })}
+            defaultTokenLabel="Theme Default"
+          />
+          <ColorPicker
+            label="Subheading Color"
+            value={p.appearance?.subheadingColor || ""}
+            onChange={(v) => onChangeProps({ appearance: { ...p.appearance, subheadingColor: v } })}
+            defaultTokenLabel="Theme Muted"
+          />
+        </div>
+      </div>
 
       {/* Spacing */}
       <div className="flex flex-col gap-3 border-t border-brand-hairline pt-3 mt-1">
