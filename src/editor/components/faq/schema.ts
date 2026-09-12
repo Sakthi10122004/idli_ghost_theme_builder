@@ -6,9 +6,15 @@ export interface FAQProps {
     subheading?: string;
     layoutStyle: "accordion" | "two-column" | "categorized";
     allowMultipleOpen: boolean;
+    itemCornerStyle?: "rounded" | "rectangle";
   };
   items: Array<{ id: string; question: string; answer: string; category?: string }>;
-  appearance: { backgroundColor?: string };
+  appearance: {
+    backgroundColor?: string;
+    itemBgColor?: string;
+    headingColor?: string;
+    subheadingColor?: string;
+  };
   spacing: { paddingTop?: string; paddingBottom?: string };
   advanced: { htmlAnchor?: string };
 }
@@ -20,9 +26,17 @@ export const DEFAULT_FAQS = [
 ];
 
 export const defaultProps: Partial<FAQProps> = {
-  general: { heading: "Frequently Asked Questions", layoutStyle: "accordion", allowMultipleOpen: false },
+  general: {
+    heading: "Frequently Asked Questions",
+    layoutStyle: "accordion",
+    allowMultipleOpen: false,
+    itemCornerStyle: "rounded",
+  },
   items: DEFAULT_FAQS,
-  appearance: { backgroundColor: "var(--color-bg)" },
+  appearance: {
+    backgroundColor: "var(--color-bg)",
+    itemBgColor: "#f8fafc",
+  },
   spacing: { paddingTop: "4rem", paddingBottom: "4rem" },
   advanced: { htmlAnchor: "faq" },
 };

@@ -127,6 +127,18 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           />
         </div>
 
+        <div className="flex flex-col gap-1.5 mt-2">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Corner Style</label>
+          <SegmentedControl
+            options={[
+              { label: "Rounded", value: "rounded" },
+              { label: "Rectangle", value: "rectangle" }
+            ]}
+            value={general.itemCornerStyle || "rounded"}
+            onChange={(v: any) => updateGeneral({ itemCornerStyle: v })}
+          />
+        </div>
+
         <div className="flex items-center justify-between mt-2">
           <label className="text-[11px] font-sans font-semibold text-brand-body">Allow Multiple Open</label>
           <Switch checked={general.allowMultipleOpen} onChange={(c) => updateGeneral({ allowMultipleOpen: c })} />
@@ -145,7 +157,30 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         />
       </div>
 
-      {/* Background Controls */}
+      {/* Item Card Styles */}
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Item Card Style</span>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Item Card Background</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="color"
+              value={p.appearance.itemBgColor || "#f8fafc"}
+              onChange={(e) => onChangeProps({ appearance: { ...p.appearance, itemBgColor: e.target.value } })}
+              className="w-7 h-7 rounded border border-brand-hairline cursor-pointer p-0.5 bg-transparent"
+            />
+            <input
+              type="text"
+              value={p.appearance.itemBgColor || "#f8fafc"}
+              onChange={(e) => onChangeProps({ appearance: { ...p.appearance, itemBgColor: e.target.value } })}
+              className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+              placeholder="#f8fafc"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Section Background Controls */}
       <BackgroundControls 
         styles={block.styles || {}} 
         appearance={p.appearance || {}} 
