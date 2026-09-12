@@ -4,10 +4,10 @@ import { StatsProps, defaultProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
 
-const SegmentedControl = ({ options, value, onChange }: { 
-  options: { label: React.ReactNode; value: string; disabled?: boolean }[]; 
-  value: string; 
-  onChange: (v: string) => void 
+const SegmentedControl = ({ options, value, onChange }: {
+  options: { label: React.ReactNode; value: string; disabled?: boolean }[];
+  value: string;
+  onChange: (v: string) => void
 }) => (
   <div className="flex bg-gray-100 p-0.5 rounded-md border border-gray-200/50">
     {options.map(opt => (
@@ -16,13 +16,12 @@ const SegmentedControl = ({ options, value, onChange }: {
         type="button"
         disabled={opt.disabled}
         onClick={() => onChange(opt.value)}
-        className={`flex-1 flex justify-center items-center py-1.5 text-[11px] font-medium rounded-sm transition-all ${
-          opt.disabled
+        className={`flex-1 flex justify-center items-center py-1.5 text-[11px] font-medium rounded-sm transition-all ${opt.disabled
             ? 'text-gray-300 cursor-not-allowed'
             : value === opt.value
               ? 'bg-white text-gray-900 shadow-sm'
               : 'text-gray-500 hover:text-gray-700'
-        }`}
+          }`}
       >
         {opt.label}
       </button>
@@ -48,9 +47,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       <div className="flex gap-2">
         <div className="flex flex-col gap-1 w-1/3">
           <label className="text-[10px] font-semibold text-gray-500">Value</label>
-          <input 
-            type="text" 
-            value={item.value} 
+          <input
+            type="text"
+            value={item.value}
             onChange={(e) => update({ value: e.target.value })}
             className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             placeholder="10k+"
@@ -58,9 +57,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </div>
         <div className="flex flex-col gap-1 w-2/3">
           <label className="text-[10px] font-semibold text-gray-500">Label</label>
-          <input 
-            type="text" 
-            value={item.label} 
+          <input
+            type="text"
+            value={item.label}
             onChange={(e) => update({ label: e.target.value })}
             className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             placeholder="Active users"
@@ -83,8 +82,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           {(!item.iconType || item.iconType === 'svg') ? (
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-semibold text-gray-500">SVG Code</label>
-              <textarea 
-                value={item.icon || ""} 
+              <textarea
+                value={item.icon || ""}
                 onChange={(e) => update({ icon: e.target.value })}
                 className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none h-12 font-mono"
                 placeholder="<svg>...</svg>"
@@ -93,9 +92,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           ) : (
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-semibold text-gray-500">Image URL</label>
-              <input 
+              <input
                 type="text"
-                value={item.imageUrl || ""} 
+                value={item.imageUrl || ""}
                 onChange={(e) => update({ imageUrl: e.target.value })}
                 className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
                 placeholder="https://example.com/icon.png"
@@ -112,7 +111,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       {/* General Settings */}
       <div className="flex flex-col gap-2">
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">General</span>
-        
+
         <div className="flex flex-col gap-1.5">
           <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
           <input
@@ -175,10 +174,10 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* Background Controls */}
-      <BackgroundControls 
-        styles={block.styles || {}} 
-        appearance={p.appearance || {}} 
-        onChangeStyles={onChangeStyles || (() => {})} 
+      <BackgroundControls
+        styles={block.styles || {}}
+        appearance={p.appearance || {}}
+        onChangeStyles={onChangeStyles || (() => { })}
         updateAppearance={(key, val) => onChangeProps({ appearance: { ...p.appearance, [key]: val } })}
       />
 
@@ -223,18 +222,18 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         <div className="flex gap-2">
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-[10px] font-semibold text-gray-500">Top Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingTop || ""} 
+            <input
+              type="text"
+              value={p.spacing.paddingTop || ""}
               onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-[10px] font-semibold text-gray-500">Bottom Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingBottom || ""} 
+            <input
+              type="text"
+              value={p.spacing.paddingBottom || ""}
               onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />

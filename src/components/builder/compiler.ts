@@ -887,6 +887,104 @@ html.dark .hover-effect-glow:hover {
 export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   const files: Record<string, string> = {};
 
+  const customConfig: Record<string, any> = {
+    stats_heading: {
+      type: "text",
+      name: "Stats: Heading",
+      description: "Heading displayed in the Stats section",
+      default: "Our impact"
+    },
+    stats_subheading: {
+      type: "text",
+      name: "Stats: Subheading",
+      description: "Subheading displayed in the Stats section",
+      default: "What we have achieved so far"
+    },
+    stat_1_value: {
+      type: "text",
+      name: "Stat 1: Value",
+      description: "Value or metric for Stat 1 (e.g., 10,000+)",
+      default: "10,000+"
+    },
+    stat_1_label: {
+      type: "text",
+      name: "Stat 1: Label",
+      description: "Description label for Stat 1 (e.g., Readers)",
+      default: "Readers"
+    },
+    stat_2_value: {
+      type: "text",
+      name: "Stat 2: Value",
+      description: "Value or metric for Stat 2 (e.g., 500+)",
+      default: "500+"
+    },
+    stat_2_label: {
+      type: "text",
+      name: "Stat 2: Label",
+      description: "Description label for Stat 2 (e.g., Articles Published)",
+      default: "Articles Published"
+    },
+    stat_3_value: {
+      type: "text",
+      name: "Stat 3: Value",
+      description: "Value or metric for Stat 3 (e.g., 50)",
+      default: "50"
+    },
+    stat_3_label: {
+      type: "text",
+      name: "Stat 3: Label",
+      description: "Description label for Stat 3 (e.g., Countries Reached)",
+      default: "Countries Reached"
+    },
+    stat_4_value: {
+      type: "text",
+      name: "Stat 4: Value",
+      description: "Value or metric for Stat 4 (e.g., 99.9%)",
+      default: "99.9%"
+    },
+    stat_4_label: {
+      type: "text",
+      name: "Stat 4: Label",
+      description: "Description label for Stat 4 (e.g., Satisfaction Rate)",
+      default: "Satisfaction Rate"
+    }
+  };
+
+  // Seed default values from any active Stats block in the document if configured
+  const statsBlock = Object.values(doc.blocks).find((b) => b.type === "stats");
+  if (statsBlock?.props) {
+    const sp = statsBlock.props as any;
+    if (sp.general?.heading) customConfig.stats_heading.default = sp.general.heading;
+    if (sp.general?.subheading) customConfig.stats_subheading.default = sp.general.subheading;
+    if (Array.isArray(sp.stats)) {
+      sp.stats.forEach((st: any, i: number) => {
+        const num = i + 1;
+        if (num <= 6) {
+          if (customConfig[`stat_${num}_value`]) {
+            customConfig[`stat_${num}_value`].default = st.value || "";
+          } else {
+            customConfig[`stat_${num}_value`] = {
+              type: "text",
+              name: `Stat ${num}: Value`,
+              description: `Value or metric for Stat ${num}`,
+              default: st.value || ""
+            };
+          }
+          if (customConfig[`stat_${num}_label`]) {
+            customConfig[`stat_${num}_label`].default = st.label || "";
+          } else {
+            customConfig[`stat_${num}_label`] = {
+              type: "text",
+              name: `Stat ${num}: Label`,
+              description: `Label for Stat ${num}`,
+              default: st.label || ""
+            };
+          }
+        }
+      });
+    }
+  }
+
   // 1. Generate package.json definition
   files["package.json"] = JSON.stringify({
     name: doc.metadata.name.toLowerCase().replace(/\s+/g, "-"),
@@ -900,7 +998,8 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     ],
     config: {
       posts_per_page: 5,
-      card_assets: true
+      card_assets: true,
+      custom: customConfig
     },
     author: {
       name: doc.metadata.author,
