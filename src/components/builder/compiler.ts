@@ -896,13 +896,15 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
       type: "text",
       name: "Stats: Heading",
       description: "Heading displayed in the Stats section",
-      default: "Our impact"
+      default: "Our impact",
+      group: "homepage"
     };
     customConfig["stats_subheading"] = {
       type: "text",
       name: "Stats: Subheading",
       description: "Subheading displayed in the Stats section",
-      default: "What we have achieved so far"
+      default: "What we have achieved so far",
+      group: "homepage"
     };
 
     const firstStats = statsBlocks[0];
@@ -917,13 +919,15 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
         type: "text",
         name: `Stat ${num}: Value`,
         description: `Value or metric for Stat ${num}`,
-        default: st.value || ""
+        default: st.value || "",
+        group: "homepage"
       };
       customConfig[`stat_${num}_label`] = {
         type: "text",
         name: `Stat ${num}: Label`,
         description: `Description label for Stat ${num}`,
-        default: st.label || ""
+        default: st.label || "",
+        group: "homepage"
       };
     });
   }
