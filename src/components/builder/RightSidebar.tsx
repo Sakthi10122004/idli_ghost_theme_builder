@@ -5,29 +5,32 @@ import { componentRegistry } from "@/editor/components/registry";
 import { Trash2, Settings, Sliders } from "lucide-react";
 
 export default function RightSidebar() {
-  const { 
-    selectedBlockId, 
-    document: themeDoc, 
-    updateBlockProps, 
-    updateBlockStyles, 
-    deleteBlock 
+  const {
+    selectedBlockId,
+    document: themeDoc,
+    updateBlockProps,
+    updateBlockStyles,
+    deleteBlock
   } = useEditorStore();
 
   const selectedBlock = selectedBlockId ? themeDoc.blocks[selectedBlockId] : null;
 
-  const getInputValue = (val: any): string => {
+  const getInputValue = (val: unknown): string => {
     if (!val) return "";
     if (typeof val === "string") return val;
-    return val.desktop || "";
+    if (typeof val === "object" && val !== null && "desktop" in val) {
+      return String((val as { desktop?: unknown }).desktop || "");
+    }
+    return String(val);
   };
 
-  const handlePropChange = (key: string, value: any) => {
+  const handlePropChange = (key: string, value: unknown) => {
     if (selectedBlockId) {
       updateBlockProps(selectedBlockId, { [key]: value });
     }
   };
 
-  const handleStyleChange = (key: string, value: any) => {
+  const handleStyleChange = (key: string, value: unknown) => {
     if (selectedBlockId) {
       updateBlockStyles(selectedBlockId, { [key]: value });
     }
@@ -189,11 +192,10 @@ export default function RightSidebar() {
                     <button
                       key={align}
                       onClick={() => handleStyleChange("textAlign", align)}
-                      className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${
-                        getInputValue(selectedBlock.styles.textAlign) === align
-                          ? "bg-white text-brand-ink shadow-level-2 font-semibold"
-                          : "text-brand-mute hover:text-brand-ink"
-                      }`}
+                      className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${getInputValue(selectedBlock.styles.textAlign) === align
+                        ? "bg-white text-brand-ink shadow-level-2 font-semibold"
+                        : "text-brand-mute hover:text-brand-ink"
+                        }`}
                     >
                       {align}
                     </button>
