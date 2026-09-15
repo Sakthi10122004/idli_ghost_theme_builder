@@ -11,7 +11,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const spacing = p.spacing;
   const styles = block.styles || {};
 
-  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(items.length > 0 ? [items[0].id] : []));
 
   const toggle = (id: string) => {
     setOpenIds(prev => {
@@ -28,40 +28,51 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   };
 
   const bgStyle = getBackgroundStyle(styles, appearance);
+  const cornerClass = (general.itemCornerStyle || "rounded") === "rectangle" ? "rounded-none" : "rounded-xl";
+  const itemBg = appearance?.itemBgColor || "#f8fafc";
 
   const renderFaqItem = (item: any) => {
     const isOpen = openIds.has(item.id);
     return (
-      <div key={item.id} className="pt-6">
-        <dt>
+      <div
+        key={item.id}
+        className={`w-full min-w-full p-5 sm:p-6 mb-4 border border-black/5 shadow-xs transition-all duration-200 ${cornerClass}`}
+        style={{ backgroundColor: itemBg }}
+      >
+        <dt className="w-full min-w-full">
           <button
             type="button"
-            className="flex w-full items-start justify-between text-left text-gray-900"
-            style={{ color: "var(--color-ink)" }}
+            className="flex w-full min-w-full items-center justify-between text-left gap-4 group cursor-pointer focus:outline-none"
+            style={{ color: appearance?.headingColor || "var(--color-ink)" }}
             aria-controls={`faq-${block.id}-${item.id}`}
             aria-expanded={isOpen}
             onClick={() => toggle(item.id)}
           >
-            <span className="text-base font-semibold leading-7">{item.question}</span>
-            <span className="ml-6 flex h-7 items-center">
-              {isOpen ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
-                </svg>
-              )}
+            <span className="text-base sm:text-lg font-bold leading-snug flex-1 min-w-0">{item.question}</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/5 group-hover:bg-black/10 shrink-0 transition-colors">
+              <svg
+                className={`h-4 w-4 transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2.5"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
             </span>
           </button>
         </dt>
-        <dd 
-          className="mt-2 pr-12" 
+        <dd
+          className={`grid transition-all duration-300 ease-in-out w-full min-w-full ${
+            isOpen ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-black/5' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'
+          }`}
           id={`faq-${block.id}-${item.id}`}
-          style={{ display: isOpen ? 'block' : 'none' }}
         >
-          <p className="text-base leading-7 text-gray-600" style={{ color: "var(--color-mute)" }}>{item.answer}</p>
+          <div className="overflow-hidden">
+            <p className="text-sm sm:text-base leading-relaxed text-gray-600 w-full" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+              {item.answer}
+            </p>
+          </div>
         </dd>
       </div>
     );
@@ -73,24 +84,23 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       const col1 = items.slice(0, mid);
       const col2 = items.slice(mid);
       return (
-        <div className="mx-auto mt-16 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 lg:grid-cols-2">
-          <dl className="space-y-6 divide-y divide-gray-900/10 divide-opacity-10">
+        <div className="w-full min-w-full mx-auto mt-12 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 lg:grid-cols-2">
+          <dl className="w-full min-w-full">
             {col1.map(renderFaqItem)}
           </dl>
-          <dl className="space-y-6 divide-y divide-gray-900/10 divide-opacity-10 lg:mt-0 mt-6">
+          <dl className="w-full min-w-full">
             {col2.map(renderFaqItem)}
           </dl>
         </div>
       );
     } else if (general.layoutStyle === "categorized") {
-      // Group by category
       const categories = Array.from(new Set(items.map(i => i.category || "General")));
       return (
-        <div className="mx-auto mt-16 max-w-3xl">
+        <div className="w-full min-w-full mx-auto mt-12 max-w-3xl">
           {categories.map((cat, idx) => (
-            <div key={idx} className="mb-12">
-              <h3 className="text-xl font-bold tracking-tight text-gray-900 mb-6" style={{ color: "var(--color-ink)" }}>{cat}</h3>
-              <dl className="space-y-6 divide-y divide-gray-900/10 divide-opacity-10">
+            <div key={idx} className="mb-10 w-full min-w-full">
+              <h3 className="text-xl font-bold tracking-tight mb-4 w-full" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>{cat}</h3>
+              <dl className="w-full min-w-full">
                 {items.filter(i => (i.category || "General") === cat).map(renderFaqItem)}
               </dl>
             </div>
@@ -101,8 +111,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     
     // Default: accordion (single column centered)
     return (
-      <div className="mx-auto mt-16 max-w-3xl divide-y divide-gray-900/10 divide-opacity-10">
-        <dl className="space-y-6 divide-y divide-gray-900/10 divide-opacity-10">
+      <div className="w-full min-w-full mx-auto mt-12 max-w-3xl">
+        <dl className="w-full min-w-full">
           {items.map(renderFaqItem)}
         </dl>
       </div>
@@ -110,17 +120,17 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   };
 
   return (
-    <div className={`relative ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: spacing.paddingTop, paddingBottom: spacing.paddingBottom }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className={`relative w-full min-w-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: spacing.paddingTop || "4rem", paddingBottom: spacing.paddingBottom || "4rem" }}>
+      <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">
         {(general.heading || general.subheading) && (
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="w-full min-w-full mx-auto max-w-4xl text-center mb-8">
             {general.heading && (
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl" style={{ color: "var(--color-ink)" }}>
+              <h2 className="w-full text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>
                 {general.heading}
               </h2>
             )}
             {general.subheading && (
-              <p className="mt-4 text-base leading-7 text-gray-600" style={{ color: "var(--color-mute)" }}>
+              <p className="w-full mt-4 text-base leading-7" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
                 {general.subheading}
               </p>
             )}

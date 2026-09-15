@@ -12,34 +12,36 @@ export const generateHTML = (block: BuilderBlock): string => {
   
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `faq-${block.id}`;
+  const cornerRadius = (general.itemCornerStyle || "rounded") === "rectangle" ? "0px" : "0.75rem";
+  const itemBg = appearance?.itemBgColor || "#f8fafc";
   
-  const renderFaqItem = (item: any) => {
+  const renderFaqItem = (item: any, idx: number) => {
+    const isFirst = idx === 0;
     return `
-      <div class="faq-item pt-6">
+      <div class="faq-item">
         <dt>
           <button
             type="button"
-            class="faq-button flex w-full items-start justify-between text-left"
+            class="faq-button"
             aria-controls="faq-content-${block.id}-${item.id}"
-            aria-expanded="false"
+            aria-expanded="${isFirst ? 'true' : 'false'}"
             data-faq-id="${item.id}"
           >
             <span class="faq-question">${item.question}</span>
-            <span class="faq-icon-wrapper ml-6 flex h-7 items-center">
-              <svg class="faq-icon-plus h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-              </svg>
-              <svg class="faq-icon-minus h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
+            <span class="faq-chevron-wrapper">
+              <svg class="faq-chevron" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
             </span>
           </button>
         </dt>
         <dd 
-          class="faq-answer mt-2 pr-12 hidden" 
+          class="faq-answer-wrapper ${isFirst ? 'is-open' : ''}" 
           id="faq-content-${block.id}-${item.id}"
         >
-          <p class="faq-answer-text">${item.answer}</p>
+          <div class="faq-answer-inner">
+            <p class="faq-answer-text">${item.answer}</p>
+          </div>
         </dd>
       </div>
     `;
@@ -52,42 +54,51 @@ export const generateHTML = (block: BuilderBlock): string => {
     const col1 = items.slice(0, mid);
     const col2 = items.slice(mid);
     contentHtml = `
-      <div class="faq-two-col mx-auto mt-16 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 lg:grid-cols-2">
-        <dl class="space-y-6 divide-y">
-          ${col1.map(renderFaqItem).join("")}
+      <div class="faq-two-col mx-auto mt-12 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 lg:grid-cols-2">
+        <dl>
+          ${col1.map((item, idx) => renderFaqItem(item, idx)).join("")}
         </dl>
-        <dl class="space-y-6 divide-y lg:mt-0 mt-6">
-          ${col2.map(renderFaqItem).join("")}
+        <dl className="lg:mt-0 mt-4">
+          ${col2.map((item, idx) => renderFaqItem(item, idx + col1.length)).join("")}
         </dl>
       </div>
     `;
   } else if (general.layoutStyle === "categorized") {
     const categories = Array.from(new Set(items.map(i => i.category || "General")));
+    let globalIndex = 0;
     contentHtml = `
-      <div class="faq-categorized mx-auto mt-16 max-w-3xl">
-        ${categories.map((cat, idx) => `
-          <div class="faq-category mb-12">
-            <h3 class="faq-category-title text-xl font-bold tracking-tight mb-6">${cat}</h3>
-            <dl class="space-y-6 divide-y">
-              ${items.filter(i => (i.category || "General") === cat).map(renderFaqItem).join("")}
-            </dl>
-          </div>
-        `).join("")}
+      <div class="faq-categorized mx-auto mt-12 max-w-3xl">
+        ${categories.map((cat) => {
+          const catItems = items.filter(i => (i.category || "General") === cat);
+          const catHtml = `
+            <div class="faq-category mb-10">
+              <h3 class="faq-category-title text-xl font-bold tracking-tight mb-4">${cat}</h3>
+              <dl>
+                ${catItems.map((item) => {
+                  const html = renderFaqItem(item, globalIndex);
+                  globalIndex++;
+                  return html;
+                }).join("")}
+              </dl>
+            </div>
+          `;
+          return catHtml;
+        }).join("")}
       </div>
     `;
   } else {
     // Accordion default
     contentHtml = `
-      <div class="faq-accordion mx-auto mt-16 max-w-3xl divide-y">
-        <dl class="space-y-6 divide-y">
-          ${items.map(renderFaqItem).join("")}
+      <div class="faq-accordion mx-auto mt-12 max-w-3xl">
+        <dl>
+          ${items.map((item, idx) => renderFaqItem(item, idx)).join("")}
         </dl>
       </div>
     `;
   }
 
   const headingHtml = (general.heading || general.subheading) ? `
-    <div class="faq-header mx-auto max-w-4xl text-center">
+    <div class="faq-header mx-auto max-w-4xl text-center mb-8">
       ${general.heading ? `<h2 class="faq-heading text-3xl font-bold tracking-tight sm:text-4xl">${general.heading}</h2>` : ''}
       ${general.subheading ? `<p class="faq-subheading mt-4 text-base leading-7">${general.subheading}</p>` : ''}
     </div>
@@ -105,36 +116,26 @@ export const generateHTML = (block: BuilderBlock): string => {
         buttons.forEach(function(btn) {
           btn.addEventListener('click', function() {
             var isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            var targetId = btn.getAttribute('aria-controls');
+            var content = document.getElementById(targetId);
             
-            if (!allowMultiple) {
-              // Close all others
+            if (!allowMultiple && !isExpanded) {
               buttons.forEach(function(otherBtn) {
                 if (otherBtn !== btn) {
                   otherBtn.setAttribute('aria-expanded', 'false');
-                  var otherContent = document.getElementById(otherBtn.getAttribute('aria-controls'));
-                  if (otherContent) otherContent.classList.add('hidden');
-                  var p = otherBtn.querySelector('.faq-icon-plus');
-                  var m = otherBtn.querySelector('.faq-icon-minus');
-                  if(p) p.classList.remove('hidden');
-                  if(m) m.classList.add('hidden');
+                  var otherId = otherBtn.getAttribute('aria-controls');
+                  var otherContent = document.getElementById(otherId);
+                  if (otherContent) otherContent.classList.remove('is-open');
                 }
               });
             }
             
-            // Toggle current
-            btn.setAttribute('aria-expanded', !isExpanded);
-            var content = document.getElementById(btn.getAttribute('aria-controls'));
-            var pIcon = btn.querySelector('.faq-icon-plus');
-            var mIcon = btn.querySelector('.faq-icon-minus');
-            
             if (!isExpanded) {
-              if (content) content.classList.remove('hidden');
-              if (pIcon) pIcon.classList.add('hidden');
-              if (mIcon) mIcon.classList.remove('hidden');
+              btn.setAttribute('aria-expanded', 'true');
+              if (content) content.classList.add('is-open');
             } else {
-              if (content) content.classList.add('hidden');
-              if (pIcon) pIcon.classList.remove('hidden');
-              if (mIcon) mIcon.classList.add('hidden');
+              btn.setAttribute('aria-expanded', 'false');
+              if (content) content.classList.remove('is-open');
             }
           });
         });
@@ -155,53 +156,98 @@ export const generateHTML = (block: BuilderBlock): string => {
     padding: 0 1.5rem;
   }
   #${wrapperId} .faq-heading {
-    color: var(--color-fg);
+    color: ${appearance.headingColor || 'var(--color-fg)'};
     margin: 0;
   }
   #${wrapperId} .faq-subheading {
-    color: var(--color-mute);
+    color: ${appearance.subheadingColor || 'var(--color-mute)'};
   }
   #${wrapperId} .faq-category-title {
-    color: var(--color-fg);
+    color: ${appearance.headingColor || 'var(--color-fg)'};
+  }
+  #${wrapperId} .faq-item {
+    background-color: ${itemBg};
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: ${cornerRadius};
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease-in-out;
   }
   #${wrapperId} .faq-button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--color-fg);
+    text-align: left;
     padding: 0;
+    gap: 1rem;
   }
   #${wrapperId} .faq-question {
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.75;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.4;
+    color: ${appearance.headingColor || 'var(--color-fg)'};
+    flex: 1;
+  }
+  #${wrapperId} .faq-chevron-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.04);
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+  }
+  #${wrapperId} .faq-button:hover .faq-chevron-wrapper {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+  #${wrapperId} .faq-chevron {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.3s ease-in-out;
+    color: currentColor;
+  }
+  #${wrapperId} .faq-button[aria-expanded="true"] .faq-chevron {
+    transform: rotate(180deg);
+  }
+  #${wrapperId} .faq-answer-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease, padding-top 0.3s ease;
+  }
+  #${wrapperId} .faq-button[aria-expanded="true"] + .faq-answer-wrapper,
+  #${wrapperId} .faq-answer-wrapper.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  #${wrapperId} .faq-answer-inner {
+    overflow: hidden;
   }
   #${wrapperId} .faq-answer-text {
-    color: var(--color-mute);
-    font-size: 1rem;
-    line-height: 1.75;
+    color: ${appearance.subheadingColor || 'var(--color-mute)'};
+    font-size: 0.95rem;
+    line-height: 1.625;
     margin: 0;
   }
   
   /* Utilities used in markup */
   #${wrapperId} .mx-auto { margin-left: auto; margin-right: auto; }
-  #${wrapperId} .mt-16 { margin-top: 4rem; }
-  #${wrapperId} .mt-6 { margin-top: 1.5rem; }
+  #${wrapperId} .mt-12 { margin-top: 3rem; }
   #${wrapperId} .mt-4 { margin-top: 1rem; }
-  #${wrapperId} .mt-2 { margin-top: 0.5rem; }
-  #${wrapperId} .mb-12 { margin-bottom: 3rem; }
-  #${wrapperId} .mb-6 { margin-bottom: 1.5rem; }
-  #${wrapperId} .pt-6 { padding-top: 1.5rem; }
-  #${wrapperId} .pr-12 { padding-right: 3rem; }
+  #${wrapperId} .mb-10 { margin-bottom: 2.5rem; }
+  #${wrapperId} .mb-8 { margin-bottom: 2rem; }
+  #${wrapperId} .mb-4 { margin-bottom: 1rem; }
   #${wrapperId} .w-full { width: 100%; }
-  #${wrapperId} .h-6 { height: 1.5rem; }
-  #${wrapperId} .w-6 { width: 1.5rem; }
-  #${wrapperId} .h-7 { height: 1.75rem; }
-  #${wrapperId} .ml-6 { margin-left: 1.5rem; }
-  #${wrapperId} .flex { display: flex; }
-  #${wrapperId} .items-start { align-items: flex-start; }
-  #${wrapperId} .items-center { align-items: center; }
-  #${wrapperId} .justify-between { justify-content: space-between; }
   #${wrapperId} .text-left { text-align: left; }
   #${wrapperId} .text-center { text-align: center; }
   #${wrapperId} .max-w-7xl { max-width: 80rem; }
@@ -211,9 +257,6 @@ export const generateHTML = (block: BuilderBlock): string => {
   #${wrapperId} .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
   #${wrapperId} .gap-x-8 { column-gap: 2rem; }
   #${wrapperId} .gap-y-0 { row-gap: 0; }
-  #${wrapperId} .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
-  #${wrapperId} .divide-y > :not([hidden]) ~ :not([hidden]) { border-top: 1px solid rgba(0,0,0,0.1); }
-  #${wrapperId} .hidden { display: none !important; }
   
   @media (min-width: 1024px) {
     #${wrapperId} .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
