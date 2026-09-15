@@ -15,60 +15,71 @@ export const generateHTML = (block: BuilderBlock): string => {
   const appearance = p.appearance;
   const spacing = p.spacing;
   const styles = block.styles || {};
-  
+
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `stats-${block.id}`;
-  
-  const renderStat = (stat: any) => {
+
+  const renderStat = (stat: any, idx: number) => {
+    const num = idx + 1;
+    const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${stat.value || ""}{{/if}}`;
+    const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${stat.label || ""}{{/if}}`;
+
     if (general.layoutStyle === "cards") {
       return `
         <div class="stats-item card">
           ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${stat.imageUrl}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
-          <dt class="stats-label">${stat.label}</dt>
-          <dd class="stats-value">${stat.value}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
+          <dd class="stats-value">${valueHbs}</dd>
         </div>
       `;
     } else if (general.layoutStyle === "bordered") {
       return `
         <div class="stats-item bordered">
-          <dt class="stats-label">${stat.label}</dt>
-          <dd class="stats-value">${stat.value}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
+          <dd class="stats-value">${valueHbs}</dd>
         </div>
       `;
     } else if (general.layoutStyle === "accent-cards") {
       return `
         <div class="stats-item accent-card">
           ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${stat.imageUrl}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
-          <dd class="stats-value">${stat.value}</dd>
-          <dt class="stats-label">${stat.label}</dt>
+          <dd class="stats-value">${valueHbs}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
         </div>
       `;
     } else if (general.layoutStyle === "divider-grid") {
       return `
         <div class="stats-item divider-cell">
-          <dt class="stats-label">${stat.label}</dt>
-          <dd class="stats-value">${stat.value}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
+          <dd class="stats-value">${valueHbs}</dd>
         </div>
       `;
     }
-    
+
     // Default "row" and "split"
     return `
       <div class="stats-item row">
-        <dt class="stats-label">${stat.label}</dt>
-        <dd class="stats-value">${stat.value}</dd>
+        <dt class="stats-label">${labelHbs}</dt>
+        <dd class="stats-value">${valueHbs}</dd>
       </div>
     `;
   };
 
   const gridCols = COLS_CLASS[general.columns] || COLS_CLASS[3];
-  
-  const headingHtml = (general.heading || general.subheading) ? `
+
+  const headingVal = general.heading
+    ? `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{else}}${general.heading}{{/if}}`
+    : `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{/if}}`;
+  const subheadingVal = general.subheading
+    ? `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{else}}${general.subheading}{{/if}}`
+    : `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{/if}}`;
+
+  const headingHtml = `
     <div class="stats-header">
-      ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
-      ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+      <h2 class="stats-heading">${headingVal}</h2>
+      <p class="stats-subheading">${subheadingVal}</p>
     </div>
-  ` : '';
+  `;
 
   return `<style>
   #${wrapperId} {

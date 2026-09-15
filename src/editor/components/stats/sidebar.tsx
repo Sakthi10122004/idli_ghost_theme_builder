@@ -4,10 +4,10 @@ import { StatsProps, defaultProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
 
-const SegmentedControl = ({ options, value, onChange }: { 
-  options: { label: React.ReactNode; value: string; disabled?: boolean }[]; 
-  value: string; 
-  onChange: (v: string) => void 
+const SegmentedControl = ({ options, value, onChange }: {
+  options: { label: React.ReactNode; value: string; disabled?: boolean }[];
+  value: string;
+  onChange: (v: string) => void
 }) => (
   <div className="flex bg-gray-100 p-0.5 rounded-md border border-gray-200/50">
     {options.map(opt => (
@@ -16,13 +16,12 @@ const SegmentedControl = ({ options, value, onChange }: {
         type="button"
         disabled={opt.disabled}
         onClick={() => onChange(opt.value)}
-        className={`flex-1 flex justify-center items-center py-1.5 text-[11px] font-medium rounded-sm transition-all ${
-          opt.disabled
+        className={`flex-1 flex justify-center items-center py-1.5 text-[11px] font-medium rounded-sm transition-all ${opt.disabled
             ? 'text-gray-300 cursor-not-allowed'
             : value === opt.value
               ? 'bg-white text-gray-900 shadow-sm'
               : 'text-gray-500 hover:text-gray-700'
-        }`}
+          }`}
       >
         {opt.label}
       </button>
@@ -43,78 +42,103 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
     onChangeProps({ general: { ...general, ...patch } });
   };
 
-  const renderStatItem = (item: any, update: (patch: any) => void) => (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <div className="flex flex-col gap-1 w-1/3">
-          <label className="text-[10px] font-semibold text-gray-500">Value</label>
-          <input 
-            type="text" 
-            value={item.value} 
-            onChange={(e) => update({ value: e.target.value })}
-            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            placeholder="10k+"
-          />
+  const renderStatItem = (item: any, update: (patch: any) => void, index?: number) => {
+    const num = (index ?? stats.findIndex((s) => s.id === item.id)) + 1;
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between pb-0.5">
+          <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
+            @custom.stat_{num}_value
+          </span>
+          <span className="text-[10px] text-gray-400 font-sans">Ghost Dynamic Sync</span>
         </div>
-        <div className="flex flex-col gap-1 w-2/3">
-          <label className="text-[10px] font-semibold text-gray-500">Label</label>
-          <input 
-            type="text" 
-            value={item.label} 
-            onChange={(e) => update({ label: e.target.value })}
-            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            placeholder="Active users"
-          />
-        </div>
-      </div>
-      {(general.layoutStyle === "cards" || general.layoutStyle === "accent-cards") && (
-        <div className="flex flex-col gap-2 mt-1 border-t border-gray-100 pt-2">
-          <div className="flex gap-2 items-center justify-between">
-            <label className="text-[10px] font-semibold text-gray-500">Icon Type</label>
-            <select
-              value={item.iconType || 'svg'}
-              onChange={(e) => update({ iconType: e.target.value })}
-              className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-white"
-            >
-              <option value="svg">SVG Code</option>
-              <option value="image">Image URL</option>
-            </select>
+        <div className="flex gap-2">
+          <div className="flex flex-col gap-1 w-1/3">
+            <label className="text-[10px] font-semibold text-gray-500">Default Value</label>
+            <input
+              type="text"
+              value={item.value}
+              onChange={(e) => update({ value: e.target.value })}
+              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-brand-canvas-soft"
+              placeholder="10k+"
+            />
           </div>
-          {(!item.iconType || item.iconType === 'svg') ? (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-gray-500">SVG Code</label>
-              <textarea 
-                value={item.icon || ""} 
-                onChange={(e) => update({ icon: e.target.value })}
-                className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none h-12 font-mono"
-                placeholder="<svg>...</svg>"
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold text-gray-500">Image URL</label>
-              <input 
-                type="text"
-                value={item.imageUrl || ""} 
-                onChange={(e) => update({ imageUrl: e.target.value })}
-                className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-                placeholder="https://example.com/icon.png"
-              />
-            </div>
-          )}
+          <div className="flex flex-col gap-1 w-2/3">
+            <label className="text-[10px] font-semibold text-gray-500">Default Label</label>
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => update({ label: e.target.value })}
+              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-brand-canvas-soft"
+              placeholder="Active users"
+            />
+          </div>
         </div>
-      )}
-    </div>
-  );
+        {(general.layoutStyle === "cards" || general.layoutStyle === "accent-cards") && (
+          <div className="flex flex-col gap-2 mt-1 border-t border-gray-100 pt-2">
+            <div className="flex gap-2 items-center justify-between">
+              <label className="text-[10px] font-semibold text-gray-500">Icon Type</label>
+              <select
+                value={item.iconType || 'svg'}
+                onChange={(e) => update({ iconType: e.target.value })}
+                className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-white"
+              >
+                <option value="svg">SVG Code</option>
+                <option value="image">Image URL</option>
+              </select>
+            </div>
+            {(!item.iconType || item.iconType === 'svg') ? (
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-semibold text-gray-500">SVG Code</label>
+                <textarea
+                  value={item.icon || ""}
+                  onChange={(e) => update({ icon: e.target.value })}
+                  className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none h-12 font-mono"
+                  placeholder="<svg>...</svg>"
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-semibold text-gray-500">Image URL</label>
+                <input
+                  type="text"
+                  value={item.imageUrl || ""}
+                  onChange={(e) => update({ imageUrl: e.target.value })}
+                  className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
+                  placeholder="https://example.com/icon.png"
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Ghost Dynamic Theme Settings Notice */}
+      <div className="p-3 bg-blue-50/80 border border-blue-200/80 rounded-md">
+        <div className="flex items-center gap-1.5 text-blue-800 font-semibold text-[11px]">
+          <svg className="w-4 h-4 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Fully Dynamic Ghost Admin Sync
+        </div>
+        <p className="text-[10.5px] text-blue-700/90 mt-1.5 leading-relaxed">
+          The values set here serve as <strong>initial theme defaults</strong>. When exported to Ghost, your users can edit the heading, subheading, and all stat values & labels live in <strong>Ghost Admin &rarr; Settings &rarr; Design &rarr; Homepage</strong>!
+        </p>
+      </div>
+
       {/* General Settings */}
       <div className="flex flex-col gap-2">
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">General</span>
-        
+
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
+            <span className="text-[9px] font-mono text-blue-600 bg-blue-50 px-1 rounded border border-blue-200/50">@custom.stats_heading</span>
+          </div>
           <input
             type="text"
             value={general.heading || ""}
@@ -124,7 +148,10 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </div>
 
         <div className="flex flex-col gap-1.5 mt-1">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
+            <span className="text-[9px] font-mono text-blue-600 bg-blue-50 px-1 rounded border border-blue-200/50">@custom.stats_subheading</span>
+          </div>
           <textarea
             value={general.subheading || ""}
             onChange={(e) => updateGeneral({ subheading: e.target.value })}
@@ -164,21 +191,21 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
 
       {/* Stats List */}
       <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
-        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Stats</span>
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Stats Items (Auto-synced with @custom)</span>
         <RepeatableList
           items={stats}
           onChange={(newStats) => onChangeProps({ stats: newStats })}
-          renderItem={renderStatItem}
+          renderItem={(item, update) => renderStatItem(item, update)}
           newItem={() => ({ id: Math.random().toString(36).substring(7), value: "0", label: "New Stat" })}
           addLabel="Add Stat"
         />
       </div>
 
       {/* Background Controls */}
-      <BackgroundControls 
-        styles={block.styles || {}} 
-        appearance={p.appearance || {}} 
-        onChangeStyles={onChangeStyles || (() => {})} 
+      <BackgroundControls
+        styles={block.styles || {}}
+        appearance={p.appearance || {}}
+        onChangeStyles={onChangeStyles || (() => { })}
         updateAppearance={(key, val) => onChangeProps({ appearance: { ...p.appearance, [key]: val } })}
       />
 
@@ -223,18 +250,18 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         <div className="flex gap-2">
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-[10px] font-semibold text-gray-500">Top Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingTop || ""} 
+            <input
+              type="text"
+              value={p.spacing.paddingTop || ""}
               onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-[10px] font-semibold text-gray-500">Bottom Padding</label>
-            <input 
-              type="text" 
-              value={p.spacing.paddingBottom || ""} 
+            <input
+              type="text"
+              value={p.spacing.paddingBottom || ""}
               onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
