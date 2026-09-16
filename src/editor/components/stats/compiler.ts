@@ -19,10 +19,9 @@ export const generateHTML = (block: BuilderBlock): string => {
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `stats-${block.id}`;
 
-  const renderStat = (stat: any, idx: number) => {
-    const num = idx + 1;
-    const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${stat.value || ""}{{/if}}`;
-    const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${stat.label || ""}{{/if}}`;
+  const renderStat = (stat: any) => {
+    const valueHbs = stat.value || "";
+    const labelHbs = stat.label || "";
 
     if (general.layoutStyle === "cards") {
       return `
@@ -67,12 +66,8 @@ export const generateHTML = (block: BuilderBlock): string => {
 
   const gridCols = COLS_CLASS[general.columns] || COLS_CLASS[3];
 
-  const headingVal = general.heading
-    ? `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{else}}${general.heading}{{/if}}`
-    : `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{/if}}`;
-  const subheadingVal = general.subheading
-    ? `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{else}}${general.subheading}{{/if}}`
-    : `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{/if}}`;
+  const headingVal = general.heading || "";
+  const subheadingVal = general.subheading || "";
 
   const headingHtml = `
     <div class="stats-header">

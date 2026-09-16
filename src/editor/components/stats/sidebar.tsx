@@ -42,16 +42,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
     onChangeProps({ general: { ...general, ...patch } });
   };
 
-  const renderStatItem = (item: any, update: (patch: any) => void, index?: number) => {
-    const num = (index ?? stats.findIndex((s) => s.id === item.id)) + 1;
+  const renderStatItem = (item: any, update: (patch: any) => void) => {
     return (
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between pb-0.5">
-          <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
-            @custom.stat_{num}_value
-          </span>
-          <span className="text-[10px] text-gray-400 font-sans">Ghost Dynamic Sync</span>
-        </div>
         <div className="flex gap-2">
           <div className="flex flex-col gap-1 w-1/3">
             <label className="text-[10px] font-semibold text-gray-500">Default Value</label>
@@ -135,10 +128,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">General</span>
 
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
-            <span className="text-[9px] font-mono text-blue-600 bg-blue-50 px-1 rounded border border-blue-200/50">@custom.stats_heading</span>
-          </div>
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
           <input
             type="text"
             value={general.heading || ""}
@@ -148,10 +138,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </div>
 
         <div className="flex flex-col gap-1.5 mt-1">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
-            <span className="text-[9px] font-mono text-blue-600 bg-blue-50 px-1 rounded border border-blue-200/50">@custom.stats_subheading</span>
-          </div>
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
           <textarea
             value={general.subheading || ""}
             onChange={(e) => updateGeneral({ subheading: e.target.value })}

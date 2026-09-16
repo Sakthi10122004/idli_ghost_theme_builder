@@ -387,8 +387,47 @@ const syncHeaderFooterAcrossPages = (
   return newPages;
 };
 
+export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
+  const newBlocks = { ...doc.blocks };
+  const newPages = { ...doc.pages };
+  let modified = false;
+
+  Object.keys(newPages).forEach((pageKey) => {
+    const page = newPages[pageKey];
+    if (!page?.sections) return;
+
+    const newSections: string[] = [];
+    page.sections.forEach((sid) => {
+      const block = newBlocks[sid];
+      // If it's a section with only a single child of type "image" or "heading"
+      if (
+        block &&
+        block.type === "section" &&
+        block.childrenIds &&
+        block.childrenIds.length === 1
+      ) {
+        const childId = block.childrenIds[0];
+        const child = newBlocks[childId];
+        if (child && (child.type === "image" || child.type === "heading" || child.type === "text" || child.type === "share")) {
+          newSections.push(childId);
+          delete newBlocks[sid];
+          modified = true;
+          return;
+        }
+      }
+      newSections.push(sid);
+    });
+
+    if (modified) {
+      newPages[pageKey] = { ...page, sections: newSections };
+    }
+  });
+
+  return modified ? { ...doc, blocks: newBlocks, pages: newPages } : doc;
+}
+
 export const useEditorStore = create<EditorState>((set, get) => ({
-  document: INITIAL_THEME_DOCUMENT,
+  document: unwrapStandaloneSections(INITIAL_THEME_DOCUMENT),
   selectedBlockId: null,
   activePage: "home",
   deviceMode: "desktop",
@@ -421,7 +460,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const data = await res.json();
       if (data.document) {
         console.log(`[Zustand Store] loadTheme completed. AST document successfully hydrated.`);
-        set({ document: data.document, saveStatus: "saved" });
+        const unwrappedDoc = unwrapStandaloneSections(data.document);
+        set({ document: unwrappedDoc, saveStatus: "saved" });
       } else {
         console.log(`[Zustand Store] loadTheme completed. No layout record found, using defaults.`);
       }
@@ -658,7 +698,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -696,7 +736,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,

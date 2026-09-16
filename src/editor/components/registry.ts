@@ -144,6 +144,11 @@ import * as teamCanvas from "./team/canvas";
 import * as teamSidebar from "./team/sidebar";
 import * as teamCompiler from "./team/compiler";
 
+import * as share from "./share/schema";
+import * as shareCanvas from "./share/canvas";
+import * as shareSidebar from "./share/sidebar";
+import * as shareCompiler from "./share/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -174,4 +179,5 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "logo-cloud": { type: "logo-cloud", ...logoCloud, ...logoCloudCanvas, ...logoCloudSidebar, ...logoCloudCompiler },
   stats: { type: "stats", ...stats, ...statsCanvas, ...statsSidebar, ...statsCompiler },
   team: { type: "team", ...team, ...teamCanvas, ...teamSidebar, ...teamCompiler },
+  share: { type: "share", ...share, ...shareCanvas, ...shareSidebar, ...shareCompiler },
 };

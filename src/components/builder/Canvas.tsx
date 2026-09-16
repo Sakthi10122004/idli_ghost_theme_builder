@@ -114,6 +114,7 @@ function SortableElement({
   };
 
   const getHoverClass = () => {
+    if (block.type === "heading" || block.type === "text" || block.type === "share") return "";
     const effect = resolveStyleLocal(hoverEffect);
     if (effect === "scale") return "hover-effect-scale";
     if (effect === "float") return "hover-effect-float";
@@ -398,7 +399,7 @@ export default function Canvas() {
       const isLogoCloud = block.type === "logo-cloud";
       const rawShadow = isLogoCloud ? undefined : resolveStyle(block.styles?.boxShadow);
       const hasShadow = !isLogoCloud && !!(rawShadow && rawShadow !== "none");
-      const hasHover = !!(block.styles?.hoverEffect && block.styles.hoverEffect !== "none");
+      const hasHover = block.type !== "heading" && !!(block.styles?.hoverEffect && block.styles.hoverEffect !== "none");
       const hasBackdrop = !isLogoCloud && !!(block.styles?.backdropBlur && block.styles.backdropBlur !== "none" && block.styles.backdropBlur !== "0px");
 
       let effectiveBg = resolvedBg || undefined;
