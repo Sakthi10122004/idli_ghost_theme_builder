@@ -129,6 +129,7 @@ function getInlineStyles(block: BuilderBlock): string {
  * Returns CSS classes for visual hover micro-animations.
  */
 function getHoverClass(block: BuilderBlock): string {
+  if (block.type === "heading") return "";
   const effect = block.styles?.hoverEffect;
   if (!effect) return "";
   const val = typeof effect === "string" ? effect : (effect.desktop || "");
@@ -234,7 +235,19 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
     return `{{!< default}}\n\n{{#post}}\n${mainContent}\n{{/post}}`;
   }
   if (pageName === "page") {
-    return `{{!< default}}\n\n{{#post}}\n{{#if @page.show_title_and_feature_image}}\n  <header class="page-header py-8 max-w-2xl mx-auto px-6">\n    <h1 class="text-3xl font-bold tracking-tight">{{title}}</h1>\n  </header>\n{{/if}}\n${mainContent}\n{{/post}}`;
+    // Avoid duplicate title if mainContent already contains a visual heading, page-detail, or title
+    const hasTitleOrHeading =
+      mainContent.includes("{{title}}") ||
+      mainContent.includes("heading") ||
+      mainContent.includes("post-header");
+
+    const headerMarkup = !hasTitleOrHeading
+      ? `\n{{#if @page.show_title_and_feature_image}}\n  <header class="page-header py-8 max-w-2xl mx-auto px-6">\n    <h1 class="text-3xl font-bold tracking-tight">{{title}}</h1>\n  </header>\n{{/if}}`
+      : (!mainContent.includes("@page.show_title_and_feature_image")
+          ? `\n{{#if @page.show_title_and_feature_image}}\n  {{!-- Page title managed via visual builder blocks --}}\n{{/if}}`
+          : "");
+
+    return `{{!< default}}\n\n{{#post}}${headerMarkup}\n${mainContent}\n{{/post}}`;
   }
   if (pageName === "author") {
     return `{{!< default}}\n\n{{#author}}\n${mainContent}\n{{/author}}`;
@@ -377,6 +390,30 @@ html.dark-mode .section[style*="background-color:#ffffff"],
 html.dark .section[style*="background-color: rgb(255, 255, 255)"],
 html.dark-mode .section[style*="background-color: rgb(255, 255, 255)"] {
   background-color: var(--color-bg) !important;
+}
+
+/* Heading dark mode adaptation */
+html.dark .heading-dark-adaptive,
+html.dark-mode .heading-dark-adaptive,
+html.dark .heading[style*="color: #000000"],
+html.dark-mode .heading[style*="color: #000000"],
+html.dark .heading[style*="color:#000000"],
+html.dark-mode .heading[style*="color:#000000"],
+html.dark .heading[style*="color: #171717"],
+html.dark-mode .heading[style*="color: #171717"],
+html.dark .heading[style*="color:#171717"],
+html.dark-mode .heading[style*="color:#171717"],
+html.dark .heading[style*="color: #0a0a0a"],
+html.dark-mode .heading[style*="color: #0a0a0a"],
+html.dark .heading[style*="color: #111111"],
+html.dark-mode .heading[style*="color: #111111"],
+html.dark .heading[style*="color: rgb(0, 0, 0)"],
+html.dark-mode .heading[style*="color: rgb(0, 0, 0)"],
+html.dark .heading[style*="color: rgb(23, 23, 23)"],
+html.dark-mode .heading[style*="color: rgb(23, 23, 23)"],
+html.dark .heading[style*="color: black"],
+html.dark-mode .heading[style*="color: black"] {
+  color: var(--color-fg, #ffffff) !important;
 }
 
 html.dark .btn-primary,
@@ -887,58 +924,10 @@ html.dark .hover-effect-glow:hover {
 export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   const files: Record<string, string> = {};
 
-  const customConfig: Record<string, any> = {};
-
-  // Scan all blocks for stats blocks and declare custom settings ONLY for what is actually referenced in templates
-  const statsBlocks = Object.values(doc.blocks).filter((b) => b.type === "stats");
-  if (statsBlocks.length > 0) {
-    customConfig["stats_heading"] = {
-      type: "text",
-      name: "Stats: Heading",
-      description: "Heading displayed in the Stats section",
-      default: "Our impact",
-      group: "homepage"
-    };
-    customConfig["stats_subheading"] = {
-      type: "text",
-      name: "Stats: Subheading",
-      description: "Subheading displayed in the Stats section",
-      default: "What we have achieved so far",
-      group: "homepage"
-    };
-
-    const firstStats = statsBlocks[0];
-    const sp = (firstStats.props || {}) as any;
-    if (sp.general?.heading) customConfig["stats_heading"].default = sp.general.heading;
-    if (sp.general?.subheading) customConfig["stats_subheading"].default = sp.general.subheading;
-
-    const statsList = Array.isArray(sp.stats) ? sp.stats : [];
-    statsList.forEach((st: any, i: number) => {
-      const num = i + 1;
-      customConfig[`stat_${num}_value`] = {
-        type: "text",
-        name: `Stat ${num}: Value`,
-        description: `Value or metric for Stat ${num}`,
-        default: st.value || "",
-        group: "homepage"
-      };
-      customConfig[`stat_${num}_label`] = {
-        type: "text",
-        name: `Stat ${num}: Label`,
-        description: `Description label for Stat ${num}`,
-        default: st.label || "",
-        group: "homepage"
-      };
-    });
-  }
-
-  const pkgConfig: Record<string, any> = {
+  const pkgConfig: Record<string, unknown> = {
     posts_per_page: 5,
     card_assets: true
   };
-  if (Object.keys(customConfig).length > 0) {
-    pkgConfig.custom = customConfig;
-  }
 
   // 1. Generate package.json definition
   files["package.json"] = JSON.stringify({

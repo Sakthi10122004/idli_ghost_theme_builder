@@ -658,7 +658,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -696,7 +696,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,

@@ -36,16 +36,6 @@ export default function RightSidebar() {
     }
   };
 
-  const vercelColors = [
-    { label: "Ink (Primary)", value: "#171717" },
-    { label: "Body Text", value: "#4d4d4d" },
-    { label: "Mute Gray", value: "#888888" },
-    { label: "Vercel Blue", value: "#0070f3" },
-    { label: "Success Green", value: "#10b981" },
-    { label: "Error Red", value: "#ee0000" },
-    { label: "Warning Gold", value: "#f5a623" },
-  ];
-
   return (
     <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto">
       {selectedBlock ? (
@@ -107,16 +97,18 @@ export default function RightSidebar() {
             {/* Typography Styles */}
             {(selectedBlock.type === "heading" || selectedBlock.type === "text") && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Font Size</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 16px, 2.5rem"
-                    value={getInputValue(selectedBlock.styles.fontSize)}
-                    onChange={(e) => handleStyleChange("fontSize", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
+                {selectedBlock.type === "text" && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-sans font-semibold text-brand-body">Font Size</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 16px, 2.5rem"
+                      value={getInputValue(selectedBlock.styles.fontSize)}
+                      onChange={(e) => handleStyleChange("fontSize", e.target.value)}
+                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                    />
+                  </div>
+                )}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Font Weight</label>
                   <select
@@ -148,19 +140,36 @@ export default function RightSidebar() {
                     <option value="0.1em">Widest (0.1em)</option>
                   </select>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Text Color</label>
-                  <select
-                    value={getInputValue(selectedBlock.styles.textColor)}
-                    onChange={(e) => handleStyleChange("textColor", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  >
-                    <option value="">Default Inherit</option>
-                    {vercelColors.map((c) => (
-                      <option key={c.label} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
+                {(selectedBlock.type === "text" || selectedBlock.type === "heading") && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-sans font-semibold text-brand-body">Font Color</label>
+                      {selectedBlock.styles.textColor && (
+                        <button
+                          onClick={() => handleStyleChange("textColor", "")}
+                          className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
+                        >
+                          Reset Default
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="color"
+                        value={getInputValue(selectedBlock.styles.textColor) || "#171717"}
+                        onChange={(e) => handleStyleChange("textColor", e.target.value)}
+                        className="w-8 h-8 rounded border border-brand-hairline p-0.5 cursor-pointer shrink-0 bg-transparent"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Inherit / #171717"
+                        value={getInputValue(selectedBlock.styles.textColor)}
+                        onChange={(e) => handleStyleChange("textColor", e.target.value)}
+                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
@@ -217,7 +226,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Box Shadow Setting */}
-            {selectedBlock.type !== "logo-cloud" && (
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
                 <select
@@ -236,7 +245,7 @@ export default function RightSidebar() {
             )}
 
             {/* General Styling Controls */}
-            {selectedBlock.type !== "header" && (
+            {selectedBlock.type !== "header" && selectedBlock.type !== "heading" && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Border Line</label>
@@ -263,7 +272,7 @@ export default function RightSidebar() {
                 )}
               </>
             )}
-            {selectedBlock.type !== "logo-cloud" && (
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
                 <select
@@ -292,19 +301,21 @@ export default function RightSidebar() {
                 <option value="0.25">25%</option>
               </select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Hover Effect</label>
-              <select
-                value={getInputValue(selectedBlock.styles.hoverEffect)}
-                onChange={(e) => handleStyleChange("hoverEffect", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="scale">Scale Up (1.02x)</option>
-                <option value="float">Float Up (-4px)</option>
-                <option value="glow">Soft Glow Shadow</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "heading" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Hover Effect</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.hoverEffect)}
+                  onChange={(e) => handleStyleChange("hoverEffect", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="scale">Scale Up (1.02x)</option>
+                  <option value="float">Float Up (-4px)</option>
+                  <option value="glow">Soft Glow Shadow</option>
+                </select>
+              </div>
+            )}
 
             {/* Section/Spacing Styles */}
             {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
