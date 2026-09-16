@@ -458,14 +458,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     padding: 0 4vmin;
     box-sizing: border-box;
   }
-  #${wrapperId} .featured-posts-title {
-    font-family: var(--gh-font-heading, var(--font-mono, monospace));
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-mute, #888888);
-    margin-bottom: 1.5rem;
-  }
+
   #${wrapperId} .featured-post-tag {
     font-family: var(--font-mono, monospace);
     font-size: 0.625rem;
@@ -1037,6 +1030,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     gap: 0.5rem;
   }
   #${wrapperId} .featured-posts-title {
+    font-family: var(--gh-font-heading, inherit);
     font-size: 1.75rem;
     font-weight: 700;
     color: ${headingColor};
