@@ -412,7 +412,25 @@ html.dark-mode .heading[style*="color: rgb(0, 0, 0)"],
 html.dark .heading[style*="color: rgb(23, 23, 23)"],
 html.dark-mode .heading[style*="color: rgb(23, 23, 23)"],
 html.dark .heading[style*="color: black"],
-html.dark-mode .heading[style*="color: black"] {
+html.dark-mode .heading[style*="color: black"],
+html.dark .text-dark-adaptive,
+html.dark-mode .text-dark-adaptive,
+html.dark .text-dark-adaptive p,
+html.dark-mode .text-dark-adaptive p,
+html.dark .text-content[style*="color: #000000"],
+html.dark-mode .text-content[style*="color: #000000"],
+html.dark .text-content[style*="color:#000000"],
+html.dark-mode .text-content[style*="color:#000000"],
+html.dark .text-content[style*="color: #171717"],
+html.dark-mode .text-content[style*="color: #171717"],
+html.dark .text-content[style*="color:#171717"],
+html.dark-mode .text-content[style*="color:#171717"],
+html.dark .text-content[style*="color: rgb(0, 0, 0)"],
+html.dark-mode .text-content[style*="color: rgb(0, 0, 0)"],
+html.dark .text-content[style*="color: rgb(23, 23, 23)"],
+html.dark-mode .text-content[style*="color: rgb(23, 23, 23)"],
+html.dark .text-content[style*="color: black"],
+html.dark-mode .text-content[style*="color: black"] {
   color: var(--color-fg, #ffffff) !important;
 }
 
@@ -1030,7 +1048,16 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   // 5. Generate asset stylesheet screen.css
   files["assets/css/screen.css"] = minifyCss(getSkeletonCss(doc));
 
-  // 6. Generate post-card.hbs
+  // 6. Generate content.hbs partial (supporting {{> "content" width="wide"}} or {{> "content"}})
+  files["partials/content.hbs"] = `{{!--
+    Standard Ghost content partial supporting {{> "content" width="wide"}} or {{> "content"}}
+--}}
+<section class="gh-content gh-canvas{{#if width}} gh-canvas-{{width}}{{/if}}">
+    {{content}}
+</section>
+`;
+
+  // 7. Generate post-card.hbs
   files["partials/post-card.hbs"] = `
 <article class="gh-post-card {{post_class}}">
   <a class="gh-post-card-link" href="{{url}}">

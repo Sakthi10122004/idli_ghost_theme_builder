@@ -127,6 +127,13 @@ html.dark #canvas-preview-frame .heading:not([style*="color"]) {
   color: var(--color-ink, #ffffff) !important;
 }
 
+/* Text dark mode adaptation in canvas */
+html.dark #canvas-preview-frame .text-dark-adaptive,
+html.dark #canvas-preview-frame .text-dark-adaptive p,
+html.dark #canvas-preview-frame .text-content.text-dark-adaptive {
+  color: var(--color-ink, #ffffff) !important;
+}
+
 /* Force hero, header, footer and button blocks to invert properly in dark mode */
 html.dark #canvas-preview-frame .gh-head-btn,
 html.dark .gh-head .gh-head-btn,
