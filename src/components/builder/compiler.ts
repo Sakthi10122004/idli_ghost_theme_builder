@@ -556,7 +556,6 @@ html.dark-mode .btn-secondary {
 .gh-content .kg-image {
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius-md);
 }
 .gh-content .kg-width-wide {
   grid-column: wide-start / wide-end;
@@ -564,6 +563,19 @@ html.dark-mode .btn-secondary {
 .gh-content .kg-width-full {
   grid-column: full-start / full-end;
 }
+
+/* 4. Global Radius & Layout Utilities */
+.rounded-none { border-radius: 0px !important; }
+.rounded-sm { border-radius: 4px !important; }
+.rounded-md { border-radius: 8px !important; }
+.rounded-lg { border-radius: 12px !important; }
+.rounded-xl { border-radius: 16px !important; }
+.rounded-2xl { border-radius: 24px !important; }
+.rounded-full { border-radius: 9999px !important; }
+.overflow-hidden { overflow: hidden !important; }
+.object-cover { object-fit: cover !important; }
+.object-contain { object-fit: contain !important; }
+.object-fill { object-fit: fill !important; }
 
 /* Ghost Gallery Cards */
 .gh-content .kg-gallery-container {

@@ -78,10 +78,14 @@ export default function RightSidebar() {
                   <SidebarElement
                     block={selectedBlock}
                     onChangeProps={(props) => {
-                      Object.entries(props).forEach(([k, v]) => handlePropChange(k, v));
+                      if (selectedBlockId) {
+                        updateBlockProps(selectedBlockId, props);
+                      }
                     }}
                     onChangeStyles={(styles) => {
-                      Object.entries(styles).forEach(([k, v]) => handleStyleChange(k, v));
+                      if (selectedBlockId) {
+                        updateBlockStyles(selectedBlockId, styles);
+                      }
                     }}
                   />
                 );

@@ -202,18 +202,18 @@ html:not(.dark) .icon-moon { display: block !important; }
   --font-mono: var(--font-geist-mono), JetBrains Mono, monospace;
   
   /* Spacing from DESIGN.md */
-  --spacing-xxs: 4px;
-  --spacing-xs: 8px;
-  --spacing-sm: 12px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-2xl: 40px;
-  --spacing-3xl: 48px;
-  --spacing-4xl: 64px;
-  --spacing-5xl: 96px;
-  --spacing-6xl: 128px;
-  --spacing-section: 192px;
+  --brand-spacing-xxs: 4px;
+  --brand-spacing-xs: 8px;
+  --brand-spacing-sm: 12px;
+  --brand-spacing-md: 16px;
+  --brand-spacing-lg: 24px;
+  --brand-spacing-xl: 32px;
+  --brand-spacing-2xl: 40px;
+  --brand-spacing-3xl: 48px;
+  --brand-spacing-4xl: 64px;
+  --brand-spacing-5xl: 96px;
+  --brand-spacing-6xl: 128px;
+  --brand-spacing-section: 192px;
   
   /* Radii from DESIGN.md */
   --radius-xs: 4px;
