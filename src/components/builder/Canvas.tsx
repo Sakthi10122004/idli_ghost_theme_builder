@@ -114,7 +114,7 @@ function SortableElement({
   };
 
   const getHoverClass = () => {
-    if (block.type === "heading" || block.type === "text") return "";
+    if (block.type === "heading" || block.type === "text" || block.type === "share") return "";
     const effect = resolveStyleLocal(hoverEffect);
     if (effect === "scale") return "hover-effect-scale";
     if (effect === "float") return "hover-effect-float";

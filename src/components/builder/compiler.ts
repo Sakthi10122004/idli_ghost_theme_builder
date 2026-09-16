@@ -447,6 +447,430 @@ html.dark-mode .btn-secondary {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
+/* 3. Ghost Native Post & Page Share (#/share) - All Layouts & Themes */
+.gh-share-wrapper,
+.gh-share-dock-wrapper,
+.gh-share-grid,
+.gh-share-inline {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Alignment */
+.gh-share-align-left {
+  justify-content: flex-start;
+  text-align: left;
+}
+.gh-share-align-center {
+  justify-content: center;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.gh-share-align-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+/* Primary Share Trigger Button */
+.gh-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body, inherit);
+  font-weight: 500;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1;
+  border-radius: 9999px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.gh-share-btn svg,
+.gh-share-direct-btn svg,
+.gh-share-grid-tile svg,
+.gh-share-more-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Button Sizing */
+.gh-share-btn.gh-share-sm {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.85rem;
+  gap: 0.375rem;
+}
+.gh-share-btn.gh-share-md {
+  font-size: 0.8125rem;
+  padding: 0.5rem 1.1rem;
+  gap: 0.5rem;
+}
+.gh-share-btn.gh-share-lg {
+  font-size: 0.875rem;
+  padding: 0.65rem 1.35rem;
+  gap: 0.625rem;
+}
+
+/* Button Variants */
+.gh-share-btn.gh-share-pill {
+  background-color: var(--color-primary, #171717);
+  color: #ffffff !important;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.gh-share-btn.gh-share-pill:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.gh-share-btn.gh-share-outline {
+  background-color: transparent;
+  border: 1px solid currentColor;
+  color: var(--color-fg, #171717) !important;
+}
+.gh-share-btn.gh-share-outline:hover {
+  opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.gh-share-btn.gh-share-ghost {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--color-fg, #171717) !important;
+}
+.gh-share-btn.gh-share-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+.gh-share-btn.gh-share-icon-only {
+  padding: 0.5rem !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--color-fg, #171717) !important;
+}
+
+/* Direct Platform Icons */
+.gh-share-direct-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  margin-left: 0.375rem;
+}
+.gh-share-direct-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  color: var(--color-muted, #737373);
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+.gh-share-direct-btn:hover {
+  color: var(--color-fg, #171717);
+  background-color: rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Layout 2: Editorial Card */
+.gh-share-card {
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  margin: 1.75rem 0;
+  box-sizing: border-box;
+}
+.gh-share-card.gh-share-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.gh-share-card.gh-share-align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+.gh-share-card-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-family: var(--font-heading, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted, #737373);
+  margin-bottom: 0.375rem;
+}
+.gh-share-card-eyebrow svg {
+  width: 12px;
+  height: 12px;
+  color: #9333ea;
+}
+.gh-share-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-fg, #171717);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+.gh-share-card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-muted, #666666);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+.gh-share-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.gh-share-card-copybox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+  margin-top: 0.875rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--color-muted, #666666);
+  gap: 0.5rem;
+}
+.gh-share-card-copybox span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gh-share-card-copybox a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  color: var(--color-fg, #171717);
+  text-decoration: none !important;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.gh-share-card-copybox a:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Layout 3: Floating Dock */
+.gh-share-dock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Layout 4: Social Grid */
+.gh-share-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.gh-share-grid-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none !important;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.gh-share-grid-tile:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+.gh-share-grid-ghost {
+  background-color: #faf5ff;
+  color: #7e22ce !important;
+  border: 1px solid #e9d5ff;
+}
+.gh-share-grid-x {
+  background-color: #000000;
+  color: #ffffff !important;
+  border: 1px solid #000000;
+}
+.gh-share-grid-linkedin {
+  background-color: #0077b5;
+  color: #ffffff !important;
+  border: 1px solid #0077b5;
+}
+.gh-share-grid-whatsapp {
+  background-color: #25d366;
+  color: #ffffff !important;
+  border: 1px solid #25d366;
+}
+.gh-share-grid-copy {
+  background-color: #ffffff;
+  color: var(--color-fg, #171717) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Layout 5: Inline Minimal */
+.gh-share-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted, #737373);
+  line-height: 1.5;
+}
+.gh-share-inline .gh-share-label {
+  font-weight: 600;
+  color: var(--color-fg, #171717);
+}
+.gh-share-inline a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+.gh-share-inline a:hover {
+  color: var(--color-primary, #171717);
+}
+.gh-share-inline a.gh-share-more-btn {
+  color: #7e22ce;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Dark Mode Adaptation for Share Components */
+html.dark .gh-share-card,
+html.dark-mode .gh-share-card {
+  background-color: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+html.dark .gh-share-card-title,
+html.dark-mode .gh-share-card-title {
+  color: #ffffff !important;
+}
+html.dark .gh-share-card-subtitle,
+html.dark-mode .gh-share-card-subtitle {
+  color: #a3a3a3 !important;
+}
+html.dark .gh-share-card-actions,
+html.dark-mode .gh-share-card-actions {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+html.dark .gh-share-card-copybox,
+html.dark-mode .gh-share-card-copybox {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #a3a3a3;
+}
+html.dark .gh-share-card-copybox a,
+html.dark-mode .gh-share-card-copybox a {
+  background: #262626;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+html.dark .gh-share-dock,
+html.dark-mode .gh-share-dock {
+  background-color: rgba(24, 24, 27, 0.9);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+html.dark .gh-share-direct-links,
+html.dark-mode .gh-share-direct-links {
+  border-left-color: rgba(255, 255, 255, 0.15);
+}
+html.dark .gh-share-direct-btn,
+html.dark-mode .gh-share-direct-btn {
+  color: #a3a3a3;
+}
+html.dark .gh-share-direct-btn:hover,
+html.dark-mode .gh-share-direct-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+html.dark .gh-share-grid-x,
+html.dark-mode .gh-share-grid-x {
+  background-color: #ffffff;
+  color: #000000 !important;
+}
+html.dark .gh-share-grid-ghost,
+html.dark-mode .gh-share-grid-ghost {
+  background-color: rgba(147, 51, 234, 0.15);
+  border-color: rgba(147, 51, 234, 0.3);
+  color: #d8b4fe !important;
+}
+html.dark .gh-share-grid-copy,
+html.dark-mode .gh-share-grid-copy {
+  background-color: #262626;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff !important;
+}
+html.dark .gh-share-pill,
+html.dark-mode .gh-share-pill {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+html.dark .gh-share-outline,
+html.dark-mode .gh-share-outline {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+html.dark .gh-share-ghost,
+html.dark-mode .gh-share-ghost {
+  color: #ffffff !important;
+}
+html.dark .gh-share-ghost:hover,
+html.dark-mode .gh-share-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+html.dark .gh-share-icon-only,
+html.dark-mode .gh-share-icon-only {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+}
+html.dark .gh-share-inline .gh-share-label,
+html.dark-mode .gh-share-inline .gh-share-label {
+  color: #ffffff;
+}
+html.dark .gh-share-inline a.gh-share-more-btn,
+html.dark-mode .gh-share-inline a.gh-share-more-btn {
+  color: #c084fc;
+}
+
 
 /* 3. Shared Structural Utilities & Hover Micro-Interactions */
 .hover-effect-scale {

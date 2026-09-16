@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Color Palette from DESIGN.md */
   --color-primary: #171717;
@@ -152,6 +154,16 @@ html.dark #canvas-preview-frame .btn-secondary {
   background-color: var(--color-canvas) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Native Ghost Share Block in canvas */
+html.dark #canvas-preview-frame .gh-share-pill {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+html.dark #canvas-preview-frame .gh-share-outline {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
 }
 
 /* Ensure default body text inside canvas adapts cleanly in dark mode */
@@ -320,4 +332,180 @@ body {
   box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
   z-index: 30 !important;
 }
+
+/* Post & Page Share Global Component Rules */
+.gh-share-wrapper,
+.gh-share-dock-wrapper,
+.gh-share-grid,
+.gh-share-inline {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.gh-share-align-left { justify-content: flex-start; text-align: left; }
+.gh-share-align-center { justify-content: center; text-align: center; margin-left: auto; margin-right: auto; }
+.gh-share-align-right { justify-content: flex-end; text-align: right; }
+.gh-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none !important;
+  cursor: pointer;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.gh-share-btn svg, .gh-share-direct-btn svg, .gh-share-grid-tile svg, .gh-share-more-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+.gh-share-btn.gh-share-sm { font-size: 0.75rem; padding: 0.4rem 0.85rem; gap: 0.375rem; }
+.gh-share-btn.gh-share-md { font-size: 0.8125rem; padding: 0.5rem 1.1rem; gap: 0.5rem; }
+.gh-share-btn.gh-share-lg { font-size: 0.875rem; padding: 0.65rem 1.35rem; gap: 0.625rem; }
+.gh-share-btn.gh-share-pill {
+  background-color: var(--color-primary, #171717);
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+.gh-share-btn.gh-share-outline {
+  background-color: transparent;
+  border: 1px solid currentColor;
+  color: var(--color-fg, #171717) !important;
+}
+.gh-share-btn.gh-share-ghost {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--color-fg, #171717) !important;
+}
+.gh-share-btn.gh-share-icon-only {
+  padding: 0.5rem !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--color-fg, #171717) !important;
+}
+.gh-share-direct-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-left: 0.625rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  margin-left: 0.375rem;
+}
+.gh-share-direct-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  color: var(--color-muted, #737373);
+  text-decoration: none !important;
+}
+.gh-share-card {
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  margin: 1.75rem 0;
+  box-sizing: border-box;
+}
+.gh-share-card-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted, #737373);
+  margin-bottom: 0.375rem;
+}
+.gh-share-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-fg, #171717);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+.gh-share-card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-muted, #666666);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+.gh-share-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.gh-share-card-copybox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+  margin-top: 0.875rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--color-muted, #666666);
+  gap: 0.5rem;
+}
+.gh-share-dock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+}
+.gh-share-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.gh-share-grid-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none !important;
+}
+.gh-share-grid-ghost { background-color: #faf5ff; color: #7e22ce !important; border: 1px solid #e9d5ff; }
+.gh-share-grid-x { background-color: #000000; color: #ffffff !important; border: 1px solid #000000; }
+.gh-share-grid-linkedin { background-color: #0077b5; color: #ffffff !important; border: 1px solid #0077b5; }
+.gh-share-grid-whatsapp { background-color: #25d366; color: #ffffff !important; border: 1px solid #25d366; }
+.gh-share-grid-copy { background-color: #ffffff; color: var(--color-fg, #171717) !important; border: 1px solid rgba(0, 0, 0, 0.12); }
+.gh-share-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted, #737373);
+  line-height: 1.5;
+}
+.gh-share-inline .gh-share-label { font-weight: 600; color: var(--color-fg, #171717); }
+.gh-share-inline a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.gh-share-inline a.gh-share-more-btn { color: #7e22ce; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem; }
+
 

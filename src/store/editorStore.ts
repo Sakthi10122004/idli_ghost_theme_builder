@@ -408,7 +408,7 @@ export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
       ) {
         const childId = block.childrenIds[0];
         const child = newBlocks[childId];
-        if (child && (child.type === "image" || child.type === "heading" || child.type === "text")) {
+        if (child && (child.type === "image" || child.type === "heading" || child.type === "text" || child.type === "share")) {
           newSections.push(childId);
           delete newBlocks[sid];
           modified = true;
@@ -698,7 +698,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -736,7 +736,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text") {
+      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,

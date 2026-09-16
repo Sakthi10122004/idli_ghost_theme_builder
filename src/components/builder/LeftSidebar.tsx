@@ -27,6 +27,7 @@ import {
   DollarSign,
   Image as GalleryIcon,
   Share2,
+  Globe,
   Play,
   Cloud,
   BarChart,
@@ -91,7 +92,7 @@ export default function LeftSidebar() {
     { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare },
     { type: "pricing-table", label: "Pricing Table", category: "Content", icon: DollarSign },
     { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon },
-    { type: "social-links", label: "Social Links", category: "Content", icon: Share2 },
+    { type: "social-links", label: "Social Links", category: "Content", icon: Globe },
     { type: "video-player", label: "Video Player", category: "Content", icon: Play },
     
     { type: "header", label: "Header", category: "Ghost Core", icon: Menu },
@@ -99,6 +100,7 @@ export default function LeftSidebar() {
     { type: "featured-posts", label: "Featured Posts", category: "Ghost Core", icon: Grid },
     { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User },
     { type: "tag-archive", label: "Tag Archive", category: "Ghost Core", icon: Tag },
+    { type: "share", label: "Post / Page Share", category: "Ghost Core", icon: Share2 },
     { type: "footer", label: "Footer", category: "Ghost Core", icon: Menu },
   ];
 

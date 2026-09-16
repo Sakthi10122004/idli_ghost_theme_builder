@@ -216,7 +216,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Box Shadow Setting */}
-            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && (
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
                 <select
@@ -235,7 +235,7 @@ export default function RightSidebar() {
             )}
 
             {/* General Styling Controls */}
-            {selectedBlock.type !== "header" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && (
+            {selectedBlock.type !== "header" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Border Line</label>
@@ -262,7 +262,7 @@ export default function RightSidebar() {
                 )}
               </>
             )}
-            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && (
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
                 <select
@@ -291,7 +291,7 @@ export default function RightSidebar() {
                 <option value="0.25">25%</option>
               </select>
             </div>
-            {selectedBlock.type !== "heading" && selectedBlock.type !== "text" && (
+            {selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Hover Effect</label>
                 <select
