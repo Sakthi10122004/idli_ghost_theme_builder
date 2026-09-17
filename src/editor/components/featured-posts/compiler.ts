@@ -874,26 +874,21 @@ export const compileToHbs = (block: BuilderBlock) => {
 
   /* Masonry Layout */
   #${wrapperId} .featured-posts-masonry {
-    column-count: 1;
+    column-count: 3;
     column-gap: 1.5rem;
     width: 100%;
     box-sizing: border-box;
   }
-  @media (min-width: 640px) {
-    #${wrapperId} .featured-posts-masonry {
-      column-count: 2;
-    }
-    /* 1 post: override columns → flex centered */
-    #${wrapperId} .featured-posts-masonry:has(> article:only-child) {
-      column-count: unset;
-      display: flex;
-      justify-content: center;
-    }
-    #${wrapperId} .featured-posts-masonry:has(> article:only-child) > article {
-      width: 100%;
-      max-width: 420px;
-      margin-bottom: 0;
-    }
+  /* 1 post: override columns → flex centered */
+  #${wrapperId} .featured-posts-masonry:has(> article:only-child) {
+    column-count: unset;
+    display: flex;
+    justify-content: center;
+  }
+  #${wrapperId} .featured-posts-masonry:has(> article:only-child) > article {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 0;
   }
   @media (min-width: 1024px) {
     #${wrapperId} .featured-posts-masonry {
@@ -975,17 +970,12 @@ export const compileToHbs = (block: BuilderBlock) => {
   /* Auto Scroll Masonry */
   #${wrapperId} .masonry-autoscroll-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     height: 500px;
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
-  }
-  @media (min-width: 640px) {
-    #${wrapperId} .masonry-autoscroll-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
   @media (min-width: 1024px) {
     #${wrapperId} .masonry-autoscroll-grid {

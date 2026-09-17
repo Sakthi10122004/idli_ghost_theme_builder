@@ -28,6 +28,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const gapKey = general.gap || "md";
   const cornerStyle = general.cornerStyle || "rounded";
   const hoverEffect = general.hoverEffect || "zoom";
+  const autoScroll = general.autoScroll ?? false;
 
   const gapValueMap = { sm: "0.75rem", md: "1.25rem", lg: "2rem" };
   const gapCss = gapValueMap[gapKey] || "1.25rem";
@@ -43,6 +44,9 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     return url;
   };
 
+  const captionColor = appearance?.captionColor || "#ffffff";
+
+  // Shared image box with hover + caption overlay
   const renderItemContent = (item: GalleryItem, idx: number) => {
     const src = resolveUrl(item.url);
     const captionText = item.caption || item.alt || `Gallery Image ${idx + 1}`;
@@ -53,8 +57,6 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         : hoverEffect === "fade"
         ? "group-hover:opacity-80 transition-opacity duration-300"
         : "";
-
-    const captionColor = appearance?.captionColor || "#ffffff";
 
     return (
       <div
@@ -88,6 +90,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     );
   };
 
+
+
   return (
     <div
       id={`gallery-${block.id}`}
@@ -99,7 +103,19 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       }}
     >
       <style>{`
-        /* Dynamic Grid Layout Styles */
+        @keyframes gallery-scroll-up-${block.id} {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        @keyframes gallery-scroll-down-${block.id} {
+          0% { transform: translateY(-50%); }
+          100% { transform: translateY(0); }
+        }
+        #gallery-${block.id} .gallery-masonry-autoscroll:hover .gallery-masonry-autoscroll-track {
+          animation-play-state: paused !important;
+        }
+
+        /* ---- Grid ---- */
         #gallery-${block.id} .gallery-grid {
           display: grid;
           grid-template-columns: repeat(1, 1fr);
@@ -121,7 +137,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           width: 100%;
         }
 
-        /* Dynamic Masonry Layout Styles */
+        /* ---- Masonry ---- */
         #gallery-${block.id} .gallery-masonry {
           column-count: 1;
           column-gap: ${gapCss};
@@ -143,7 +159,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           width: 100%;
         }
 
-        /* Dynamic Carousel Auto-Scrolling Marquee Styles */
+        /* ---- Carousel auto-scroll ---- */
         #gallery-${block.id} .gallery-carousel-wrapper {
           width: 100%;
           overflow: hidden;
@@ -217,7 +233,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           </div>
         )}
 
-        {/* Layout Renderers */}
+        {/* ===== GRID ===== */}
         {layoutStyle === "grid" && (
           <div className="gallery-grid">
             {items.map((item, idx) => (
@@ -228,41 +244,194 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           </div>
         )}
 
+        {/* ===== MASONRY ===== */}
         {layoutStyle === "masonry" && (
-          <div className="gallery-masonry">
-            {items.map((item, idx) => {
-              // Simulated staggered aspect ratios for canvas preview in masonry mode
-              const heights = ["h-56", "h-72", "h-64", "h-80", "h-60", "h-76"];
-              const randomHeightClass = heights[idx % heights.length];
-              return (
-                <div key={item.id || idx} className={`gallery-masonry-item ${randomHeightClass}`}>
+          autoScroll ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 h-[480px] overflow-hidden relative gallery-masonry-autoscroll">
+              {[0, 1, 2].map((colIdx) => {
+                const colItems = items.filter((_, idx) => idx % 3 === colIdx);
+                const doubled = [...colItems, ...colItems];
+                const isUp = colIdx % 2 === 0;
+                return (
+                  <div
+                    key={colIdx}
+                    className={`flex flex-col gap-4 gallery-masonry-autoscroll-track`}
+                    style={{
+                      animation: `${isUp ? `gallery-scroll-up-${block.id}` : `gallery-scroll-down-${block.id}`} 30s linear infinite`,
+                    }}
+                  >
+                    {doubled.map((item, idx) => {
+                      const heights = ["h-48", "h-60", "h-52", "h-64", "h-44", "h-56"];
+                      return (
+                        <div key={`${item.id || idx}-${colIdx}-${idx}`} className={`${heights[(idx + colIdx) % heights.length]} shrink-0`}>
+                          {renderItemContent(item, idx)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="gallery-masonry">
+              {items.map((item, idx) => {
+                const heights = ["h-56", "h-72", "h-64", "h-80", "h-60", "h-76"];
+                const randomHeightClass = heights[idx % heights.length];
+                return (
+                  <div key={item.id || idx} className={`gallery-masonry-item ${randomHeightClass}`}>
+                    {renderItemContent(item, idx)}
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
+
+        {/* ===== CAROUSEL ===== */}
+        {layoutStyle === "carousel" && (
+          autoScroll ? (
+            <div className="gallery-carousel-wrapper">
+              <div className="gallery-carousel-track">
+                {(() => {
+                  const baseList = items.length > 0 ? (items.length < 6 ? [...items, ...items, ...items] : items) : [];
+                  const doubled = [...baseList, ...baseList];
+                  return doubled.map((item, idx) => (
+                    <div key={`${item.id || idx}-${idx}`} className="gallery-carousel-item">
+                      {renderItemContent(item, idx)}
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+          ) : (
+            <div className={`flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin ${items.length <= 2 ? "justify-center" : ""}`}>
+              {items.map((item, idx) => (
+                <div key={item.id || idx} className="gallery-carousel-item snap-start shrink-0">
                   {renderItemContent(item, idx)}
+                </div>
+              ))}
+            </div>
+          )
+        )}
+
+
+        {/* ===== LIST ===== */}
+        {layoutStyle === "list" && (
+          <div className="flex flex-col gap-4">
+            {items.map((item, idx) => {
+              const src = resolveUrl(item.url);
+              const captionText = item.caption || item.alt || `Gallery Image ${idx + 1}`;
+              return (
+                <div key={item.id || idx} className={`flex flex-col sm:flex-row gap-4 items-start sm:items-center border border-brand-hairline ${roundedClass} p-4 bg-white shadow-level-1 group hover:shadow-level-2 transition-all`}>
+                  <div className={`w-full sm:w-40 h-28 overflow-hidden shrink-0 ${roundedClass} bg-brand-canvas-soft-2 border border-brand-hairline`}>
+                    <img
+                      src={src}
+                      alt={captionText}
+                      className={`w-full h-full object-cover ${hoverEffect === "zoom" ? "group-hover:scale-105 transition-transform duration-500" : ""}`}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-brand-ink leading-snug line-clamp-2">{captionText}</span>
+                    {item.alt && item.caption && item.alt !== item.caption && (
+                      <span className="text-xs text-brand-mute leading-snug line-clamp-2">{item.alt}</span>
+                    )}
+                    <span className="text-[10px] font-mono text-brand-link font-semibold">View Image →</span>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
 
-        {layoutStyle === "carousel" && (
-          <div className="gallery-carousel-wrapper">
-            <div className="gallery-carousel-track">
-              {(() => {
-                const baseList =
-                  items.length > 0
-                    ? items.length < 6
-                      ? [...items, ...items, ...items]
-                      : items
-                    : [];
-                const doubled = [...baseList, ...baseList];
-                return doubled.map((item, idx) => (
-                  <div key={`${item.id || idx}-${idx}`} className="gallery-carousel-item">
-                    {renderItemContent(item, idx)}
+        {/* ===== BENTO GRID ===== */}
+        {layoutStyle === "bento" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {items.map((item, idx) => {
+              const isLarge = idx % 3 === 0;
+              const src = resolveUrl(item.url);
+              const captionText = item.caption || item.alt || `Gallery Image ${idx + 1}`;
+              return (
+                <div
+                  key={item.id || idx}
+                  className={`border border-brand-hairline ${roundedClass} overflow-hidden bg-white shadow-level-2 hover:shadow-level-3 transition-all group flex flex-col ${
+                    isLarge ? "md:col-span-2 md:flex-row md:items-stretch" : ""
+                  }`}
+                >
+                  <div className={`overflow-hidden bg-brand-canvas-soft-2 shrink-0 ${isLarge ? "w-full md:w-1/2 aspect-video md:aspect-auto" : "w-full aspect-[4/3]"}`}>
+                    <img
+                      src={src}
+                      alt={captionText}
+                      className={`w-full h-full object-cover ${hoverEffect === "zoom" ? "group-hover:scale-105 transition-transform duration-500" : ""}`}
+                      loading="lazy"
+                    />
                   </div>
-                ));
-              })()}
-            </div>
+                  <div className="flex flex-col gap-3 p-5 flex-1 justify-center">
+                    <span className="text-xs font-semibold text-brand-ink leading-snug line-clamp-3">{captionText}</span>
+                    {item.alt && item.caption && item.alt !== item.caption && (
+                      <span className="text-[11px] text-brand-mute leading-relaxed line-clamp-3">{item.alt}</span>
+                    )}
+                    <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                      View Full Image →
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+        {/* ===== COLLAGE ===== */}
+        {layoutStyle === "collage" && (
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 py-8 sm:py-12 md:py-16 px-4">
+            {items.map((item, idx) => {
+              const src = resolveUrl(item.url);
+              const captionText = item.caption || item.alt || `Gallery Image ${idx + 1}`;
+              
+              const rotations = ["-rotate-3", "rotate-2", "-rotate-2", "rotate-3", "-rotate-1", "rotate-1"];
+              const translates = ["translate-y-2", "-translate-y-4", "translate-y-4", "-translate-y-2", "translate-y-0", "-translate-y-3"];
+              const widths = [
+                "w-[60%] sm:w-[40%] md:w-[35%] lg:w-[30%]", 
+                "w-[50%] sm:w-[35%] md:w-[25%] lg:w-[20%]", 
+                "w-[70%] sm:w-[45%] md:w-[40%] lg:w-[35%]", 
+                "w-[55%] sm:w-[35%] md:w-[30%] lg:w-[25%]",
+                "w-[65%] sm:w-[40%] md:w-[35%] lg:w-[30%]",
+                "w-[45%] sm:w-[30%] md:w-[25%] lg:w-[20%]"
+              ];
+              const aspectRatios = ["aspect-square", "aspect-[3/4]", "aspect-[4/3]", "aspect-video", "aspect-[4/5]", "aspect-[3/2]"];
+              const zIndexes = ["z-10", "z-20", "z-10", "z-30", "z-20", "z-10"];
+
+              const rot = rotations[idx % rotations.length];
+              const trans = translates[idx % translates.length];
+              const w = widths[idx % widths.length];
+              const aspect = aspectRatios[idx % aspectRatios.length];
+              const zIndex = zIndexes[idx % zIndexes.length];
+
+              return (
+                <div 
+                  key={item.id || idx} 
+                  className={`group relative ${w} ${trans} ${rot} ${zIndex} transition-all duration-300 hover:z-40 hover:scale-[1.03] hover:rotate-0`}
+                >
+                  <div className={`w-full bg-white p-2.5 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 shadow-level-2 border border-brand-hairline flex flex-col`}>
+                    <div className={`w-full ${aspect} overflow-hidden bg-brand-canvas-soft-2 relative`}>
+                      <img
+                        src={src}
+                        alt={captionText}
+                        className={`absolute inset-0 w-full h-full object-cover ${hoverEffect === "zoom" ? "group-hover:scale-105 transition-transform duration-500" : ""}`}
+                        loading="lazy"
+                      />
+                    </div>
+                    {item.caption && (
+                      <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-0 right-0 text-center px-4 flex items-center justify-center">
+                         <span className="font-mono text-[10px] sm:text-xs font-semibold text-brand-ink opacity-80 tracking-tight line-clamp-1">{item.caption}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
       </div>
     </div>
   );

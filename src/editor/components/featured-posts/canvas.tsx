@@ -258,7 +258,7 @@ export const CanvasElement = ({ block }: {
 
       {layout === "masonry" && (
         autoScroll ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 h-[480px] overflow-hidden relative group/masonry">
+          <div className="grid grid-cols-3 gap-6 h-[480px] overflow-hidden relative group/masonry">
             {[0, 1, 2].map(colIdx => {
               const colPosts = mockPosts.filter((_, idx) => idx % 3 === colIdx);
               const itemsToRender = [...colPosts, ...colPosts];
@@ -309,7 +309,7 @@ export const CanvasElement = ({ block }: {
               })}
             </div>
           ) : (
-          <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
+          <div className="columns-3 gap-4 sm:gap-6 space-y-4 sm:space-y-6">
             {mockPosts.map((post, idx) => {
               const aspectClasses = ["aspect-square", "aspect-[4/5]", "aspect-video"][idx % 3];
               return (
