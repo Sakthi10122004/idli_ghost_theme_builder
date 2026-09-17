@@ -5,6 +5,37 @@ export function generateId(prefix: string = "block"): string {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
+export const STANDALONE_SECTION_TYPES = new Set([
+  "section",
+  "container",
+  "header",
+  "footer",
+  "hero",
+  "post-grid",
+  "featured-posts",
+  "post-content",
+  "logo-cloud",
+  "heading",
+  "image",
+  "text",
+  "share",
+  "team",
+  "testimonials",
+  "faq",
+  "stats",
+  "pricing-table",
+  "newsletter",
+  "grid-gallery",
+  "comments",
+  "author-profile",
+  "tag-archive",
+  "page-detail",
+  "error-view",
+  "post-navigation",
+  "related-posts",
+  "columns",
+]);
+
 export const DEFAULT_DESIGN_TOKENS = {
   colors: {
     background: "#ffffff",
@@ -698,7 +729,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = [...(parent.childrenIds || []), newId];
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
+      if (!STANDALONE_SECTION_TYPES.has(type)) {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,
@@ -736,7 +767,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       parent.childrenIds = childrenIds;
       newBlocks[parentId] = parent;
     } else {
-      if (type !== "section" && type !== "container" && type !== "header" && type !== "footer" && type !== "hero" && type !== "post-grid" && type !== "featured-posts" && type !== "post-content" && type !== "logo-cloud" && type !== "heading" && type !== "image" && type !== "text" && type !== "share") {
+      if (!STANDALONE_SECTION_TYPES.has(type)) {
         const autoSectionId = generateId("section");
         newBlocks[autoSectionId] = {
           id: autoSectionId,

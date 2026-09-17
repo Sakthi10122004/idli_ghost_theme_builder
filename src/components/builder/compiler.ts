@@ -60,8 +60,10 @@ function getInlineStyles(block: BuilderBlock): string {
     const val = resolveStyleValue(styles.width);
     if (val) {
       stylePairs.push(`width: ${val}`);
+      stylePairs.push(`max-width: 100%`);
       stylePairs.push(`margin-left: auto`);
       stylePairs.push(`margin-right: auto`);
+      stylePairs.push(`box-sizing: border-box`);
     }
   }
 
@@ -234,8 +236,14 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
   if (pageName === "post") {
     return `{{!< default}}\n\n{{#post}}\n${mainContent}\n{{/post}}`;
   }
-  if (pageName === "page") {
-    // Avoid duplicate title if mainContent already contains a visual heading, page-detail, or title
+  // FIX: "page" AND any custom-* template both need {{#post}} context —
+  // Ghost renders custom page templates against the same Page resource as
+  // page.hbs, just selected via the admin "Template" dropdown instead of
+  // being the default. Previously only the literal string "page" got this
+  // wrapper; custom-* fell through to the bare fallback below with no
+  // context at all, so {{title}}/{{content}}/{{feature_image}} silently
+  // resolved to nothing.
+  if (pageName === "page" || pageName.startsWith("custom-")) {
     const hasTitleOrHeading =
       mainContent.includes("{{title}}") ||
       mainContent.includes("heading") ||
@@ -249,6 +257,7 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
 
     return `{{!< default}}\n\n{{#post}}${headerMarkup}\n${mainContent}\n{{/post}}`;
   }
+
   if (pageName === "author") {
     return `{{!< default}}\n\n{{#author}}\n${mainContent}\n{{/author}}`;
   }

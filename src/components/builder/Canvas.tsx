@@ -100,6 +100,8 @@ function SortableElement({
   const resolvedBlur = isLogoCloud ? undefined : resolveStyleLocal(backdropBlur);
   const isGlassActive = !isLogoCloud && !!resolvedBlur && resolvedBlur !== "none" && resolvedBlur !== "0px";
 
+  const resolvedWidth = block.styles.width ? resolveStyleLocal(block.styles.width) : undefined;
+
   const combinedStyle: React.CSSProperties = {
     ...style,
     transform: CSS.Transform.toString(transform),
@@ -111,6 +113,11 @@ function SortableElement({
     backdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     WebkitBackdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     opacity: isDragging ? 0.3 : (opacity ? parseFloat(resolveStyleLocal(opacity) || "1") : undefined),
+    width: resolvedWidth,
+    maxWidth: "100%",
+    marginLeft: resolvedWidth ? "auto" : undefined,
+    marginRight: resolvedWidth ? "auto" : undefined,
+    boxSizing: "border-box",
   };
 
   const getHoverClass = () => {

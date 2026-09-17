@@ -106,16 +106,22 @@ export const generateHTML = (block: BuilderBlock): string => {
     padding-bottom: ${spacing.paddingBottom || "5rem"};
     position: relative;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   #${wrapperId} .team-inner {
     max-width: 80rem;
+    width: 100%;
     margin: 0 auto;
     padding: 0 1.5rem;
+    box-sizing: border-box;
   }
   #${wrapperId} .team-header {
     text-align: center;
     max-width: 42rem;
     margin: 0 auto 3.5rem auto;
+    width: 100%;
+    box-sizing: border-box;
   }
   #${wrapperId} .team-heading {
     font-family: var(--gh-font-heading, inherit);
@@ -139,6 +145,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     flex-wrap: wrap;
     justify-content: center;
     gap: 2.5rem 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   #${wrapperId} .team-card {
     display: flex;
