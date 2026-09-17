@@ -1,4 +1,4 @@
-export type GalleryLayout = "grid" | "masonry" | "carousel";
+export type GalleryLayout = "grid" | "masonry" | "carousel" | "list" | "bento" | "collage";
 export type GalleryCornerStyle = "rounded" | "rectangle";
 export type GalleryHoverEffect = "zoom" | "overlay" | "fade" | "none";
 export type GalleryGap = "sm" | "md" | "lg";
@@ -21,6 +21,7 @@ export interface GridGalleryProps {
     hoverEffect: GalleryHoverEffect;
     useDynamicData?: boolean;
     dynamicTag?: string;
+    autoScroll?: boolean;
   };
   items: GalleryItem[];
   urls?: string[];
@@ -89,6 +90,7 @@ export const defaultProps: GridGalleryProps = {
     hoverEffect: "zoom",
     useDynamicData: false,
     dynamicTag: "gallery",
+    autoScroll: false,
   },
   items: DEFAULT_GALLERY_ITEMS,
   urls: DEFAULT_GALLERY_ITEMS.map((item) => item.url),

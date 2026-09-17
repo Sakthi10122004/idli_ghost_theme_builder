@@ -13,7 +13,7 @@ import {
 } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
-import { Image as ImageIcon, LayoutGrid, Columns3, GalleryHorizontal } from "lucide-react";
+import { Image as ImageIcon, LayoutGrid, Columns3, GalleryHorizontal, List, LayoutDashboard, Layers } from "lucide-react";
 
 const Switch = ({ checked, onChange }: { checked: boolean; onChange: (c: boolean) => void }) => (
   <button
@@ -217,37 +217,47 @@ export const SidebarElement = ({
         {/* Layout Style */}
         <div className="flex flex-col gap-1.5 mt-1.5">
           <label className="text-[11px] font-sans font-semibold text-brand-body">Layout Style</label>
-          <SegmentedControl<GalleryLayout>
-            options={[
-              {
-                label: (
-                  <span className="flex items-center gap-1">
-                    <LayoutGrid size={11} /> Grid
-                  </span>
-                ),
-                value: "grid",
-              },
-              {
-                label: (
-                  <span className="flex items-center gap-1">
-                    <Columns3 size={11} /> Masonry
-                  </span>
-                ),
-                value: "masonry",
-              },
-              {
-                label: (
-                  <span className="flex items-center gap-1">
-                    <GalleryHorizontal size={11} /> Carousel
-                  </span>
-                ),
-                value: "carousel",
-              },
-            ]}
-            value={general.layoutStyle || "grid"}
-            onChange={(v) => updateGeneral({ layoutStyle: v })}
-          />
+          <div className="grid grid-cols-3 gap-1">
+            {([
+              { value: "grid", icon: <LayoutGrid size={13} />, label: "Grid" },
+              { value: "masonry", icon: <Columns3 size={13} />, label: "Masonry" },
+              { value: "carousel", icon: <GalleryHorizontal size={13} />, label: "Carousel" },
+              { value: "list", icon: <List size={13} />, label: "List" },
+              { value: "bento", icon: <LayoutDashboard size={13} />, label: "Bento" },
+              { value: "collage", icon: <Layers size={13} />, label: "Collage" },
+            ] as { value: GalleryLayout; icon: React.ReactNode; label: string }[]).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => updateGeneral({ layoutStyle: opt.value })}
+                className={`flex flex-col items-center justify-center gap-1 py-2 px-1 rounded border text-[9px] font-medium transition-all ${
+                  (general.layoutStyle || "grid") === opt.value
+                    ? "bg-brand-ink text-white border-brand-ink shadow-sm"
+                    : "bg-brand-canvas-soft border-brand-hairline text-brand-body hover:border-gray-400 hover:text-brand-ink"
+                }`}
+              >
+                {opt.icon}
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Auto Scroll (Carousel / Masonry only) */}
+        {(general.layoutStyle === "carousel" || general.layoutStyle === "masonry") && (
+          <div className="flex justify-between items-center mt-1.5">
+            <div className="flex flex-col gap-0.5">
+              <label className="text-[11px] font-sans font-semibold text-brand-body">Auto Scroll</label>
+              <span className="text-[10px] text-brand-mute">
+                {general.layoutStyle === "carousel" ? "Continuous marquee animation" : "Alternating column scroll"}
+              </span>
+            </div>
+            <Switch
+              checked={general.autoScroll ?? false}
+              onChange={(c) => updateGeneral({ autoScroll: c })}
+            />
+          </div>
+        )}
 
         {/* Desktop Columns */}
         <div className="flex flex-col gap-1.5 mt-1.5">
