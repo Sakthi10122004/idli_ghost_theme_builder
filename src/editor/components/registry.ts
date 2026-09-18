@@ -144,6 +144,31 @@ import * as teamCanvas from "./team/canvas";
 import * as teamSidebar from "./team/sidebar";
 import * as teamCompiler from "./team/compiler";
 
+import * as share from "./share/schema";
+import * as shareCanvas from "./share/canvas";
+import * as shareSidebar from "./share/sidebar";
+import * as shareCompiler from "./share/compiler";
+
+import * as comments from "./comments/schema";
+import * as commentsCanvas from "./comments/canvas";
+import * as commentsSidebar from "./comments/sidebar";
+import * as commentsCompiler from "./comments/compiler";
+
+import * as relatedPosts from "./related-posts/schema";
+import * as relatedPostsCanvas from "./related-posts/canvas";
+import * as relatedPostsSidebar from "./related-posts/sidebar";
+import * as relatedPostsCompiler from "./related-posts/compiler";
+
+import * as embed from "./embed/schema";
+import * as embedCanvas from "./embed/canvas";
+import * as embedSidebar from "./embed/sidebar";
+import * as embedCompiler from "./embed/compiler";
+
+import * as postNavigation from "./post-navigation/schema";
+import * as postNavigationCanvas from "./post-navigation/canvas";
+import * as postNavigationSidebar from "./post-navigation/sidebar";
+import * as postNavigationCompiler from "./post-navigation/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -174,4 +199,9 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "logo-cloud": { type: "logo-cloud", ...logoCloud, ...logoCloudCanvas, ...logoCloudSidebar, ...logoCloudCompiler },
   stats: { type: "stats", ...stats, ...statsCanvas, ...statsSidebar, ...statsCompiler },
   team: { type: "team", ...team, ...teamCanvas, ...teamSidebar, ...teamCompiler },
+  share: { type: "share", ...share, ...shareCanvas, ...shareSidebar, ...shareCompiler },
+  comments: { type: "comments", ...comments, ...commentsCanvas, ...commentsSidebar, ...commentsCompiler },
+  "related-posts": { type: "related-posts", ...relatedPosts, ...relatedPostsCanvas, ...relatedPostsSidebar, ...relatedPostsCompiler },
+  embed: { type: "embed", ...embed, ...embedCanvas, ...embedSidebar, ...embedCompiler },
+  "post-navigation": { type: "post-navigation", ...postNavigation, ...postNavigationCanvas, ...postNavigationSidebar, ...postNavigationCompiler },
 };

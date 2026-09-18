@@ -27,17 +27,22 @@ import {
   DollarSign,
   Image as GalleryIcon,
   Share2,
+  Globe,
   Play,
   Cloud,
   BarChart,
-  Users
+  Users,
+  Code,
+  MessageCircle,
+  FileText,
+  ArrowLeftRight
 } from "lucide-react";
 
 interface BlockTemplate {
   type: string;
   label: string;
   category: "Layout" | "Content" | "Ghost Core";
-  icon: any;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
 function DraggableBlockButton({ b }: { b: BlockTemplate }) {
@@ -91,14 +96,21 @@ export default function LeftSidebar() {
     { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare },
     { type: "pricing-table", label: "Pricing Table", category: "Content", icon: DollarSign },
     { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon },
-    { type: "social-links", label: "Social Links", category: "Content", icon: Share2 },
+    { type: "social-links", label: "Social Links", category: "Content", icon: Globe },
     { type: "video-player", label: "Video Player", category: "Content", icon: Play },
+    { type: "embed", label: "Embed / HTML", category: "Content", icon: Code },
     
     { type: "header", label: "Header", category: "Ghost Core", icon: Menu },
+    { type: "page-detail", label: "Page Detail", category: "Ghost Core", icon: FileText },
+    { type: "post-content", label: "Post Content", category: "Ghost Core", icon: FileText },
     { type: "post-grid", label: "Post Grid", category: "Ghost Core", icon: ColumnsIcon },
     { type: "featured-posts", label: "Featured Posts", category: "Ghost Core", icon: Grid },
+    { type: "related-posts", label: "Related Posts", category: "Ghost Core", icon: Grid },
+    { type: "comments", label: "Comments", category: "Ghost Core", icon: MessageCircle },
+    { type: "post-navigation", label: "Post Navigation", category: "Ghost Core", icon: ArrowLeftRight },
     { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User },
     { type: "tag-archive", label: "Tag Archive", category: "Ghost Core", icon: Tag },
+    { type: "share", label: "Post / Page Share", category: "Ghost Core", icon: Share2 },
     { type: "footer", label: "Footer", category: "Ghost Core", icon: Menu },
   ];
 

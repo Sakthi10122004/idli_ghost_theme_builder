@@ -100,6 +100,8 @@ function SortableElement({
   const resolvedBlur = isLogoCloud ? undefined : resolveStyleLocal(backdropBlur);
   const isGlassActive = !isLogoCloud && !!resolvedBlur && resolvedBlur !== "none" && resolvedBlur !== "0px";
 
+  const resolvedWidth = block.styles.width ? resolveStyleLocal(block.styles.width) : undefined;
+
   const combinedStyle: React.CSSProperties = {
     ...style,
     transform: CSS.Transform.toString(transform),
@@ -111,9 +113,15 @@ function SortableElement({
     backdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     WebkitBackdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     opacity: isDragging ? 0.3 : (opacity ? parseFloat(resolveStyleLocal(opacity) || "1") : undefined),
+    width: resolvedWidth,
+    maxWidth: "100%",
+    marginLeft: resolvedWidth ? "auto" : undefined,
+    marginRight: resolvedWidth ? "auto" : undefined,
+    boxSizing: "border-box",
   };
 
   const getHoverClass = () => {
+    if (block.type === "heading" || block.type === "text" || block.type === "share") return "";
     const effect = resolveStyleLocal(hoverEffect);
     if (effect === "scale") return "hover-effect-scale";
     if (effect === "float") return "hover-effect-float";
@@ -398,7 +406,7 @@ export default function Canvas() {
       const isLogoCloud = block.type === "logo-cloud";
       const rawShadow = isLogoCloud ? undefined : resolveStyle(block.styles?.boxShadow);
       const hasShadow = !isLogoCloud && !!(rawShadow && rawShadow !== "none");
-      const hasHover = !!(block.styles?.hoverEffect && block.styles.hoverEffect !== "none");
+      const hasHover = block.type !== "heading" && !!(block.styles?.hoverEffect && block.styles.hoverEffect !== "none");
       const hasBackdrop = !isLogoCloud && !!(block.styles?.backdropBlur && block.styles.backdropBlur !== "none" && block.styles.backdropBlur !== "0px");
 
       let effectiveBg = resolvedBg || undefined;
