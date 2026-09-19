@@ -161,7 +161,7 @@ export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, 
               <FieldLabel>Overlay Opacity</FieldLabel>
               <span className="text-[10px] text-brand-mute">{Math.round((styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5) * 100)}%</span>
             </div>
-            <input type="range" min="0" max="1" step="0.05" value={styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5} onChange={(e) => onChangeStyles({ bgOverlayOpacity: parseFloat(e.target.value) })} className="w-full accent-brand-primary" />
+            <input type="range" min="0" max="1" step="0.05" value={styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5} onChange={(e) => onChangeStyles({ bgOverlayOpacity: parseFloat(e.target.value) })} className="w-full accent-blue-600" />
           </div>
         </div>
       )}

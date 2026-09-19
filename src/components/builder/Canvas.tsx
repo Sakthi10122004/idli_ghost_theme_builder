@@ -117,6 +117,7 @@ function SortableElement({
     maxWidth: "100%",
     marginLeft: resolvedWidth ? "auto" : undefined,
     marginRight: resolvedWidth ? "auto" : undefined,
+    marginBottom: block.styles.marginBottom ? resolveStyleLocal(block.styles.marginBottom) : undefined,
     boxSizing: "border-box",
   };
 
