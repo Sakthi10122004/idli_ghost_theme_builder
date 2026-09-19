@@ -74,10 +74,16 @@ export interface ThemePages {
   [key: string]: PageDefinition;
 }
 
+export interface ThemeLayouts {
+  header: string | null;
+  footer: string | null;
+}
+
 export interface ThemeDocument {
   metadata: ThemeMetadata;
   settings: ThemeSettings;
   pages: ThemePages;
+  layouts: ThemeLayouts;
   // A flat dictionary of all blocks on the canvas to make reordering and manipulation simple
   blocks: Record<string, BuilderBlock>;
   assets?: Record<string, string>; // Maps asset:// URI to base64 Data URI

@@ -74,7 +74,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   }).filter(Boolean).join("\n      ");
 
   const socialIconsHtml = `
-    <div class="footer-social-links" style="display: flex; gap: 16px; align-items: center; justify-content: center;">
+    <div class="footer-social-links" style="display: flex; flex-wrap: wrap; gap: 14px 16px; align-items: center; justify-content: center; max-width: 100%;">
       ${socialLinksParts}
     </div>
   `;
@@ -224,6 +224,14 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   #${htmlAnchor} .footer-secondary-column:empty {
     display: none !important;
   }
+  #${htmlAnchor} .footer-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 16px;
+    max-width: 100%;
+  }
   #${htmlAnchor} .footer-social-links a {
     display: inline-flex;
     align-items: center;
@@ -326,12 +334,37 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   #${htmlAnchor} .footer-inner {
     margin: 0 auto;
     max-width: 1200px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #${htmlAnchor} .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #${htmlAnchor} .footer-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
   @media (min-width: 768px) {
     #${htmlAnchor} .footer-bottom {
       flex-direction: row !important;
       justify-content: space-between !important;
       text-align: left !important;
+    }
+    #${htmlAnchor} .footer-actions {
+      flex-direction: row !important;
+      justify-content: flex-end !important;
+      width: auto !important;
     }
     #${htmlAnchor} .footer-secondary-nav,
     #${htmlAnchor} .footer-secondary-nav .nav,

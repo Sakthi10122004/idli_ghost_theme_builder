@@ -61,9 +61,9 @@ export const DEFAULT_DESIGN_TOKENS = {
 
 export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
   metadata: {
-    name: "My Ghost Theme",
+    name: "Sakthi T4GC",
     version: "1.0.0",
-    author: "Theme Builder",
+    author: "Sakthi T4GC",
     description: "A Vercel-inspired theme visual build",
   },
   settings: {
@@ -72,15 +72,43 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     primaryColor: "#171717",
     designTokens: DEFAULT_DESIGN_TOKENS,
   },
+  layouts: {
+    header: "header-sec-1",
+    footer: "footer-sec-3",
+  },
   pages: {
-    home: { sections: ["hero-sec-1", "posts-sec-2", "footer-sec-3"] },
-    post: { sections: ["header-sec-1", "post-content-sec", "footer-sec-3"] },
-    page: { sections: ["header-sec-1", "page-content-sec", "footer-sec-3"] },
-    author: { sections: ["header-sec-1", "author-profile-sec", "footer-sec-3"] },
-    tag: { sections: ["header-sec-1", "tag-archive-sec", "footer-sec-3"] },
-    error: { sections: ["header-sec-1", "error-main-sec", "footer-sec-3"] },
+    home: { sections: ["hero-sec-1", "featured-posts-sec", "posts-sec-2", "newsletter-sec"] },
+    post: { sections: ["post-content-sec", "post-author-sec", "post-nav-sec", "post-related-sec", "post-comments-sec"] },
+    page: { sections: ["page-content-sec"] },
+    author: { sections: ["author-profile-sec", "author-posts-sec"] },
+    tag: { sections: ["tag-archive-sec", "tag-posts-sec"] },
+    error: { sections: ["error-main-sec"] },
   },
   blocks: {
+    "header-sec-1": {
+      id: "header-sec-1",
+      type: "header",
+      props: {
+        general: {
+          siteTitle: "Sakthi T4GC",
+        },
+        navItems: [
+          { label: "Home", url: "/" },
+          { label: "About", url: "/about" },
+          { label: "Team", url: "/team" },
+          { label: "About 2", url: "/about-2" }
+        ]
+      },
+      styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
+    },
+    "footer-sec-3": {
+      id: "footer-sec-3",
+      type: "footer",
+      props: { copyright: "© 2026 Ghost Theme Builder" },
+      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
+    },
+
+    // Home Page Blocks
     "hero-sec-1": {
       id: "hero-sec-1",
       type: "section",
@@ -126,6 +154,12 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       props: { label: "Learn more", href: "#", variant: "secondary" },
       styles: {},
     },
+    "featured-posts-sec": {
+      id: "featured-posts-sec",
+      type: "featured-posts",
+      props: { title: "Featured Highlights", limit: 3 },
+      styles: {},
+    },
     "posts-sec-2": {
       id: "posts-sec-2",
       type: "section",
@@ -136,98 +170,125 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     "posts-grid-1": {
       id: "posts-grid-1",
       type: "post-grid",
-      props: { title: "Latest Stories", limit: 6 },
+      props: { title: "Latest Stories", limit: 6, columns: 3 },
       styles: {},
     },
-    "footer-sec-3": {
-      id: "footer-sec-3",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["footer-content-1"],
-    },
-    "footer-content-1": {
-      id: "footer-content-1",
-      type: "footer",
-      props: { copyright: "© 2026 Ghost Theme Builder" },
+    "newsletter-sec": {
+      id: "newsletter-sec",
+      type: "newsletter",
+      props: {
+        title: "Subscribe to our publication",
+        subtitle: "Get the latest articles and design insights delivered directly to your inbox."
+      },
       styles: {},
     },
-    "header-sec-1": {
-      id: "header-sec-1",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
-      childrenIds: ["header-content-1"],
-    },
-    "header-content-1": {
-      id: "header-content-1",
-      type: "header",
-      props: {},
-      styles: {},
-    },
+
+    // Post Page Blocks
     "post-content-sec": {
       id: "post-content-sec",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["post-detail-1"],
-    },
-    "post-detail-1": {
-      id: "post-detail-1",
-      type: "post-detail",
-      props: {},
+      type: "post-content",
+      props: {
+        showPrimaryTag: true,
+        showFeaturedBadge: true,
+        showExcerpt: true,
+        showByline: true,
+        showAuthorAvatar: true,
+        showPublishDate: true,
+        showReadingTime: true,
+        showFeatureImage: true,
+        contentWidth: "regular",
+      },
       styles: {},
     },
+    "post-author-sec": {
+      id: "post-author-sec",
+      type: "author-profile",
+      props: {
+        name: "Alex Rivera",
+        bio: "Founder & Lead Architect at Ghost Foundation. Dedicated to building minimalist, high-speed publication frameworks.",
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80",
+        layoutStyle: "card",
+      },
+      styles: {},
+    },
+    "post-nav-sec": {
+      id: "post-nav-sec",
+      type: "post-navigation",
+      props: { showImage: true, showExcerpt: true },
+      styles: {},
+    },
+    "post-related-sec": {
+      id: "post-related-sec",
+      type: "related-posts",
+      props: { heading: "Recommended for you", count: 3, showImage: true, showExcerpt: true },
+      styles: {},
+    },
+    "post-comments-sec": {
+      id: "post-comments-sec",
+      type: "comments",
+      props: { heading: "Discussion", showCount: true },
+      styles: {},
+    },
+
+    // Static Page Blocks
     "page-content-sec": {
       id: "page-content-sec",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["page-detail-1"],
-    },
-    "page-detail-1": {
-      id: "page-detail-1",
       type: "page-detail",
       props: {},
       styles: {},
     },
+
+    // Author Archive Blocks
     "author-profile-sec": {
       id: "author-profile-sec",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["author-profile-1"],
-    },
-    "author-profile-1": {
-      id: "author-profile-1",
       type: "author-profile",
-      props: {},
+      props: {
+        name: "Alex Rivera",
+        bio: "Founder & Lead Architect at Ghost Foundation. Dedicated to building minimalist, high-speed publication frameworks.",
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80",
+        location: "San Francisco, CA",
+        website: "https://example.com",
+        twitter: "@alexrivera",
+        layoutStyle: "banner",
+      },
       styles: {},
     },
+    "author-posts-sec": {
+      id: "author-posts-sec",
+      type: "post-grid",
+      props: { title: "Stories by Author", limit: 6, columns: 3 },
+      styles: {},
+    },
+
+    // Tag Archive Blocks
     "tag-archive-sec": {
       id: "tag-archive-sec",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["tag-archive-1"],
-    },
-    "tag-archive-1": {
-      id: "tag-archive-1",
       type: "tag-archive",
-      props: {},
+      props: {
+        title: "Engineering",
+        description: "A comprehensive collection of software architecture patterns, developer tooling, and technical case studies.",
+        layoutStyle: "banner",
+        showCount: true,
+      },
       styles: {},
     },
+    "tag-posts-sec": {
+      id: "tag-posts-sec",
+      type: "post-grid",
+      props: { title: "Stories under this topic", limit: 6, columns: 3 },
+      styles: {},
+    },
+
+    // 404 Error Page Blocks
     "error-main-sec": {
       id: "error-main-sec",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "128px", paddingBottom: "128px" },
-      childrenIds: ["error-content-1"],
-    },
-    "error-content-1": {
-      id: "error-content-1",
       type: "error-view",
-      props: {},
+      props: {
+        errorCode: "404",
+        message: "Page Not Found",
+        description: "The page you're looking for doesn't exist or has been moved.",
+        homeLabel: "Back to Home",
+      },
       styles: {},
     },
   },
@@ -266,8 +327,8 @@ interface EditorState {
   updatePageTagFilter: (pageKey: string, tag: string) => void;
   addBlock: (type: string, parentId?: string) => void;
   insertBlockAt: (type: string, index: number, parentId?: string) => void;
-  updateBlockProps: (blockId: string, props: Record<string, any>) => void;
-  updateBlockStyles: (blockId: string, styles: Record<string, any>) => void;
+  updateBlockProps: (blockId: string, props: Record<string, unknown>) => void;
+  updateBlockStyles: (blockId: string, styles: Record<string, unknown>) => void;
   deleteBlock: (blockId: string) => void;
   duplicateBlock: (blockId: string) => void;
   reorderBlocks: (sourceIndex: number, destinationIndex: number, parentId?: string) => void;
@@ -331,7 +392,7 @@ const duplicateBlockRecursive = (blockId: string, blocks: Record<string, Builder
 
 let autosaveTimeout: NodeJS.Timeout | null = null;
 
-const triggerAutosave = (get: any) => {
+const triggerAutosave = (get: () => EditorState) => {
   if (autosaveTimeout) clearTimeout(autosaveTimeout);
   console.log("[Zustand Store] Triggering debounced autosave task in 400ms...");
   autosaveTimeout = setTimeout(() => {
@@ -339,88 +400,209 @@ const triggerAutosave = (get: any) => {
   }, 400);
 };
 
-const syncHeaderFooterAcrossPages = (
+/**
+ * Helper to check whether a block or any of its descendants is a header or footer.
+ */
+export const isHeaderOrFooterBlock = (
+  blockId: string,
+  blocks: Record<string, BuilderBlock>
+): boolean => {
+  const block = blocks[blockId];
+  if (!block) return false;
+  if (block.type === "header" || block.type === "footer") return true;
+  if (block.childrenIds && block.childrenIds.length > 0) {
+    return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
+  }
+  return false;
+};
+
+/**
+ * Finds a layout block ID (header or footer) by searching the document blocks or page sections.
+ */
+export const findLayoutBlockId = (
   pages: ThemePages,
   blocks: Record<string, BuilderBlock>,
-  activePage: string
-): ThemePages => {
-  const activeSections = pages[activePage]?.sections || [];
-  
-  let headerSectionId: string | null = null;
-  let footerSectionId: string | null = null;
-  
-  const isHeaderOrFooter = (blockId: string): { isHeader: boolean; isFooter: boolean } => {
-    const block = blocks[blockId];
-    if (!block) return { isHeader: false, isFooter: false };
-    if (block.type === "header") return { isHeader: true, isFooter: false };
-    if (block.type === "footer") return { isHeader: false, isFooter: true };
-    if (block.childrenIds) {
-      for (const cid of block.childrenIds) {
-        const res = isHeaderOrFooter(cid);
-        if (res.isHeader || res.isFooter) return res;
+  type: "header" | "footer"
+): string | null => {
+  // 1. Direct block of type
+  for (const block of Object.values(blocks)) {
+    if (block.type === type) return block.id;
+  }
+  // 2. Section referencing type in children
+  for (const page of Object.values(pages)) {
+    for (const sid of page.sections || []) {
+      const block = blocks[sid];
+      if (block) {
+        if (block.type === type) return sid;
+        if (block.childrenIds) {
+          for (const cid of block.childrenIds) {
+            if (blocks[cid]?.type === type) return cid;
+          }
+        }
       }
     }
-    return { isHeader: false, isFooter: false };
-  };
+  }
+  return null;
+};
 
-  activeSections.forEach((sid) => {
-    const res = isHeaderOrFooter(sid);
-    if (res.isHeader) {
-      headerSectionId = sid;
-    }
-    if (res.isFooter) {
-      footerSectionId = sid;
-    }
-  });
+/**
+ * Migrates a ThemeDocument to guarantee a valid `layouts` property
+ * and strip header/footer blocks from page body sections.
+ */
+export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
+  const newBlocks = { ...doc.blocks };
+  const newPages = { ...doc.pages };
 
-  const newPages = { ...pages };
-  
+  // Resolve header and footer layout references
+  let headerId: string | null = doc.layouts?.header || null;
+  let footerId: string | null = doc.layouts?.footer || null;
+
+  if (!headerId || !newBlocks[headerId]) {
+    headerId = findLayoutBlockId(newPages, newBlocks, "header");
+  }
+  if (!footerId || !newBlocks[footerId]) {
+    footerId = findLayoutBlockId(newPages, newBlocks, "footer");
+  }
+
+  // If header or footer is a wrapper section containing a header/footer block, resolve to the actual component block
+  if (headerId && newBlocks[headerId]?.type === "section" && newBlocks[headerId]?.childrenIds) {
+    const childHdr = newBlocks[headerId].childrenIds!.find((cid) => newBlocks[cid]?.type === "header");
+    if (childHdr) {
+      headerId = childHdr;
+    }
+  }
+  if (footerId && newBlocks[footerId]?.type === "section" && newBlocks[footerId]?.childrenIds) {
+    const childFtr = newBlocks[footerId].childrenIds!.find((cid) => newBlocks[cid]?.type === "footer");
+    if (childFtr) {
+      footerId = childFtr;
+    }
+  }
+
+  // If still missing, create default layout blocks
+  if (!headerId) {
+    headerId = "header-sec-1";
+    newBlocks[headerId] = {
+      id: headerId,
+      type: "header",
+      props: {},
+      styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
+    };
+  }
+  if (!footerId) {
+    footerId = "footer-sec-3";
+    newBlocks[footerId] = {
+      id: footerId,
+      type: "footer",
+      props: { copyright: "© 2026 Ghost Theme Builder" },
+      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
+    };
+  }
+
+  // Strip all header/footer block references from page sections
   Object.keys(newPages).forEach((pageKey) => {
-    let sections = [...(newPages[pageKey].sections || [])];
-    
-    sections = sections.filter((sid) => {
-      const res = isHeaderOrFooter(sid);
-      if (res.isHeader && sid !== headerSectionId) return false;
-      if (res.isFooter && sid !== footerSectionId) return false;
+    const page = newPages[pageKey];
+    if (!page?.sections) return;
+
+    const filteredSections = page.sections.filter((sid) => {
+      if (sid === headerId || sid === footerId) return false;
+      if (isHeaderOrFooterBlock(sid, newBlocks)) return false;
       return true;
     });
 
-    if (headerSectionId) {
-      const idx = sections.indexOf(headerSectionId);
-      if (idx === -1) {
-        sections.unshift(headerSectionId);
-      } else if (idx !== 0) {
-        sections.splice(idx, 1);
-        sections.unshift(headerSectionId);
-      }
-    } else {
-      sections = sections.filter((sid) => !isHeaderOrFooter(sid).isHeader);
-    }
-
-    if (footerSectionId) {
-      const idx = sections.indexOf(footerSectionId);
-      if (idx === -1) {
-        sections.push(footerSectionId);
-      } else if (idx !== sections.length - 1) {
-        sections.splice(idx, 1);
-        sections.push(footerSectionId);
-      }
-    } else {
-      sections = sections.filter((sid) => !isHeaderOrFooter(sid).isFooter);
-    }
-
     newPages[pageKey] = {
-      ...newPages[pageKey],
-      sections,
+      ...page,
+      sections: filteredSections,
     };
   });
 
-  return newPages;
-};
+  // Ensure default page templates exist and have standard blocks
+  const initialBlocks = INITIAL_THEME_DOCUMENT.blocks;
+
+  // Post page migration
+  if (!newPages.post || !newPages.post.sections || newPages.post.sections.length === 0) {
+    newPages.post = { sections: [...INITIAL_THEME_DOCUMENT.pages.post.sections] };
+  } else {
+    const hasPostContent = newPages.post.sections.some(
+      (sid) => newBlocks[sid]?.type === "post-content"
+    );
+    if (!hasPostContent) {
+      newPages.post.sections = [
+        "post-content-sec",
+        "post-author-sec",
+        "post-nav-sec",
+        "post-related-sec",
+        "post-comments-sec",
+      ];
+    } else {
+      const postTypes = newPages.post.sections.map((sid) => newBlocks[sid]?.type);
+      if (!postTypes.includes("author-profile")) {
+        newPages.post.sections.push("post-author-sec");
+      }
+      if (!postTypes.includes("post-navigation")) {
+        newPages.post.sections.push("post-nav-sec");
+      }
+      if (!postTypes.includes("related-posts")) {
+        newPages.post.sections.push("post-related-sec");
+      }
+      if (!postTypes.includes("comments")) {
+        newPages.post.sections.push("post-comments-sec");
+      }
+    }
+  }
+
+  // Author page migration: author-profile + post-grid
+  if (!newPages.author || !newPages.author.sections || newPages.author.sections.length === 0) {
+    newPages.author = { sections: [...INITIAL_THEME_DOCUMENT.pages.author.sections] };
+  } else {
+    const hasPostGrid = newPages.author.sections.some(
+      (sid) => newBlocks[sid]?.type === "post-grid"
+    );
+    if (!hasPostGrid) {
+      newPages.author.sections.push("author-posts-sec");
+    }
+  }
+
+  // Tag page migration: tag-archive + post-grid
+  if (!newPages.tag || !newPages.tag.sections || newPages.tag.sections.length === 0) {
+    newPages.tag = { sections: [...INITIAL_THEME_DOCUMENT.pages.tag.sections] };
+  } else {
+    const hasPostGrid = newPages.tag.sections.some(
+      (sid) => newBlocks[sid]?.type === "post-grid"
+    );
+    if (!hasPostGrid) {
+      newPages.tag.sections.push("tag-posts-sec");
+    }
+  }
+
+  // Error page migration
+  if (!newPages.error || !newPages.error.sections || newPages.error.sections.length === 0) {
+    newPages.error = { sections: [...INITIAL_THEME_DOCUMENT.pages.error.sections] };
+  }
+
+  // Ensure any newly referenced block IDs exist in newBlocks
+  Object.keys(newPages).forEach((pageKey) => {
+    newPages[pageKey].sections.forEach((sid) => {
+      if (!newBlocks[sid] && initialBlocks[sid]) {
+        newBlocks[sid] = JSON.parse(JSON.stringify(initialBlocks[sid]));
+      }
+    });
+  });
+
+  return {
+    ...doc,
+    layouts: {
+      header: headerId,
+      footer: footerId,
+    },
+    blocks: newBlocks,
+    pages: newPages,
+  };
+}
 
 export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
-  const newBlocks = { ...doc.blocks };
-  const newPages = { ...doc.pages };
+  const migrated = migrateThemeDocument(doc);
+  const newBlocks = { ...migrated.blocks };
+  const newPages = { ...migrated.pages };
   let modified = false;
 
   Object.keys(newPages).forEach((pageKey) => {
@@ -454,7 +636,7 @@ export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
     }
   });
 
-  return modified ? { ...doc, blocks: newBlocks, pages: newPages } : doc;
+  return modified ? { ...migrated, blocks: newBlocks, pages: newPages } : migrated;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -568,7 +750,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const newPages = {
       ...state.document.pages,
       [cleanSlug]: {
-        sections: ["header-sec-1", customSecId, "footer-sec-3"],
+        sections: [customSecId],
       },
     };
 
@@ -599,13 +781,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const newSections: string[] = [];
 
     sourcePage.sections.forEach((sid) => {
-      if (sid === "header-sec-1" || sid === "footer-sec-3") {
-        newSections.push(sid);
-      } else {
-        const { newId, clonedBlocks } = duplicateBlockRecursive(sid, newBlocks);
-        Object.assign(newBlocks, clonedBlocks);
-        newSections.push(newId);
+      if (
+        sid === state.document.layouts?.header ||
+        sid === state.document.layouts?.footer ||
+        isHeaderOrFooterBlock(sid, state.document.blocks)
+      ) {
+        return;
       }
+      const { newId, clonedBlocks } = duplicateBlockRecursive(sid, newBlocks);
+      Object.assign(newBlocks, clonedBlocks);
+      newSections.push(newId);
     });
 
     const newPages = {
@@ -718,6 +903,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   }),
 
   addBlock: (type, parentId) => set((state) => {
+    if (type === "header" || type === "footer") return {};
     const historyUpdate = saveToHistory(state);
     const newBlock = createNewBlock(type);
     const newId = newBlock.id;
@@ -748,12 +934,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
       selectedBlockId: newId,
     };
   }),
 
   insertBlockAt: (type, index, parentId) => set((state) => {
+    if (type === "header" || type === "footer") return {};
     const historyUpdate = saveToHistory(state);
     const newBlock = createNewBlock(type);
     const newId = newBlock.id;
@@ -790,7 +977,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
       selectedBlockId: newId,
     };
   }),
@@ -853,7 +1040,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) }
+      document: { ...state.document, blocks: newBlocks, pages: newPages }
     };
   }),
 
@@ -914,7 +1101,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   }),
 
   deleteBlock: (blockId) => set((state) => {
-    if (!state.document.blocks[blockId]) return {};
+    if (
+      !state.document.blocks[blockId] ||
+      state.document.layouts?.header === blockId ||
+      state.document.layouts?.footer === blockId ||
+      state.document.blocks[blockId]?.type === "header" ||
+      state.document.blocks[blockId]?.type === "footer"
+    ) {
+      return {};
+    }
     const historyUpdate = saveToHistory(state);
 
     const newBlocks = { ...state.document.blocks };
@@ -937,13 +1132,21 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     return {
       ...historyUpdate,
-      document: { ...state.document, blocks: newBlocks, pages: syncHeaderFooterAcrossPages(newPages, newBlocks, state.activePage) },
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
       selectedBlockId: state.selectedBlockId === blockId ? null : state.selectedBlockId,
     };
   }),
 
   duplicateBlock: (blockId) => set((state) => {
-    if (!state.document.blocks[blockId]) return {};
+    if (
+      !state.document.blocks[blockId] ||
+      state.document.layouts?.header === blockId ||
+      state.document.layouts?.footer === blockId ||
+      state.document.blocks[blockId]?.type === "header" ||
+      state.document.blocks[blockId]?.type === "footer"
+    ) {
+      return {};
+    }
     const historyUpdate = saveToHistory(state);
 
     const newBlocks = { ...state.document.blocks };
@@ -1012,7 +1215,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
       return {
         ...historyUpdate,
-        document: { ...state.document, pages: syncHeaderFooterAcrossPages(newPages, state.document.blocks, state.activePage) },
+        document: { ...state.document, pages: newPages },
       };
     }
   }),

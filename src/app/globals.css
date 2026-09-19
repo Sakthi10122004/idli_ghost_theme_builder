@@ -86,11 +86,26 @@ html.dark #canvas-preview-frame .logo-cloud-section,
 html.dark .logo-cloud-section,
 html.dark .gh-head,
 html.dark .gh-head-open .gh-head,
-html.dark .gh-head-actions,
-html.dark .gh-head-open .gh-head-actions,
 html.dark .site-footer {
   background-color: var(--color-canvas) !important;
   color: var(--color-ink) !important;
+}
+
+/* Header actions container is strictly transparent in both desktop and mobile */
+.gh-head-actions,
+html.dark .gh-head-actions,
+html.dark .gh-head-open .gh-head-actions {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Hamburger menu button and SVGs in dark mode */
+html.dark .gh-burger,
+html.dark .gh-head .gh-burger,
+html.dark .gh-burger svg,
+html.dark .gh-head .gh-burger svg {
+  color: var(--color-ink, #ffffff) !important;
+  stroke: var(--color-ink, #ffffff) !important;
 }
 
 /* Logo Cloud dark mode in canvas */
@@ -333,11 +348,8 @@ body {
   z-index: 30 !important;
 }
 
-/* Post & Page Share Global Component Rules */
-.gh-share-wrapper,
-.gh-share-dock-wrapper,
-.gh-share-grid,
-.gh-share-inline {
+/* Post & Page Share Component Rules */
+.gh-share-wrapper {
   display: flex;
   align-items: center;
   margin: 1.25rem 0;
@@ -355,8 +367,10 @@ body {
   cursor: pointer;
   border-radius: 9999px;
   white-space: nowrap;
+  font-weight: 500;
+  transition: opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
-.gh-share-btn svg, .gh-share-direct-btn svg, .gh-share-grid-tile svg, .gh-share-more-btn svg {
+.gh-share-btn svg {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
@@ -371,15 +385,24 @@ body {
   color: #ffffff !important;
   border: 1px solid transparent;
 }
+.gh-share-btn.gh-share-pill:hover {
+  opacity: 0.9;
+}
 .gh-share-btn.gh-share-outline {
   background-color: transparent;
   border: 1px solid currentColor;
   color: var(--color-fg, #171717) !important;
 }
+.gh-share-btn.gh-share-outline:hover {
+  border-color: var(--color-primary, #171717);
+}
 .gh-share-btn.gh-share-ghost {
   background-color: transparent;
   border: 1px solid transparent;
   color: var(--color-fg, #171717) !important;
+}
+.gh-share-btn.gh-share-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 .gh-share-btn.gh-share-icon-only {
   padding: 0.5rem !important;
@@ -387,125 +410,6 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: var(--color-fg, #171717) !important;
 }
-.gh-share-direct-links {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding-left: 0.625rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-  margin-left: 0.375rem;
-}
-.gh-share-direct-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9999px;
-  color: var(--color-muted, #737373);
-  text-decoration: none !important;
-}
-.gh-share-card {
-  width: 100%;
-  max-width: 600px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  margin: 1.75rem 0;
-  box-sizing: border-box;
-}
-.gh-share-card-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-muted, #737373);
-  margin-bottom: 0.375rem;
-}
-.gh-share-card-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-fg, #171717);
-  margin: 0 0 0.25rem 0;
-  line-height: 1.3;
-}
-.gh-share-card-subtitle {
-  font-size: 0.8125rem;
-  color: var(--color-muted, #666666);
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
-}
-.gh-share-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-.gh-share-card-copybox {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0.5rem;
-  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
-  margin-top: 0.875rem;
-  font-size: 0.75rem;
-  font-family: monospace;
-  color: var(--color-muted, #666666);
-  gap: 0.5rem;
-}
-.gh-share-dock {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem;
-  border-radius: 9999px;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
-}
-.gh-share-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-.gh-share-grid-tile {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none !important;
-}
-.gh-share-grid-ghost { background-color: #faf5ff; color: #7e22ce !important; border: 1px solid #e9d5ff; }
-.gh-share-grid-x { background-color: #000000; color: #ffffff !important; border: 1px solid #000000; }
-.gh-share-grid-linkedin { background-color: #0077b5; color: #ffffff !important; border: 1px solid #0077b5; }
-.gh-share-grid-whatsapp { background-color: #25d366; color: #ffffff !important; border: 1px solid #25d366; }
-.gh-share-grid-copy { background-color: #ffffff; color: var(--color-fg, #171717) !important; border: 1px solid rgba(0, 0, 0, 0.12); }
-.gh-share-inline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--color-muted, #737373);
-  line-height: 1.5;
-}
-.gh-share-inline .gh-share-label { font-weight: 600; color: var(--color-fg, #171717); }
-.gh-share-inline a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-.gh-share-inline a.gh-share-more-btn { color: #7e22ce; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem; }
+
 
 

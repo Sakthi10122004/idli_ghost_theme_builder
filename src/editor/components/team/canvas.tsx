@@ -8,6 +8,10 @@ import { getBackgroundStyle } from "../shared/background";
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const p = { ...defaultProps, ...block.props } as TeamProps;
   const assets = useEditorStore((s) => s.document.assets) || {};
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+  const isTablet = deviceMode === "tablet";
+
   const general = p.general || defaultProps.general;
   const members = p.members || defaultProps.members;
   const appearance = p.appearance || defaultProps.appearance;
@@ -24,6 +28,14 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       : photoShape === "square"
         ? "rounded-none"
         : "rounded-2xl";
+
+  const effCols = isMobile ? 1 : isTablet ? Math.min(2, columns) : columns;
+  const itemWidth =
+    effCols === 1
+      ? "100%"
+      : `calc((100% - ${(effCols - 1) * 2}rem) / ${effCols})`;
+  const itemMaxWidth = effCols === 1 ? "24rem" : "none";
+  const gridGap = isMobile ? "2.5rem 1.5rem" : isTablet ? "3rem 2rem" : "3.5rem 2rem";
 
   const renderPhoto = (member: TeamMember) => {
     let resolvedUrl = member.photoUrl;
@@ -69,8 +81,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       className={`relative w-full min-w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`}
       style={{
         ...bgStyle,
-        paddingTop: spacing.paddingTop || "5rem",
-        paddingBottom: spacing.paddingBottom || "5rem",
+        paddingTop: isMobile ? "3rem" : (spacing.paddingTop || "5rem"),
+        paddingBottom: isMobile ? "3rem" : (spacing.paddingBottom || "5rem"),
       }}
     >
       <style>{`
@@ -78,15 +90,27 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 2.5rem 1.5rem;
+          gap: ${gridGap};
           width: 100%;
+          box-sizing: border-box;
         }
         #team-${block.id} .team-grid > * {
-          width: 100%;
-          max-width: 24rem;
+          width: ${itemWidth};
+          max-width: ${itemMaxWidth};
           flex-shrink: 0;
+          box-sizing: border-box;
         }
-        @media (min-width: 580px) {
+        ${!isMobile && !isTablet ? `
+        @media (max-width: 640px) {
+          #team-${block.id} .team-grid {
+            gap: 2.5rem 1.5rem;
+          }
+          #team-${block.id} .team-grid > * {
+            width: 100%;
+            max-width: 24rem;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) {
           #team-${block.id} .team-grid {
             gap: 3rem 2rem;
           }
@@ -95,18 +119,10 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             max-width: none;
           }
         }
-        @media (min-width: 900px) {
-          #team-${block.id} .team-grid {
-            gap: 3.5rem 2rem;
-          }
-          #team-${block.id} .team-grid > * {
-            width: calc((100% - ${(columns - 1) * 2}rem) / ${columns});
-            max-width: none;
-          }
-        }
+        ` : ""}
       `}</style>
 
-      <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">
+      <div className={`w-full min-w-full max-w-7xl mx-auto ${isMobile ? "px-4" : "px-6 lg:px-8"}`}>
         {/* Dynamic Badge Banner in Editor */}
         {general.useDynamicData && (
           <div className="mb-8 flex items-center justify-center gap-2 text-xs font-mono font-medium text-blue-700 bg-blue-50/80 border border-blue-200/80 rounded-full px-3.5 py-1 w-fit mx-auto shadow-xs">
@@ -117,10 +133,10 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
         {/* Section Header */}
         {(general.heading || general.subheading) && (
-          <div className="w-full min-w-full max-w-2xl mx-auto text-center mb-14">
+          <div className={`w-full min-w-full max-w-2xl mx-auto text-center ${isMobile ? "mb-8" : "mb-14"}`}>
             {general.heading && (
               <h2
-                className="w-full text-3xl sm:text-4xl font-semibold tracking-tight text-brand-ink"
+                className={`w-full ${isMobile ? "text-2xl" : "text-3xl sm:text-4xl"} font-semibold tracking-tight text-brand-ink`}
                 style={{ color: appearance?.headingColor || "var(--color-ink)" }}
               >
                 {general.heading}
@@ -128,7 +144,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             )}
             {general.subheading && (
               <p
-                className="w-full mt-3 text-base sm:text-lg leading-relaxed text-brand-body"
+                className={`w-full mt-3 ${isMobile ? "text-sm" : "text-base sm:text-lg"} leading-relaxed text-brand-body`}
                 style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}
               >
                 {general.subheading}
@@ -142,13 +158,13 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           {members.map((member, idx) => (
             <div
               key={member.id || idx}
-              className="flex flex-col items-center text-center group"
+              className="team-card flex flex-col items-center text-center group"
             >
               {renderPhoto(member)}
 
               <div className="mt-4 flex flex-col items-center">
                 <h3
-                  className="text-base sm:text-lg font-semibold text-brand-ink tracking-tight"
+                  className={`font-semibold text-brand-ink tracking-tight ${isMobile ? "text-base" : "text-base sm:text-lg"}`}
                   style={{ color: appearance?.nameColor || "var(--color-ink)" }}
                 >
                   {member.name || "Team Member"}
@@ -165,7 +181,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
                 {member.bio && (
                   <p
-                    className="text-xs sm:text-sm text-brand-body leading-relaxed mt-2.5 max-w-[280px] whitespace-pre-line"
+                    className={`text-brand-body leading-relaxed mt-2.5 max-w-[280px] whitespace-pre-line ${isMobile ? "text-xs px-2" : "text-xs sm:text-sm"}`}
                     style={{ color: appearance?.bioColor || "var(--color-body)" }}
                   >
                     {member.bio}

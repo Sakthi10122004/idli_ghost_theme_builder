@@ -83,14 +83,14 @@ const ColorPicker = ({ label, value, onChange, defaultTokenLabel = "Theme Defaul
 
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
   const p = block.props || {};
   const g = p.general || {};
   const a = p.appearance || {};
 
-  const updateCategory = (category: string, key: string, value: any) => {
+  const updateCategory = (category: string, key: string, value: unknown) => {
     onChangeProps({
       ...p,
       [category]: {
@@ -120,6 +120,40 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <option value="Logo in Center">Logo in Center</option>
             <option value="Stacked">Stacked</option>
           </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Site / Publication Title</label>
+          <input
+            type="text"
+            value={g.siteTitle ?? ""}
+            onChange={(e) => updateCategory("general", "siteTitle", e.target.value)}
+            className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+            placeholder="e.g. Sakthi T4GC"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Logo Image URL (Optional)</label>
+          <input
+            type="text"
+            value={g.logoUrl ?? ""}
+            onChange={(e) => updateCategory("general", "logoUrl", e.target.value)}
+            className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+            placeholder="https://..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Member State Preview</label>
+          <SegmentedControl
+            options={[
+              { label: "Visitor", value: "visitor" },
+              { label: "Member", value: "member" }
+            ]}
+            value={g.memberPreviewState || "visitor"}
+            onChange={(v) => updateCategory("general", "memberPreviewState", v)}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -192,6 +226,92 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             )}
           </div>
 
+        </div>
+      </div>
+
+      {/* NAVIGATION ITEMS */}
+      <div className="flex flex-col gap-2 border-t border-gray-100 pt-5">
+        <div className="flex justify-between items-center">
+          <span className="text-[12px] font-bold text-gray-900 tracking-tight">Navigation Items</span>
+          <button
+            type="button"
+            onClick={() => {
+              const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
+                { label: "Home", url: "/" },
+                { label: "About", url: "/about" },
+                { label: "Team", url: "/team" },
+                { label: "About 2", url: "/about-2" }
+              ];
+              onChangeProps({
+                ...p,
+                navItems: [...currentItems, { label: "New Link", url: "#" }]
+              });
+            }}
+            className="text-[11px] text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+          >
+            + Add Link
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2 mt-1">
+          {(Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
+            { label: "Home", url: "/" },
+            { label: "About", url: "/about" },
+            { label: "Team", url: "/team" },
+            { label: "About 2", url: "/about-2" }
+          ]).map((item: { label: string; url: string }, idx: number) => (
+            <div key={idx} className="flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 rounded p-1.5">
+              <input
+                type="text"
+                value={item.label}
+                onChange={(e) => {
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
+                    { label: "Home", url: "/" },
+                    { label: "About", url: "/about" },
+                    { label: "Team", url: "/team" },
+                    { label: "About 2", url: "/about-2" }
+                  ];
+                  currentItems[idx] = { ...currentItems[idx], label: e.target.value };
+                  onChangeProps({ ...p, navItems: currentItems });
+                }}
+                className="w-1/2 px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none"
+                placeholder="Label"
+              />
+              <input
+                type="text"
+                value={item.url}
+                onChange={(e) => {
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
+                    { label: "Home", url: "/" },
+                    { label: "About", url: "/about" },
+                    { label: "Team", url: "/team" },
+                    { label: "About 2", url: "/about-2" }
+                  ];
+                  currentItems[idx] = { ...currentItems[idx], url: e.target.value };
+                  onChangeProps({ ...p, navItems: currentItems });
+                }}
+                className="w-1/2 px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none font-mono"
+                placeholder="URL"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
+                    { label: "Home", url: "/" },
+                    { label: "About", url: "/about" },
+                    { label: "Team", url: "/team" },
+                    { label: "About 2", url: "/about-2" }
+                  ];
+                  currentItems.splice(idx, 1);
+                  onChangeProps({ ...p, navItems: currentItems });
+                }}
+                className="text-gray-400 hover:text-red-500 px-1 text-sm font-bold cursor-pointer"
+                title="Remove Link"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 

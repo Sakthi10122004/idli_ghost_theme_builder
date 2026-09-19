@@ -48,13 +48,18 @@ export default function RightSidebar() {
                 Inspect: {selectedBlock.type}
               </span>
             </div>
-            <button
-              onClick={() => deleteBlock(selectedBlock.id)}
-              className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
-              title="Delete Block"
-            >
-              <Trash2 size={14} />
-            </button>
+            {selectedBlock.type !== "header" &&
+              selectedBlock.type !== "footer" &&
+              themeDoc.layouts?.header !== selectedBlock.id &&
+              themeDoc.layouts?.footer !== selectedBlock.id && (
+                <button
+                  onClick={() => deleteBlock(selectedBlock.id)}
+                  className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
+                  title="Delete Block"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
           </div>
 
           {/* Global Layout Warning */}

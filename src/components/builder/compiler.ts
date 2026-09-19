@@ -259,10 +259,10 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
   }
 
   if (pageName === "author") {
-    return `{{!< default}}\n\n{{#author}}\n${mainContent}\n{{/author}}`;
+    return `{{!< default}}\n\n${mainContent}`;
   }
   if (pageName === "tag") {
-    return `{{!< default}}\n\n{{#tag}}\n${mainContent}\n{{/tag}}`;
+    return `{{!< default}}\n\n${mainContent}`;
   }
 
   return `{{!< default}}\n\n${mainContent}`;
@@ -456,11 +456,47 @@ html.dark-mode .btn-secondary {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* 3. Ghost Native Post & Page Share (#/share) - All Layouts & Themes */
-.gh-share-wrapper,
-.gh-share-dock-wrapper,
-.gh-share-grid,
-.gh-share-inline {
+/* Header Burger & Actions Theme Adaptation */
+.gh-head-actions {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+html.dark .gh-head-actions,
+html.dark-mode .gh-head-actions {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+.gh-head-open .gh-head-actions {
+  margin-top: auto !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+.gh-head-open .gh-head-btn {
+  order: 1 !important;
+  width: 100% !important;
+  max-width: 280px !important;
+}
+.gh-head-open :is(.gh-head-link, .gh-signout) {
+  order: 2 !important;
+}
+.gh-burger {
+  color: inherit;
+}
+.gh-burger svg {
+  stroke: currentColor;
+}
+html.dark .gh-burger,
+html.dark-mode .gh-burger {
+  color: #ffffff !important;
+}
+html.dark .gh-burger svg,
+html.dark-mode .gh-burger svg {
+  stroke: #ffffff !important;
+}
+
+
+/* 3. Ghost Native Post & Page Share (#/share) */
+.gh-share-wrapper {
   display: flex;
   align-items: center;
   margin: 1.25rem 0;
@@ -499,10 +535,7 @@ html.dark-mode .btn-secondary {
   white-space: nowrap;
   box-sizing: border-box;
 }
-.gh-share-btn svg,
-.gh-share-direct-btn svg,
-.gh-share-grid-tile svg,
-.gh-share-more-btn svg {
+.gh-share-btn svg {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
@@ -527,357 +560,73 @@ html.dark-mode .btn-secondary {
   gap: 0.625rem;
 }
 
-/* Button Variants */
+/* Variant: Pill (Filled) */
 .gh-share-btn.gh-share-pill {
   background-color: var(--color-primary, #171717);
   color: #ffffff !important;
   border: 1px solid transparent;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .gh-share-btn.gh-share-pill:hover {
-  opacity: 0.9;
+  opacity: 0.88;
   transform: translateY(-1px);
 }
+
+/* Variant: Outline */
 .gh-share-btn.gh-share-outline {
   background-color: transparent;
   border: 1px solid currentColor;
   color: var(--color-fg, #171717) !important;
 }
 .gh-share-btn.gh-share-outline:hover {
-  opacity: 0.8;
-  background-color: rgba(0, 0, 0, 0.04);
+  border-color: var(--color-primary, #171717);
+  background-color: rgba(0, 0, 0, 0.03);
 }
+
+/* Variant: Ghost */
 .gh-share-btn.gh-share-ghost {
   background-color: transparent;
   border: 1px solid transparent;
   color: var(--color-fg, #171717) !important;
 }
 .gh-share-btn.gh-share-ghost:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: rgba(0, 0, 0, 0.05);
 }
+
+/* Variant: Icon Only */
 .gh-share-btn.gh-share-icon-only {
-  padding: 0.5rem !important;
+  padding: 0.55rem !important;
   border-radius: 9999px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: var(--color-fg, #171717) !important;
+  background-color: transparent;
+}
+.gh-share-btn.gh-share-icon-only:hover {
+  border-color: var(--color-primary, #171717);
 }
 
-/* Direct Platform Icons */
-.gh-share-direct-links {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding-left: 0.625rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-  margin-left: 0.375rem;
-}
-.gh-share-direct-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9999px;
-  color: var(--color-muted, #737373);
-  text-decoration: none !important;
-  transition: all 0.15s ease;
-  box-sizing: border-box;
-}
-.gh-share-direct-btn:hover {
-  color: var(--color-fg, #171717);
-  background-color: rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
-}
-
-/* Layout 2: Editorial Card */
-.gh-share-card {
-  width: 100%;
-  max-width: 600px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  margin: 1.75rem 0;
-  box-sizing: border-box;
-}
-.gh-share-card.gh-share-align-center {
-  margin-left: auto;
-  margin-right: auto;
-}
-.gh-share-card.gh-share-align-right {
-  margin-left: auto;
-  margin-right: 0;
-}
-.gh-share-card-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.6875rem;
-  font-family: var(--font-heading, monospace);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-muted, #737373);
-  margin-bottom: 0.375rem;
-}
-.gh-share-card-eyebrow svg {
-  width: 12px;
-  height: 12px;
-  color: #9333ea;
-}
-.gh-share-card-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-fg, #171717);
-  margin: 0 0 0.25rem 0;
-  line-height: 1.3;
-}
-.gh-share-card-subtitle {
-  font-size: 0.8125rem;
-  color: var(--color-muted, #666666);
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
-}
-.gh-share-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-.gh-share-card-copybox {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0.5rem;
-  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
-  margin-top: 0.875rem;
-  font-size: 0.75rem;
-  font-family: monospace;
-  color: var(--color-muted, #666666);
-  gap: 0.5rem;
-}
-.gh-share-card-copybox span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.gh-share-card-copybox a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.625rem;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.25rem;
-  color: var(--color-fg, #171717);
-  text-decoration: none !important;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.gh-share-card-copybox a:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-/* Layout 3: Floating Dock */
-.gh-share-dock {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem;
-  border-radius: 9999px;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-/* Layout 4: Social Grid */
-.gh-share-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-.gh-share-grid-tile {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none !important;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.gh-share-grid-tile:hover {
-  transform: translateY(-1px);
-  opacity: 0.92;
-}
-.gh-share-grid-ghost {
-  background-color: #faf5ff;
-  color: #7e22ce !important;
-  border: 1px solid #e9d5ff;
-}
-.gh-share-grid-x {
-  background-color: #000000;
-  color: #ffffff !important;
-  border: 1px solid #000000;
-}
-.gh-share-grid-linkedin {
-  background-color: #0077b5;
-  color: #ffffff !important;
-  border: 1px solid #0077b5;
-}
-.gh-share-grid-whatsapp {
-  background-color: #25d366;
-  color: #ffffff !important;
-  border: 1px solid #25d366;
-}
-.gh-share-grid-copy {
-  background-color: #ffffff;
-  color: var(--color-fg, #171717) !important;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-/* Layout 5: Inline Minimal */
-.gh-share-inline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--color-muted, #737373);
-  line-height: 1.5;
-}
-.gh-share-inline .gh-share-label {
-  font-weight: 600;
-  color: var(--color-fg, #171717);
-}
-.gh-share-inline a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.15s ease;
-}
-.gh-share-inline a:hover {
-  color: var(--color-primary, #171717);
-}
-.gh-share-inline a.gh-share-more-btn {
-  color: #7e22ce;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Dark Mode Adaptation for Share Components */
-html.dark .gh-share-card,
-html.dark-mode .gh-share-card {
-  background-color: #1a1a1a;
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-html.dark .gh-share-card-title,
-html.dark-mode .gh-share-card-title {
-  color: #ffffff !important;
-}
-html.dark .gh-share-card-subtitle,
-html.dark-mode .gh-share-card-subtitle {
-  color: #a3a3a3 !important;
-}
-html.dark .gh-share-card-actions,
-html.dark-mode .gh-share-card-actions {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-html.dark .gh-share-card-copybox,
-html.dark-mode .gh-share-card-copybox {
-  background-color: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #a3a3a3;
-}
-html.dark .gh-share-card-copybox a,
-html.dark-mode .gh-share-card-copybox a {
-  background: #262626;
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-html.dark .gh-share-dock,
-html.dark-mode .gh-share-dock {
-  background-color: rgba(24, 24, 27, 0.9);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-html.dark .gh-share-direct-links,
-html.dark-mode .gh-share-direct-links {
-  border-left-color: rgba(255, 255, 255, 0.15);
-}
-html.dark .gh-share-direct-btn,
-html.dark-mode .gh-share-direct-btn {
-  color: #a3a3a3;
-}
-html.dark .gh-share-direct-btn:hover,
-html.dark-mode .gh-share-direct-btn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-html.dark .gh-share-grid-x,
-html.dark-mode .gh-share-grid-x {
-  background-color: #ffffff;
-  color: #000000 !important;
-}
-html.dark .gh-share-grid-ghost,
-html.dark-mode .gh-share-grid-ghost {
-  background-color: rgba(147, 51, 234, 0.15);
-  border-color: rgba(147, 51, 234, 0.3);
-  color: #d8b4fe !important;
-}
-html.dark .gh-share-grid-copy,
-html.dark-mode .gh-share-grid-copy {
-  background-color: #262626;
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff !important;
-}
-html.dark .gh-share-pill,
-html.dark-mode .gh-share-pill {
+/* Dark Mode */
+html.dark .gh-share-btn.gh-share-pill,
+html.dark-mode .gh-share-btn.gh-share-pill {
   background-color: #ffffff !important;
   color: #000000 !important;
 }
-html.dark .gh-share-outline,
-html.dark-mode .gh-share-outline {
+html.dark .gh-share-btn.gh-share-outline,
+html.dark-mode .gh-share-btn.gh-share-outline {
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
 }
-html.dark .gh-share-ghost,
-html.dark-mode .gh-share-ghost {
+html.dark .gh-share-btn.gh-share-ghost,
+html.dark-mode .gh-share-btn.gh-share-ghost {
   color: #ffffff !important;
 }
-html.dark .gh-share-ghost:hover,
-html.dark-mode .gh-share-ghost:hover {
+html.dark .gh-share-btn.gh-share-ghost:hover,
+html.dark-mode .gh-share-btn.gh-share-ghost:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-html.dark .gh-share-icon-only,
-html.dark-mode .gh-share-icon-only {
+html.dark .gh-share-btn.gh-share-icon-only,
+html.dark-mode .gh-share-btn.gh-share-icon-only {
   border-color: rgba(255, 255, 255, 0.2);
   color: #ffffff !important;
-}
-html.dark .gh-share-inline .gh-share-label,
-html.dark-mode .gh-share-inline .gh-share-label {
-  color: #ffffff;
-}
-html.dark .gh-share-inline a.gh-share-more-btn,
-html.dark-mode .gh-share-inline a.gh-share-more-btn {
-  color: #c084fc;
 }
 
 
@@ -925,6 +674,67 @@ html.dark-mode .gh-share-inline a.gh-share-more-btn {
 }
 .skip-link:focus {
   top: 0;
+}
+
+/* 3.1. Ghost Comments Section */
+.gh-comments-section {
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.5rem 1.5rem;
+  box-sizing: border-box;
+  color: #171717;
+  color-scheme: light;
+}
+html.dark .gh-comments-section,
+html.dark-mode .gh-comments-section,
+.gh-comments-section.dark {
+  color: #ffffff !important;
+  color-scheme: dark;
+}
+.gh-comments-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-hairline, #ebebeb);
+}
+.gh-comments-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-ink, #171717);
+  flex-shrink: 0;
+}
+.gh-comments-heading {
+  font-family: var(--gh-font-heading, inherit);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-ink, #171717);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+.gh-comments-count {
+  font-weight: 400;
+  color: var(--color-muted, #737373);
+}
+html.dark .gh-comments-header,
+html.dark-mode .gh-comments-header {
+  border-bottom-color: var(--color-hairline, #333333);
+}
+html.dark .gh-comments-icon,
+html.dark-mode .gh-comments-icon,
+html.dark .gh-comments-heading,
+html.dark-mode .gh-comments-heading {
+  color: var(--color-ink, #ffffff) !important;
+}
+html.dark .gh-comments-count,
+html.dark-mode .gh-comments-count {
+  color: var(--color-muted, #a3a3a3) !important;
 }
 
 /* 4. Ghost .gh-content Post Typography & Cards */
@@ -1378,6 +1188,178 @@ html.dark-mode .gh-share-inline a.gh-share-more-btn {
 html.dark .hover-effect-glow:hover {
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.15), 0 12px 32px -4px rgba(0, 0, 0, 0.6) !important;
 }
+
+/* 4. Ghost Article Header, Byline & Layout */
+.article {
+  padding: 1.5rem 0 3rem 0;
+}
+.article-header {
+  max-width: 800px;
+  margin: 0 auto 2.5rem auto;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+.article-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.article-tag a {
+  font-size: 0.8125rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+}
+.article-featured-badge {
+  font-size: 0.6875rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill, 9999px);
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+.article-title {
+  font-family: var(--font-heading);
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 1rem 0;
+  color: var(--color-ink, var(--color-fg));
+}
+.article-excerpt {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  max-width: 640px;
+  margin: 0 auto 1.5rem auto;
+}
+.article-byline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-hairline, #ebebeb);
+  border-bottom: 1px solid var(--color-hairline, #ebebeb);
+}
+.article-byline-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.author-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.author-list-item {
+  position: relative;
+  margin-right: -8px;
+}
+.author-avatar {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-bg, #ffffff);
+  background-color: var(--color-bg, #ffffff);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.author-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 0.875rem;
+  background-color: var(--color-canvas, #fafafa);
+  color: var(--color-primary);
+}
+.article-byline-meta {
+  text-align: left;
+}
+.author-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.15rem 0;
+  color: var(--color-ink, var(--color-fg));
+}
+.byline-meta-content {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.article-image {
+  margin: 2rem auto 3rem auto;
+  max-width: 1040px;
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+}
+.article-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.article-image figcaption {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+.gh-canvas {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.gh-content {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-fg);
+}
+.gh-content-narrow {
+  max-width: 640px;
+}
+.gh-content-wide {
+  max-width: 840px;
+}
+@media (max-width: 640px) {
+  .article-title {
+    font-size: 2rem;
+  }
+  .article-excerpt {
+    font-size: 1rem;
+  }
+  .article-header {
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+  }
+}
 `;
 }
 
@@ -1413,14 +1395,20 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   // 2. Extract global partials
   let headerCompiled = "";
   let footerCompiled = "";
-  Object.values(doc.blocks).forEach((block) => {
-    if (block.type === "header" && !headerCompiled) {
-      headerCompiled = compileBlockToHbs(block.id, doc.blocks, false);
-    }
-    if (block.type === "footer" && !footerCompiled) {
-      footerCompiled = compileBlockToHbs(block.id, doc.blocks, false);
-    }
-  });
+
+  const headerId =
+    doc.layouts?.header ||
+    Object.values(doc.blocks).find((b) => b.type === "header")?.id;
+  const footerId =
+    doc.layouts?.footer ||
+    Object.values(doc.blocks).find((b) => b.type === "footer")?.id;
+
+  if (headerId && doc.blocks[headerId]) {
+    headerCompiled = compileBlockToHbs(headerId, doc.blocks, false);
+  }
+  if (footerId && doc.blocks[footerId]) {
+    footerCompiled = compileBlockToHbs(footerId, doc.blocks, false);
+  }
 
   if (headerCompiled) files["partials/header.hbs"] = headerCompiled;
   if (footerCompiled) files["partials/footer.hbs"] = footerCompiled;
@@ -1454,6 +1442,9 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     const compiledHtml = compilePageToHbs(pageName, doc);
     if (pageName === "home") {
       files["index.hbs"] = compiledHtml;
+    } else if (pageName === "error") {
+      files["error.hbs"] = compiledHtml;
+      files["error-404.hbs"] = compiledHtml;
     } else {
       files[`${pageName}.hbs`] = compiledHtml;
     }

@@ -100,7 +100,6 @@ export default function LeftSidebar() {
     { type: "video-player", label: "Video Player", category: "Content", icon: Play },
     { type: "embed", label: "Embed / HTML", category: "Content", icon: Code },
     
-    { type: "header", label: "Header", category: "Ghost Core", icon: Menu },
     { type: "page-detail", label: "Page Detail", category: "Ghost Core", icon: FileText },
     { type: "post-content", label: "Post Content", category: "Ghost Core", icon: FileText },
     { type: "post-grid", label: "Post Grid", category: "Ghost Core", icon: ColumnsIcon },
@@ -111,7 +110,6 @@ export default function LeftSidebar() {
     { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User },
     { type: "tag-archive", label: "Tag Archive", category: "Ghost Core", icon: Tag },
     { type: "share", label: "Post / Page Share", category: "Ghost Core", icon: Share2 },
-    { type: "footer", label: "Footer", category: "Ghost Core", icon: Menu },
   ];
 
   const pageSections = themeDoc.pages[activePage]?.sections || [];
@@ -187,6 +185,40 @@ export default function LeftSidebar() {
     <aside className="w-[280px] border-r border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1">
       {/* Block List Panel */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 border-b border-brand-hairline">
+        {/* Global Layout (Header / Footer) */}
+        <div className="flex flex-col gap-2 pb-3 border-b border-brand-hairline">
+          <span className="text-[11px] font-sans font-semibold text-brand-body flex items-center justify-between">
+            <span>Global Layout</span>
+            <span className="text-[9px] font-mono text-purple-700 bg-purple-50 border border-purple-200 uppercase px-1.5 py-0.5 rounded font-medium">All Pages</span>
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => themeDoc.layouts?.header && selectBlock(themeDoc.layouts.header)}
+              className={`flex items-center gap-1.5 p-2 border rounded-sm transition-all text-xs font-medium cursor-pointer ${
+                selectedBlockId === themeDoc.layouts?.header
+                  ? "bg-brand-canvas-soft-2 border-brand-primary text-brand-primary font-semibold shadow-xs"
+                  : "bg-white border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+              }`}
+            >
+              <Menu size={13} className="text-brand-mute shrink-0" />
+              <span className="truncate">Edit Header</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => themeDoc.layouts?.footer && selectBlock(themeDoc.layouts.footer)}
+              className={`flex items-center gap-1.5 p-2 border rounded-sm transition-all text-xs font-medium cursor-pointer ${
+                selectedBlockId === themeDoc.layouts?.footer
+                  ? "bg-brand-canvas-soft-2 border-brand-primary text-brand-primary font-semibold shadow-xs"
+                  : "bg-white border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+              }`}
+            >
+              <Menu size={13} className="text-brand-mute shrink-0" />
+              <span className="truncate">Edit Footer</span>
+            </button>
+          </div>
+        </div>
+
         <h3 className="font-mono text-[10px] uppercase tracking-wider text-brand-mute flex items-center gap-1.5">
           <Plus size={10} />
           <span>Add Components</span>
@@ -222,11 +254,41 @@ export default function LeftSidebar() {
         </h3>
         {isLayersExpanded && (
           <div className="flex-1 flex flex-col gap-0.5 mt-3">
+            {themeDoc.layouts?.header && (
+              <div
+                onClick={() => selectBlock(themeDoc.layouts.header)}
+                className={`group flex items-center justify-between py-1.5 px-2 text-xs cursor-pointer rounded-sm transition-all ${
+                  selectedBlockId === themeDoc.layouts.header
+                    ? "bg-brand-canvas-soft-2 text-brand-ink font-semibold border-l-2 border-brand-primary"
+                    : "text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+                }`}
+              >
+                <span className="truncate flex items-center gap-1.5 min-w-0">
+                  <span className="font-mono text-[9px] text-purple-600 font-bold uppercase shrink-0">[GLOBAL]</span>
+                  <span className="truncate font-medium">Header</span>
+                </span>
+              </div>
+            )}
             {pageSections.length > 0 ? (
               pageSections.map(sid => renderLayerItem(sid))
             ) : (
-              <div className="text-center text-xs text-brand-mute mt-6 font-sans">
+              <div className="text-center text-xs text-brand-mute py-3 font-sans">
                 No sections on this page.
+              </div>
+            )}
+            {themeDoc.layouts?.footer && (
+              <div
+                onClick={() => selectBlock(themeDoc.layouts.footer)}
+                className={`group flex items-center justify-between py-1.5 px-2 text-xs cursor-pointer rounded-sm transition-all ${
+                  selectedBlockId === themeDoc.layouts.footer
+                    ? "bg-brand-canvas-soft-2 text-brand-ink font-semibold border-l-2 border-brand-primary"
+                    : "text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+                }`}
+              >
+                <span className="truncate flex items-center gap-1.5 min-w-0">
+                  <span className="font-mono text-[9px] text-purple-600 font-bold uppercase shrink-0">[GLOBAL]</span>
+                  <span className="truncate font-medium">Footer</span>
+                </span>
               </div>
             )}
           </div>

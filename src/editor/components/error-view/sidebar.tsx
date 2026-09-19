@@ -1,10 +1,9 @@
 import React from "react";
-import { BuilderBlock } from "@/types/theme";
 
-export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
-  block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles: (styles: Record<string, any>) => void;
-}) => {
-  return <span className="text-xs text-brand-mute">Error View settings.</span>;
+export const SidebarElement = () => {
+  return (
+    <div className="p-4 text-xs text-brand-mute">
+      Error Page settings. This template dynamically renders Ghost 404 or server error details.
+    </div>
+  );
 };
