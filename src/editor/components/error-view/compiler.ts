@@ -1,7 +1,7 @@
-export const compileToHbs = () => {
-  return `<div class="error-view-block py-16 text-center">
-  <h1 style="font-size: 4rem; font-weight: 700; margin: 0; color: #171717;">{{#if statusCode}}{{statusCode}}{{else}}404{{/if}}</h1>
-  <p style="font-size: 1rem; color: #888888; margin-top: 1rem;">{{#if message}}{{message}}{{else}}Page not found{{/if}}</p>
-  <a href="{{@site.url}}" class="btn btn-primary" style="margin-top: 1.5rem;">Go to Home</a>
+export const compileToHbs = (): string => {
+  return `<div class="error-view-block" style="padding: 5rem 1.5rem; text-align: center; max-width: 600px; margin: 0 auto; box-sizing: border-box;">
+  <h1 style="font-size: 4rem; font-weight: 700; margin: 0; color: var(--color-fg, #171717); line-height: 1;">{{#if statusCode}}{{statusCode}}{{else}}404{{/if}}</h1>
+  <p style="font-size: 1rem; color: var(--color-muted, #737373); margin-top: 1rem;">{{#if message}}{{message}}{{else}}Page not found{{/if}}</p>
+  <a href="{{@site.url}}" class="btn btn-primary" style="margin-top: 1.5rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0.625rem 1.5rem; border-radius: var(--radius-pill, 9999px); background-color: var(--color-primary, #171717); color: #ffffff; font-size: 0.875rem; font-weight: 600;">Go to Home</a>
 </div>`;
 };

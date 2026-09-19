@@ -17,6 +17,7 @@ async function verify() {
     "error.hbs",
     "error-404.hbs",
     "assets/css/screen.css",
+    "assets/built/screen.css",
     "package.json"
   ];
 

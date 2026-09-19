@@ -49,7 +49,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   if (p.sourceType === "dynamic") {
     switch (p.dynamicSource) {
       case "post_content":
-        return `<section class="gh-content gh-canvas ${baseClasses}"${styleAttr}>\n  {{content}}\n</section>`;
+        return `<section class="gh-content ${baseClasses}"${styleAttr}>\n  {{content}}\n</section>`;
       case "post_excerpt":
         return `{{#if excerpt}}\n  <p class="${baseClasses}"${styleAttr}>{{excerpt}}</p>\n{{/if}}`;
       case "site_description":
@@ -61,7 +61,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       case "post_reading_time":
         return `<span class="${baseClasses}"${styleAttr}>{{reading_time}}</span>`;
       default:
-        return `<section class="gh-content gh-canvas ${baseClasses}"${styleAttr}>\n  {{content}}\n</section>`;
+        return `<section class="gh-content ${baseClasses}"${styleAttr}>\n  {{content}}\n</section>`;
     }
   }
 

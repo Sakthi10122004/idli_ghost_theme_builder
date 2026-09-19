@@ -91,11 +91,11 @@ ${authorAvatarMarkup}
       : "";
 
   return `<article class="article {{post_class}}">
-  <header class="article-header gh-canvas">
+  <header class="article-header">
 ${tagSection ? tagSection + "\n" : ""}    <h1 class="article-title">{{title}}</h1>
-${excerptSection ? excerptSection + "\n" : ""}${bylineSection ? bylineSection + "\n" : ""}${featureImageSection ? featureImageSection + "\n" : ""}  </header>
-
-  <section class="gh-content gh-canvas ${widthClass}">
+${excerptSection ? excerptSection + "\n" : ""}${bylineSection ? bylineSection + "\n" : ""}  </header>
+${featureImageSection ? featureImageSection + "\n" : ""}
+  <section class="gh-content${widthClass ? ` ${widthClass}` : ""}">
     {{content}}
   </section>
 </article>`;

@@ -7,7 +7,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
   if (isBanner) {
     return `{{#tag}}
-<header class="tag-header gh-canvas" style="text-align: center; padding: 4rem 1rem 2.5rem 1rem; max-width: 800px; margin: 0 auto;">
+<header class="tag-header" style="text-align: center; padding: 4rem 1rem 2.5rem 1rem; max-width: 800px; margin: 0 auto;">
   <span style="font-size: 0.75rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-primary, #171717); font-weight: 700; display: block; margin-bottom: 0.5rem;">Topic Archive</span>
   <h1 class="tag-title" style="font-size: 2.75rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em;">{{name}}</h1>
   {{#if description}}

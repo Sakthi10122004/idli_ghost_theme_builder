@@ -177,7 +177,8 @@ export default function Toolbar() {
         }
 
         const { generateThemeFiles } = await import("./compiler");
-        const files = generateThemeFiles(themeDoc);
+        const latestDoc = useEditorStore.getState().document;
+        const files = generateThemeFiles(latestDoc);
         Object.entries(files).forEach(([name, content]) => {
           if (name.startsWith("assets/images/") && !name.endsWith(".svg")) {
             zip.file(name, content, { base64: true });
