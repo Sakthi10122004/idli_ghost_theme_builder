@@ -34,6 +34,7 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
     // Check if dragging from LeftSidebar palette
     if (activeId.startsWith("sidebar-")) {
       const blockType = activeId.replace("sidebar-", "");
+      if (blockType === "header" || blockType === "footer") return;
       
       if (overId === "canvas-root") {
         const sections = themeDoc.pages[activePage]?.sections || [];

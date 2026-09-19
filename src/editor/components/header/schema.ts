@@ -3,12 +3,15 @@ export interface HeaderProps {
     layoutStyle: "Logo on Left" | "Logo in Center" | "Stacked";
     logoSize: number;
     showLogo: boolean;
+    siteTitle?: string;
+    logoUrl?: string;
     showSearch: boolean;
     showThemeSwitcher: boolean;
     showSignIn: boolean;
     signInText?: string;
     showSubscribe: boolean;
     subscribeText?: string;
+    memberPreviewState?: "visitor" | "member";
     sticky: boolean;
   };
   appearance: {
@@ -40,12 +43,14 @@ export const defaultProps: HeaderProps = {
     layoutStyle: "Logo on Left",
     logoSize: 40,
     showLogo: true,
+    siteTitle: "Sakthi T4GC",
     showSearch: true,
     showThemeSwitcher: true,
     showSignIn: true,
     signInText: "Sign in",
     showSubscribe: true,
     subscribeText: "Subscribe",
+    memberPreviewState: "visitor",
     sticky: false,
   },
   appearance: {
@@ -71,8 +76,9 @@ export const defaultProps: HeaderProps = {
   },
   navItems: [
     { label: "Home", url: "/" },
-    { label: "Articles", url: "/articles" },
-    { label: "About", url: "/about" }
+    { label: "About", url: "/about" },
+    { label: "Team", url: "/team" },
+    { label: "About 2", url: "/about-2" }
   ]
 };
 

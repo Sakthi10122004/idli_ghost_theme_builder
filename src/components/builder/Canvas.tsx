@@ -528,14 +528,16 @@ export default function Canvas() {
     );
   };
 
-  let headerBlockId: string | undefined;
-  let footerBlockId: string | undefined;
-  Object.values(themeDoc.blocks).forEach((block) => {
-    if (block.type === "header" && !headerBlockId) headerBlockId = block.id;
-    if (block.type === "footer" && !footerBlockId) footerBlockId = block.id;
-  });
+  const headerBlockId =
+    themeDoc.layouts?.header ||
+    Object.values(themeDoc.blocks).find((block) => block.type === "header")?.id;
+
+  const footerBlockId =
+    themeDoc.layouts?.footer ||
+    Object.values(themeDoc.blocks).find((block) => block.type === "footer")?.id;
 
   const isHeaderOrFooterBlock = (blockId: string, blocks: Record<string, BuilderBlock>): boolean => {
+    if (blockId === headerBlockId || blockId === footerBlockId) return true;
     const block = blocks[blockId];
     if (!block) return false;
     if (block.type === "header" || block.type === "footer") return true;

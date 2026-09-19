@@ -90,7 +90,10 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     );
   };
 
-
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+  const isTablet = deviceMode === "tablet";
+  const effCols = isMobile ? 1 : isTablet ? Math.min(2, columns) : columns;
 
   return (
     <div
@@ -98,8 +101,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       className={`relative w-full min-w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`}
       style={{
         ...bgStyle,
-        paddingTop: spacing.paddingTop || "4rem",
-        paddingBottom: spacing.paddingBottom || "4rem",
+        paddingTop: isMobile ? "2.5rem" : (spacing.paddingTop || "4rem"),
+        paddingBottom: isMobile ? "2.5rem" : (spacing.paddingBottom || "4rem"),
       }}
     >
       <style>{`
@@ -118,19 +121,9 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         /* ---- Grid ---- */
         #gallery-${block.id} .gallery-grid {
           display: grid;
-          grid-template-columns: repeat(1, 1fr);
+          grid-template-columns: repeat(${effCols}, 1fr);
           gap: ${gapCss};
           width: 100%;
-        }
-        @media (min-width: 640px) {
-          #gallery-${block.id} .gallery-grid {
-            grid-template-columns: repeat(${Math.min(2, columns)}, 1fr);
-          }
-        }
-        @media (min-width: 1024px) {
-          #gallery-${block.id} .gallery-grid {
-            grid-template-columns: repeat(${columns}, 1fr);
-          }
         }
         #gallery-${block.id} .gallery-grid-item {
           aspect-ratio: 4 / 3;
@@ -139,19 +132,9 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
         /* ---- Masonry ---- */
         #gallery-${block.id} .gallery-masonry {
-          column-count: 1;
+          column-count: ${effCols};
           column-gap: ${gapCss};
           width: 100%;
-        }
-        @media (min-width: 640px) {
-          #gallery-${block.id} .gallery-masonry {
-            column-count: ${Math.min(2, columns)};
-          }
-        }
-        @media (min-width: 1024px) {
-          #gallery-${block.id} .gallery-masonry {
-            column-count: ${columns};
-          }
         }
         #gallery-${block.id} .gallery-masonry-item {
           break-inside: avoid;
@@ -166,7 +149,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           position: relative;
           padding-bottom: 0.5rem;
           mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 4%, rgba(0, 0, 0, 1) 96%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 4%, rgba(0, 0, 0, 1) 96%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 1) 4%, rgba(0, 0, 0, 1) 96%, transparent 100%);
         }
         #gallery-${block.id} .gallery-carousel-track {
           display: flex;
@@ -184,23 +167,37 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           100% { transform: translateX(-50%); }
         }
         #gallery-${block.id} .gallery-carousel-item {
-          flex: 0 0 280px;
+          flex: 0 0 ${isMobile ? "240px" : isTablet ? "300px" : "360px"};
           aspect-ratio: 4 / 3;
           flex-shrink: 0;
         }
-        @media (min-width: 640px) {
+        ${!isMobile && !isTablet ? `
+        @media (max-width: 640px) {
+          #gallery-${block.id} .gallery-grid {
+            grid-template-columns: repeat(1, 1fr);
+          }
+          #gallery-${block.id} .gallery-masonry {
+            column-count: 1;
+          }
+          #gallery-${block.id} .gallery-carousel-item {
+            flex: 0 0 280px;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) {
+          #gallery-${block.id} .gallery-grid {
+            grid-template-columns: repeat(${Math.min(2, columns)}, 1fr);
+          }
+          #gallery-${block.id} .gallery-masonry {
+            column-count: ${Math.min(2, columns)};
+          }
           #gallery-${block.id} .gallery-carousel-item {
             flex: 0 0 320px;
           }
         }
-        @media (min-width: 1024px) {
-          #gallery-${block.id} .gallery-carousel-item {
-            flex: 0 0 360px;
-          }
-        }
+        ` : ""}
       `}</style>
 
-      <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">
+      <div className={`w-full min-w-full max-w-7xl mx-auto ${isMobile ? "px-4" : "px-6 lg:px-8"}`}>
         {/* Dynamic Data Badge */}
         {general.useDynamicData && (
           <div className="mb-8 flex items-center justify-center gap-2 text-xs font-mono font-medium text-blue-700 bg-blue-50/80 border border-blue-200/80 rounded-full px-3.5 py-1 w-fit mx-auto shadow-xs">

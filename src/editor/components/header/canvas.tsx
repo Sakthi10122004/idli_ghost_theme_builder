@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { BuilderBlock } from "@/types/theme";
-import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
+import { WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 import { useEditorStore } from "@/store/editorStore";
 import { getBackgroundStyle } from "../shared/background";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
+
+interface HeaderNavItem {
+  label: string;
+  url?: string;
+}
 
 const widthRank = (w: string | undefined) => {
   const i = WIDTH_ORDER.indexOf((w as typeof WIDTH_ORDER[number]) ?? "full");
@@ -23,13 +28,15 @@ export const CanvasElement = ({ block }: {
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { deviceMode } = useEditorStore();
+  const { deviceMode, document: doc } = useEditorStore();
+
+  const siteTitle = general.siteTitle || (doc?.metadata?.name && doc.metadata.name !== "My Ghost Theme" ? doc.metadata.name : "Sakthi T4GC");
 
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
-    { label: "Lifestyle", url: "#" },
-    { label: "Travel", url: "#" },
-    { label: "About", url: "#" },
-    { label: "Resources", url: "#" }
+    { label: "Home", url: "/" },
+    { label: "About", url: "/about" },
+    { label: "Team", url: "/team" },
+    { label: "About 2", url: "/about-2" }
   ];
 
   const layout = general.layoutStyle || "Logo on Left";
@@ -60,7 +67,7 @@ export const CanvasElement = ({ block }: {
 
   const contentMaxWidth = CONTENT_WIDTH_VALUES[effectiveContentWidth || "wide"] || "100%";
 
-  const marginBottomValue = (typeof styles.marginBottom === 'object' ? (styles.marginBottom as any).desktop : styles.marginBottom as string) || "0px";
+  const marginBottomValue = (typeof styles.marginBottom === 'object' && styles.marginBottom !== null && 'desktop' in styles.marginBottom ? (styles.marginBottom as { desktop?: string }).desktop : typeof styles.marginBottom === 'string' ? styles.marginBottom : "0px") || "0px";
   const shadowValue = styles.boxShadow && styles.boxShadow !== "none" ? styles.boxShadow : "none";
   const opacityValue = styles.opacity ?? 1;
 
@@ -113,38 +120,69 @@ export const CanvasElement = ({ block }: {
   );
 
   /**
-   * Renders action buttons (sign in, subscribe).
-   * Search and theme toggle are now handled separately for mobile placement.
+   * Renders action buttons (visitor: sign in & subscribe; member: sign out & account).
    */
   const renderActions = (vertical = false) => {
-    const signInButton = general.showSignIn !== false && (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveModal("Ghost Portal Sign In simulation active.");
-        }}
-        className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
-      >
-        {general.signInText || "Sign in"}
-      </button>
-    );
+    const isMember = general.memberPreviewState === "member";
 
-    const subscribeButton = general.showSubscribe !== false && (
+    const primaryAction = isMember ? (
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          setActiveModal("Ghost Portal Subscribe simulation active.");
+          setActiveModal("Ghost Portal Account simulation active.");
         }}
         className={vertical
-          ? "gh-head-btn gh-btn w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
+          ? "gh-head-btn gh-btn w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100 text-center"
           : "gh-head-btn gh-btn px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
         }
         style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
       >
-        {general.subscribeText || "Subscribe"}
+        Account
       </button>
+    ) : (
+      general.showSubscribe !== false && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveModal("Ghost Portal Subscribe simulation active.");
+          }}
+          className={vertical
+            ? "gh-head-btn gh-btn w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100 text-center"
+            : "gh-head-btn gh-btn px-6 py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100"
+          }
+          style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
+        >
+          {general.subscribeText || "Subscribe"}
+        </button>
+      )
+    );
+
+    const secondaryAction = isMember ? (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveModal("Ghost Sign Out simulation active.");
+        }}
+        className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
+      >
+        Sign out
+      </button>
+    ) : (
+      general.showSignIn !== false && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveModal("Ghost Portal Sign In simulation active.");
+          }}
+          className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
+        >
+          {general.signInText || "Sign in"}
+        </button>
+      )
     );
 
     if (!vertical) {
@@ -152,37 +190,28 @@ export const CanvasElement = ({ block }: {
         <div className="flex items-center gap-4 shrink-0">
           {searchButton}
           {themeButton}
-          {signInButton}
-          {subscribeButton}
+          {secondaryAction}
+          {primaryAction}
         </div>
       );
     }
 
     return (
-      <div className="flex flex-col items-center gap-5 w-full">
-        {subscribeButton}
-        {signInButton}
+      <div className="flex flex-col items-center gap-4 w-full">
+        {primaryAction}
+        {secondaryAction}
       </div>
     );
   };
-
-  const logoIcon = (paths: string) => (
-    <svg
-      className="fill-current shrink-0"
-      style={{ width: logoSize, height: logoSize }}
-      viewBox="0 0 24 24"
-    >
-      <path d={paths} />
-    </svg>
-  );
 
   /**
    * Renders the hamburger / close toggle button for mobile view.
    */
   const renderBurgerButton = () => (
     <button 
-      className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50" 
+      className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50 text-neutral-900 dark:text-white" 
       aria-label="Menu"
+      style={{ color: "inherit" }}
       onClick={(e) => {
         e.stopPropagation();
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -248,14 +277,14 @@ export const CanvasElement = ({ block }: {
           className="flex items-center justify-between w-full px-4"
           style={{ height: "64px", flexShrink: 0 }}
         >
-          {renderLogo("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
+          {renderLogo()}
           {renderMobileTopBarActions()}
         </div>
 
         {/* Nav items with staggered animation */}
         <div className="flex flex-col items-center justify-start gap-5 px-6 pt-10 pb-8">
           <nav className="flex flex-col items-center gap-5 w-full">
-            {items.map((item: any, idx: number) => (
+            {items.map((item: HeaderNavItem, idx: number) => (
               <span
                 key={idx}
                 className="cursor-pointer hover:opacity-100 transition-opacity text-[1.5rem] leading-[1.3] font-semibold"
@@ -276,7 +305,7 @@ export const CanvasElement = ({ block }: {
           className="flex flex-col items-center gap-3 px-6 py-6 mt-auto gh-head-actions"
           style={{
             flexShrink: 0,
-            ...(bgStyleObj.backgroundColor ? { backgroundColor: bgStyleObj.backgroundColor } : {}),
+            backgroundColor: "transparent",
             opacity: isMobileMenuOpen ? 1 : 0,
             transform: isMobileMenuOpen ? 'translateY(0)' : 'translateY(16px)',
             transition: `opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s`,
@@ -297,20 +326,29 @@ export const CanvasElement = ({ block }: {
   };
 
   /**
-   * Renders the logo section.
+   * Renders the logo section: renders uploaded logo image or site title text matching Ghost {{#if @site.logo}}...{{else}}{{@site.title}}{{/if}}.
    */
-  const renderLogo = (iconPath: string, showLabel = false) => {
-    if (general.showLogo === false && general.layoutStyle !== 'Logo in Center') {
+  const renderLogo = () => {
+    if (general.showLogo === false) {
+      return null;
+    }
+
+    if (general.logoUrl) {
       return (
-        <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0">
-          <span>Publication</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <img
+            src={general.logoUrl}
+            alt={siteTitle}
+            style={{ maxHeight: `${logoSize}px`, width: "auto" }}
+            className="object-contain"
+          />
         </div>
       );
     }
+
     return (
-      <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0">
-        {general.showLogo !== false && logoIcon(iconPath)}
-        {showLabel && <span>Publication</span>}
+      <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0 select-none">
+        <span className="gh-site-title leading-none">{siteTitle}</span>
       </div>
     );
   };
@@ -322,7 +360,7 @@ export const CanvasElement = ({ block }: {
     <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden ${
       justify === "center" ? "justify-center" : "justify-start"
     }`}>
-      {items.map((item: any, idx: number) => (
+      {items.map((item: HeaderNavItem, idx: number) => (
         <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
           {item.label}
         </span>
@@ -372,15 +410,15 @@ export const CanvasElement = ({ block }: {
           {isMobile ? (
             /* ============ MOBILE LAYOUT ============ */
             <div className="flex items-center justify-between w-full" style={{ height: "64px" }}>
-              {renderLogo("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
+              {renderLogo()}
               {renderMobileTopBarActions()}
             </div>
           ) : isStacked ? (
             /* ============ STACKED DESKTOP ============ */
             <div className="flex flex-col items-center gap-4 text-center w-full">
-              {renderLogo("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5", true)}
+              {renderLogo()}
               <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90">
-                {items.map((item: any, idx: number) => (
+                {items.map((item: HeaderNavItem, idx: number) => (
                   <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
                     {item.label}
                   </span>
@@ -396,7 +434,7 @@ export const CanvasElement = ({ block }: {
               </div>
 
               <div className="shrink-0 flex items-center justify-center font-bold tracking-tight px-4 whitespace-nowrap">
-                {renderLogo("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5")}
+                {renderLogo()}
               </div>
 
               <div className="flex-1 flex items-center justify-end min-w-0">
@@ -407,7 +445,7 @@ export const CanvasElement = ({ block }: {
             /* ============ LOGO LEFT DESKTOP (default) ============ */
             <div className="flex items-center justify-between w-full gap-8">
               <div className="flex items-center gap-8 min-w-0">
-                {renderLogo("M3.5 18.5l8.5-15 8.5 15h-17zm8.5-11.5l-4.5 8h9l-4.5-8z")}
+                {renderLogo()}
                 {renderDesktopNav()}
               </div>
 

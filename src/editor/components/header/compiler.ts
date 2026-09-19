@@ -196,8 +196,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
           ${general.showSubscribe !== false ? `
           <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
         {{else}}
-          <a class="gh-head-link" href="#/portal/account" data-portal="account" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Account</a>
           <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
+          <a class="gh-head-btn gh-btn" href="#/portal/account" data-portal="account" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Account</a>
         {{/unless}}
       {{/if}}
     </div>`;
@@ -297,7 +297,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
       display: flex;
       align-items: center;
       gap: 16px;
+      background: transparent !important;
+      background-color: transparent !important;
     }
+    #${htmlAnchor} .gh-head-actions .gh-search-btn { order: 1; }
+    #${htmlAnchor} .gh-head-actions .gh-theme-toggle { order: 2; }
+    #${htmlAnchor} .gh-head-actions :is(.gh-head-link, .gh-signout) { order: 3; }
+    #${htmlAnchor} .gh-head-actions .gh-head-btn { order: 4; }
     #${htmlAnchor} .gh-head-menu {
       opacity: 0.9;
     }
@@ -376,8 +382,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
       background: transparent !important;
       border: none !important;
       cursor: pointer !important;
-      color: ${palette.text} !important;
+      color: inherit !important;
       padding: 8px !important;
+    }
+
+    #${htmlAnchor}.gh-head .gh-burger svg {
+      stroke: currentColor !important;
+      color: inherit !important;
     }
 
     #${htmlAnchor}.gh-head .gh-head-menu,
@@ -414,9 +425,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
       right: 0 !important;
       bottom: 0 !important;
       height: 100% !important;
+      height: 100vh !important;
+      height: 100dvh !important;
       max-height: none !important;
       z-index: 3999999 !important;
-      overflow-y: scroll !important;
+      overflow-y: auto !important;
       -webkit-overflow-scrolling: touch !important;
       ${importantBgCss}
     }
@@ -424,12 +437,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
     .gh-head-open #${htmlAnchor}.gh-head .gh-head-inner {
       display: flex !important;
       flex-direction: column !important;
-      height: 100% !important;
+      min-height: 100% !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
       box-sizing: border-box !important;
       align-items: center !important;
       justify-content: flex-start !important;
-      padding-top: 0 !important;
-      gap: 48px !important;
+      padding: 0 16px 24px 16px !important;
+      gap: 0 !important;
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .gh-head-brand {
@@ -440,10 +455,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
       height: 64px !important;
       flex-shrink: 0 !important;
       margin-bottom: 0 !important;
+      padding: 0 !important;
     }
 
-    .gh-head-open #${htmlAnchor}.gh-head .gh-head-menu,
-    .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions {
+    .gh-head-open #${htmlAnchor}.gh-head .gh-head-menu {
       position: static !important;
       visibility: visible !important;
       opacity: 1 !important;
@@ -452,37 +467,41 @@ export const compileToHbs = (block: BuilderBlock): string => {
       flex-direction: column !important;
       align-items: center !important;
       width: 100% !important;
+      background: transparent !important;
       background-color: transparent !important;
       margin: 0 !important;
-    }
-
-    .gh-head-open #${htmlAnchor}.gh-head .gh-head-menu {
-      gap: 16px !important;
+      padding: 32px 16px 20px 16px !important;
+      gap: 20px !important;
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions {
-      position: sticky !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      display: inline-flex !important;
-      flex-direction: column-reverse !important;
-      gap: 12px !important;
+      position: static !important;
+      margin-top: auto !important;
+      margin-bottom: 0 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
+      display: flex !important;
+      flex-direction: column !important;
       align-items: center !important;
-      padding: max(4vmin, 20px) 0 max(4vmin, 28px) !important;
-      ${importantBgCss}
+      gap: 16px !important;
+      width: 100% !important;
+      padding: 24px 16px 32px 16px !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      flex-shrink: 0 !important;
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .nav {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      gap: 16px !important;
+      gap: 20px !important;
       width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
       list-style: none !important;
-      line-height: 1.4 !important;
+      line-height: 1.3 !important;
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .nav li {
@@ -506,21 +525,46 @@ export const compileToHbs = (block: BuilderBlock): string => {
     .gh-head-open #${htmlAnchor}.gh-head .nav a {
       font-size: 1.5rem !important;
       font-weight: 600 !important;
+      line-height: 1.3 !important;
+      text-align: center !important;
       width: 100% !important;
       display: inline-block !important;
+      padding: 0 !important;
+      text-decoration: none !important;
+      color: inherit !important;
     }
 
-    .gh-head-open #${htmlAnchor}.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn) {
+    .gh-head-open #${htmlAnchor}.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn, .gh-signout) {
       opacity: 1 !important;
       transform: translateY(0) !important;
       transition: transform 0.4s ease, opacity 0.4s ease !important;
-      transition-delay: 0.3s !important;
+      transition-delay: 0.2s !important;
     }
 
     .gh-head-open #${htmlAnchor}.gh-head .gh-head-btn {
+      order: 1 !important;
       width: 100% !important;
       max-width: 280px !important;
       text-align: center !important;
+      display: inline-block !important;
+      padding: 10px 24px !important;
+      border-radius: 9999px !important;
+      font-size: 1.0625rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+      text-decoration: none !important;
+    }
+
+    .gh-head-open #${htmlAnchor}.gh-head :is(.gh-head-link, .gh-signout) {
+      order: 2 !important;
+      text-align: center !important;
+      font-size: 1.0625rem !important;
+      font-weight: 500 !important;
+      opacity: 0.9 !important;
+      display: inline-block !important;
+      text-decoration: none !important;
+      color: inherit !important;
+      padding: 0 4px !important;
     }
 
     /* SVG burger icon toggle */
@@ -539,10 +583,53 @@ export const compileToHbs = (block: BuilderBlock): string => {
   /* Dark mode overrides (placed at the end to ensure they win over previous styles) */
   html.dark #${htmlAnchor}.gh-head,
   html.dark #${htmlAnchor}.gh-head.gh-head-open,
-  html.dark .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions,
-  html.dark #${htmlAnchor}.gh-head .gh-head-actions {
+  html.dark .gh-head-open #${htmlAnchor}.gh-head {
     background-color: #111111 !important;
     color: #ffffff !important;
+  }
+
+  /* Ensure all header text, branding, and links cleanly adapt to white in dark mode */
+  html.dark #${htmlAnchor}.gh-head .gh-head-brand,
+  html.dark #${htmlAnchor}.gh-head .gh-head-brand a,
+  html.dark #${htmlAnchor}.gh-head .gh-site-title,
+  html.dark #${htmlAnchor}.gh-head .gh-head-menu a,
+  html.dark #${htmlAnchor}.gh-head .gh-head-menu .nav a,
+  html.dark #${htmlAnchor}.gh-head .gh-head-link,
+  html.dark #${htmlAnchor}.gh-head .gh-signout,
+  html.dark #${htmlAnchor}.gh-head .gh-search-btn,
+  html.dark #${htmlAnchor}.gh-head .gh-theme-toggle,
+  html.dark .gh-head-open #${htmlAnchor}.gh-head .nav a {
+    color: #ffffff !important;
+  }
+
+  /* Ensure the hamburger and action icons are fully visible in dark mode */
+  html.dark #${htmlAnchor} .gh-burger,
+  html.dark #${htmlAnchor}.gh-head .gh-burger,
+  html.dark .gh-head-open #${htmlAnchor} .gh-burger,
+  html.dark .gh-head-open #${htmlAnchor}.gh-head .gh-burger {
+    color: #ffffff !important;
+  }
+  html.dark #${htmlAnchor} .gh-burger svg,
+  html.dark #${htmlAnchor}.gh-head .gh-burger svg,
+  html.dark .gh-head-open #${htmlAnchor} .gh-burger svg,
+  html.dark .gh-head-open #${htmlAnchor}.gh-head .gh-burger svg,
+  html.dark #${htmlAnchor} .gh-search-btn svg,
+  html.dark #${htmlAnchor}.gh-head .gh-search-btn svg,
+  html.dark #${htmlAnchor} .gh-theme-toggle svg,
+  html.dark #${htmlAnchor}.gh-head .gh-theme-toggle svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+  }
+
+  /* gh-head-actions is strictly transparent in desktop & mobile overlays (no black box) */
+  #${htmlAnchor} .gh-head-actions,
+  #${htmlAnchor}.gh-head .gh-head-actions,
+  html.dark #${htmlAnchor}.gh-head .gh-head-actions,
+  html.dark #${htmlAnchor} .gh-head-actions,
+  .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions,
+  html.dark .gh-head-open #${htmlAnchor}.gh-head .gh-head-actions {
+    background: transparent !important;
+    background-color: transparent !important;
   }
   
   html.dark #${htmlAnchor}.gh-head .gh-head-btn {
@@ -629,19 +716,40 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
 })();
 
+function syncCommentsTheme(isDark) {
+  try {
+    var sec = document.querySelector('.gh-comments-section');
+    if (sec) {
+      sec.style.color = isDark ? '#ffffff' : '#171717';
+      sec.classList.toggle('dark', isDark);
+    }
+    var script = document.querySelector('script[data-ghost-comments]');
+    if (script) {
+      script.dataset.colorScheme = isDark ? 'dark' : 'light';
+    }
+  } catch (e) {}
+}
+
 function toggleThemeMode() {
-  document.documentElement.classList.toggle('dark');
-  if (document.documentElement.classList.contains('dark')) {
+  var isDark = document.documentElement.classList.toggle('dark');
+  if (isDark) {
     localStorage.setItem('theme', 'dark');
   } else {
     localStorage.setItem('theme', 'light');
   }
+  syncCommentsTheme(isDark);
 }
 
 (function initTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  var savedTheme = localStorage.getItem('theme');
+  var isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
     document.documentElement.classList.add('dark');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { syncCommentsTheme(isDark); });
+  } else {
+    syncCommentsTheme(isDark);
   }
 })();
 </script>

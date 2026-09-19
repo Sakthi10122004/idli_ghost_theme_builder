@@ -15,6 +15,9 @@ export function CanvasElement({ block, onClick }: {
   const p = block.props;
   
   const document = useEditorStore(state => state.document);
+  const deviceMode = useEditorStore(state => state.deviceMode);
+  const isMobile = deviceMode === 'mobile';
+
   const headerBlock = Object.values(document.blocks).find(b => b.type === "header");
   const headerAppearance = headerBlock?.props?.appearance || {};
   
@@ -64,7 +67,7 @@ export function CanvasElement({ block, onClick }: {
   }, []);
 
   const socialIcons = (
-    <div className="flex gap-4 items-center opacity-80">
+    <div className="flex flex-wrap gap-3 sm:gap-4 items-center justify-center opacity-80 max-w-full">
       {activePlatforms.map((platformId) => {
         const item = platformMap.get(platformId);
         if (!item) return null;
@@ -72,7 +75,7 @@ export function CanvasElement({ block, onClick }: {
           <span 
             key={platformId} 
             title={item.label}
-            className="hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+            className="hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer shrink-0"
           >
             {item.renderIcon({ size: 20 })}
           </span>
@@ -83,7 +86,7 @@ export function CanvasElement({ block, onClick }: {
 
   return (
     <footer 
-      className={`site-footer w-full px-6 transition-all section-width-${sectionWidth} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
+      className={`site-footer w-full px-4 sm:px-6 transition-all overflow-hidden section-width-${sectionWidth} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
       style={{ 
         ...bgStyleObj, 
         color: text, 
@@ -101,13 +104,17 @@ export function CanvasElement({ block, onClick }: {
       <div className="max-w-[1200px] mx-auto w-full flex flex-col gap-8">
         
         {layoutStyle === "Multi-Column" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-8">
-            <div className="flex flex-col gap-4">
+          <div className={`grid gap-8 sm:gap-10 mb-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+            <div className={`flex flex-col gap-4 ${isMobile ? 'text-center items-center' : ''}`}>
               <h4 className="text-xl font-bold">Your Publication</h4>
               <p className="opacity-80 leading-relaxed">Thoughts, stories and ideas about building modern software and design.</p>
-              {showSocialIcons && socialIcons}
+              {showSocialIcons && (
+                <div className={`w-full flex ${isMobile ? 'justify-center' : 'justify-start'}`}>
+                  {socialIcons}
+                </div>
+              )}
             </div>
-            <div className="flex flex-col gap-4">
+            <div className={`flex flex-col gap-4 ${isMobile ? 'text-center items-center' : ''}`}>
               <h4 className="text-sm font-bold uppercase tracking-wider opacity-60">Navigation</h4>
               <nav className="flex flex-col gap-3 opacity-80">
                 {primaryNavItems.map((item: { label: string; url?: string }, idx: number) => (
@@ -118,7 +125,7 @@ export function CanvasElement({ block, onClick }: {
               </nav>
             </div>
             {showSecondaryNav && (
-              <div className="flex flex-col gap-4">
+              <div className={`flex flex-col gap-4 ${isMobile ? 'text-center items-center' : ''}`}>
                 <h4 className="text-sm font-bold uppercase tracking-wider opacity-60">{secondaryNavTitle}</h4>
                 <nav className="flex flex-col gap-3 opacity-80">
                   {secondaryNavItems.map((item, idx) => (
@@ -133,7 +140,7 @@ export function CanvasElement({ block, onClick }: {
         )}
 
         {layoutStyle === "Newsletter Integrated" && showSubscribeBox && (
-          <div className="text-center max-w-[600px] mx-auto mb-10 p-12 rounded-xl" style={{ backgroundColor: 'currentColor', color: bgFallbackColor }}>
+          <div className="text-center max-w-[600px] mx-auto mb-10 p-6 sm:p-12 rounded-xl" style={{ backgroundColor: 'currentColor', color: bgFallbackColor }}>
             <h3 className="text-2xl font-bold mb-3">Subscribe to our newsletter</h3>
             <p className="opacity-80 mb-6">Get the latest posts delivered right to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-[400px] mx-auto">
@@ -144,22 +151,48 @@ export function CanvasElement({ block, onClick }: {
         )}
 
         {/* Footer Bottom Row */}
-        <div className={`flex flex-col md:flex-row items-center gap-6 text-sm ${layoutStyle !== "Simple Minimal" ? 'pt-6 border-t opacity-90 border-current border-opacity-20 md:justify-between' : 'justify-between'}`}>
-          {showCopyright && <span className="opacity-70">{copyrightText}</span>}
-          
-          <div className="flex flex-wrap items-center justify-center gap-6">
+        {isMobile ? (
+          <div className={`flex flex-col items-center justify-center text-center gap-5 text-sm w-full ${layoutStyle !== "Simple Minimal" ? 'pt-6 border-t opacity-90 border-current border-opacity-20' : ''}`}>
             {showSecondaryNav && layoutStyle !== "Multi-Column" && (
-              <nav className="flex flex-wrap items-center gap-5 opacity-80">
+              <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 opacity-80 w-full text-center">
                 {secondaryNavItems.map((item, idx) => (
-                  <a key={idx} href={item.url || "#"} onClick={(e) => e.preventDefault()} className="hover:opacity-100 transition-opacity">
+                  <a key={idx} href={item.url || "#"} onClick={(e) => e.preventDefault()} className="hover:opacity-100 transition-opacity whitespace-nowrap">
                     {item.label}
                   </a>
                 ))}
               </nav>
             )}
-            {showSocialIcons && layoutStyle !== "Multi-Column" && socialIcons}
+
+            {showSocialIcons && layoutStyle !== "Multi-Column" && (
+              <div className="w-full flex justify-center py-1">
+                {socialIcons}
+              </div>
+            )}
+
+            {showCopyright && (
+              <span className="opacity-70 text-xs leading-relaxed text-center w-full px-2 max-w-sm">
+                {copyrightText}
+              </span>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className={`flex flex-col md:flex-row items-center justify-between gap-6 text-sm w-full ${layoutStyle !== "Simple Minimal" ? 'pt-6 border-t opacity-90 border-current border-opacity-20' : ''}`}>
+            {showCopyright && <span className="opacity-70 text-left shrink-0">{copyrightText}</span>}
+            
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-6">
+              {showSecondaryNav && layoutStyle !== "Multi-Column" && (
+                <nav className="flex flex-wrap items-center gap-5 opacity-80">
+                  {secondaryNavItems.map((item, idx) => (
+                    <a key={idx} href={item.url || "#"} onClick={(e) => e.preventDefault()} className="hover:opacity-100 transition-opacity">
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              )}
+              {showSocialIcons && layoutStyle !== "Multi-Column" && socialIcons}
+            </div>
+          </div>
+        )}
 
       </div>
     </footer>
