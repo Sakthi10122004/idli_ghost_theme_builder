@@ -5,7 +5,18 @@ import { useEditorStore } from "@/store/editorStore";
 import { HeroSlide } from "./schema";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 
-export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
+function resolveStyleValue(val: unknown, fallback: string = ""): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  if (typeof val === "number") return String(val);
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return String(obj.desktop || obj.mobile || obj.tablet || fallback);
+  }
+  return fallback;
+}
+
+export const CanvasElement = ({ block }: {
   block: BuilderBlock;
   isSelected?: boolean;
   onClick?: (e: React.MouseEvent) => void;
@@ -93,6 +104,10 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       break;
   }
 
+  const pt = resolveStyleValue(block.styles?.paddingTop, "3.5rem");
+  const pb = resolveStyleValue(block.styles?.paddingBottom, "4.5rem");
+  const maxWidth = resolveStyleValue(block.styles?.contentWidth, layout.startsWith("split") ? "1200px" : "800px");
+
   // =========================================================================
   // CAROUSEL MODE
   // =========================================================================
@@ -123,7 +138,8 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       }
     ];
 
-    const current = slides[currentSlideIndex] || slides[0] || {};
+    const safeIndex = Math.min(currentSlideIndex, Math.max(0, slides.length - 1));
+    const current = slides[safeIndex] || slides[0] || {};
     const slideImg = resolveAsset(current.imageUrl);
     const showArrows = p.showArrows ?? true;
     const showDots = p.showDots ?? true;
@@ -134,8 +150,8 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
         style={{
           ...dynamicStyle,
           ...(textColor ? { color: textColor } : (showCover ? { color: "#ffffff" } : {})),
-          paddingTop: (block.styles?.paddingTop as string) || "3.5rem",
-          paddingBottom: (block.styles?.paddingBottom as string) || "4.5rem",
+          paddingTop: pt,
+          paddingBottom: pb,
         }}
       >
         {/* Carousel Mode Indicator */}
@@ -143,12 +159,12 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>Carousel: {isDynamic ? `Ghost Tag (#${dynamicTag})` : "Static Slides"}</span>
           <span className="opacity-40">|</span>
-          <span>{currentSlideIndex + 1}/{slides.length}</span>
+          <span>{safeIndex + 1}/{slides.length}</span>
         </div>
 
         <div
           className={contentClasses}
-          style={{ maxWidth: (block.styles?.contentWidth as string) || (layout.startsWith("split") ? "1200px" : "800px") }}
+          style={{ maxWidth }}
         >
           {/* Slide Text Content */}
           <div className={textContainerClasses}>
@@ -162,12 +178,12 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
                 style={applyCustomColor ? { color: textColor || "#ffffff" } : {}}
               >
                 {isDynamic && <Tag size={10} />}
-                {current.eyebrowText || `Tag: ${dynamicTag}`}
+                {isDynamic ? `Tag: #${dynamicTag}` : current.eyebrowText}
               </span>
             )}
 
             <h1 className={`text-[2.5rem] md:text-[3.25rem] font-sans font-bold leading-[1.12] tracking-[-0.02em] break-words max-w-full transition-all duration-300 ${textColorClass}`}>
-              {current.title || "Slide Title"}
+              {isDynamic ? (safeIndex === 0 ? "Featured Story from #" + dynamicTag : current.title || "Dynamic Post Title") : (current.title || "Slide Title")}
             </h1>
 
             <p className={`text-base md:text-lg leading-relaxed max-w-[640px] break-words transition-all duration-300 ${subtitleColorClass}`}>
@@ -178,15 +194,15 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
               <button
                 className="hover:opacity-90 px-7 py-3 rounded-full text-[14px] font-semibold transition-all shadow-xs flex items-center justify-center cursor-pointer"
                 style={{
-                  backgroundColor: p.buttonBgColor && p.buttonBgColor !== "#171717"
+                  backgroundColor: p.buttonBgColor
                     ? p.buttonBgColor
-                    : "var(--color-primary)",
-                  color: p.buttonTextColor && p.buttonTextColor !== "#ffffff"
+                    : "var(--color-primary, #171717)",
+                  color: p.buttonTextColor
                     ? p.buttonTextColor
-                    : "var(--color-on-primary)"
+                    : "#ffffff"
                 }}
               >
-                {current.buttonLabel || p.buttonLabel || "Read More"}
+                {isDynamic ? (p.buttonLabel || "Read Article") : (current.buttonLabel || p.buttonLabel || "Learn More")}
               </button>
               {(p.showSecondaryButton ?? true) && (
                 <button
@@ -212,6 +228,12 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
                     alt={current.imageAlt || current.title || "Slide Image"}
                     className="w-full h-auto aspect-video md:aspect-[16/10] object-cover"
                   />
+                </div>
+              ) : isDynamic ? (
+                <div className="w-full aspect-video bg-blue-50/50 dark:bg-white/5 rounded-xl border border-blue-200/60 dark:border-white/10 flex flex-col items-center justify-center text-blue-700 dark:text-blue-300 gap-2 p-6 text-center">
+                  <Tag size={24} className="opacity-60" />
+                  <span className="text-xs font-semibold">Ghost Feature Image</span>
+                  <span className="text-[11px] font-mono opacity-70">{"{{feature_image}}"}</span>
                 </div>
               ) : (
                 <div className="w-full aspect-video bg-gray-100 dark:bg-white/5 rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
@@ -262,7 +284,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
                   setCurrentSlideIndex(idx);
                 }}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  currentSlideIndex === idx
+                  safeIndex === idx
                     ? "w-7 h-2 bg-brand-primary dark:bg-white shadow-xs"
                     : "w-2 h-2 bg-gray-300 dark:bg-white/30 hover:bg-gray-400 dark:hover:bg-white/60"
                 }`}
@@ -287,13 +309,13 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
       style={{
         ...dynamicStyle,
         ...(textColor ? { color: textColor } : (showCover ? { color: "#ffffff" } : {})),
-        paddingTop: (block.styles?.paddingTop as string) || "3rem",
-        paddingBottom: (block.styles?.paddingBottom as string) || "5rem",
+        paddingTop: pt,
+        paddingBottom: pb,
       }}
     >
       <div
         className={contentClasses}
-        style={{ maxWidth: (block.styles?.contentWidth as string) || (layout.startsWith("split") ? "1200px" : "800px") }}
+        style={{ maxWidth }}
       >
         <div className={textContainerClasses}>
           {eyebrowText && (
@@ -318,12 +340,12 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             <button
               className="hover:opacity-90 px-8 py-3.5 rounded-full text-[15px] font-semibold transition-all shadow-xs flex items-center justify-center cursor-pointer"
               style={{
-                backgroundColor: p.buttonBgColor && p.buttonBgColor !== "#171717"
+                backgroundColor: p.buttonBgColor
                   ? p.buttonBgColor
-                  : "var(--color-primary)",
-                color: p.buttonTextColor && p.buttonTextColor !== "#ffffff"
+                  : "var(--color-primary, #171717)",
+                color: p.buttonTextColor
                   ? p.buttonTextColor
-                  : "var(--color-on-primary)"
+                  : "#ffffff"
               }}
             >
               {buttonLabel || "Start Free"}

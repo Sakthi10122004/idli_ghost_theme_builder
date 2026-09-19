@@ -1,6 +1,26 @@
 import { BuilderBlock } from "@/types/theme";
-import { StatsProps, defaultProps } from "./schema";
+import { StatsProps, StatItem, defaultProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+
+function resolveStyleValue(val: unknown, fallback: string = ""): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  if (typeof val === "number") return String(val);
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return String(obj.desktop || obj.mobile || obj.tablet || fallback);
+  }
+  return fallback;
+}
+
+function resolveHbsAsset(url?: string): string {
+  if (!url) return "";
+  if (url.startsWith("asset://")) {
+    const rel = url.replace(/^asset:\/\/(assets\/)?/, "");
+    return `{{asset "${rel}"}}`;
+  }
+  return url;
+}
 
 const COLS_CLASS: Record<number, string> = {
   2: "grid-cols-1 md:grid-cols-2",
@@ -10,16 +30,19 @@ const COLS_CLASS: Record<number, string> = {
 
 export const generateHTML = (block: BuilderBlock): string => {
   const p = { ...defaultProps, ...block.props } as StatsProps;
-  const general = p.general;
-  const stats = p.stats || [];
-  const appearance = p.appearance;
-  const spacing = p.spacing;
+  const general = p.general || defaultProps.general || { heading: "Our impact", subheading: "", layoutStyle: "row", columns: 3 };
+  const stats = p.stats || defaultProps.stats || [];
+  const appearance = p.appearance || defaultProps.appearance || {};
+  const spacing = p.spacing || defaultProps.spacing || { paddingTop: "4rem", paddingBottom: "4rem" };
   const styles = block.styles || {};
 
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `stats-${block.id}`;
 
-  const renderStat = (stat: any, idx: number) => {
+  const pt = resolveStyleValue(spacing.paddingTop, "4rem");
+  const pb = resolveStyleValue(spacing.paddingBottom, "4rem");
+
+  const renderStat = (stat: StatItem, idx: number) => {
     const num = idx + 1;
     const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${stat.value || ""}{{/if}}`;
     const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${stat.label || ""}{{/if}}`;
@@ -27,22 +50,22 @@ export const generateHTML = (block: BuilderBlock): string => {
     if (general.layoutStyle === "cards") {
       return `
         <div class="stats-item card">
-          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${stat.imageUrl}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
-          <dt class="stats-label">${labelHbs}</dt>
+          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
           <dd class="stats-value">${valueHbs}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
         </div>
       `;
     } else if (general.layoutStyle === "bordered") {
       return `
         <div class="stats-item bordered">
-          <dt class="stats-label">${labelHbs}</dt>
           <dd class="stats-value">${valueHbs}</dd>
+          <dt class="stats-label">${labelHbs}</dt>
         </div>
       `;
     } else if (general.layoutStyle === "accent-cards") {
       return `
         <div class="stats-item accent-card">
-          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${stat.imageUrl}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
+          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
           <dd class="stats-value">${valueHbs}</dd>
           <dt class="stats-label">${labelHbs}</dt>
         </div>
@@ -67,25 +90,33 @@ export const generateHTML = (block: BuilderBlock): string => {
 
   const gridCols = COLS_CLASS[general.columns] || COLS_CLASS[3];
 
-  const headingVal = general.heading
-    ? `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{else}}${general.heading}{{/if}}`
-    : `{{#if @custom.stats_heading}}{{@custom.stats_heading}}{{/if}}`;
-  const subheadingVal = general.subheading
-    ? `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{else}}${general.subheading}{{/if}}`
-    : `{{#if @custom.stats_subheading}}{{@custom.stats_subheading}}{{/if}}`;
-
-  const headingHtml = `
+  const headingHtml = (general.heading || general.subheading) ? `
     <div class="stats-header">
-      <h2 class="stats-heading">${headingVal}</h2>
-      <p class="stats-subheading">${subheadingVal}</p>
+      {{#if @custom.stats_heading}}
+        <h2 class="stats-heading">{{@custom.stats_heading}}</h2>
+      {{else}}
+        ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
+      {{/if}}
+      {{#if @custom.stats_subheading}}
+        <p class="stats-subheading">{{@custom.stats_subheading}}</p>
+      {{else}}
+        ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+      {{/if}}
     </div>
+  ` : `
+    {{#if @custom.stats_heading}}
+    <div class="stats-header">
+      <h2 class="stats-heading">{{@custom.stats_heading}}</h2>
+      {{#if @custom.stats_subheading}}<p class="stats-subheading">{{@custom.stats_subheading}}</p>{{/if}}
+    </div>
+    {{/if}}
   `;
 
   return `<style>
   #${wrapperId} {
     ${bgCss}
-    padding-top: ${spacing.paddingTop || '4rem'};
-    padding-bottom: ${spacing.paddingBottom || '4rem'};
+    padding-top: ${pt};
+    padding-bottom: ${pb};
     position: relative;
     width: 100%;
   }
@@ -171,8 +202,8 @@ export const generateHTML = (block: BuilderBlock): string => {
   #${wrapperId} .stats-item.card {
     background-color: #ffffff;
     border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     padding: 2rem;
     align-items: center;
     text-align: center;
@@ -208,7 +239,25 @@ export const generateHTML = (block: BuilderBlock): string => {
     color: ${appearance?.labelColor || "var(--color-muted)"};
   }
   #${wrapperId} .stats-item.card .stats-value {
-    order: -1;
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: ${appearance?.valueColor || "var(--color-fg)"};
+    margin: 0 0 0.5rem 0;
+  }
+  
+  /* Bordered Style */
+  #${wrapperId} .stats-item.bordered {
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 1.5rem 0;
+  }
+  #${wrapperId} .stats-item.bordered .stats-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: ${appearance?.labelColor || "var(--color-muted)"};
+  }
+  #${wrapperId} .stats-item.bordered .stats-value {
     font-size: 2.25rem;
     font-weight: 700;
     letter-spacing: -0.025em;
@@ -320,14 +369,45 @@ export const generateHTML = (block: BuilderBlock): string => {
     color: ${appearance?.valueColor || "var(--color-fg)"};
     margin: 0;
   }
+
+  /* Dark Mode Styles */
+  html.dark #${wrapperId} .stats-item.card,
+  html.dark-mode #${wrapperId} .stats-item.card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  html.dark #${wrapperId} .stats-item.accent-card,
+  html.dark-mode #${wrapperId} .stats-item.accent-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  html.dark #${wrapperId} .stats-grid.divider,
+  html.dark-mode #${wrapperId} .stats-grid.divider,
+  html.dark #${wrapperId} .stats-item.divider-cell,
+  html.dark-mode #${wrapperId} .stats-item.divider-cell {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  html.dark #${wrapperId} .stats-item.bordered,
+  html.dark-mode #${wrapperId} .stats-item.bordered {
+    border-top-color: rgba(255, 255, 255, 0.12);
+  }
 </style>
 <div id="${wrapperId}" class="stats-section kg-width-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}">
   <div class="stats-inner">
     ${general.layoutStyle === 'split' ? `
       <div class="stats-split-container">
         <div class="stats-split-header">
-          ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
-          ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+          {{#if @custom.stats_heading}}
+            <h2 class="stats-heading">{{@custom.stats_heading}}</h2>
+          {{else}}
+            ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
+          {{/if}}
+          {{#if @custom.stats_subheading}}
+            <p class="stats-subheading">{{@custom.stats_subheading}}</p>
+          {{else}}
+            ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+          {{/if}}
         </div>
         <div class="stats-split-grid">
           <dl class="stats-grid ${gridCols}">

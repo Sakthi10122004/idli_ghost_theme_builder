@@ -538,7 +538,16 @@ export const SidebarElement = ({
               />
             )}
           </div>
+        </div>
+      )}
 
+      {/* ================================================================= */}
+      {/* 3. BUTTON STYLES & SECONDARY BUTTON (Shared) */}
+      {/* ================================================================= */}
+      <div className="flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-2xs">
+        <span className="text-[11px] font-semibold text-gray-800">Button Configuration</span>
+        
+        {(!isCarousel || p.carouselMode === "dynamic") && (
           <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
             <label className="text-[11px] font-semibold text-gray-700">Primary Button</label>
             <input
@@ -546,61 +555,64 @@ export const SidebarElement = ({
               value={p.buttonLabel || ""}
               onChange={(e) => onChangeProps({ buttonLabel: e.target.value })}
               className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-              placeholder="Button Label"
+              placeholder={isCarousel ? "Read Article" : "Button Label"}
             />
-            <input
-              type="text"
-              value={p.buttonUrl || ""}
-              onChange={(e) => onChangeProps({ buttonUrl: e.target.value })}
-              className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-              placeholder="https://example.com"
-            />
-            <div className="flex flex-col border border-gray-200 rounded-md overflow-hidden mt-1">
-              <ColorPicker
-                label="Button Background"
-                value={p.buttonBgColor || ""}
-                onChange={(v) => onChangeProps({ buttonBgColor: v })}
+            {!isCarousel && (
+              <input
+                type="text"
+                value={p.buttonUrl || ""}
+                onChange={(e) => onChangeProps({ buttonUrl: e.target.value })}
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
+                placeholder="https://example.com"
               />
-              <ColorPicker
-                label="Button Text"
-                value={p.buttonTextColor || ""}
-                onChange={(v) => onChangeProps({ buttonTextColor: v })}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
-            <div className="flex justify-between items-center">
-              <label className="text-[11px] font-semibold text-gray-700">Secondary Button</label>
-              <Switch
-                checked={p.showSecondaryButton ?? true}
-                onChange={(c) => onChangeProps({ showSecondaryButton: c })}
-              />
-            </div>
-            {(p.showSecondaryButton ?? true) && (
-              <>
-                <input
-                  type="text"
-                  value={p.secondaryButtonLabel || ""}
-                  onChange={(e) => onChangeProps({ secondaryButtonLabel: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-                  placeholder="Button Label"
-                />
-                <input
-                  type="text"
-                  value={p.secondaryButtonUrl || ""}
-                  onChange={(e) => onChangeProps({ secondaryButtonUrl: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-                  placeholder="https://example.com"
-                />
-              </>
             )}
           </div>
+        )}
+        
+        <div className="flex flex-col border border-gray-200 rounded-md overflow-hidden mt-1">
+          <ColorPicker
+            label="Button Background"
+            value={p.buttonBgColor || ""}
+            onChange={(v) => onChangeProps({ buttonBgColor: v })}
+          />
+          <ColorPicker
+            label="Button Text"
+            value={p.buttonTextColor || ""}
+            onChange={(v) => onChangeProps({ buttonTextColor: v })}
+          />
         </div>
-      )}
+
+        <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-semibold text-gray-700">Secondary Button</label>
+            <Switch
+              checked={p.showSecondaryButton ?? true}
+              onChange={(c) => onChangeProps({ showSecondaryButton: c })}
+            />
+          </div>
+          {(p.showSecondaryButton ?? true) && (
+            <>
+              <input
+                type="text"
+                value={p.secondaryButtonLabel || ""}
+                onChange={(e) => onChangeProps({ secondaryButtonLabel: e.target.value })}
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
+                placeholder="Button Label"
+              />
+              <input
+                type="text"
+                value={p.secondaryButtonUrl || ""}
+                onChange={(e) => onChangeProps({ secondaryButtonUrl: e.target.value })}
+                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
+                placeholder="https://example.com"
+              />
+            </>
+          )}
+        </div>
+      </div>
 
       {/* ================================================================= */}
-      {/* 3. SHARED LAYOUT & STYLING (Identical for Carousel and Standard Hero) */}
+      {/* 4. SHARED LAYOUT & STYLING (Identical for Carousel and Standard Hero) */}
       {/* ================================================================= */}
       <div className="flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-2xs">
         {/* Layout Selection */}
@@ -620,15 +632,39 @@ export const SidebarElement = ({
 
           {layout.startsWith("split") && !isCarousel && !useSiteData && (
             <div className="flex flex-col gap-2 pt-2 border-t border-gray-100 mt-1">
-              <label className="text-[11px] font-semibold text-gray-700">Split Image URL</label>
+              <label className="text-[11px] font-semibold text-gray-700">Split Image URL / Upload</label>
               <input
                 type="text"
                 value={p.imageUrl || ""}
                 onChange={(e) => onChangeProps({ imageUrl: e.target.value })}
                 className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white font-mono text-[11px]"
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/image.jpg or asset://..."
               />
-              <label className="text-[11px] font-semibold text-gray-700">Image Alt</label>
+              <label className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2 bg-gray-50 border border-dashed border-gray-200 rounded cursor-pointer hover:bg-gray-100 text-[10px] font-medium text-gray-700">
+                <Upload size={11} />
+                <span>Upload Image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const dataUri = ev.target?.result as string;
+                      if (!dataUri) return;
+                      const ext = file.name.split(".").pop() || "png";
+                      const id = Math.random().toString(36).substring(7);
+                      const assetPath = `assets/images/hero/${id}.${ext}`;
+                      addAsset(assetPath, dataUri);
+                      onChangeProps({ imageUrl: `asset://${assetPath.replace("assets/", "")}` });
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+              <label className="text-[11px] font-semibold text-gray-700 mt-1">Image Alt</label>
               <input
                 type="text"
                 value={p.imageAlt || ""}

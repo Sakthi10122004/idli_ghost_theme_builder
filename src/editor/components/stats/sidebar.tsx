@@ -1,8 +1,10 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
-import { StatsProps, defaultProps } from "./schema";
+import { StatsProps, StatItem, defaultProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
+import { useEditorStore } from "@/store/editorStore";
+import { Upload } from "lucide-react";
 
 const SegmentedControl = ({ options, value, onChange }: {
   options: { label: React.ReactNode; value: string; disabled?: boolean }[];
@@ -31,19 +33,22 @@ const SegmentedControl = ({ options, value, onChange }: {
 
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
+  const addAsset = useEditorStore((s) => s.addAsset);
   const p = { ...defaultProps, ...block.props } as StatsProps;
-  const general = p.general;
-  const stats = p.stats || [];
+  const general = p.general || defaultProps.general || { heading: "Our impact", subheading: "", layoutStyle: "row", columns: 3 };
+  const stats = p.stats || defaultProps.stats || [];
+  const appearance = p.appearance || defaultProps.appearance || {};
+  const spacing = p.spacing || defaultProps.spacing || { paddingTop: "4rem", paddingBottom: "4rem" };
 
   const updateGeneral = (patch: Partial<StatsProps['general']>) => {
     onChangeProps({ general: { ...general, ...patch } });
   };
 
-  const renderStatItem = (item: any, update: (patch: any) => void, index?: number) => {
-    const num = (index ?? stats.findIndex((s) => s.id === item.id)) + 1;
+  const renderStatItem = (item: StatItem, update: (patch: Partial<StatItem>) => void, index?: number) => {
+    const num = (index !== undefined ? index : stats.findIndex((s) => s.id === item.id)) + 1;
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between pb-0.5">
@@ -57,7 +62,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <label className="text-[10px] font-semibold text-gray-500">Default Value</label>
             <input
               type="text"
-              value={item.value}
+              value={item.value || ""}
               onChange={(e) => update({ value: e.target.value })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-brand-canvas-soft"
               placeholder="10k+"
@@ -67,7 +72,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <label className="text-[10px] font-semibold text-gray-500">Default Label</label>
             <input
               type="text"
-              value={item.label}
+              value={item.label || ""}
               onChange={(e) => update({ label: e.target.value })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-brand-canvas-soft"
               placeholder="Active users"
@@ -80,11 +85,11 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               <label className="text-[10px] font-semibold text-gray-500">Icon Type</label>
               <select
                 value={item.iconType || 'svg'}
-                onChange={(e) => update({ iconType: e.target.value })}
+                onChange={(e) => update({ iconType: e.target.value as 'svg' | 'image' })}
                 className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none bg-white"
               >
                 <option value="svg">SVG Code</option>
-                <option value="image">Image URL</option>
+                <option value="image">Image URL / Upload</option>
               </select>
             </div>
             {(!item.iconType || item.iconType === 'svg') ? (
@@ -99,14 +104,38 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               </div>
             ) : (
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-semibold text-gray-500">Image URL</label>
+                <label className="text-[10px] font-semibold text-gray-500">Image URL / Upload</label>
                 <input
                   type="text"
                   value={item.imageUrl || ""}
                   onChange={(e) => update({ imageUrl: e.target.value })}
-                  className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-                  placeholder="https://example.com/icon.png"
+                  className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none font-mono text-[11px]"
+                  placeholder="https://... or asset://..."
                 />
+                <label className="flex items-center justify-center gap-1.5 w-full py-1 px-2 bg-gray-50 border border-dashed border-gray-200 rounded cursor-pointer hover:bg-gray-100 text-[10px] font-medium text-gray-700 mt-0.5">
+                  <Upload size={11} />
+                  <span>Upload Icon</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const dataUri = ev.target?.result as string;
+                        if (!dataUri) return;
+                        const ext = file.name.split(".").pop() || "png";
+                        const id = Math.random().toString(36).substring(7);
+                        const assetPath = `assets/images/stats/${id}.${ext}`;
+                        addAsset(assetPath, dataUri);
+                        update({ imageUrl: `asset://${assetPath.replace("assets/", "")}` });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
               </div>
             )}
           </div>
@@ -163,7 +192,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <label className="text-[11px] font-sans font-semibold text-brand-body">Layout Style</label>
           <select
             value={general.layoutStyle}
-            onChange={(e: any) => updateGeneral({ layoutStyle: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateGeneral({ layoutStyle: e.target.value as StatsProps['general']['layoutStyle'] })}
             className="w-full px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft appearance-none cursor-pointer"
           >
             <option value="row">Row (Minimal)</option>
@@ -184,7 +213,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               { label: "4", value: "4" }
             ]}
             value={String(general.columns)}
-            onChange={(v: any) => updateGeneral({ columns: parseInt(v) as any })}
+            onChange={(v: string) => updateGeneral({ columns: parseInt(v, 10) as 2 | 3 | 4 })}
           />
         </div>
       </div>
@@ -195,7 +224,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         <RepeatableList
           items={stats}
           onChange={(newStats) => onChangeProps({ stats: newStats })}
-          renderItem={(item, update) => renderStatItem(item, update)}
+          renderItem={(item, update, idx) => renderStatItem(item, update, idx)}
           newItem={() => ({ id: Math.random().toString(36).substring(7), value: "0", label: "New Stat" })}
           addLabel="Add Stat"
         />
@@ -204,9 +233,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       {/* Background Controls */}
       <BackgroundControls
         styles={block.styles || {}}
-        appearance={p.appearance || {}}
+        appearance={appearance}
         onChangeStyles={onChangeStyles || (() => { })}
-        updateAppearance={(key, val) => onChangeProps({ appearance: { ...p.appearance, [key]: val } })}
+        updateAppearance={(key, val) => onChangeProps({ appearance: { ...appearance, [key]: val } })}
       />
 
       {/* Text Colors */}
@@ -216,29 +245,29 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Heading</label>
             <div className="flex gap-2 items-center">
-              <input type="color" value={p.appearance?.headingColor || "#171717"} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, headingColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="text" value={p.appearance?.headingColor || ""} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, headingColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
+              <input type="color" value={appearance.headingColor || "#171717"} onChange={(e) => onChangeProps({ appearance: { ...appearance, headingColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="text" value={appearance.headingColor || ""} onChange={(e) => onChangeProps({ appearance: { ...appearance, headingColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Subheading</label>
             <div className="flex gap-2 items-center">
-              <input type="color" value={p.appearance?.subheadingColor || "#525252"} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, subheadingColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="text" value={p.appearance?.subheadingColor || ""} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, subheadingColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
+              <input type="color" value={appearance.subheadingColor || "#525252"} onChange={(e) => onChangeProps({ appearance: { ...appearance, subheadingColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="text" value={appearance.subheadingColor || ""} onChange={(e) => onChangeProps({ appearance: { ...appearance, subheadingColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Stat Value</label>
             <div className="flex gap-2 items-center">
-              <input type="color" value={p.appearance?.valueColor || "#171717"} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, valueColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="text" value={p.appearance?.valueColor || ""} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, valueColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
+              <input type="color" value={appearance.valueColor || "#171717"} onChange={(e) => onChangeProps({ appearance: { ...appearance, valueColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="text" value={appearance.valueColor || ""} onChange={(e) => onChangeProps({ appearance: { ...appearance, valueColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Stat Label</label>
             <div className="flex gap-2 items-center">
-              <input type="color" value={p.appearance?.labelColor || "#525252"} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, labelColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="text" value={p.appearance?.labelColor || ""} onChange={(e) => onChangeProps({ appearance: { ...p.appearance, labelColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
+              <input type="color" value={appearance.labelColor || "#525252"} onChange={(e) => onChangeProps({ appearance: { ...appearance, labelColor: e.target.value } })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
+              <input type="text" value={appearance.labelColor || ""} onChange={(e) => onChangeProps({ appearance: { ...appearance, labelColor: e.target.value } })} className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft min-w-0" placeholder="Default" />
             </div>
           </div>
         </div>
@@ -252,8 +281,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <label className="text-[10px] font-semibold text-gray-500">Top Padding</label>
             <input
               type="text"
-              value={p.spacing.paddingTop || ""}
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })}
+              value={spacing.paddingTop || ""}
+              onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingTop: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
@@ -261,8 +290,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <label className="text-[10px] font-semibold text-gray-500">Bottom Padding</label>
             <input
               type="text"
-              value={p.spacing.paddingBottom || ""}
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })}
+              value={spacing.paddingBottom || ""}
+              onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingBottom: e.target.value } })}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
