@@ -1413,7 +1413,10 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     if (sp.general?.subheading) customConfig["stats_subheading"].default = sp.general.subheading;
 
     const statsList = Array.isArray(sp.stats) ? sp.stats : [];
-    statsList.forEach((st: any, i: number) => {
+    const maxDynamicStats = 6;
+    
+    for (let i = 0; i < maxDynamicStats; i++) {
+      const st = statsList[i] || {};
       const num = i + 1;
       customConfig[`stat_${num}_value`] = {
         type: "text",
@@ -1429,7 +1432,7 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
         default: st.label || "",
         group: "homepage"
       };
-    });
+    }
   }
 
   const pkgConfig: Record<string, any> = {

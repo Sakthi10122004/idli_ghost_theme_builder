@@ -225,11 +225,11 @@ export default function RightSidebar() {
                   className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                 >
                   <option value="">None</option>
-                  <option value="0 2px 8px rgba(0,0,0,0.04)">Soft (Level 1)</option>
-                  <option value="0 8px 16px rgba(0,0,0,0.06)">Medium (Level 2)</option>
-                  <option value="0 16px 32px rgba(0,0,0,0.08)">Large (Level 3)</option>
-                  <option value="0 8px 24px rgba(23,23,23,0.06)">Dark Glow</option>
-                  <option value="0 8px 24px rgba(0,112,243,0.12)">Accent Blue Glow</option>
+                  <option value="0 4px 12px rgba(0,0,0,0.15)">Soft (Level 1)</option>
+                  <option value="0 12px 24px rgba(0,0,0,0.25)">Medium (Level 2)</option>
+                  <option value="0 20px 40px rgba(0,0,0,0.35)">Large (Level 3)</option>
+                  <option value="0 12px 36px rgba(23,23,23,0.5)">Dark Glow</option>
+                  <option value="0 12px 36px rgba(0,112,243,0.4)">Accent Blue Glow</option>
                 </select>
               </div>
             )}

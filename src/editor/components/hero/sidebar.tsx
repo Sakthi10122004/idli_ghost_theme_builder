@@ -230,7 +230,7 @@ export const SidebarElement = ({
                     <input
                       type="text"
                       value={p.dynamicTag || "hero-carousel"}
-                      onChange={(e) => onChangeProps({ dynamicTag: e.target.value.replace(/^#/, "") })}
+                      onChange={(e) => onChangeProps({ dynamicTag: e.target.value.replace(/^#\s*/, "").trim() })}
                       className="w-full pl-6 pr-2.5 py-1.5 bg-white border border-gray-200 text-gray-900 rounded text-xs font-mono font-medium focus:outline-none focus:border-blue-500"
                       placeholder="hero-carousel"
                     />

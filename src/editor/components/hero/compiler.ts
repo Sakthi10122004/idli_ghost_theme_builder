@@ -336,7 +336,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // If CAROUSEL is enabled
   if (isCarousel) {
     const isDynamic = p.carouselMode === "dynamic";
-    const dynamicTag = p.dynamicTag || "hero-carousel";
+    const dynamicTag = (p.dynamicTag || "hero-carousel").replace(/^#\s*/, "").trim();
     const showArrows = p.showArrows ?? true;
     const showDots = p.showDots ?? true;
     const autoplay = p.autoplay ?? true;
@@ -344,11 +344,44 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
     let slidesHtml = "";
 
+    const slides: HeroSlide[] = (p.slides && p.slides.length > 0) ? p.slides : [
+      {
+        id: "slide-1",
+        eyebrowText: "Featured",
+        title: "Discover Verve Edition",
+        subtitle: "Experience modern publishing with fluid visual storytelling.",
+        buttonLabel: "Explore Now",
+        buttonUrl: "#",
+        imageUrl: "",
+        imageAlt: "Slide 1 Image",
+      }
+    ];
+
+    const staticSlidesHtml = slides.map((slide, idx) => `
+    <div class="carousel-slide${idx === 0 ? ' active' : ''}" role="group" aria-roledescription="slide">
+      <div class="hero-content">
+        <div class="hero-text-container">
+          ${slide.eyebrowText ? `<span class="hero-eyebrow">${slide.eyebrowText}</span>` : ''}
+          <h1 class="hero-title heading">${slide.title}</h1>
+          ${slide.subtitle ? `<p class="hero-subtitle text-content">${slide.subtitle}</p>` : ''}
+          <div class="hero-actions">
+            <a href="${slide.buttonUrl || '#'}" class="hero-btn hero-btn-primary">${slide.buttonLabel || p.buttonLabel || "Learn More"}</a>
+            ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
+          </div>
+        </div>
+        ${layout.startsWith('split') && slide.imageUrl ? `
+        <div class="hero-image-container">
+          <img src="${resolveHbsAsset(slide.imageUrl)}" alt="${slide.imageAlt || slide.title}" />
+        </div>
+        ` : ''}
+      </div>
+    </div>`).join('\n');
+
     if (isDynamic) {
       slidesHtml = `
-  {{#get "posts" filter="tag:${dynamicTag},tag:hash-${dynamicTag}" include="tags,authors" limit="10" as |heroPosts|}}
-    {{#if heroPosts}}
-      {{#foreach heroPosts}}
+  {{#get "posts" filter="tag:hash-${dynamicTag},tag:${dynamicTag}" include="tags,authors" limit="10"}}
+    {{#if posts}}
+      {{#foreach posts}}
       <div class="carousel-slide{{#if @first}} active{{/if}}" role="group" aria-roledescription="slide">
         <div class="hero-content">
           <div class="hero-text-container">
@@ -370,41 +403,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
         </div>
       </div>
       {{/foreach}}
+    {{else}}
+      ${staticSlidesHtml}
     {{/if}}
   {{/get}}`;
     } else {
-      const slides: HeroSlide[] = (p.slides && p.slides.length > 0) ? p.slides : [
-        {
-          id: "slide-1",
-          eyebrowText: "Featured",
-          title: "Discover Verve Edition",
-          subtitle: "Experience modern publishing with fluid visual storytelling.",
-          buttonLabel: "Explore Now",
-          buttonUrl: "#",
-          imageUrl: "",
-          imageAlt: "Slide 1 Image",
-        }
-      ];
-
-      slidesHtml = slides.map((slide, idx) => `
-    <div class="carousel-slide${idx === 0 ? ' active' : ''}" role="group" aria-roledescription="slide">
-      <div class="hero-content">
-        <div class="hero-text-container">
-          ${slide.eyebrowText ? `<span class="hero-eyebrow">${slide.eyebrowText}</span>` : ''}
-          <h1 class="hero-title heading">${slide.title}</h1>
-          ${slide.subtitle ? `<p class="hero-subtitle text-content">${slide.subtitle}</p>` : ''}
-          <div class="hero-actions">
-            <a href="${slide.buttonUrl || '#'}" class="hero-btn hero-btn-primary">${slide.buttonLabel || p.buttonLabel || "Learn More"}</a>
-            ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
-          </div>
-        </div>
-        ${layout.startsWith('split') && slide.imageUrl ? `
-        <div class="hero-image-container">
-          <img src="${resolveHbsAsset(slide.imageUrl)}" alt="${slide.imageAlt || slide.title}" />
-        </div>
-        ` : ''}
-      </div>
-    </div>`).join('\n');
+      slidesHtml = staticSlidesHtml;
     }
 
     const scriptHtml = `

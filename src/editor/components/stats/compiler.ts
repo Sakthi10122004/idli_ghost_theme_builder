@@ -23,9 +23,9 @@ function resolveHbsAsset(url?: string): string {
 }
 
 const COLS_CLASS: Record<number, string> = {
-  2: "grid-cols-1 md:grid-cols-2",
-  3: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
-  4: "grid-cols-1 sm:grid-cols-2 md:grid-cols-4",
+  2: "cols-2",
+  3: "cols-3",
+  4: "cols-4",
 };
 
 export const generateHTML = (block: BuilderBlock): string => {
@@ -88,7 +88,23 @@ export const generateHTML = (block: BuilderBlock): string => {
     `;
   };
 
-  const gridCols = COLS_CLASS[general.columns] || COLS_CLASS[3];
+  const maxDynamicStats = 6;
+  let statsHtml = "";
+  for (let i = 0; i < maxDynamicStats; i++) {
+    const statObj = stats[i] || { value: "", label: "", icon: "", iconType: "svg" };
+    const renderedMarkup = renderStat(statObj, i);
+    
+    if (i < stats.length) {
+      statsHtml += renderedMarkup;
+    } else {
+      const num = i + 1;
+      statsHtml += `\n{{#if @custom.stat_${num}_value}}\n${renderedMarkup}\n{{/if}}\n`;
+    }
+  }
+
+
+  const activeCols = Math.max(1, Math.min(general.columns, stats.length));
+  const gridCols = COLS_CLASS[activeCols] || `cols-${activeCols}`;
 
   const headingHtml = (general.heading || general.subheading) ? `
     <div class="stats-header">
@@ -162,14 +178,18 @@ export const generateHTML = (block: BuilderBlock): string => {
     gap: 1.5rem 2rem;
   }
   
-  #${wrapperId} .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  #${wrapperId} .cols-1,
+  #${wrapperId} .cols-2,
+  #${wrapperId} .cols-3,
+  #${wrapperId} .cols-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
   @media (min-width: 640px) {
-    #${wrapperId} .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #${wrapperId} .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #${wrapperId} .cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #${wrapperId} .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (min-width: 768px) {
-    #${wrapperId} .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    #${wrapperId} .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    #${wrapperId} .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    #${wrapperId} .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #${wrapperId} .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
   /* Stat Items */
@@ -411,14 +431,14 @@ export const generateHTML = (block: BuilderBlock): string => {
         </div>
         <div class="stats-split-grid">
           <dl class="stats-grid ${gridCols}">
-            ${stats.map(renderStat).join("")}
+            ${statsHtml}
           </dl>
         </div>
       </div>
     ` : `
       ${headingHtml}
       <dl class="stats-grid ${gridCols} ${general.layoutStyle === 'cards' || general.layoutStyle === 'accent-cards' ? 'gap-y-6' : ''} ${general.layoutStyle === 'divider-grid' ? 'divider' : ''}">
-        ${stats.map(renderStat).join("")}
+        ${statsHtml}
       </dl>
     `}
   </div>

@@ -103,33 +103,24 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
   const isCards = general.layoutStyle === 'cards' || general.layoutStyle === 'accent-cards';
   const isDivider = general.layoutStyle === 'divider-grid';
+  const deviceMode = useEditorStore((s) => s.deviceMode) || 'desktop';
+  const activeCols = Math.max(1, Math.min(general.columns, stats.length));
 
   return (
-    <div id={elementId} className={`relative w-full min-w-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: pt, paddingBottom: pb, containerType: 'inline-size' }}>
+    <div id={elementId} className={`relative w-full min-w-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: pt, paddingBottom: pb }}>
       <style>{`
         #${elementId} .responsive-grid {
           display: grid;
-          grid-template-columns: repeat(1, minmax(0, 1fr));
-        }
-        @container (min-width: 640px) {
-          #${elementId} .responsive-grid {
-            grid-template-columns: repeat(${Math.min(2, general.columns)}, minmax(0, 1fr));
-          }
-        }
-        @container (min-width: 768px) {
-          #${elementId} .responsive-grid {
-            grid-template-columns: repeat(${general.columns}, minmax(0, 1fr));
-          }
+          grid-template-columns: repeat(${
+            deviceMode === 'desktop' ? activeCols : 
+            deviceMode === 'tablet' ? Math.min(2, activeCols) : 
+            1
+          }, minmax(0, 1fr));
         }
         #${elementId} .responsive-split {
           display: grid;
-          grid-template-columns: repeat(1, minmax(0, 1fr));
+          grid-template-columns: repeat(${deviceMode === 'desktop' ? 2 : 1}, minmax(0, 1fr));
           align-items: center;
-        }
-        @container (min-width: 1024px) {
-          #${elementId} .responsive-split {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
         }
       `}</style>
       <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">

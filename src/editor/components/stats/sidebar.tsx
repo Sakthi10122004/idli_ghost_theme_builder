@@ -273,28 +273,42 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </div>
       </div>
 
-      {/* Spacing */}
-      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-3 mt-1">
-        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Spacing</span>
-        <div className="flex gap-2">
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-[10px] font-semibold text-gray-500">Top Padding</label>
-            <input
-              type="text"
-              value={spacing.paddingTop || ""}
-              onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingTop: e.target.value } })}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            />
+      {/* Spacing Controls */}
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-3 mt-1">
+        <span className="text-[11px] font-semibold text-gray-700">Section Spacing</span>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[10px] text-gray-600">Top Padding</label>
+            <span className="text-[10px] font-mono font-medium text-blue-600">
+              {spacing.paddingTop || "4rem"}
+            </span>
           </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-[10px] font-semibold text-gray-500">Bottom Padding</label>
-            <input
-              type="text"
-              value={spacing.paddingBottom || ""}
-              onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingBottom: e.target.value } })}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
-            />
+          <input
+            type="range"
+            min="0"
+            max="12"
+            step="0.5"
+            value={parseFloat(spacing.paddingTop || "4")}
+            onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingTop: `${e.target.value}rem` } })}
+            className="w-full accent-blue-600"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[10px] text-gray-600">Bottom Padding</label>
+            <span className="text-[10px] font-mono font-medium text-blue-600">
+              {spacing.paddingBottom || "4rem"}
+            </span>
           </div>
+          <input
+            type="range"
+            min="0"
+            max="12"
+            step="0.5"
+            value={parseFloat(spacing.paddingBottom || "4")}
+            onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingBottom: `${e.target.value}rem` } })}
+            className="w-full accent-blue-600"
+          />
         </div>
       </div>
 
