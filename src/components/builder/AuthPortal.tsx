@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useEditorStore } from "@/store/editorStore";
 
 export default function AuthPortal({ onAuthSuccess }: { onAuthSuccess: (userId: string) => void }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -29,8 +28,8 @@ export default function AuthPortal({ onAuthSuccess }: { onAuthSuccess: (userId: 
       }
 
       onAuthSuccess(data.userId);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -91,7 +90,7 @@ export default function AuthPortal({ onAuthSuccess }: { onAuthSuccess: (userId: 
           </button>
         </form>
 
-        <div className="flex justify-center text-xs text-[#888888] border-t border-[#ebebeb] pt-5">
+        <div className="flex flex-col items-center gap-3 text-xs text-[#888888] border-t border-[#ebebeb] pt-5">
           <span>
             {isLogin ? "New to Ghost Builder? " : "Already have an account? "}
             <button
@@ -101,6 +100,13 @@ export default function AuthPortal({ onAuthSuccess }: { onAuthSuccess: (userId: 
               {isLogin ? "Create account" : "Sign in"}
             </button>
           </span>
+          <button
+            type="button"
+            onClick={() => onAuthSuccess("default-builder-user")}
+            className="text-xs text-brand-mute hover:text-brand-ink transition-colors font-medium hover:underline pt-1"
+          >
+            Continue to Workspace as Guest &rarr;
+          </button>
         </div>
       </div>
     </div>

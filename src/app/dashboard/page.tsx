@@ -22,7 +22,8 @@ import {
   Check,
   Copy,
   Trash2,
-  Clock
+  Clock,
+  Sparkles
 } from "lucide-react";
 import { useEditorStore, INITIAL_THEME_DOCUMENT } from "@/store/editorStore";
 import { ThemeDocument } from "@/types/theme";
@@ -37,13 +38,20 @@ interface ThemeProject {
   document: ThemeDocument;
 }
 
-const STORAGE_KEY = "ghost_user_themes_v1";
+const STORAGE_THEMES_KEY = "ghost_user_themes_v2";
+const STORAGE_ACTIVE_ID_KEY = "ghost_active_theme_id_v2";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { document: themeDoc, updateMetadata, setDocument } = useEditorStore();
+  const { 
+    document: themeDoc, 
+    updateMetadata, 
+    setDocument, 
+    activeThemeId, 
+    setActiveThemeId 
+  } = useEditorStore();
 
-  // Initialize themes from localStorage or fallback to active themeDoc
+  // Initialize themes from localStorage or fallback to default themeDoc
   const [themes, setThemes] = useState<ThemeProject[]>(() => {
     if (typeof window === "undefined") {
       return [{
@@ -57,20 +65,23 @@ export default function DashboardPage() {
       }];
     }
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      // Check v2 key first, then fallback to v1 for migration
+      const stored = localStorage.getItem(STORAGE_THEMES_KEY) || localStorage.getItem("ghost_user_themes_v1");
       if (stored) {
         const parsed: ThemeProject[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const activeIdx = parsed.findIndex(
-            (t) => t.name === themeDoc.metadata.name || t.id === "theme-primary"
+          const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+          // Match by explicit activeThemeId or storedActiveId or exact name
+          const matchIdx = parsed.findIndex(
+            (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === activeThemeId || t.name === themeDoc.metadata.name
           );
-          if (activeIdx >= 0) {
-            parsed[activeIdx].document = themeDoc;
-            parsed[activeIdx].name = themeDoc.metadata.name;
-            parsed[activeIdx].author = themeDoc.metadata.author;
-            parsed[activeIdx].version = themeDoc.metadata.version;
-            parsed[activeIdx].description = themeDoc.metadata.description || "";
-            parsed[activeIdx].updatedAt = "Just now";
+          if (matchIdx >= 0) {
+            parsed[matchIdx].document = themeDoc;
+            parsed[matchIdx].name = themeDoc.metadata.name;
+            parsed[matchIdx].author = themeDoc.metadata.author;
+            parsed[matchIdx].version = themeDoc.metadata.version;
+            parsed[matchIdx].description = themeDoc.metadata.description || "";
+            parsed[matchIdx].updatedAt = "Just now";
           }
           return parsed;
         }
@@ -95,6 +106,7 @@ export default function DashboardPage() {
   const [exportSuccessId, setExportSuccessId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const [themeToEdit, setThemeToEdit] = useState<ThemeProject | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // New Theme Form State
   const [newThemeName, setNewThemeName] = useState("");
@@ -107,35 +119,47 @@ export default function DashboardPage() {
   const [editVersion, setEditVersion] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
-  // Synchronize active theme changes into the stored theme list
+  // Synchronize themes list changes into localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(themes));
-    } catch {}
+      localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(themes));
+    } catch (err) {
+      console.error("Failed to save themes:", err);
+    }
   }, [themes]);
 
-  // Persist themes helper
-  const persistThemes = (updated: ThemeProject[]) => {
-    setThemes(updated);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.error("Failed to save themes to localStorage:", e);
-    }
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleOpenTheme = (theme: ThemeProject) => {
-    setDocument(theme.document);
+    setActiveThemeId(theme.id);
+    setDocument(theme.document, theme.id);
+    try {
+      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, theme.id);
+    } catch {}
     router.push("/builder");
   };
 
   const handleDuplicateTheme = (theme: ThemeProject) => {
     const duplicatedDoc: ThemeDocument = JSON.parse(JSON.stringify(theme.document));
+    const newId = `theme-${Date.now()}`;
     const newName = `${theme.name} (Copy)`;
     duplicatedDoc.metadata.name = newName;
 
+    if (duplicatedDoc.blocks && duplicatedDoc.blocks["header-sec-1"]) {
+      duplicatedDoc.blocks["header-sec-1"].props = {
+        ...duplicatedDoc.blocks["header-sec-1"].props,
+        general: {
+          ...duplicatedDoc.blocks["header-sec-1"].props?.general,
+          siteTitle: newName,
+        },
+      };
+    }
+
     const newProject: ThemeProject = {
-      id: `theme-${Date.now()}`,
+      id: newId,
       name: newName,
       author: theme.author,
       version: theme.version,
@@ -144,7 +168,12 @@ export default function DashboardPage() {
       document: duplicatedDoc,
     };
 
-    persistThemes([...themes, newProject]);
+    const updated = [newProject, ...themes];
+    setThemes(updated);
+    try {
+      localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+    } catch {}
+    showToast(`Duplicated "${theme.name}" as "${newName}"!`);
   };
 
   const handleDeleteTheme = (id: string) => {
@@ -152,14 +181,29 @@ export default function DashboardPage() {
       alert("You must keep at least one theme project.");
       return;
     }
+    const themeToDelete = themes.find((t) => t.id === id);
     const updated = themes.filter((t) => t.id !== id);
-    persistThemes(updated);
+    setThemes(updated);
+    try {
+      localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+    } catch {}
+
+    // If deleting active theme, switch to first remaining
+    if (activeThemeId === id && updated.length > 0) {
+      setDocument(updated[0].document, updated[0].id);
+      setActiveThemeId(updated[0].id);
+      try {
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated[0].id);
+      } catch {}
+    }
+    showToast(`Deleted theme "${themeToDelete?.name || ""}".`);
   };
 
-  const handleCreateTheme = (e: React.FormEvent) => {
+  const handleCreateTheme = (e: React.FormEvent, openBuilder = true) => {
     e.preventDefault();
     if (!newThemeName.trim()) return;
 
+    const newId = `theme-${Date.now()}`;
     const baseDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
     baseDoc.metadata = {
       name: newThemeName.trim(),
@@ -168,8 +212,19 @@ export default function DashboardPage() {
       description: newThemeDescription.trim() || "A custom Ghost publication theme",
     };
 
+    // Update siteTitle in header block so visual canvas renders the new theme name
+    if (baseDoc.blocks && baseDoc.blocks["header-sec-1"]) {
+      baseDoc.blocks["header-sec-1"].props = {
+        ...baseDoc.blocks["header-sec-1"].props,
+        general: {
+          ...baseDoc.blocks["header-sec-1"].props?.general,
+          siteTitle: newThemeName.trim(),
+        },
+      };
+    }
+
     const newProject: ThemeProject = {
-      id: `theme-${Date.now()}`,
+      id: newId,
       name: baseDoc.metadata.name,
       author: baseDoc.metadata.author,
       version: baseDoc.metadata.version,
@@ -178,15 +233,28 @@ export default function DashboardPage() {
       document: baseDoc,
     };
 
-    const updated = [...themes, newProject];
-    persistThemes(updated);
-    setDocument(baseDoc);
+    const updated = [newProject, ...themes];
+    setThemes(updated);
+    try {
+      localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, newId);
+    } catch (err) {
+      console.error("Failed to store new theme:", err);
+    }
+
+    setDocument(baseDoc, newId);
+    setActiveThemeId(newId);
 
     setShowNewModal(false);
     setNewThemeName("");
     setNewThemeAuthor("");
     setNewThemeDescription("");
-    router.push("/builder");
+
+    if (openBuilder) {
+      router.push("/builder");
+    } else {
+      showToast(`Created theme "${newProject.name}"!`);
+    }
   };
 
   const openSettings = (theme: ThemeProject) => {
@@ -213,8 +281,18 @@ export default function DashboardPage() {
             description: editDescription.trim(),
           },
         };
+        // Update header block if present
+        if (updatedDoc.blocks && updatedDoc.blocks["header-sec-1"]) {
+          updatedDoc.blocks["header-sec-1"].props = {
+            ...updatedDoc.blocks["header-sec-1"].props,
+            general: {
+              ...updatedDoc.blocks["header-sec-1"].props?.general,
+              siteTitle: editName.trim(),
+            },
+          };
+        }
         // If this is the active theme, update Zustand store too
-        if (t.name === themeDoc.metadata.name) {
+        if (t.id === activeThemeId || t.name === themeDoc.metadata.name) {
           updateMetadata(updatedDoc.metadata);
         }
         return {
@@ -230,8 +308,12 @@ export default function DashboardPage() {
       return t;
     });
 
-    persistThemes(updated);
+    setThemes(updated);
+    try {
+      localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+    } catch {}
     setThemeToEdit(null);
+    showToast("Theme configuration updated.");
   };
 
   const handleExportThemeZip = async (theme: ThemeProject) => {
@@ -289,6 +371,7 @@ export default function DashboardPage() {
 
       setExportSuccessId(theme.id);
       setTimeout(() => setExportSuccessId(null), 3000);
+      showToast(`Exported "${filename}"!`);
     } catch (err) {
       console.error("Theme export failed:", err);
       alert("Failed to export theme ZIP. Please verify compiler outputs.");
@@ -306,6 +389,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-brand-canvas-soft text-brand-ink flex flex-col font-sans selection:bg-brand-primary selection:text-white">
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-brand-primary text-white text-xs px-4 py-2.5 rounded-lg shadow-level-4 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Sparkles size={14} className="text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-hairline px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -389,7 +480,7 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={() => {
-                const active = themes.find((t) => t.name === themeDoc.metadata.name) || themes[0];
+                const active = themes.find((t) => t.id === activeThemeId || t.name === themeDoc.metadata.name) || themes[0];
                 if (active) openSettings(active);
               }}
               className="p-2 border border-brand-hairline rounded-md bg-white hover:bg-brand-canvas-soft text-brand-ink transition-colors"
@@ -427,7 +518,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              Zero errors · Casper & Ghost 5.x spec compliant
+              Zero errors · Casper &amp; Ghost 5.x spec compliant
             </div>
           </div>
 
@@ -453,7 +544,7 @@ export default function DashboardPage() {
               Ghost 5.x Ready
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              Automated Handlebars & minified CSS
+              Automated Handlebars &amp; minified CSS
             </div>
           </div>
         </div>
@@ -485,7 +576,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredThemes.map((theme) => {
-              const isActive = theme.name === themeDoc.metadata.name;
+              const isActive = (activeThemeId ? theme.id === activeThemeId : false) || theme.name === themeDoc.metadata.name;
               const pages = Object.keys(theme.document.pages || {});
               const blocksCount = Object.keys(theme.document.blocks || {}).length;
               const isCurrentlyExporting = isExporting === theme.id;
@@ -759,18 +850,24 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white border border-brand-hairline rounded-xl shadow-level-5 max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
-              <h3 className="font-bold text-base text-brand-ink">Create New Theme</h3>
+              <div className="flex items-center gap-2">
+                <FileCode2 size={16} className="text-brand-primary" />
+                <h3 className="font-bold text-base text-brand-ink">Create New Theme</h3>
+              </div>
               <button onClick={() => setShowNewModal(false)} className="text-brand-mute hover:text-brand-ink">
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTheme} className="space-y-3.5 text-xs">
+            <form onSubmit={(e) => handleCreateTheme(e, true)} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-brand-ink mb-1">Theme Name</label>
+                <label className="block font-semibold text-brand-ink mb-1">
+                  Theme Name <span className="text-rose-500">*</span>
+                </label>
                 <input
                   type="text"
                   required
+                  autoFocus
                   placeholder="e.g. Acme Publication"
                   value={newThemeName}
                   onChange={(e) => setNewThemeName(e.target.value)}
@@ -800,20 +897,29 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <div className="pt-3 border-t border-brand-hairline flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-brand-hairline flex flex-col sm:flex-row items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-3.5 py-1.5 border border-brand-hairline rounded-md text-brand-body hover:bg-brand-canvas-soft"
+                  className="w-full sm:w-auto px-3.5 py-1.5 border border-brand-hairline rounded-md text-brand-body hover:bg-brand-canvas-soft"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  onClick={(e) => handleCreateTheme(e, false)}
+                  disabled={!newThemeName.trim()}
+                  className="w-full sm:w-auto px-3.5 py-1.5 border border-brand-hairline rounded-md font-semibold text-brand-ink hover:bg-brand-canvas-soft transition-colors disabled:opacity-50"
+                >
+                  Create Theme
+                </button>
+                <button
                   type="submit"
                   disabled={!newThemeName.trim()}
-                  className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90 disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1"
                 >
-                  Create &amp; Open Builder
+                  <span>Create &amp; Open Builder</span>
+                  <span className="text-xs">&rarr;</span>
                 </button>
               </div>
             </form>

@@ -153,10 +153,6 @@ export default function Toolbar() {
   };
 
   useEffect(() => {
-    useEditorStore.getState().loadTheme();
-  }, []);
-
-  useEffect(() => {
     const handler = setTimeout(async () => {
       try {
         setIsValidatingLive(true);
@@ -253,8 +249,14 @@ export default function Toolbar() {
             <span className="text-white font-mono font-semibold text-sm">G</span>
           </div>
           <div>
-            <span className="font-sans font-semibold text-sm tracking-tight text-brand-ink">Ghost Theme Builder</span>
-            <span className="ml-2 font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded-sm text-brand-body uppercase">Alpha</span>
+            <div className="flex items-center gap-2">
+              <span className="font-sans font-semibold text-sm tracking-tight text-brand-ink truncate max-w-[170px]">
+                {themeDoc.metadata?.name || "Ghost Theme"}
+              </span>
+              <span className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded-sm text-brand-body uppercase">
+                v{themeDoc.metadata?.version || "1.0.0"}
+              </span>
+            </div>
           </div>
         </Link>
       </div>

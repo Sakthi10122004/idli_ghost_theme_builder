@@ -334,9 +334,11 @@ interface EditorState {
   reorderBlocks: (sourceIndex: number, destinationIndex: number, parentId?: string) => void;
   moveBlock: (activeId: string, overId: string) => void;
   
+  activeThemeId: string;
+  setActiveThemeId: (themeId: string) => void;
   applyPageTemplate: (pageKey: string, templateId: string) => void;
   updateMetadata: (metadata: Partial<ThemeDocument["metadata"]>) => void;
-  setDocument: (document: ThemeDocument) => void;
+  setDocument: (document: ThemeDocument, themeId?: string) => void;
   
   undo: () => void;
   redo: () => void;
@@ -652,6 +654,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isCodeMode: false,
   showShortcutsHelp: false,
   userId: "default-builder-user",
+  activeThemeId: "theme-primary",
   isSaving: false,
   saveStatus: "idle",
 
@@ -659,6 +662,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     console.log(`[Zustand Store] Active userId set to: "${userId}"`);
     set({ userId });
   },
+  setActiveThemeId: (themeId) => set({ activeThemeId: themeId }),
   setDeviceMode: (mode) => set({ deviceMode: mode }),
   setActivePage: (page) => set({ activePage: page, selectedBlockId: null }),
   selectBlock: (blockId) => set({ selectedBlockId: blockId }),
@@ -669,7 +673,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   loadTheme: async () => {
     try {
-      const { userId } = get();
+      const { userId, activeThemeId } = get();
+      // If we are actively editing a user-created local theme, don't overwrite it with default db record
+      if (activeThemeId && activeThemeId !== "theme-primary") {
+        console.log(`[Zustand Store] loadTheme skipped for active custom theme: "${activeThemeId}"`);
+        return;
+      }
       console.log(`[Zustand Store] loadTheme initiated for userId: "${userId}"`);
       const res = await fetch(`/api/theme?userId=${encodeURIComponent(userId)}`);
       const data = await res.json();
@@ -725,13 +734,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     };
   }),
 
-  setDocument: (document) => set((state) => {
+  setDocument: (document, themeId) => set((state) => {
     const historyUpdate = saveToHistory(state);
     return {
       ...historyUpdate,
       document: JSON.parse(JSON.stringify(document)),
       selectedBlockId: null,
       activePage: "home",
+      ...(themeId ? { activeThemeId: themeId } : {}),
     };
   }),
 
