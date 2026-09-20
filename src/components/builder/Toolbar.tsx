@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import JSZip from "jszip";
 
 import { useEditorStore } from "@/store/editorStore";
@@ -24,7 +25,8 @@ import {
   AlertCircle, 
   LayoutTemplate, 
   X, 
-  AlertTriangle 
+  AlertTriangle,
+  ArrowLeft
 } from "lucide-react";
 import TemplatePickerModal from "./TemplatePickerModal";
 
@@ -76,7 +78,6 @@ export default function Toolbar() {
     toggleShortcutsHelp,
     createCustomPage,
     duplicateCustomPage,
-    loadTheme,
     saveTheme,
     saveStatus,
     isSaving
@@ -152,7 +153,7 @@ export default function Toolbar() {
   };
 
   useEffect(() => {
-    loadTheme();
+    useEditorStore.getState().loadTheme();
   }, []);
 
   useEffect(() => {
@@ -238,13 +239,24 @@ export default function Toolbar() {
       <header className="h-[64px] border-b border-brand-hairline bg-white px-6 flex items-center justify-between shrink-0 select-none shadow-level-1 z-10">
       {/* Brand Logo & Name */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-brand-primary flex items-center justify-center rounded-sm">
-          <span className="text-white font-mono font-semibold text-sm">G</span>
-        </div>
-        <div>
-          <span className="font-sans font-semibold text-sm tracking-tight text-brand-ink">Ghost Theme Builder</span>
-          <span className="ml-2 font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded-sm text-brand-body uppercase">Alpha</span>
-        </div>
+        <Link 
+          href="/dashboard" 
+          className="flex items-center gap-1.5 px-2 py-1 -ml-1 text-xs text-brand-body hover:text-brand-ink rounded hover:bg-brand-canvas-soft transition-colors" 
+          title="Back to Dashboard"
+        >
+          <ArrowLeft size={14} />
+          <span className="font-medium hidden sm:inline">Dashboard</span>
+        </Link>
+        <div className="h-4 w-px bg-brand-hairline hidden sm:block" />
+        <Link href="/" className="flex items-center gap-2 group" title="Ghost Theme Builder Home">
+          <div className="w-8 h-8 bg-brand-primary flex items-center justify-center rounded-sm transition-transform group-hover:scale-105">
+            <span className="text-white font-mono font-semibold text-sm">G</span>
+          </div>
+          <div>
+            <span className="font-sans font-semibold text-sm tracking-tight text-brand-ink">Ghost Theme Builder</span>
+            <span className="ml-2 font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded-sm text-brand-body uppercase">Alpha</span>
+          </div>
+        </Link>
       </div>
 
       {/* Dynamic Pages Selector & Add Page CTA */}

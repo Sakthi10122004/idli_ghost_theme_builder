@@ -335,6 +335,7 @@ interface EditorState {
   moveBlock: (activeId: string, overId: string) => void;
   
   applyPageTemplate: (pageKey: string, templateId: string) => void;
+  updateMetadata: (metadata: Partial<ThemeDocument["metadata"]>) => void;
   
   undo: () => void;
   redo: () => void;
@@ -708,6 +709,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       set({ isSaving: false, saveStatus: "error" });
     }
   },
+
+  updateMetadata: (metadata) => set((state) => {
+    const historyUpdate = saveToHistory(state);
+    return {
+      ...historyUpdate,
+      document: {
+        ...state.document,
+        metadata: {
+          ...state.document.metadata,
+          ...metadata,
+        },
+      },
+    };
+  }),
 
   createCustomPage: (slug) => set((state) => {
     let cleanSlug = slug.trim().toLowerCase().replace(/\s+/g, "-");
