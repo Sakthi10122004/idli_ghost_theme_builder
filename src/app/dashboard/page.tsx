@@ -20,18 +20,28 @@ import {
   SlidersHorizontal,
   X,
   Loader2,
-  Check
+  Check,
+  FileText
 } from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { document: themeDoc, updateMetadata } = useEditorStore();
+  const { 
+    document: themeDoc, 
+    updateMetadata, 
+    activePage, 
+    setActivePage, 
+    createCustomPage 
+  } = useEditorStore();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [showNewPageModal, setShowNewPageModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [newPageSlug, setNewPageSlug] = useState("");
   const [newThemeName, setNewThemeName] = useState("");
   const [newThemeAuthor, setNewThemeAuthor] = useState("");
   const [newThemeDescription, setNewThemeDescription] = useState("");
@@ -39,61 +49,79 @@ export default function DashboardPage() {
   const pageCount = Object.keys(themeDoc.pages || {}).length;
   const blockCount = Object.keys(themeDoc.blocks || {}).length;
 
-  const starterTemplates = [
-    {
-      id: "sakthi-t4gc",
-      name: "Sakthi T4GC (Active)",
-      tagline: "Vercel-inspired developer publication theme",
-      description: "Stark monochrome aesthetics, multi-stop mesh gradients, Geist typography, and micro-interactions.",
-      badge: "Current Theme",
-      badgeColor: "bg-brand-primary text-white",
-      pages: ["Home", "Post", "Page", "Author", "Tag", "404"],
-      accentColor: "#171717",
-      previewBg: "bg-white",
-      isCurrent: true,
-    },
-    {
-      id: "editorial-magazine",
-      name: "Editorial Gazette",
-      tagline: "High-density editorial & longform storytelling",
-      description: "Designed for newsrooms, magazines, and essayists with bold serif display and multi-author bylines.",
-      badge: "Magazine",
-      badgeColor: "bg-blue-600 text-white",
-      pages: ["Home", "Post", "Page", "Author", "Tag"],
-      accentColor: "#0070f3",
-      previewBg: "bg-slate-50",
-      isCurrent: false,
-    },
-    {
-      id: "minimal-devblog",
-      name: "Geist Tech Log",
-      tagline: "Developer-first documentation & engineering journal",
-      description: "Monospace accents, dark code syntax blocks, technical eyebrows, and 100/100 Lighthouse performance.",
-      badge: "Engineering",
-      badgeColor: "bg-purple-600 text-white",
-      pages: ["Home", "Post", "Page", "Tag"],
-      accentColor: "#7928ca",
-      previewBg: "bg-zinc-50",
-      isCurrent: false,
-    },
-    {
-      id: "creator-minimal",
-      name: "Atelier Minimal",
-      tagline: "Visual portfolio & newsletter publication",
-      description: "Expansive image grids, integrated Ghost membership tiers, sticky subscription bar, and fluid layout containers.",
-      badge: "Portfolio",
-      badgeColor: "bg-emerald-600 text-white",
-      pages: ["Home", "Post", "Page", "Author"],
-      accentColor: "#059669",
-      previewBg: "bg-stone-50",
-      isCurrent: false,
-    }
-  ];
+  const templatePages = Object.entries(themeDoc.pages || {}).map(([slug, pageData]) => {
+    const isHome = slug === "home";
+    const isPost = slug === "post";
+    const isPage = slug === "page";
+    const isAuthor = slug === "author";
+    const isTag = slug === "tag";
+    const isError = slug === "error";
 
-  const filteredTemplates = starterTemplates.filter(t => 
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const fileName = isHome ? "index.hbs" : `${slug}.hbs`;
+
+    let title = "Custom Page";
+    let badge = "Custom Page";
+    let badgeColor = "bg-brand-canvas-soft text-brand-body border border-brand-hairline";
+    let description = "Custom dynamic page layout configured in the visual builder.";
+
+    if (isHome) {
+      title = "Home Publication Feed";
+      badge = "Primary Index";
+      badgeColor = "bg-brand-primary text-white";
+      description = "Main landing template displaying hero banner, featured posts grid, latest articles, and newsletter CTA.";
+    } else if (isPost) {
+      title = "Single Post Article";
+      badge = "Post Template";
+      badgeColor = "bg-blue-600 text-white";
+      description = "Article reading template with tag badge, title, byline meta, feature image, content, author bio, and comments.";
+    } else if (isPage) {
+      title = "Static Page Template";
+      badge = "Page Template";
+      badgeColor = "bg-purple-600 text-white";
+      description = "Full-page static layout for about, contact, or policy pages with title and rich prose content.";
+    } else if (isAuthor) {
+      title = "Author Profile Archive";
+      badge = "Archive";
+      badgeColor = "bg-amber-600 text-white";
+      description = "Author showcase archive displaying author avatar, bio, social links, and a filtered stream of their articles.";
+    } else if (isTag) {
+      title = "Tag Collection Archive";
+      badge = "Archive";
+      badgeColor = "bg-emerald-600 text-white";
+      description = "Topic taxonomy archive with tag metadata pill, description, and tagged post collection grid.";
+    } else if (isError) {
+      title = "404 Error Response";
+      badge = "System Error";
+      badgeColor = "bg-rose-600 text-white";
+      description = "Error template displayed when visitors navigate to non-existent URLs, with recovery navigation.";
+    } else {
+      title = slug.replace(/^custom-/, "").replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    const sections = pageData.sections || [];
+    const sectionTypes: string[] = sections.map((secId) => {
+      const block = themeDoc.blocks[secId];
+      return block ? block.type : "section";
+    });
+
+    return {
+      slug,
+      fileName,
+      title,
+      badge,
+      badgeColor,
+      description,
+      sectionsCount: sections.length,
+      sectionTypes,
+      isActive: activePage === slug,
+    };
+  });
+
+  const filteredTemplates = templatePages.filter(t => 
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    t.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.tagline.toLowerCase().includes(searchQuery.toLowerCase())
+    t.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleExportZip = async () => {
@@ -171,6 +199,18 @@ export default function DashboardPage() {
     });
 
     setShowNewModal(false);
+    router.push("/builder");
+  };
+
+  const handleCreatePage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPageSlug.trim()) return;
+    const cleanSlug = newPageSlug.trim().toLowerCase().replace(/\s+/g, "-").replace(/^custom-/, "");
+    const fullSlug = `custom-${cleanSlug}`;
+    createCustomPage(cleanSlug);
+    setActivePage(fullSlug);
+    setShowNewPageModal(false);
+    setNewPageSlug("");
     router.push("/builder");
   };
 
@@ -405,92 +445,127 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Starter Themes & Template Library */}
+        {/* Dynamic Theme Templates & Page Layouts */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-bold text-brand-ink">
-                Curated Theme Library & Starters
-              </h3>
-              <p className="text-xs text-brand-body">
-                Kickstart your next publication with validated layouts designed for Ghost 5.x.
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold text-brand-ink">
+                  Theme Templates &amp; Page Layouts
+                </h3>
+                <span className="font-mono text-[11px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-mute">
+                  {filteredTemplates.length} templates
+                </span>
+              </div>
+              <p className="text-xs text-brand-body mt-0.5">
+                Dynamic Handlebars templates compiled from this theme&apos;s AST. Click any template to edit in the visual builder.
               </p>
             </div>
-            <span className="text-xs font-mono text-brand-mute hidden sm:inline">
-              {filteredTemplates.length} themes available
-            </span>
+            <button
+              onClick={() => setShowNewPageModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-brand-hairline rounded-md text-xs font-semibold text-brand-ink hover:bg-brand-canvas-soft transition-colors bg-white shadow-xs self-start sm:self-auto"
+            >
+              <Plus size={13} />
+              <span>Add Custom Page</span>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTemplates.map((template) => (
               <div 
-                key={template.id} 
-                className="bg-white border border-brand-hairline rounded-xl overflow-hidden shadow-xs hover:border-brand-hairline-strong transition-all flex flex-col group"
+                key={template.slug} 
+                className={`bg-white border rounded-xl overflow-hidden shadow-xs hover:border-brand-hairline-strong transition-all flex flex-col justify-between group ${
+                  template.isActive ? "border-brand-primary ring-1 ring-brand-primary/10" : "border-brand-hairline"
+                }`}
               >
-                {/* Visual Header Mockup */}
-                <div className={`h-36 ${template.previewBg} border-b border-brand-hairline p-4 flex flex-col justify-between relative overflow-hidden`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full ${template.badgeColor}`}>
+                {/* Card Header */}
+                <div className="p-4 border-b border-brand-hairline bg-brand-canvas-soft/30 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileCode2 size={15} className="text-brand-mute" />
+                    <span className="font-mono text-xs font-semibold text-brand-ink">
+                      {template.fileName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-full ${template.badgeColor}`}>
                       {template.badge}
                     </span>
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: template.accentColor }} />
+                    {template.isActive && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" title="Active in Canvas" />
+                    )}
                   </div>
-
-                  <div className="space-y-1">
-                    <div className="w-24 h-2 bg-brand-hairline rounded-full" />
-                    <div className="w-36 h-3 bg-brand-ink/80 rounded-full" />
-                    <div className="w-16 h-1.5 bg-brand-hairline rounded-full" />
-                  </div>
-
-                  {/* Decorative background grid pattern */}
-                  <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full border border-dashed border-brand-hairline/80 pointer-events-none opacity-50" />
                 </div>
 
-                {/* Card Content */}
+                {/* Card Body */}
                 <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                   <div>
                     <h4 className="font-bold text-sm text-brand-ink group-hover:text-brand-primary transition-colors">
-                      {template.name}
+                      {template.title}
                     </h4>
-                    <p className="text-xs text-brand-mute font-medium mt-0.5">
-                      {template.tagline}
-                    </p>
-                    <p className="text-xs text-brand-body mt-2 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-brand-body mt-1 leading-relaxed">
                       {template.description}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-brand-hairline flex items-center justify-between">
-                    <div className="text-[11px] font-mono text-brand-mute">
-                      {template.pages.length} templates
+                  {/* Included sections pills */}
+                  {template.sectionTypes.length > 0 && (
+                    <div className="pt-2">
+                      <span className="text-[10px] font-mono uppercase text-brand-mute block mb-1.5">
+                        Blocks in template:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {template.sectionTypes.slice(0, 4).map((type, idx) => (
+                          <span 
+                            key={idx}
+                            className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-body"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                        {template.sectionTypes.length > 4 && (
+                          <span className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-mute">
+                            +{template.sectionTypes.length - 4} more
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {template.isCurrent ? (
-                      <Link
-                        href="/builder"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary hover:underline"
-                      >
-                        <span>Edit Active</span>
-                        <ArrowRight size={12} />
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          updateMetadata({
-                            name: template.name,
-                            description: template.description
-                          });
-                          router.push("/builder");
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-brand-body hover:text-brand-ink transition-colors"
-                      >
-                        <span>Use Starter</span>
-                        <ArrowRight size={12} />
-                      </button>
-                    )}
+                  )}
+
+                  {/* Card Actions Footer */}
+                  <div className="pt-3 border-t border-brand-hairline flex items-center justify-between">
+                    <div className="text-[11px] font-mono text-brand-mute">
+                      {template.sectionsCount} {template.sectionsCount === 1 ? "section" : "sections"}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setActivePage(template.slug);
+                        router.push("/builder");
+                      }}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary hover:underline"
+                    >
+                      <span>Edit in Builder</span>
+                      <ArrowRight size={12} />
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
+
+            {/* Add Custom Page Template Card */}
+            <button
+              onClick={() => setShowNewPageModal(true)}
+              className="border-2 border-dashed border-brand-hairline hover:border-brand-primary/40 rounded-xl p-6 flex flex-col items-center justify-center text-center group transition-all bg-brand-canvas-soft/30 hover:bg-white min-h-[200px]"
+            >
+              <div className="w-10 h-10 rounded-full bg-white border border-brand-hairline flex items-center justify-center text-brand-body group-hover:text-brand-primary group-hover:scale-110 transition-all shadow-xs mb-3">
+                <Plus size={18} />
+              </div>
+              <h4 className="font-bold text-sm text-brand-ink group-hover:text-brand-primary transition-colors">
+                Add Custom Page Template
+              </h4>
+              <p className="text-xs text-brand-mute max-w-[220px] mt-1 leading-relaxed">
+                Create a custom slug layout (e.g. custom-about.hbs) with modular Ghost blocks.
+              </p>
+            </button>
           </div>
         </section>
 
@@ -643,6 +718,62 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90"
+                >
+                  Create &amp; Open Builder
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* New Custom Page Template Modal */}
+      {showNewPageModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-brand-hairline rounded-xl shadow-level-5 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
+              <div className="flex items-center gap-2">
+                <FileText size={16} className="text-brand-primary" />
+                <h3 className="font-bold text-base text-brand-ink">Add Page Template</h3>
+              </div>
+              <button onClick={() => setShowNewPageModal(false)} className="text-brand-mute hover:text-brand-ink">
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePage} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-brand-ink mb-1">Template Slug</label>
+                <div className="flex items-center">
+                  <span className="bg-brand-canvas-soft border border-r-0 border-brand-hairline px-2.5 py-2 text-brand-mute font-mono text-xs rounded-l-md select-none">
+                    custom-
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    placeholder="about, pricing, team, etc."
+                    value={newPageSlug}
+                    onChange={(e) => setNewPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                    className="flex-1 px-3 py-2 border border-brand-hairline rounded-r-md text-brand-ink focus:outline-none focus:border-brand-primary font-mono text-xs"
+                  />
+                </div>
+                <p className="text-[11px] text-brand-mute mt-1.5">
+                  Compiled output file will be <code className="font-mono bg-brand-canvas-soft px-1 rounded border border-brand-hairline">custom-{newPageSlug || "name"}.hbs</code>.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-brand-hairline flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewPageModal(false)}
+                  className="px-3.5 py-1.5 border border-brand-hairline rounded-md text-brand-body hover:bg-brand-canvas-soft"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newPageSlug.trim()}
+                  className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90 disabled:opacity-50"
                 >
                   Create &amp; Open Builder
                 </button>
