@@ -1,88 +1,26 @@
 import { BuilderBlock } from "@/types/theme";
 import { HeroSlide } from "./schema";
+import { getBackgroundCSS } from "../shared/background";
 
-const getBackgroundCSS = (styles?: Record<string, unknown>): string => {
-  const bgType = (styles?.backgroundType as string) || "solid";
-  const defaultBg = "transparent";
-
-  switch (bgType) {
-    case "solid": {
-      const bg = styles?.backgroundColor as string;
-      if (!bg || bg === "#ffffff" || bg === "#fff") {
-        return `background-color: var(--color-bg, #ffffff);`;
-      }
-      return `background-color: ${bg};`;
-    }
-    case "linear": {
-      const c1 = (styles?.gradientColor1 as string) || "#000000";
-      const c2 = (styles?.gradientColor2 as string) || "#333333";
-      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
-      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2});`;
-    }
-    case "radial": {
-      const c1 = (styles?.gradientColor1 as string) || "#000000";
-      const c2 = (styles?.gradientColor2 as string) || "#333333";
-      const pos = (styles?.gradientPosition as string) || "center";
-      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2});`;
-    }
-    case "mesh": {
-      const m1 = (styles?.meshColor1 as string) || "#ff0080";
-      const m2 = (styles?.meshColor2 as string) || "#7928ca";
-      const m3 = (styles?.meshColor3 as string) || "#0070f3";
-      return `
-    background-color: ${defaultBg};
-    background-image: 
-      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
-      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
-      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
-      `;
-    }
-    case "pattern": {
-      const pType = (styles?.patternType as string) || "dots";
-      const pColor = (styles?.patternColor as string) || "#000000";
-      if (pType === "dots") {
-        return `
-    background-color: ${defaultBg};
-    background-image: radial-gradient(${pColor} 1px, transparent 1px);
-    background-size: 20px 20px;
-        `;
-      } else if (pType === "lines") {
-        return `
-    background-color: ${defaultBg};
-    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px);
-        `;
-      } else if (pType === "noise") {
-        return `
-    background-color: ${pColor};
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
-        `;
-      }
-      return `background-color: ${defaultBg};`;
-    }
-    case "image": {
-      const url = (styles?.bgImageUrl as string) || "";
-      const overlayColor = (styles?.bgOverlayColor as string) || "#000000";
-      const opacity = styles?.bgOverlayOpacity !== undefined ? (styles.bgOverlayOpacity as number) : 0.5;
-
-      let r = 0, g = 0, b = 0;
-      if (overlayColor.length === 7) {
-        r = parseInt(overlayColor.slice(1, 3), 16);
-        g = parseInt(overlayColor.slice(3, 5), 16);
-        b = parseInt(overlayColor.slice(5, 7), 16);
-      }
-
-      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      return `
-    background-color: ${defaultBg};
-    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""};
-    background-size: cover;
-    background-position: center;
-      `;
-    }
-    default:
-      return `background-color: ${defaultBg};`;
+function resolveStyleValue(val: unknown, fallback: string = ""): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  if (typeof val === "number") return String(val);
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return String(obj.desktop || obj.mobile || obj.tablet || fallback);
   }
-};
+  return fallback;
+}
+
+function resolveHbsAsset(url?: string): string {
+  if (!url) return "";
+  if (url.startsWith("asset://")) {
+    const rel = url.replace(/^asset:\/\/(assets\/)?/, "");
+    return `{{asset "${rel}"}}`;
+  }
+  return url;
+}
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
@@ -95,8 +33,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
   const uid = `hero-${Math.random().toString(36).slice(2, 9)}`;
 
-  const pt = (block.styles?.paddingTop as string) || "3rem";
-  const pb = (block.styles?.paddingBottom as string) || "5rem";
+  const pt = resolveStyleValue(block.styles?.paddingTop, "3rem");
+  const pb = resolveStyleValue(block.styles?.paddingBottom, "5rem");
   const bgCSS = getBackgroundCSS(block.styles as Record<string, unknown>);
 
   let r = 0, g = 0, b = 0;
@@ -193,6 +131,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
   @media (min-width: 768px) {
     #${uid} .hero-text-container {
       ${layout.startsWith('split') ? 'width: 50%;' : ''}
+    }
+    #${uid} .hero-text-container:only-child {
+      width: 100%;
+      align-items: center;
+      text-align: center;
     }
   }
   #${uid} .hero-image-container {
@@ -393,7 +336,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // If CAROUSEL is enabled
   if (isCarousel) {
     const isDynamic = p.carouselMode === "dynamic";
-    const dynamicTag = p.dynamicTag || "hero-carousel";
+    const dynamicTag = (p.dynamicTag || "hero-carousel").replace(/^#\s*/, "").trim();
     const showArrows = p.showArrows ?? true;
     const showDots = p.showDots ?? true;
     const autoplay = p.autoplay ?? true;
@@ -401,53 +344,26 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
     let slidesHtml = "";
 
-    if (isDynamic) {
-      slidesHtml = `
-  {{#get "posts" filter="tag:${dynamicTag}" limit="10" as |heroPosts|}}
-    {{#foreach heroPosts}}
-    <div class="carousel-slide{{#if @first}} active{{/if}}">
-      <div class="hero-content">
-        <div class="hero-text-container">
-          <span class="hero-eyebrow">{{primary_tag.name}}</span>
-          <h1 class="hero-title heading">{{title}}</h1>
-          <p class="hero-subtitle text-content">{{excerpt}}</p>
-          <div class="hero-actions">
-            <a href="{{url}}" class="hero-btn hero-btn-primary">${p.buttonLabel || "Read Article"}</a>
-            ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
-          </div>
-        </div>
-        ${layout.startsWith('split') ? `
-        {{#if feature_image}}
-        <div class="hero-image-container">
-          <img src="{{img_url feature_image size="m"}}" alt="{{title}}" />
-        </div>
-        {{/if}}
-        ` : ''}
-      </div>
-    </div>
-    {{/foreach}}
-  {{/get}}`;
-    } else {
-      const slides: HeroSlide[] = (p.slides && p.slides.length > 0) ? p.slides : [
-        {
-          id: "slide-1",
-          eyebrowText: "Featured",
-          title: "Discover Verve Edition",
-          subtitle: "Experience modern publishing with fluid visual storytelling.",
-          buttonLabel: "Explore Now",
-          buttonUrl: "#",
-          imageUrl: "",
-          imageAlt: "Slide 1 Image",
-        }
-      ];
+    const slides: HeroSlide[] = (p.slides && p.slides.length > 0) ? p.slides : [
+      {
+        id: "slide-1",
+        eyebrowText: "Featured",
+        title: "Discover Verve Edition",
+        subtitle: "Experience modern publishing with fluid visual storytelling.",
+        buttonLabel: "Explore Now",
+        buttonUrl: "#",
+        imageUrl: "",
+        imageAlt: "Slide 1 Image",
+      }
+    ];
 
-      slidesHtml = slides.map((slide, idx) => `
-    <div class="carousel-slide${idx === 0 ? ' active' : ''}">
+    const staticSlidesHtml = slides.map((slide, idx) => `
+    <div class="carousel-slide${idx === 0 ? ' active' : ''}" role="group" aria-roledescription="slide">
       <div class="hero-content">
         <div class="hero-text-container">
           ${slide.eyebrowText ? `<span class="hero-eyebrow">${slide.eyebrowText}</span>` : ''}
           <h1 class="hero-title heading">${slide.title}</h1>
-          <p class="hero-subtitle text-content">${slide.subtitle}</p>
+          ${slide.subtitle ? `<p class="hero-subtitle text-content">${slide.subtitle}</p>` : ''}
           <div class="hero-actions">
             <a href="${slide.buttonUrl || '#'}" class="hero-btn hero-btn-primary">${slide.buttonLabel || p.buttonLabel || "Learn More"}</a>
             ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
@@ -455,11 +371,44 @@ export const compileToHbs = (block: BuilderBlock): string => {
         </div>
         ${layout.startsWith('split') && slide.imageUrl ? `
         <div class="hero-image-container">
-          <img src="${slide.imageUrl}" alt="${slide.imageAlt || slide.title}" />
+          <img src="${resolveHbsAsset(slide.imageUrl)}" alt="${slide.imageAlt || slide.title}" />
         </div>
         ` : ''}
       </div>
     </div>`).join('\n');
+
+    if (isDynamic) {
+      slidesHtml = `
+  {{#get "posts" filter="tag:hash-${dynamicTag},tag:${dynamicTag}" include="tags,authors" limit="10"}}
+    {{#if posts}}
+      {{#foreach posts}}
+      <div class="carousel-slide{{#if @first}} active{{/if}}" role="group" aria-roledescription="slide">
+        <div class="hero-content">
+          <div class="hero-text-container">
+            {{#if primary_tag}}<span class="hero-eyebrow">{{primary_tag.name}}</span>{{/if}}
+            <h1 class="hero-title heading">{{title}}</h1>
+            {{#if excerpt}}<p class="hero-subtitle text-content">{{excerpt}}</p>{{/if}}
+            <div class="hero-actions">
+              <a href="{{url}}" class="hero-btn hero-btn-primary">${p.buttonLabel || "Read Article"}</a>
+              ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
+            </div>
+          </div>
+          ${layout.startsWith('split') ? `
+          {{#if feature_image}}
+          <div class="hero-image-container">
+            <img src="{{img_url feature_image size="m"}}" alt="{{title}}" />
+          </div>
+          {{/if}}
+          ` : ''}
+        </div>
+      </div>
+      {{/foreach}}
+    {{else}}
+      ${staticSlidesHtml}
+    {{/if}}
+  {{/get}}`;
+    } else {
+      slidesHtml = staticSlidesHtml;
     }
 
     const scriptHtml = `
@@ -468,7 +417,30 @@ export const compileToHbs = (block: BuilderBlock): string => {
     const root = document.getElementById('${uid}');
     if (!root) return;
     const slides = root.querySelectorAll('.carousel-slide');
-    if (slides.length <= 1) return;
+    const prevBtn = root.querySelector('.carousel-prev');
+    const nextBtn = root.querySelector('.carousel-next');
+    const dotsContainer = root.querySelector('.carousel-dots');
+
+    if (slides.length <= 1) {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      if (dotsContainer) dotsContainer.style.display = 'none';
+      return;
+    }
+
+    let dots = root.querySelectorAll('.carousel-dot');
+    
+    if (dotsContainer && dots.length === 0) {
+      slides.forEach(function(_, i) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('data-index', i);
+        dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+        dotsContainer.appendChild(dot);
+      });
+      dots = root.querySelectorAll('.carousel-dot');
+    }
 
     let currentIndex = 0;
     let timer = null;
@@ -477,15 +449,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
       slides.forEach(function(s, i) {
         s.classList.toggle('active', i === index);
       });
-      const dots = root.querySelectorAll('.carousel-dot');
       dots.forEach(function(d, i) {
         d.classList.toggle('active', i === index);
       });
       currentIndex = index;
     }
-
-    const prevBtn = root.querySelector('.carousel-prev');
-    const nextBtn = root.querySelector('.carousel-next');
 
     if (prevBtn) {
       prevBtn.addEventListener('click', function() {
@@ -503,8 +471,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
       });
     }
 
-    const dots = root.querySelectorAll('.carousel-dot');
-    dots.forEach(function(dot) {
+    const dotsElements = root.querySelectorAll('.carousel-dot');
+    dotsElements.forEach(function(dot) {
       dot.addEventListener('click', function() {
         const idx = parseInt(dot.getAttribute('data-index') || '0', 10);
         showSlide(idx);
@@ -519,7 +487,34 @@ export const compileToHbs = (block: BuilderBlock): string => {
       }, ${autoplayInterval});` : ''}
     }
 
-    ${autoplay ? `resetTimer();` : ''}
+    ${autoplay ? `
+    root.addEventListener('mouseenter', function() {
+      if (timer) clearInterval(timer);
+    });
+    root.addEventListener('mouseleave', function() {
+      resetTimer();
+    });
+    resetTimer();` : ''}
+
+    let touchStartX = 0;
+    root.addEventListener('touchstart', function(e) {
+      if (e.changedTouches && e.changedTouches[0]) {
+        touchStartX = e.changedTouches[0].screenX;
+      }
+    }, { passive: true });
+    root.addEventListener('touchend', function(e) {
+      if (e.changedTouches && e.changedTouches[0]) {
+        const diff = e.changedTouches[0].screenX - touchStartX;
+        if (Math.abs(diff) > 40) {
+          if (diff < 0) {
+            showSlide((currentIndex + 1) % slides.length);
+          } else {
+            showSlide((currentIndex - 1 + slides.length) % slides.length);
+          }
+          resetTimer();
+        }
+      }
+    }, { passive: true });
   })();
 </script>`;
 
@@ -533,7 +528,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
     const dotsHtml = showDots ? `
   <div class="carousel-dots">
-    ${!isDynamic && ((p.slides as HeroSlide[] | undefined) || []).map((_: HeroSlide, idx: number) => `
+    ${isDynamic ? '' : ((p.slides as HeroSlide[] | undefined) || []).map((_: HeroSlide, idx: number) => `
       <button type="button" class="carousel-dot${idx === 0 ? ' active' : ''}" data-index="${idx}" aria-label="Slide ${idx + 1}"></button>
     `).join('')}
   </div>` : '';
@@ -587,7 +582,7 @@ ${commonStyles}
     {{/if}}
       ` : (imageUrl ? `
     <div class="hero-image-container">
-      <img src="${imageUrl}" alt="${imageAlt}" />
+      <img src="${resolveHbsAsset(imageUrl)}" alt="${imageAlt}" />
     </div>
       ` : '')
     ) : ''}

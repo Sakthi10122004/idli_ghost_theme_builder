@@ -1739,10 +1739,61 @@ html.dark-mode .btn-secondary {
 export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   const files: Record<string, string> = {};
 
-  const pkgConfig: Record<string, unknown> = {
+  const customConfig: Record<string, any> = {};
+
+  // Scan all blocks for stats blocks and declare custom settings ONLY for what is actually referenced in templates
+  const statsBlocks = Object.values(doc.blocks).filter((b) => b.type === "stats");
+  if (statsBlocks.length > 0) {
+    customConfig["stats_heading"] = {
+      type: "text",
+      name: "Stats: Heading",
+      description: "Heading displayed in the Stats section",
+      default: "Our impact",
+      group: "homepage"
+    };
+    customConfig["stats_subheading"] = {
+      type: "text",
+      name: "Stats: Subheading",
+      description: "Subheading displayed in the Stats section",
+      default: "What we have achieved so far",
+      group: "homepage"
+    };
+
+    const firstStats = statsBlocks[0];
+    const sp = (firstStats.props || {}) as any;
+    if (sp.general?.heading) customConfig["stats_heading"].default = sp.general.heading;
+    if (sp.general?.subheading) customConfig["stats_subheading"].default = sp.general.subheading;
+
+    const statsList = Array.isArray(sp.stats) ? sp.stats : [];
+    const maxDynamicStats = 6;
+    
+    for (let i = 0; i < maxDynamicStats; i++) {
+      const st = statsList[i] || {};
+      const num = i + 1;
+      customConfig[`stat_${num}_value`] = {
+        type: "text",
+        name: `Stat ${num}: Value`,
+        description: `Value or metric for Stat ${num}`,
+        default: st.value || "",
+        group: "homepage"
+      };
+      customConfig[`stat_${num}_label`] = {
+        type: "text",
+        name: `Stat ${num}: Label`,
+        description: `Description label for Stat ${num}`,
+        default: st.label || "",
+        group: "homepage"
+      };
+    }
+  }
+
+  const pkgConfig: Record<string, any> = {
     posts_per_page: 5,
     card_assets: true
   };
+  if (Object.keys(customConfig).length > 0) {
+    pkgConfig.custom = customConfig;
+  }
 
   // 1. Generate package.json definition
   files["package.json"] = JSON.stringify({

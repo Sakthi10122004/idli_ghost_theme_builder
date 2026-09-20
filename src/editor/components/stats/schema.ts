@@ -1,4 +1,11 @@
-import { BuilderBlock } from "@/types/theme";
+export interface StatItem {
+  id: string;
+  value: string;
+  label: string;
+  icon?: string;
+  iconType?: 'svg' | 'image';
+  imageUrl?: string;
+}
 
 export interface StatsProps {
   general: {
@@ -7,7 +14,7 @@ export interface StatsProps {
     layoutStyle: "row" | "cards" | "bordered" | "split" | "accent-cards" | "divider-grid";
     columns: 2 | 3 | 4;
   };
-  stats: Array<{ id: string; value: string; label: string; icon?: string; iconType?: 'svg' | 'image'; imageUrl?: string }>;
+  stats: StatItem[];
   appearance: { 
     backgroundColor?: string;
     headingColor?: string;
