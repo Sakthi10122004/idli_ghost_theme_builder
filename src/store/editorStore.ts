@@ -336,6 +336,7 @@ interface EditorState {
   
   applyPageTemplate: (pageKey: string, templateId: string) => void;
   updateMetadata: (metadata: Partial<ThemeDocument["metadata"]>) => void;
+  setDocument: (document: ThemeDocument) => void;
   
   undo: () => void;
   redo: () => void;
@@ -721,6 +722,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           ...metadata,
         },
       },
+    };
+  }),
+
+  setDocument: (document) => set((state) => {
+    const historyUpdate = saveToHistory(state);
+    return {
+      ...historyUpdate,
+      document: JSON.parse(JSON.stringify(document)),
+      selectedBlockId: null,
+      activePage: "home",
     };
   }),
 

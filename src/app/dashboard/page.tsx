@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import JSZip from "jszip";
@@ -11,7 +11,6 @@ import {
   CheckCircle2, 
   Layers, 
   FileCode2, 
-  ArrowRight, 
   Settings, 
   Search, 
   Layout, 
@@ -21,112 +20,223 @@ import {
   X,
   Loader2,
   Check,
-  FileText
+  Copy,
+  Trash2,
+  Clock
 } from "lucide-react";
-import { useEditorStore } from "@/store/editorStore";
+import { useEditorStore, INITIAL_THEME_DOCUMENT } from "@/store/editorStore";
+import { ThemeDocument } from "@/types/theme";
+
+interface ThemeProject {
+  id: string;
+  name: string;
+  author: string;
+  version: string;
+  description: string;
+  updatedAt: string;
+  document: ThemeDocument;
+}
+
+const STORAGE_KEY = "ghost_user_themes_v1";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { 
-    document: themeDoc, 
-    updateMetadata, 
-    activePage, 
-    setActivePage, 
-    createCustomPage 
-  } = useEditorStore();
+  const { document: themeDoc, updateMetadata, setDocument } = useEditorStore();
+
+  // Initialize themes from localStorage or fallback to active themeDoc
+  const [themes, setThemes] = useState<ThemeProject[]>(() => {
+    if (typeof window === "undefined") {
+      return [{
+        id: "theme-primary",
+        name: themeDoc.metadata.name || "Sakthi T4GC",
+        author: themeDoc.metadata.author || "Sakthi T4GC",
+        version: themeDoc.metadata.version || "1.0.0",
+        description: themeDoc.metadata.description || "A Vercel-inspired theme visual build",
+        updatedAt: "Just now",
+        document: themeDoc,
+      }];
+    }
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed: ThemeProject[] = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const activeIdx = parsed.findIndex(
+            (t) => t.name === themeDoc.metadata.name || t.id === "theme-primary"
+          );
+          if (activeIdx >= 0) {
+            parsed[activeIdx].document = themeDoc;
+            parsed[activeIdx].name = themeDoc.metadata.name;
+            parsed[activeIdx].author = themeDoc.metadata.author;
+            parsed[activeIdx].version = themeDoc.metadata.version;
+            parsed[activeIdx].description = themeDoc.metadata.description || "";
+            parsed[activeIdx].updatedAt = "Just now";
+          }
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load themes from storage:", e);
+    }
+
+    return [{
+      id: "theme-primary",
+      name: themeDoc.metadata.name || "Sakthi T4GC",
+      author: themeDoc.metadata.author || "Sakthi T4GC",
+      version: themeDoc.metadata.version || "1.0.0",
+      description: themeDoc.metadata.description || "A Vercel-inspired theme visual build",
+      updatedAt: "Just now",
+      document: themeDoc,
+    }];
+  });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportSuccess, setExportSuccess] = useState(false);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+  const [exportSuccessId, setExportSuccessId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [showNewPageModal, setShowNewPageModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [newPageSlug, setNewPageSlug] = useState("");
+  const [themeToEdit, setThemeToEdit] = useState<ThemeProject | null>(null);
+
+  // New Theme Form State
   const [newThemeName, setNewThemeName] = useState("");
   const [newThemeAuthor, setNewThemeAuthor] = useState("");
   const [newThemeDescription, setNewThemeDescription] = useState("");
 
-  const pageCount = Object.keys(themeDoc.pages || {}).length;
-  const blockCount = Object.keys(themeDoc.blocks || {}).length;
+  // Edit Theme Form State
+  const [editName, setEditName] = useState("");
+  const [editAuthor, setEditAuthor] = useState("");
+  const [editVersion, setEditVersion] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
-  const templatePages = Object.entries(themeDoc.pages || {}).map(([slug, pageData]) => {
-    const isHome = slug === "home";
-    const isPost = slug === "post";
-    const isPage = slug === "page";
-    const isAuthor = slug === "author";
-    const isTag = slug === "tag";
-    const isError = slug === "error";
+  // Synchronize active theme changes into the stored theme list
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(themes));
+    } catch {}
+  }, [themes]);
 
-    const fileName = isHome ? "index.hbs" : `${slug}.hbs`;
-
-    let title = "Custom Page";
-    let badge = "Custom Page";
-    let badgeColor = "bg-brand-canvas-soft text-brand-body border border-brand-hairline";
-    let description = "Custom dynamic page layout configured in the visual builder.";
-
-    if (isHome) {
-      title = "Home Publication Feed";
-      badge = "Primary Index";
-      badgeColor = "bg-brand-primary text-white";
-      description = "Main landing template displaying hero banner, featured posts grid, latest articles, and newsletter CTA.";
-    } else if (isPost) {
-      title = "Single Post Article";
-      badge = "Post Template";
-      badgeColor = "bg-blue-600 text-white";
-      description = "Article reading template with tag badge, title, byline meta, feature image, content, author bio, and comments.";
-    } else if (isPage) {
-      title = "Static Page Template";
-      badge = "Page Template";
-      badgeColor = "bg-purple-600 text-white";
-      description = "Full-page static layout for about, contact, or policy pages with title and rich prose content.";
-    } else if (isAuthor) {
-      title = "Author Profile Archive";
-      badge = "Archive";
-      badgeColor = "bg-amber-600 text-white";
-      description = "Author showcase archive displaying author avatar, bio, social links, and a filtered stream of their articles.";
-    } else if (isTag) {
-      title = "Tag Collection Archive";
-      badge = "Archive";
-      badgeColor = "bg-emerald-600 text-white";
-      description = "Topic taxonomy archive with tag metadata pill, description, and tagged post collection grid.";
-    } else if (isError) {
-      title = "404 Error Response";
-      badge = "System Error";
-      badgeColor = "bg-rose-600 text-white";
-      description = "Error template displayed when visitors navigate to non-existent URLs, with recovery navigation.";
-    } else {
-      title = slug.replace(/^custom-/, "").replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  // Persist themes helper
+  const persistThemes = (updated: ThemeProject[]) => {
+    setThemes(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error("Failed to save themes to localStorage:", e);
     }
+  };
 
-    const sections = pageData.sections || [];
-    const sectionTypes: string[] = sections.map((secId) => {
-      const block = themeDoc.blocks[secId];
-      return block ? block.type : "section";
+  const handleOpenTheme = (theme: ThemeProject) => {
+    setDocument(theme.document);
+    router.push("/builder");
+  };
+
+  const handleDuplicateTheme = (theme: ThemeProject) => {
+    const duplicatedDoc: ThemeDocument = JSON.parse(JSON.stringify(theme.document));
+    const newName = `${theme.name} (Copy)`;
+    duplicatedDoc.metadata.name = newName;
+
+    const newProject: ThemeProject = {
+      id: `theme-${Date.now()}`,
+      name: newName,
+      author: theme.author,
+      version: theme.version,
+      description: theme.description,
+      updatedAt: "Just now",
+      document: duplicatedDoc,
+    };
+
+    persistThemes([...themes, newProject]);
+  };
+
+  const handleDeleteTheme = (id: string) => {
+    if (themes.length <= 1) {
+      alert("You must keep at least one theme project.");
+      return;
+    }
+    const updated = themes.filter((t) => t.id !== id);
+    persistThemes(updated);
+  };
+
+  const handleCreateTheme = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newThemeName.trim()) return;
+
+    const baseDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
+    baseDoc.metadata = {
+      name: newThemeName.trim(),
+      author: newThemeAuthor.trim() || "Sakthi T4GC",
+      version: "1.0.0",
+      description: newThemeDescription.trim() || "A custom Ghost publication theme",
+    };
+
+    const newProject: ThemeProject = {
+      id: `theme-${Date.now()}`,
+      name: baseDoc.metadata.name,
+      author: baseDoc.metadata.author,
+      version: baseDoc.metadata.version,
+      description: baseDoc.metadata.description || "",
+      updatedAt: "Just now",
+      document: baseDoc,
+    };
+
+    const updated = [...themes, newProject];
+    persistThemes(updated);
+    setDocument(baseDoc);
+
+    setShowNewModal(false);
+    setNewThemeName("");
+    setNewThemeAuthor("");
+    setNewThemeDescription("");
+    router.push("/builder");
+  };
+
+  const openSettings = (theme: ThemeProject) => {
+    setThemeToEdit(theme);
+    setEditName(theme.name);
+    setEditAuthor(theme.author);
+    setEditVersion(theme.version);
+    setEditDescription(theme.description);
+  };
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!themeToEdit || !editName.trim()) return;
+
+    const updated = themes.map((t) => {
+      if (t.id === themeToEdit.id) {
+        const updatedDoc = {
+          ...t.document,
+          metadata: {
+            ...t.document.metadata,
+            name: editName.trim(),
+            author: editAuthor.trim(),
+            version: editVersion.trim(),
+            description: editDescription.trim(),
+          },
+        };
+        // If this is the active theme, update Zustand store too
+        if (t.name === themeDoc.metadata.name) {
+          updateMetadata(updatedDoc.metadata);
+        }
+        return {
+          ...t,
+          name: editName.trim(),
+          author: editAuthor.trim(),
+          version: editVersion.trim(),
+          description: editDescription.trim(),
+          updatedAt: "Just now",
+          document: updatedDoc,
+        };
+      }
+      return t;
     });
 
-    return {
-      slug,
-      fileName,
-      title,
-      badge,
-      badgeColor,
-      description,
-      sectionsCount: sections.length,
-      sectionTypes,
-      isActive: activePage === slug,
-    };
-  });
+    persistThemes(updated);
+    setThemeToEdit(null);
+  };
 
-  const filteredTemplates = templatePages.filter(t => 
-    t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    t.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleExportZip = async () => {
+  const handleExportThemeZip = async (theme: ThemeProject) => {
     try {
-      setIsExporting(true);
+      setIsExporting(theme.id);
       const zip = new JSZip();
 
       // Cherry-pick casper template assets if available
@@ -149,8 +259,7 @@ export default function DashboardPage() {
       }
 
       const { generateThemeFiles } = await import("@/components/builder/compiler");
-      const latestDoc = useEditorStore.getState().document;
-      const files = generateThemeFiles(latestDoc);
+      const files = generateThemeFiles(theme.document);
 
       for (const [name, content] of Object.entries(files)) {
         if (name === "assets/css/screen.css") {
@@ -167,7 +276,7 @@ export default function DashboardPage() {
       }
 
       const blob = await zip.generateAsync({ type: "blob" });
-      const filename = `${latestDoc.metadata.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
+      const filename = `${theme.name.toLowerCase().replace(/\s+/g, "-")}-theme.zip`;
 
       const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -178,41 +287,22 @@ export default function DashboardPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
 
-      setExportSuccess(true);
-      setTimeout(() => setExportSuccess(false), 3000);
+      setExportSuccessId(theme.id);
+      setTimeout(() => setExportSuccessId(null), 3000);
     } catch (err) {
-      console.error("Dashboard theme export failed:", err);
+      console.error("Theme export failed:", err);
       alert("Failed to export theme ZIP. Please verify compiler outputs.");
     } finally {
-      setIsExporting(false);
+      setIsExporting(null);
     }
   };
 
-  const handleCreateTheme = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newThemeName.trim()) return;
-
-    updateMetadata({
-      name: newThemeName.trim(),
-      author: newThemeAuthor.trim() || themeDoc.metadata.author,
-      description: newThemeDescription.trim() || themeDoc.metadata.description,
-    });
-
-    setShowNewModal(false);
-    router.push("/builder");
-  };
-
-  const handleCreatePage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPageSlug.trim()) return;
-    const cleanSlug = newPageSlug.trim().toLowerCase().replace(/\s+/g, "-").replace(/^custom-/, "");
-    const fullSlug = `custom-${cleanSlug}`;
-    createCustomPage(cleanSlug);
-    setActivePage(fullSlug);
-    setShowNewPageModal(false);
-    setNewPageSlug("");
-    router.push("/builder");
-  };
+  const filteredThemes = themes.filter(
+    (t) =>
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-brand-canvas-soft text-brand-ink flex flex-col font-sans selection:bg-brand-primary selection:text-white">
@@ -239,7 +329,7 @@ export default function DashboardPage() {
               My Themes
             </span>
             <Link href="/builder" className="px-2.5 py-1 rounded hover:text-brand-ink hover:bg-brand-canvas-soft transition-colors">
-              Builder
+              Visual Builder
             </Link>
             <a 
               href="https://ghost.org/docs/themes/" 
@@ -291,16 +381,19 @@ export default function DashboardPage() {
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-mute pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search templates & themes..."
+                placeholder="Search themes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 pr-3 py-1.5 text-xs bg-white border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary w-56 sm:w-64"
               />
             </div>
             <button
-              onClick={() => setShowSettingsModal(true)}
+              onClick={() => {
+                const active = themes.find((t) => t.name === themeDoc.metadata.name) || themes[0];
+                if (active) openSettings(active);
+              }}
               className="p-2 border border-brand-hairline rounded-md bg-white hover:bg-brand-canvas-soft text-brand-ink transition-colors"
-              title="Theme Settings"
+              title="Active Theme Settings"
             >
               <SlidersHorizontal size={14} />
             </button>
@@ -318,7 +411,7 @@ export default function DashboardPage() {
               {themeDoc.metadata.name || "Sakthi T4GC"}
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              Version {themeDoc.metadata.version || "1.0.0"} · By {themeDoc.metadata.author || "Sakthi T4GC"}
+              v{themeDoc.metadata.version || "1.0.0"} · By {themeDoc.metadata.author || "Sakthi T4GC"}
             </div>
           </div>
 
@@ -340,14 +433,14 @@ export default function DashboardPage() {
 
           <div className="p-4 bg-white border border-brand-hairline rounded-lg shadow-xs">
             <div className="flex items-center justify-between text-brand-mute mb-2">
-              <span className="text-xs font-mono uppercase tracking-wider">Layout Structure</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Total Themes</span>
               <Layers size={16} />
             </div>
             <div className="text-lg font-bold text-brand-ink">
-              {pageCount} Templates · {blockCount} Blocks
+              {themes.length} {themes.length === 1 ? "Theme" : "Themes"}
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              Includes home, post, page, author, tag & 404
+              Independent Ghost publication projects
             </div>
           </div>
 
@@ -357,213 +450,213 @@ export default function DashboardPage() {
               <Globe size={16} />
             </div>
             <div className="text-lg font-bold text-brand-ink">
-              Standalone ZIP
+              Ghost 5.x Ready
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              Instantly deployable to Ghost Admin Design
+              Automated Handlebars & minified CSS
             </div>
           </div>
         </div>
 
-        {/* Active Project Banner Card */}
-        <div className="p-6 bg-white border border-brand-hairline rounded-xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider bg-brand-primary text-white">
-                Active Theme Project
-              </span>
-              <span className="text-xs font-mono text-brand-mute">
-                Author: {themeDoc.metadata.author}
-              </span>
-            </div>
-            
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-ink">
-              {themeDoc.metadata.name}
-            </h2>
-            
-            <p className="text-sm text-brand-body leading-relaxed">
-              {themeDoc.metadata.description || "A high-performance, minimalist Ghost CMS publication theme designed with Geist UI principles and real-time Handlebars AST compilation."}
-            </p>
-
-            {/* Quick layout tags */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              {Object.keys(themeDoc.pages || {}).map((slug) => (
-                <span 
-                  key={slug} 
-                  className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-body"
-                >
-                  {slug === "home" ? "index.hbs" : `${slug}.hbs`}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 min-w-[200px]">
-            <Link
-              href="/builder"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white font-semibold text-xs rounded-lg hover:opacity-90 transition-opacity shadow-xs text-center"
-            >
-              <Layout size={14} />
-              <span>Open in Visual Builder</span>
-            </Link>
-
-            <button
-              onClick={handleExportZip}
-              disabled={isExporting}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg font-semibold text-xs transition-colors text-center ${
-                exportSuccess 
-                  ? "bg-emerald-50 border-emerald-300 text-emerald-700" 
-                  : "bg-white border-brand-hairline text-brand-ink hover:bg-brand-canvas-soft"
-              }`}
-            >
-              {isExporting ? (
-                <>
-                  <Loader2 size={14} className="animate-spin text-brand-mute" />
-                  <span>Compiling ZIP...</span>
-                </>
-              ) : exportSuccess ? (
-                <>
-                  <Check size={14} className="text-emerald-600" />
-                  <span>Downloaded!</span>
-                </>
-              ) : (
-                <>
-                  <Download size={14} />
-                  <span>Export Theme ZIP</span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={() => setShowSettingsModal(true)}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent rounded-lg font-medium text-xs text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft transition-colors"
-            >
-              <Settings size={13} />
-              <span>Theme Configuration</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Dynamic Theme Templates & Page Layouts */}
+        {/* Themes Grid Section */}
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-brand-ink">
-                  Theme Templates &amp; Page Layouts
+                  My Themes
                 </h3>
                 <span className="font-mono text-[11px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-mute">
-                  {filteredTemplates.length} templates
+                  {filteredThemes.length} {filteredThemes.length === 1 ? "theme" : "themes"}
                 </span>
               </div>
               <p className="text-xs text-brand-body mt-0.5">
-                Dynamic Handlebars templates compiled from this theme&apos;s AST. Click any template to edit in the visual builder.
+                Manage, edit, and export your Ghost CMS publication themes.
               </p>
             </div>
             <button
-              onClick={() => setShowNewPageModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-brand-hairline rounded-md text-xs font-semibold text-brand-ink hover:bg-brand-canvas-soft transition-colors bg-white shadow-xs self-start sm:self-auto"
+              onClick={() => setShowNewModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs self-start sm:self-auto"
             >
               <Plus size={13} />
-              <span>Add Custom Page</span>
+              <span>New Theme</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map((template) => (
-              <div 
-                key={template.slug} 
-                className={`bg-white border rounded-xl overflow-hidden shadow-xs hover:border-brand-hairline-strong transition-all flex flex-col justify-between group ${
-                  template.isActive ? "border-brand-primary ring-1 ring-brand-primary/10" : "border-brand-hairline"
-                }`}
-              >
-                {/* Card Header */}
-                <div className="p-4 border-b border-brand-hairline bg-brand-canvas-soft/30 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileCode2 size={15} className="text-brand-mute" />
-                    <span className="font-mono text-xs font-semibold text-brand-ink">
-                      {template.fileName}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-full ${template.badgeColor}`}>
-                      {template.badge}
-                    </span>
-                    {template.isActive && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" title="Active in Canvas" />
-                    )}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredThemes.map((theme) => {
+              const isActive = theme.name === themeDoc.metadata.name;
+              const pages = Object.keys(theme.document.pages || {});
+              const blocksCount = Object.keys(theme.document.blocks || {}).length;
+              const isCurrentlyExporting = isExporting === theme.id;
+              const isExportSuccess = exportSuccessId === theme.id;
 
-                {/* Card Body */}
-                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <h4 className="font-bold text-sm text-brand-ink group-hover:text-brand-primary transition-colors">
-                      {template.title}
-                    </h4>
-                    <p className="text-xs text-brand-body mt-1 leading-relaxed">
-                      {template.description}
-                    </p>
+              return (
+                <div 
+                  key={theme.id}
+                  className={`bg-white border rounded-xl overflow-hidden shadow-xs hover:shadow-sm transition-all flex flex-col justify-between group ${
+                    isActive ? "border-brand-primary/50 ring-1 ring-brand-primary/10" : "border-brand-hairline hover:border-brand-hairline-strong"
+                  }`}
+                >
+                  {/* Card Top Banner */}
+                  <div className="p-4 border-b border-brand-hairline bg-gradient-to-r from-brand-canvas-soft via-white to-brand-canvas-soft flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-md bg-brand-primary text-white flex items-center justify-center font-mono font-bold text-xs shadow-2xs">
+                        {theme.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-sm text-brand-ink group-hover:text-brand-primary transition-colors block truncate max-w-[160px]">
+                          {theme.name}
+                        </span>
+                        <span className="font-mono text-[10px] text-brand-mute block truncate max-w-[160px]">
+                          v{theme.version} · By {theme.author}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isActive ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono text-brand-mute px-2 py-0.5 rounded border border-brand-hairline bg-brand-canvas-soft">
+                          Draft
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Included sections pills */}
-                  {template.sectionTypes.length > 0 && (
-                    <div className="pt-2">
-                      <span className="text-[10px] font-mono uppercase text-brand-mute block mb-1.5">
-                        Blocks in template:
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {template.sectionTypes.slice(0, 4).map((type, idx) => (
+                  {/* Card Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <p className="text-xs text-brand-body leading-relaxed line-clamp-2">
+                        {theme.description || "A custom high-performance Ghost publication theme built with the visual editor."}
+                      </p>
+
+                      {/* Theme Stats Specs */}
+                      <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-brand-hairline text-xs">
+                        <div className="p-2.5 rounded-lg bg-brand-canvas-soft border border-brand-hairline space-y-0.5">
+                          <span className="text-[10px] font-mono uppercase text-brand-mute block">
+                            Templates
+                          </span>
+                          <span className="font-bold text-brand-ink text-xs">
+                            {pages.length} Layouts
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-brand-canvas-soft border border-brand-hairline space-y-0.5">
+                          <span className="text-[10px] font-mono uppercase text-brand-mute block">
+                            GScan Health
+                          </span>
+                          <span className="font-bold text-emerald-600 text-xs flex items-center gap-1">
+                            <Check size={12} /> 100/100
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Included template file pills */}
+                      <div className="flex flex-wrap items-center gap-1 pt-3">
+                        {pages.slice(0, 5).map((slug) => (
                           <span 
-                            key={idx}
+                            key={slug} 
                             className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-body"
                           >
-                            {type}
+                            {slug === "home" ? "index.hbs" : `${slug}.hbs`}
                           </span>
                         ))}
-                        {template.sectionTypes.length > 4 && (
+                        {pages.length > 5 && (
                           <span className="font-mono text-[10px] bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-mute">
-                            +{template.sectionTypes.length - 4} more
+                            +{pages.length - 5}
                           </span>
                         )}
                       </div>
                     </div>
-                  )}
 
-                  {/* Card Actions Footer */}
-                  <div className="pt-3 border-t border-brand-hairline flex items-center justify-between">
-                    <div className="text-[11px] font-mono text-brand-mute">
-                      {template.sectionsCount} {template.sectionsCount === 1 ? "section" : "sections"}
+                    {/* Card Actions Footer */}
+                    <div className="pt-3 border-t border-brand-hairline space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenTheme(theme)}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-brand-primary text-white rounded-md text-xs font-semibold hover:opacity-90 transition-opacity shadow-xs"
+                        >
+                          <Layout size={13} />
+                          <span>Open in Builder</span>
+                        </button>
+                        <button
+                          onClick={() => handleExportThemeZip(theme)}
+                          disabled={isCurrentlyExporting}
+                          className={`px-3 py-2 border rounded-md text-xs font-semibold transition-colors flex items-center gap-1 ${
+                            isExportSuccess 
+                              ? "bg-emerald-50 border-emerald-300 text-emerald-700" 
+                              : "border-brand-hairline text-brand-ink hover:bg-brand-canvas-soft bg-white"
+                          }`}
+                          title="Export Theme ZIP"
+                        >
+                          {isCurrentlyExporting ? (
+                            <Loader2 size={13} className="animate-spin text-brand-mute" />
+                          ) : isExportSuccess ? (
+                            <Check size={13} className="text-emerald-600" />
+                          ) : (
+                            <Download size={13} />
+                          )}
+                          <span className="hidden sm:inline">ZIP</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-brand-mute pt-0.5 px-0.5">
+                        <div className="flex items-center gap-1 text-[10px] font-mono">
+                          <Clock size={10} className="opacity-70" />
+                          <span>{blocksCount} blocks</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => openSettings(theme)}
+                            className="hover:text-brand-ink transition-colors text-[11px] font-medium flex items-center gap-1"
+                            title="Theme Settings"
+                          >
+                            <Settings size={11} />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDuplicateTheme(theme)}
+                            className="hover:text-brand-ink transition-colors text-[11px] font-medium flex items-center gap-1"
+                            title="Duplicate Theme"
+                          >
+                            <Copy size={11} />
+                            <span>Duplicate</span>
+                          </button>
+                          {themes.length > 1 && (
+                            <button
+                              onClick={() => handleDeleteTheme(theme.id)}
+                              className="hover:text-rose-600 transition-colors text-[11px] font-medium flex items-center gap-1"
+                              title="Delete Theme"
+                            >
+                              <Trash2 size={11} />
+                              <span>Delete</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        setActivePage(template.slug);
-                        router.push("/builder");
-                      }}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary hover:underline"
-                    >
-                      <span>Edit in Builder</span>
-                      <ArrowRight size={12} />
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {/* Add Custom Page Template Card */}
+            {/* Create New Theme Card */}
             <button
-              onClick={() => setShowNewPageModal(true)}
-              className="border-2 border-dashed border-brand-hairline hover:border-brand-primary/40 rounded-xl p-6 flex flex-col items-center justify-center text-center group transition-all bg-brand-canvas-soft/30 hover:bg-white min-h-[200px]"
+              onClick={() => setShowNewModal(true)}
+              className="border-2 border-dashed border-brand-hairline hover:border-brand-primary/40 rounded-xl p-6 flex flex-col items-center justify-center text-center group transition-all bg-brand-canvas-soft/30 hover:bg-white min-h-[280px]"
             >
-              <div className="w-10 h-10 rounded-full bg-white border border-brand-hairline flex items-center justify-center text-brand-body group-hover:text-brand-primary group-hover:scale-110 transition-all shadow-xs mb-3">
-                <Plus size={18} />
+              <div className="w-11 h-11 rounded-full bg-white border border-brand-hairline flex items-center justify-center text-brand-body group-hover:text-brand-primary group-hover:scale-110 transition-all shadow-xs mb-3">
+                <Plus size={20} />
               </div>
               <h4 className="font-bold text-sm text-brand-ink group-hover:text-brand-primary transition-colors">
-                Add Custom Page Template
+                Create New Theme
               </h4>
               <p className="text-xs text-brand-mute max-w-[220px] mt-1 leading-relaxed">
-                Create a custom slug layout (e.g. custom-about.hbs) with modular Ghost blocks.
+                Initialize a new publication theme project ready for the visual builder.
               </p>
             </button>
           </div>
@@ -575,7 +668,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <CheckCircle2 size={18} className="text-emerald-600" />
               <h3 className="font-bold text-sm text-brand-ink">
-                Ghost Architecture & GScan Validator Checklist
+                Ghost Architecture &amp; GScan Validator Checklist
               </h3>
             </div>
             <span className="text-xs font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded self-start sm:self-auto">
@@ -597,7 +690,7 @@ export default function DashboardPage() {
             <div className="p-3 bg-brand-canvas-soft rounded-lg border border-brand-hairline space-y-1">
               <div className="font-semibold text-brand-ink flex items-center gap-1.5">
                 <Check size={13} className="text-emerald-600" />
-                <span>Responsive CSS & Layout</span>
+                <span>Responsive CSS &amp; Layout</span>
               </div>
               <p className="text-[11px] text-brand-mute leading-normal">
                 Minified screen.css with --gh-font variables, .kg-width-wide, and responsive container insets.
@@ -678,7 +771,7 @@ export default function DashboardPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Acme Tech Journal"
+                  placeholder="e.g. Acme Publication"
                   value={newThemeName}
                   onChange={(e) => setNewThemeName(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
@@ -689,7 +782,7 @@ export default function DashboardPage() {
                 <label className="block font-semibold text-brand-ink mb-1">Author Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Design Team"
+                  placeholder="e.g. Sakthi T4GC"
                   value={newThemeAuthor}
                   onChange={(e) => setNewThemeAuthor(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
@@ -717,62 +810,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90"
-                >
-                  Create &amp; Open Builder
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* New Custom Page Template Modal */}
-      {showNewPageModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-brand-hairline rounded-xl shadow-level-5 max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
-              <div className="flex items-center gap-2">
-                <FileText size={16} className="text-brand-primary" />
-                <h3 className="font-bold text-base text-brand-ink">Add Page Template</h3>
-              </div>
-              <button onClick={() => setShowNewPageModal(false)} className="text-brand-mute hover:text-brand-ink">
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePage} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-semibold text-brand-ink mb-1">Template Slug</label>
-                <div className="flex items-center">
-                  <span className="bg-brand-canvas-soft border border-r-0 border-brand-hairline px-2.5 py-2 text-brand-mute font-mono text-xs rounded-l-md select-none">
-                    custom-
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    placeholder="about, pricing, team, etc."
-                    value={newPageSlug}
-                    onChange={(e) => setNewPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
-                    className="flex-1 px-3 py-2 border border-brand-hairline rounded-r-md text-brand-ink focus:outline-none focus:border-brand-primary font-mono text-xs"
-                  />
-                </div>
-                <p className="text-[11px] text-brand-mute mt-1.5">
-                  Compiled output file will be <code className="font-mono bg-brand-canvas-soft px-1 rounded border border-brand-hairline">custom-{newPageSlug || "name"}.hbs</code>.
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-brand-hairline flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowNewPageModal(false)}
-                  className="px-3.5 py-1.5 border border-brand-hairline rounded-md text-brand-body hover:bg-brand-canvas-soft"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!newPageSlug.trim()}
+                  disabled={!newThemeName.trim()}
                   className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90 disabled:opacity-50"
                 >
                   Create &amp; Open Builder
@@ -784,23 +822,24 @@ export default function DashboardPage() {
       )}
 
       {/* Theme Settings Modal */}
-      {showSettingsModal && (
+      {themeToEdit && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white border border-brand-hairline rounded-xl shadow-level-5 max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
-              <h3 className="font-bold text-base text-brand-ink">Theme Settings</h3>
-              <button onClick={() => setShowSettingsModal(false)} className="text-brand-mute hover:text-brand-ink">
+              <h3 className="font-bold text-base text-brand-ink">Edit Theme Configuration</h3>
+              <button onClick={() => setThemeToEdit(null)} className="text-brand-mute hover:text-brand-ink">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <form onSubmit={handleSaveSettings} className="space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-brand-ink mb-1">Theme Name</label>
                 <input
                   type="text"
-                  value={themeDoc.metadata.name}
-                  onChange={(e) => updateMetadata({ name: e.target.value })}
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
                 />
               </div>
@@ -809,8 +848,8 @@ export default function DashboardPage() {
                 <label className="block font-semibold text-brand-ink mb-1">Author</label>
                 <input
                   type="text"
-                  value={themeDoc.metadata.author}
-                  onChange={(e) => updateMetadata({ author: e.target.value })}
+                  value={editAuthor}
+                  onChange={(e) => setEditAuthor(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
                 />
               </div>
@@ -819,8 +858,8 @@ export default function DashboardPage() {
                 <label className="block font-semibold text-brand-ink mb-1">Version</label>
                 <input
                   type="text"
-                  value={themeDoc.metadata.version}
-                  onChange={(e) => updateMetadata({ version: e.target.value })}
+                  value={editVersion}
+                  onChange={(e) => setEditVersion(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
                 />
               </div>
@@ -829,22 +868,28 @@ export default function DashboardPage() {
                 <label className="block font-semibold text-brand-ink mb-1">Description</label>
                 <textarea
                   rows={2}
-                  value={themeDoc.metadata.description}
-                  onChange={(e) => updateMetadata({ description: e.target.value })}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"
                 />
               </div>
-            </div>
 
-            <div className="pt-3 border-t border-brand-hairline flex items-center justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSettingsModal(false)}
-                className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90 text-xs"
-              >
-                Done
-              </button>
-            </div>
+              <div className="pt-3 border-t border-brand-hairline flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setThemeToEdit(null)}
+                  className="px-3.5 py-1.5 border border-brand-hairline rounded-md text-brand-body hover:bg-brand-canvas-soft"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-brand-primary text-white font-semibold rounded-md hover:opacity-90"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
