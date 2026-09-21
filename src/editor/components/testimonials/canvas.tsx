@@ -51,6 +51,8 @@ export const CanvasElement = ({
       ? "grid-1"
       : deviceMode === "tablet" && configuredLayout === "grid-3"
       ? "grid-2"
+      : deviceMode === "tablet" && configuredLayout === "grid-2"
+      ? "grid-1"
       : configuredLayout;
 
   // Dynamic posts mockup preview for builder canvas
@@ -101,42 +103,33 @@ export const CanvasElement = ({
 
   const displayItems = useDynamicData ? dynamicItems : items;
 
-  // Flexible Auto-Centering Layout
+  // CSS Grid Auto-Centering Layout based on item count and device mode
   const getContainerStyle = (): React.CSSProperties => {
+    let cols = 3;
+    let maxWidth = "1200px";
+
+    if (effectiveLayout === "grid-1" || displayItems.length === 1) {
+      cols = 1;
+      maxWidth = "680px";
+    } else if (effectiveLayout === "grid-2" || displayItems.length === 2) {
+      cols = 2;
+      maxWidth = "900px";
+    }
+
     return {
-      display: "flex",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      alignItems: "stretch",
+      display: "grid",
+      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       gap: "1.25rem",
       width: "100%",
-      maxWidth: "1200px",
+      maxWidth,
       margin: "0 auto",
       boxSizing: "border-box",
     };
   };
 
   const getCardItemStyle = (itemCount: number): React.CSSProperties => {
-    if (effectiveLayout === "grid-1" || itemCount === 1 || deviceMode === "mobile") {
-      return {
-        flex: "0 1 680px",
-        maxWidth: "680px",
-        width: "100%",
-        boxSizing: "border-box",
-      };
-    }
-    if (effectiveLayout === "grid-2" || itemCount === 2) {
-      return {
-        flex: "1 1 420px",
-        maxWidth: "460px",
-        minWidth: "280px",
-        boxSizing: "border-box",
-      };
-    }
     return {
-      flex: "1 1 320px",
-      maxWidth: "380px",
-      minWidth: "280px",
+      width: "100%",
       boxSizing: "border-box",
     };
   };

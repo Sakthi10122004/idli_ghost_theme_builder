@@ -56,6 +56,9 @@ export const CanvasElement = ({ block }: {
   const opacity = block.styles?.bgOverlayOpacity !== undefined ? (block.styles.bgOverlayOpacity as number) : 0.6;
   const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
 
+  const deviceMode = useEditorStore((s) => s.deviceMode) || "desktop";
+  const isMobile = deviceMode === "mobile";
+
   const dynamicStyle = showCover
     ? { backgroundColor: "#111", backgroundImage: `linear-gradient(${overlay}, ${overlay})` }
     : bgStyle;
@@ -85,14 +88,14 @@ export const CanvasElement = ({ block }: {
       break;
     case "split-left":
       wrapperClasses += " text-left";
-      contentClasses += " flex-col md:flex-row items-center gap-10";
-      textContainerClasses += " items-start md:w-1/2 flex-shrink-0";
+      contentClasses += isMobile ? " flex-col items-center gap-8" : " flex-row items-center gap-10";
+      textContainerClasses += isMobile ? " items-start w-full" : " items-start w-1/2 flex-shrink-0";
       buttonGroupClasses += " justify-start";
       break;
     case "split-right":
       wrapperClasses += " text-left";
-      contentClasses += " flex-col md:flex-row-reverse items-center gap-10";
-      textContainerClasses += " items-start md:w-1/2 flex-shrink-0";
+      contentClasses += isMobile ? " flex-col items-center gap-8" : " flex-row-reverse items-center gap-10";
+      textContainerClasses += isMobile ? " items-start w-full" : " items-start w-1/2 flex-shrink-0";
       buttonGroupClasses += " justify-start";
       break;
     case "center":
@@ -182,11 +185,11 @@ export const CanvasElement = ({ block }: {
               </span>
             )}
 
-            <h1 className={`text-[2.5rem] md:text-[3.25rem] font-sans font-bold leading-[1.12] tracking-[-0.02em] break-words max-w-full transition-all duration-300 ${textColorClass}`}>
+            <h1 className={`${isMobile ? "text-4xl" : "text-[3.25rem]"} font-sans font-bold leading-[1.12] tracking-[-0.02em] break-words max-w-full transition-all duration-300 ${textColorClass}`}>
               {isDynamic ? (safeIndex === 0 ? "Featured Story from #" + dynamicTag : current.title || "Dynamic Post Title") : (current.title || "Slide Title")}
             </h1>
 
-            <p className={`text-base md:text-lg leading-relaxed max-w-[640px] break-words transition-all duration-300 ${subtitleColorClass}`}>
+            <p className={`${isMobile ? "text-base" : "text-lg"} leading-relaxed max-w-[640px] break-words transition-all duration-300 ${subtitleColorClass}`}>
               {current.subtitle || "Slide description and accompanying editorial copy."}
             </p>
 
@@ -220,13 +223,13 @@ export const CanvasElement = ({ block }: {
 
           {/* Slide Visual / Image Container for Split Layouts */}
           {layout.startsWith("split") && (
-            <div className="w-full md:w-1/2 flex justify-center">
+            <div className={`w-full ${isMobile ? "mt-4" : "w-1/2"} flex justify-center`}>
               {slideImg ? (
                 <div className="w-full relative rounded-xl overflow-hidden shadow-xl border border-white/10">
                   <img
                     src={slideImg}
                     alt={current.imageAlt || current.title || "Slide Image"}
-                    className="w-full h-auto aspect-video md:aspect-[16/10] object-cover"
+                    className={`w-full h-auto object-cover ${isMobile ? "aspect-video" : "aspect-[16/10]"}`}
                   />
                 </div>
               ) : isDynamic ? (
@@ -245,7 +248,7 @@ export const CanvasElement = ({ block }: {
         </div>
 
         {/* Carousel Arrow Controls */}
-        {showArrows && slides.length > 1 && (
+        {showArrows && slides.length > 1 && !isMobile && (
           <>
             <button
               type="button"
@@ -330,10 +333,10 @@ export const CanvasElement = ({ block }: {
               {eyebrowText}
             </span>
           )}
-          <h1 className={`text-[2.75rem] md:text-[3.5rem] font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
+          <h1 className={`${isMobile ? "text-4xl" : "text-[3.5rem]"} font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
             {useSiteData ? "{{@site.title}}" : (title || "Build beautiful layouts.")}
           </h1>
-          <p className={`text-lg md:text-xl leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
+          <p className={`${isMobile ? "text-lg" : "text-xl"} leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
             {useSiteData ? "{{@site.description}}" : (subtitle || "A visual workspace built directly on layout AST compilation logic, adhering strictly to Geist presets.")}
           </p>
           <div className={buttonGroupClasses}>
@@ -365,7 +368,7 @@ export const CanvasElement = ({ block }: {
         </div>
 
         {layout.startsWith("split") && (
-          <div className="w-full md:w-1/2 flex justify-center">
+          <div className={`w-full ${isMobile ? "mt-4" : "w-1/2"} flex justify-center`}>
             {useSiteData ? (
               <div className="w-full aspect-video bg-[#222] rounded-lg border-2 border-dashed border-[#444] flex flex-col gap-2 items-center justify-center text-gray-400 text-sm font-mono shadow-lg">
                 <span>{"{{@site.cover_image}}"}</span>

@@ -103,7 +103,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   if (layoutStyle === "carousel") {
     if (autoScroll) {
       if (useDynamicData) {
-        contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+        contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
         <div class="gallery-carousel-wrapper">
           <div class="gallery-carousel-track gallery-layout-carousel">
             ${ghostItemLoop("gallery-carousel-item")}
@@ -126,7 +126,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     } else {
       // Manual scroll
       if (useDynamicData) {
-        contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+        contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
         <div class="gallery-carousel-manual${items.length <= 2 ? " gallery-carousel-center" : ""}">
           ${ghostItemLoop("gallery-carousel-item")}
         </div>
@@ -157,7 +157,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       };
 
       if (useDynamicData) {
-        contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+        contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
         <div class="gallery-masonry-autoscroll">
           ${col("up")}
           ${col("down")}
@@ -175,7 +175,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       }
     } else {
       if (useDynamicData) {
-        contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+        contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
         <div class="gallery-items gallery-layout-masonry">
           ${ghostItemLoop("gallery-item")}
         </div>
@@ -192,7 +192,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // ───────────────────────────── GRID ─────────────────────────────
   } else if (layoutStyle === "grid") {
     if (useDynamicData) {
-      contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+      contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
       <div class="gallery-items gallery-layout-grid">
         ${ghostItemLoop("gallery-item")}
       </div>
@@ -208,7 +208,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // ───────────────────────────── LIST ─────────────────────────────
   } else if (layoutStyle === "list") {
     if (useDynamicData) {
-      contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+      contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
       <div class="gallery-layout-list">
         {{#foreach posts}}
           {{#if feature_image}}
@@ -255,7 +255,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // ───────────────────────────── BENTO ─────────────────────────────
   } else if (layoutStyle === "bento") {
     if (useDynamicData) {
-      contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+      contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
       <div class="gallery-layout-bento">
         {{#foreach posts}}
           {{#if feature_image}}
@@ -303,7 +303,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // ───────────────────────────── COLLAGE ─────────────────────────────
   } else if (layoutStyle === "collage") {
     if (useDynamicData) {
-      contentMarkup = `{{#get "posts" filter="tag:${dynamicTag}" limit="100"}}
+      contentMarkup = `{{#get "posts" filter="tags:${dynamicTag}" limit="100"}}
       <div class="gallery-layout-collage">
         {{#foreach posts}}
           {{#if feature_image}}

@@ -145,7 +145,7 @@ export const compileToHbs = (block: BuilderBlock) => {
           </div>
         </div>
         ${showSocialLink ? `
-        <a href="{{#if canonical_url}}{{canonical_url}}{{else if primary_author.website}}{{primary_author.website}}{{else if primary_author.twitter}}{{twitter_url primary_author.twitter}}{{else if primary_author.facebook}}{{facebook_url primary_author.facebook}}{{else}}{{url}}{{/if}}" target="_blank" rel="noopener noreferrer" class="gh-social-link" title="Website / Profile" {{#unless canonical_url}}{{#unless primary_author.website}}{{#unless primary_author.twitter}}{{#unless primary_author.facebook}}style="display:none;"{{/unless}}{{/unless}}{{/unless}}{{/unless}}>
+        <a href="{{#if canonical_url}}{{canonical_url}}{{else if primary_author.website}}{{primary_author.website}}{{else if primary_author.twitter}}{{#primary_author}}{{social_url type="twitter"}}{{/primary_author}}{{else if primary_author.facebook}}{{#primary_author}}{{social_url type="facebook"}}{{/primary_author}}{{else}}{{url}}{{/if}}" target="_blank" rel="noopener noreferrer" class="gh-social-link" title="Website / Profile" {{#unless canonical_url}}{{#unless primary_author.website}}{{#unless primary_author.twitter}}{{#unless primary_author.facebook}}style="display:none;"{{/unless}}{{/unless}}{{/unless}}{{/unless}}>
           ${getSocialIconSvg("website")}
         </a>` : ""}
       </div>
@@ -157,7 +157,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     const cleanTag = dynamicTag.startsWith("#") ? dynamicTag.slice(1) : dynamicTag;
 
     contentHtml = `
-  {{#get "posts" filter="tag:[${cleanTag},${cleanTag}s]" limit="${dynamicLimit}" include="authors,tags"}}
+  {{#get "posts" filter="tags:${cleanTag}" limit="${dynamicLimit}" include="authors,tags"}}
   <div class="gh-testimonials-container ${containerClass}">
     {{#foreach posts}}
       ${dynamicCardTemplate}
@@ -372,15 +372,23 @@ export const compileToHbs = (block: BuilderBlock) => {
       margin: 0;
     }
     #${uid} .gh-testimonials-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: stretch;
+      display: grid;
       gap: 1.5rem;
       width: 100%;
-      max-width: 1200px;
       margin: 0 auto;
       box-sizing: border-box;
+    }
+    #${uid} .gh-testimonials-grid-1 {
+      grid-template-columns: 1fr;
+      max-width: 680px;
+    }
+    #${uid} .gh-testimonials-grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 900px;
+    }
+    #${uid} .gh-testimonials-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 1200px;
     }
     #${uid} .gh-testimonial-card {
       position: relative;
@@ -390,9 +398,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       border-radius: 14px;
       padding: 1.5rem;
       box-sizing: border-box;
-      flex: 1 1 320px;
-      max-width: 380px;
-      min-width: 280px;
+      width: 100%;
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.2s ease;
     }
     #${uid} .gh-testimonial-card:hover {
@@ -409,29 +415,28 @@ export const compileToHbs = (block: BuilderBlock) => {
         : ""
       }
     }
-    /* Auto-center and balance for 1 post */
-    #${uid} .gh-testimonials-grid-1 .gh-testimonial-card,
-    #${uid} .gh-testimonials-container > .gh-testimonial-card:only-child {
-      flex: 0 1 680px;
-      max-width: 680px;
-      width: 100%;
+    /* Balanced equal columns for 2 posts in a 3 grid layout fallback */
+    #${uid} .gh-testimonials-grid-3:has(> .gh-testimonial-card:nth-child(2):last-child) {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 900px;
     }
-    /* Balanced equal columns for 2 posts */
-    #${uid} .gh-testimonials-grid-2 .gh-testimonial-card,
-    #${uid} .gh-testimonials-container:has(> .gh-testimonial-card:nth-child(2):last-child) .gh-testimonial-card {
-      flex: 1 1 420px;
-      max-width: 460px;
+    /* Auto-center for 1 post fallback */
+    #${uid} .gh-testimonials-container:has(> .gh-testimonial-card:only-child) {
+      grid-template-columns: 1fr !important;
+      max-width: 680px !important;
+    }
+    @media (max-width: 1024px) {
+      #${uid} .gh-testimonials-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 900px;
+      }
     }
     @media (max-width: 768px) {
-      #${uid} .gh-testimonials-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 1.25rem;
-      }
-      #${uid} .gh-testimonial-card {
-        flex: 1 1 100% !important;
-        max-width: 100% !important;
-        width: 100% !important;
+      #${uid} .gh-testimonials-container,
+      #${uid} .gh-testimonials-grid-3,
+      #${uid} .gh-testimonials-grid-2 {
+        grid-template-columns: 1fr;
+        max-width: 680px;
       }
       #${uid} .gh-testimonials-title {
         font-size: 1.5rem;
