@@ -1,0 +1,27 @@
+
+<article class="gh-post-card {{post_class}}">
+  <a class="gh-post-card-link" href="{{url}}">
+    {{#if feature_image}}
+    <div class="gh-post-card-image">
+      <img
+        srcset="{{img_url feature_image size="s"}} 300w,
+                {{img_url feature_image size="m"}} 600w,
+                {{img_url feature_image size="l"}} 1000w,
+                {{img_url feature_image size="xl"}} 2000w"
+        sizes="(max-width: 1000px) 400px, 800px"
+        src="{{img_url feature_image size="m"}}"
+        alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}"
+        loading="lazy"
+      />
+    </div>
+    {{/if}}
+    <div class="gh-post-card-content">
+      <h2 class="gh-post-card-title">{{title}}</h2>
+      <p class="gh-post-card-excerpt">{{excerpt}}</p>
+      <footer class="gh-post-card-meta">
+        <span class="gh-post-card-date"><time datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM YYYY"}}</time></span>
+        <span class="gh-post-card-reading-time">{{reading_time}}</span>
+      </footer>
+    </div>
+  </a>
+</article>

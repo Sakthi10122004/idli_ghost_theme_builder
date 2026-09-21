@@ -1,0 +1,220 @@
+{{!< default}}
+
+{{#author}}
+<header class="author-header" style="text-align: center; padding: 4rem 1rem 2.5rem 1rem; max-width: 800px; margin: 0 auto;">
+  {{#if profile_image}}
+  <div style="width: 96px; height: 96px; border-radius: 50%; overflow: hidden; margin: 0 auto 1.25rem auto; border: 2px solid var(--color-hairline, #ebebeb); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <img src="{{img_url profile_image size="m"}}" alt="{{name}}" style="width: 100%; height: 100%; object-fit: cover;" />
+  </div>
+  {{/if}}
+  <h1 class="author-name" style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em;">{{name}}</h1>
+  {{#if bio}}
+  <p class="author-bio" style="font-size: 1.125rem; line-height: 1.6; color: var(--color-muted, #666); max-width: 600px; margin: 0 auto 1.25rem auto;">{{bio}}</p>
+  {{/if}}
+  <div class="author-meta" style="font-size: 0.8125rem; color: var(--color-muted, #666); display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; align-items: center;">
+    {{#if location}}<span>📍 {{location}}</span>{{/if}}
+    {{#if website}}<a href="{{website}}" target="_blank" rel="noopener" style="color: var(--color-primary);">🔗 Website</a>{{/if}}
+    {{#if twitter}}<a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Twitter</a>{{/if}}
+    {{#if facebook}}<a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Facebook</a>{{/if}}
+    <span style="font-family: monospace; background: var(--color-bg, #fafafa); border: 1px solid var(--color-hairline, #ebebeb); padding: 0.2rem 0.5rem; border-radius: 4px;">{{plural count.posts empty="0 posts" singular="% post" plural="% posts"}}</span>
+  </div>
+</header>
+{{/author}}
+<style>
+  #post-grid-post-grid-sec .post-grid-title {
+    font-size: 2rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-fg);
+    margin: 0 0 2rem 0;
+    text-align: center;
+  }
+  #post-grid-post-grid-sec .post-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(100% / 3 - 2rem), 1fr));
+    gap: 2rem;
+  }
+  #post-grid-post-grid-sec .magazine-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  @media (min-width: 992px) {
+    #post-grid-post-grid-sec .magazine-layout {
+      grid-template-columns: 7fr 5fr;
+      gap: 3rem;
+    }
+  }
+  #post-grid-post-grid-sec .magazine-list-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  #post-grid-post-grid-sec .gh-post-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  #post-grid-post-grid-sec .magazine-list-item {
+    flex-direction: row;
+    gap: 1rem;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  #post-grid-post-grid-sec .magazine-list-item .gh-post-card-link {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  #post-grid-post-grid-sec .gh-post-card:hover, #post-grid-post-grid-sec .magazine-list-item:hover {
+    transform: translateY(-4px);
+  }
+  #post-grid-post-grid-sec .gh-post-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  #post-grid-post-grid-sec .gh-post-card-image {
+    width: 100%;
+    overflow: hidden;
+  }
+  #post-grid-post-grid-sec .gh-post-card-image-feature {
+    aspect-ratio: 16 / 9;
+  }
+  #post-grid-post-grid-sec .gh-post-card-image-list {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+  #post-grid-post-grid-sec .gh-post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #post-grid-post-grid-sec .gh-post-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1.5rem;
+    justify-content: center;
+  }
+  #post-grid-post-grid-sec .magazine-list-item .gh-post-card-content {
+    padding: 1rem;
+    padding-left: 0;
+  }
+  #post-grid-post-grid-sec .gh-post-card-tag {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+  #post-grid-post-grid-sec .gh-post-card-title {
+    font-family: var(--font-heading);
+    margin: 0 0 0.5rem 0;
+  }
+  #post-grid-post-grid-sec .gh-post-card-title-feature {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+  #post-grid-post-grid-sec .gh-post-card-title-list {
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+  #post-grid-post-grid-sec .gh-post-card-excerpt {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  #post-grid-post-grid-sec .gh-post-card-excerpt-list {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  #post-grid-post-grid-sec .post-grid-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  #post-grid-post-grid-sec .post-grid-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    background: var(--color-primary);
+    color: #ffffff;
+  }
+  #post-grid-post-grid-sec:hover .post-grid-button {
+    opacity: 0.9;
+  }
+</style>
+<div id="post-grid-post-grid-sec" class="post-feed-wrapper outer " style="background-color: #ffffff; padding-top: 4rem; padding-bottom: 4rem;">
+  <div class="inner" style="max-width: 100%">
+    <h2 class="post-grid-title">Latest Stories</h2>
+    
+    <div class="post-grid-inner-container">
+      
+      <div class="post-feed">
+        {{#foreach posts}}
+        <article class="gh-post-card {{post_class}}">
+          
+    <a class="gh-post-card-link" href="{{url}}">
+      
+      {{#if feature_image}}
+      <div class="gh-post-card-image gh-post-card-image-list">
+        <img srcset="{{img_url feature_image size="s"}} 300w,
+                     {{img_url feature_image size="m"}} 600w,
+                     {{img_url feature_image size="l"}} 1000w,
+                     {{img_url feature_image size="xl"}} 2000w"
+             sizes="(max-width: 1000px) 400px, 800px"
+             src="{{img_url feature_image size="m"}}"
+             alt="{{title}}"
+             loading="lazy"
+        />
+      </div>
+      {{/if}}
+      
+      <div class="gh-post-card-content">
+        
+        {{#if primary_tag}}
+          <span class="gh-post-card-tag">{{primary_tag.name}}</span>
+        {{/if}}
+        
+        <h3 class="gh-post-card-title gh-post-card-title-list">{{title}}</h3>
+        
+        <p class="gh-post-card-excerpt gh-post-card-excerpt-list">{{excerpt words="20"}}</p>
+        
+      </div>
+    </a>
+  
+        </article>
+        {{/foreach}}
+      </div>
+      
+    </div>
+    
+    
+  </div>
+</div>

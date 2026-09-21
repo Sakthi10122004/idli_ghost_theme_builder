@@ -1,0 +1,380 @@
+{{!< default}}
+
+{{#post}}
+<article class="article {{post_class}}">
+<header class="article-header gh-canvas">
+  {{#if primary_tag}}
+  <a href="{{primary_tag.url}}" class="article-tag">{{primary_tag.name}}</a>
+  {{/if}}
+  {{#if featured}}
+  <span class="article-featured-flag">Featured</span>
+  {{/if}}
+  <h1 class="article-title">{{title}}</h1>
+  {{#if custom_excerpt}}
+  <p class="article-excerpt">{{custom_excerpt}}</p>
+  {{/if}}
+  <div class="article-byline">
+    {{#foreach authors}}
+      <img src="{{profile_image}}" alt="{{name}}" class="author-avatar-sm author-avatar" />
+      <span class="author-name">{{name}}</span>{{#unless @last}}, {{/unless}}
+    {{/foreach}}
+    <time class="article-date" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMMM, YYYY"}}</time>
+    <span class="article-reading-time">{{reading_time}}</span>
+  </div>
+  {{#if feature_image}}
+    <figure class="article-image">
+      <img src="{{img_url feature_image size="xl"}}" alt="{{title}}" />
+    </figure>
+  {{/if}}
+</header>
+<section class="gh-content gh-canvas">
+  {{content}}
+</section>
+</article>
+{{#foreach authors}}
+<section class="author-card">
+  {{#if profile_image}}
+  <div class="author-card-avatar">
+    <img src="{{img_url profile_image size="s"}}" alt="{{name}}" />
+  </div>
+  {{else}}
+  <div class="author-card-avatar author-card-initial">
+    <span>{{name}}</span>
+  </div>
+  {{/if}}
+  <div class="author-card-content">
+    <span class="author-card-eyebrow">Written by</span>
+    <h4 class="author-card-name"><a href="{{url}}">{{name}}</a></h4>
+    {{#if bio}}<p class="author-card-bio">{{bio}}</p>{{/if}}
+  </div>
+</section>
+{{/foreach}}
+<style>
+  #post-nav-post-nav-sec {
+    width: 100%;
+    max-width: var(--container-width, 1200px);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2.5rem 1.5rem;
+    border-top: 1px solid var(--color-hairline, #ebebeb);
+    box-sizing: border-box;
+  }
+  @media (max-width: 640px) {
+    #post-nav-post-nav-sec {
+      padding: 1.5rem 1rem;
+    }
+  }
+  #post-nav-post-nav-sec .gh-post-nav-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    #post-nav-post-nav-sec .gh-post-nav-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    #post-nav-post-nav-sec .gh-post-nav-next:only-child {
+      grid-column: 2;
+    }
+  }
+  #post-nav-post-nav-sec .gh-post-nav-card {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-hairline, #ebebeb);
+    border-radius: var(--radius-md, 8px);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    box-sizing: border-box;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-card:hover {
+    border-color: var(--color-primary, #171717);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  #post-nav-post-nav-sec .gh-post-nav-next {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-thumb {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-sm, 4px);
+    overflow: hidden;
+    border: 1px solid var(--color-hairline, #ebebeb);
+    flex-shrink: 0;
+    background-color: var(--color-canvas-soft, #f5f5f5);
+  }
+  #post-nav-post-nav-sec .gh-post-nav-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-content {
+    flex: 1;
+    min-width: 0;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.625rem;
+    font-family: var(--font-mono, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted, #737373);
+    font-weight: 600;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-fg, #171717);
+    margin: 0.25rem 0 0 0;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #post-nav-post-nav-sec .gh-post-nav-excerpt {
+    font-size: 0.6875rem;
+    color: var(--color-muted, #737373);
+    margin: 0.25rem 0 0 0;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  html.dark #post-nav-post-nav-sec .gh-post-nav-card,
+  html.dark-mode #post-nav-post-nav-sec .gh-post-nav-card {
+    background-color: var(--color-bg, #111111);
+    border-color: var(--color-hairline, #333333);
+  }
+  html.dark #post-nav-post-nav-sec,
+  html.dark-mode #post-nav-post-nav-sec {
+    border-top-color: var(--color-hairline, #333333);
+  }
+</style>
+<nav id="post-nav-post-nav-sec" class="gh-post-nav">
+  <div class="gh-post-nav-grid">
+    {{#prev_post}}
+    <a href="{{url}}" class="gh-post-nav-card gh-post-nav-prev">
+      {{#if feature_image}}
+      <div class="gh-post-nav-thumb">
+        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />
+      </div>
+      {{/if}}
+      <div class="gh-post-nav-content">
+        <span class="gh-post-nav-label">&larr; Previous Post</span>
+        <h4 class="gh-post-nav-title">{{title}}</h4>
+      </div>
+    </a>
+    {{/prev_post}}
+    {{#next_post}}
+    <a href="{{url}}" class="gh-post-nav-card gh-post-nav-next">
+      {{#if feature_image}}
+      <div class="gh-post-nav-thumb">
+        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />
+      </div>
+      {{/if}}
+      <div class="gh-post-nav-content">
+        <span class="gh-post-nav-label">Next Post &rarr;</span>
+        <h4 class="gh-post-nav-title">{{title}}</h4>
+      </div>
+    </a>
+    {{/next_post}}
+  </div>
+</nav>
+<style>
+  #related-related-posts-sec {
+    width: 100%;
+    max-width: var(--container-width, 1200px);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 3rem 1.5rem;
+    box-sizing: border-box;
+  }
+  #related-related-posts-sec .gh-related-heading {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-fg, #171717);
+    margin: 0 0 1.5rem 0;
+    letter-spacing: -0.015em;
+  }
+  #related-related-posts-sec .gh-related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    #related-related-posts-sec .gh-related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    #related-related-posts-sec .gh-related-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  #related-related-posts-sec .gh-related-card {
+    background-color: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-hairline, #ebebeb);
+    border-radius: var(--radius-md, 8px);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  #related-related-posts-sec .gh-related-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  #related-related-posts-sec .gh-related-image {
+    aspect-ratio: 16 / 9;
+    background-color: var(--color-canvas-soft, #f5f5f5);
+    overflow: hidden;
+    width: 100%;
+    display: block;
+  }
+  #related-related-posts-sec .gh-related-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  #related-related-posts-sec .gh-related-card:hover .gh-related-image img {
+    transform: scale(1.03);
+  }
+  #related-related-posts-sec .gh-related-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  #related-related-posts-sec .gh-related-tag {
+    font-size: 0.625rem;
+    font-family: var(--font-mono, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--color-primary, #0070f3);
+    margin-bottom: 0.25rem;
+  }
+  #related-related-posts-sec .gh-related-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-fg, #171717);
+    margin: 0;
+    line-height: 1.35;
+  }
+  #related-related-posts-sec .gh-related-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  #related-related-posts-sec .gh-related-title a:hover {
+    color: var(--color-primary, #0070f3);
+  }
+  #related-related-posts-sec .gh-related-excerpt {
+    font-size: 0.75rem;
+    color: var(--color-muted, #737373);
+    line-height: 1.5;
+    margin: 0.5rem 0 0 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  @media (max-width: 640px) {
+    #related-related-posts-sec {
+      padding: 2rem 1rem;
+    }
+  }
+  html.dark #related-related-posts-sec .gh-related-card,
+  html.dark-mode #related-related-posts-sec .gh-related-card {
+    background-color: var(--color-bg, #111111);
+    border-color: var(--color-hairline, #333333);
+  }
+</style>
+<section id="related-related-posts-sec" class="gh-related-posts">
+  <h3 class="gh-related-heading">You might also like</h3>
+  {{#get "posts" filter="tags:{{primary_tag.slug}}+id:-{{id}}" limit="3" include="authors" as |related|}}
+    {{#if related}}
+    <div class="gh-related-grid">
+      {{#foreach related}}
+        <article class="gh-related-card">
+          {{#if feature_image}}
+          <a href="{{url}}" class="gh-related-image">
+            <img src="{{img_url feature_image size="m"}}" alt="{{title}}" loading="lazy" />
+          </a>
+          {{/if}}
+          <div class="gh-related-content">
+            {{#if primary_tag}}<span class="gh-related-tag">{{primary_tag.name}}</span>{{/if}}
+            <h4 class="gh-related-title"><a href="{{url}}">{{title}}</a></h4>
+            <p class="gh-related-excerpt">{{#if custom_excerpt}}{{custom_excerpt}}{{else}}{{excerpt words="18"}}{{/if}}</p>
+          </div>
+        </article>
+      {{/foreach}}
+    </div>
+    {{/if}}
+  {{/get}}
+</section>
+{{#if comments}}
+<section class="gh-comments-section">
+  <div class="gh-comments-header">
+    <svg class="gh-comments-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <h3 class="gh-comments-heading">
+      Discussion <span class="gh-comments-count">({{comment_count empty="0" singular="" plural=""}})</span>
+    </h3>
+  </div>
+  {{comments title="" count=false mode="auto"}}
+</section>
+<script>
+(function() {
+  function syncGhostCommentsTheme() {
+    try {
+      var isDark = document.documentElement.classList.contains('dark') || 
+                   document.documentElement.classList.contains('dark-mode') || 
+                   (!localStorage.getItem('theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var sec = document.querySelector('.gh-comments-section');
+      if (sec) {
+        sec.style.color = isDark ? '#ffffff' : '#171717';
+        sec.classList.toggle('dark', isDark);
+      }
+      var script = document.querySelector('script[data-ghost-comments]');
+      if (script) {
+        script.dataset.colorScheme = isDark ? 'dark' : 'light';
+      }
+    } catch(e) {}
+  }
+  syncGhostCommentsTheme();
+  if (typeof MutationObserver !== 'undefined') {
+    var obs = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].attributeName === 'class') {
+          syncGhostCommentsTheme();
+          break;
+        }
+      }
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (window.matchMedia) {
+    var mql = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mql.addEventListener) {
+      mql.addEventListener('change', syncGhostCommentsTheme);
+    } else if (mql.addListener) {
+      mql.addListener(syncGhostCommentsTheme);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', syncGhostCommentsTheme);
+  window.addEventListener('load', syncGhostCommentsTheme);
+})();
+</script>
+{{/if}}
+{{/post}}

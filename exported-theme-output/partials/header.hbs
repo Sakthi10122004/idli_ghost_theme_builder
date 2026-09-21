@@ -1,0 +1,587 @@
+
+<style>
+  #gh-head.section-width-full {
+    max-width: none;
+  }
+  #gh-head .gh-head-inner.content-width-wide {
+    max-width: 1152px; margin-left: auto; margin-right: auto;
+  }
+
+  #gh-head .gh-head-brand {
+    font-weight: 700;
+    font-size: 24px;
+    white-space: nowrap;
+  }
+  #gh-head .gh-head-inner {
+    padding: 0 4vmin;
+  }
+  @media (min-width: 768px) {
+    #gh-head .gh-head-inner {
+      padding: 16px 24px 16px 24px;
+    }
+    
+      #gh-head .gh-head-inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 32px;
+      }
+      #gh-head .gh-head-brand { justify-self: start; }
+      #gh-head .gh-head-menu { 
+        display: flex; 
+        justify-content: center;
+        width: 100%;
+      }
+      #gh-head .gh-head-actions { justify-self: end; }
+    
+    #gh-head .gh-head-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #gh-head .gh-burger {
+      display: none !important;
+    }
+    #gh-head .gh-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+    #gh-head .gh-head-actions .gh-search-btn { order: 1; }
+    #gh-head .gh-head-actions .gh-theme-toggle { order: 2; }
+    #gh-head .gh-head-actions :is(.gh-head-link, .gh-signout) { order: 3; }
+    #gh-head .gh-head-actions .gh-head-btn { order: 4; }
+    #gh-head .gh-head-menu {
+      opacity: 0.9;
+    }
+    #gh-head .gh-head-menu .nav {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 28px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+  #gh-head .gh-head-menu .nav li {
+    margin: 0;
+    padding: 0;
+  }
+  #gh-head .gh-head-menu .nav a {
+    color: inherit;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    opacity: 0.9;
+    padding: 8px 16px;
+    display: inline-block;
+    transition: opacity 0.15s;
+  }
+  #gh-head .gh-head-menu a:hover,
+  #gh-head .gh-search-btn:hover,
+  #gh-head .gh-theme-toggle:hover,
+  #gh-head .gh-head-link:hover,
+  #gh-head .gh-head-btn:hover {
+    opacity: 1 !important;
+  }
+  
+  #gh-head .gh-mobile-only {
+    display: none !important;
+  }
+  
+  /* ===== Mobile Menu ===== */
+  /* 
+   * These rules use doubled-up class selectors to beat Casper's built-in
+   * #gh-head specificity on the same elements. The .gh-head class is always
+   * present on the <header style="padding-top: 16px; padding-bottom: 16px; background-color: #ffffff"> alongside the #gh-head id.
+   */
+  @media (max-width: 767px) {
+    /* -- Closed state: compact 64px bar -- */
+    #gh-head.gh-head {
+      height: 64px !important;
+    }
+    #gh-head.gh-head .gh-desktop-only {
+      display: none !important;
+    }
+    #gh-head.gh-head .gh-mobile-only {
+      display: block !important;
+    }
+
+    #gh-head.gh-head .gh-head-inner {
+      grid-template-rows: auto 1fr auto !important;
+      grid-template-columns: 1fr !important;
+      gap: 48px !important;
+    }
+
+    #gh-head.gh-head .gh-head-brand {
+      display: grid !important;
+      grid-template-columns: 1fr auto !important;
+      align-items: center !important;
+      height: 64px !important;
+    }
+
+    #gh-head.gh-head .gh-burger {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer !important;
+      color: inherit !important;
+      padding: 8px !important;
+    }
+
+    #gh-head.gh-head .gh-burger svg {
+      stroke: currentColor !important;
+      color: inherit !important;
+    }
+
+    #gh-head.gh-head .gh-head-menu,
+    #gh-head.gh-head .gh-head-actions {
+      position: fixed !important;
+      justify-content: center !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    }
+
+    #gh-head.gh-head .gh-head-menu {
+      margin: 0 !important;
+      transform: translateY(0) !important;
+    }
+
+    #gh-head.gh-head .nav li {
+      opacity: 0 !important;
+      transform: translateY(-4px) !important;
+      transition: transform 0.2s ease, opacity 0.2s ease !important;
+    }
+
+    #gh-head.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn) {
+      opacity: 0 !important;
+      transform: translateY(8px) !important;
+      transition: transform 0.4s ease, opacity 0.4s ease !important;
+    }
+
+    /* -- Open state: full viewport overlay -- */
+    .gh-head-open #gh-head.gh-head {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 100% !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: none !important;
+      z-index: 3999999 !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      background-color: #ffffff !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .gh-head-inner {
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 100% !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
+      box-sizing: border-box !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      padding: 0 16px 24px 16px !important;
+      gap: 0 !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .gh-head-brand {
+      width: 100% !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      height: 64px !important;
+      flex-shrink: 0 !important;
+      margin-bottom: 0 !important;
+      padding: 0 !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .gh-head-menu {
+      position: static !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      margin: 0 !important;
+      padding: 32px 16px 20px 16px !important;
+      gap: 20px !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .gh-head-actions {
+      position: static !important;
+      margin-top: auto !important;
+      margin-bottom: 0 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 16px !important;
+      width: 100% !important;
+      padding: 24px 16px 32px 16px !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      flex-shrink: 0 !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .nav {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 20px !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
+      line-height: 1.3 !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .nav li {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      text-align: center !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition: transform 0.2s ease, opacity 0.2s ease !important;
+    }
+
+    /* Staggered delays for nav items */
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(1) { transition-delay: 0.05s !important; }
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(2) { transition-delay: 0.10s !important; }
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(3) { transition-delay: 0.15s !important; }
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(4) { transition-delay: 0.20s !important; }
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(5) { transition-delay: 0.25s !important; }
+    .gh-head-open #gh-head.gh-head .nav li:nth-child(6) { transition-delay: 0.30s !important; }
+
+    .gh-head-open #gh-head.gh-head .nav a {
+      font-size: 1.5rem !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+      text-align: center !important;
+      width: 100% !important;
+      display: inline-block !important;
+      padding: 0 !important;
+      text-decoration: none !important;
+      color: inherit !important;
+    }
+
+    .gh-head-open #gh-head.gh-head :is(.gh-head-button, .gh-head-link, .gh-head-btn, .gh-signout) {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition: transform 0.4s ease, opacity 0.4s ease !important;
+      transition-delay: 0.2s !important;
+    }
+
+    .gh-head-open #gh-head.gh-head .gh-head-btn {
+      order: 1 !important;
+      width: 100% !important;
+      max-width: 280px !important;
+      text-align: center !important;
+      display: inline-block !important;
+      padding: 10px 24px !important;
+      border-radius: 9999px !important;
+      font-size: 1.0625rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+      text-decoration: none !important;
+    }
+
+    .gh-head-open #gh-head.gh-head :is(.gh-head-link, .gh-signout) {
+      order: 2 !important;
+      text-align: center !important;
+      font-size: 1.0625rem !important;
+      font-weight: 500 !important;
+      opacity: 0.9 !important;
+      display: inline-block !important;
+      text-decoration: none !important;
+      color: inherit !important;
+      padding: 0 4px !important;
+    }
+
+    /* SVG burger icon toggle */
+    #gh-head.gh-head .gh-burger::before,
+    #gh-head.gh-head .gh-burger::after {
+      display: none !important;
+    }
+    .gh-head-open #gh-head.gh-head .gh-burger .burger-icon {
+      display: none !important;
+    }
+    .gh-head-open #gh-head.gh-head .gh-burger .close-icon {
+      display: block !important;
+    }
+  }
+
+  /* Dark mode overrides (placed at the end to ensure they win over previous styles) */
+  html.dark #gh-head.gh-head,
+  html.dark #gh-head.gh-head.gh-head-open,
+  html.dark .gh-head-open #gh-head.gh-head {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+  }
+
+  /* Ensure all header text, branding, and links cleanly adapt to white in dark mode */
+  html.dark #gh-head.gh-head .gh-head-brand,
+  html.dark #gh-head.gh-head .gh-head-brand a,
+  html.dark #gh-head.gh-head .gh-site-title,
+  html.dark #gh-head.gh-head .gh-head-menu a,
+  html.dark #gh-head.gh-head .gh-head-menu .nav a,
+  html.dark #gh-head.gh-head .gh-head-link,
+  html.dark #gh-head.gh-head .gh-signout,
+  html.dark #gh-head.gh-head .gh-search-btn,
+  html.dark #gh-head.gh-head .gh-theme-toggle,
+  html.dark .gh-head-open #gh-head.gh-head .nav a {
+    color: #ffffff !important;
+  }
+
+  /* Ensure the hamburger and action icons are fully visible in dark mode */
+  html.dark #gh-head .gh-burger,
+  html.dark #gh-head.gh-head .gh-burger,
+  html.dark .gh-head-open #gh-head .gh-burger,
+  html.dark .gh-head-open #gh-head.gh-head .gh-burger {
+    color: #ffffff !important;
+  }
+  html.dark #gh-head .gh-burger svg,
+  html.dark #gh-head.gh-head .gh-burger svg,
+  html.dark .gh-head-open #gh-head .gh-burger svg,
+  html.dark .gh-head-open #gh-head.gh-head .gh-burger svg,
+  html.dark #gh-head .gh-search-btn svg,
+  html.dark #gh-head.gh-head .gh-search-btn svg,
+  html.dark #gh-head .gh-theme-toggle svg,
+  html.dark #gh-head.gh-head .gh-theme-toggle svg {
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+  }
+
+  /* gh-head-actions is strictly transparent in desktop & mobile overlays (no black box) */
+  #gh-head .gh-head-actions,
+  #gh-head.gh-head .gh-head-actions,
+  html.dark #gh-head.gh-head .gh-head-actions,
+  html.dark #gh-head .gh-head-actions,
+  .gh-head-open #gh-head.gh-head .gh-head-actions,
+  html.dark .gh-head-open #gh-head.gh-head .gh-head-actions {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  
+  html.dark #gh-head.gh-head .gh-head-btn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  html.dark #gh-head.gh-head .icon-moon { display: none !important; }
+  html.dark #gh-head.gh-head .icon-sun { display: block !important; }
+  html:not(.dark) #gh-head.gh-head .icon-sun { display: none !important; }
+  html:not(.dark) #gh-head.gh-head .icon-moon { display: block !important; }
+
+</style>
+
+<script>
+(function() {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  function init() {
+    const head = document.getElementById('gh-head');
+    const burger = head ? head.querySelector('.gh-burger') : null;
+    
+    if (!head || !burger) return;
+
+    // Check if there's a pre-existing open state (e.g., from server-side)
+    const isOpen = head.classList.contains('gh-head-open');
+    
+    // Toggle function
+    function toggleMenu(e) {
+      e.stopPropagation();
+      head.classList.toggle('gh-head-open');
+      document.body.classList.toggle('gh-head-open');
+      
+      // Toggle burger/close icons
+      const burgerIcon = burger.querySelector('.burger-icon');
+      const closeIcon = burger.querySelector('.close-icon');
+      if (burgerIcon && closeIcon) {
+        const open = head.classList.contains('gh-head-open');
+        burgerIcon.style.display = open ? 'none' : 'block';
+        closeIcon.style.display = open ? 'block' : 'none';
+      }
+    }
+
+    // Click handler
+    burger.addEventListener('click', toggleMenu);
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (head.classList.contains('gh-head-open')) {
+        const isClickInside = head.contains(e.target);
+        if (!isClickInside) {
+          head.classList.remove('gh-head-open');
+          document.body.classList.remove('gh-head-open');
+          
+          const burgerIcon = burger.querySelector('.burger-icon');
+          const closeIcon = burger.querySelector('.close-icon');
+          if (burgerIcon && closeIcon) {
+            burgerIcon.style.display = 'block';
+            closeIcon.style.display = 'none';
+          }
+        }
+      }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && head.classList.contains('gh-head-open')) {
+        head.classList.remove('gh-head-open');
+        document.body.classList.remove('gh-head-open');
+        
+        const burgerIcon = burger.querySelector('.burger-icon');
+        const closeIcon = burger.querySelector('.close-icon');
+        if (burgerIcon && closeIcon) {
+          burgerIcon.style.display = 'block';
+          closeIcon.style.display = 'none';
+        }
+      }
+    });
+  }
+})();
+
+function syncCommentsTheme(isDark) {
+  try {
+    var sec = document.querySelector('.gh-comments-section');
+    if (sec) {
+      sec.style.color = isDark ? '#ffffff' : '#171717';
+      sec.classList.toggle('dark', isDark);
+    }
+    var script = document.querySelector('script[data-ghost-comments]');
+    if (script) {
+      script.dataset.colorScheme = isDark ? 'dark' : 'light';
+    }
+  } catch (e) {}
+}
+
+function toggleThemeMode() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  if (isDark) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+  syncCommentsTheme(isDark);
+}
+
+(function initTheme() {
+  var savedTheme = localStorage.getItem('theme');
+  var isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { syncCommentsTheme(isDark); });
+  } else {
+    syncCommentsTheme(isDark);
+  }
+})();
+</script>
+
+<div style="width: 100%; padding: 0; background-color: transparent;">
+  <header 
+    id="gh-head" 
+    class="gh-head section-width-full "
+    style="
+      position: relative;
+      background-color: #ffffff;
+      color: #000000;
+      width: 100%;
+      
+      margin-bottom: 0px;
+      box-shadow: none;
+      opacity: 1;
+      
+      transition: all 0.15s ease-in-out;
+    "
+  >
+    <div class="gh-head-inner content-width-wide" style="width: 100%; max-width: 1152px; margin-left: auto; margin-right: auto;">
+      
+    <div class="gh-head-brand">
+      <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+        {{#if @site.logo}}
+          <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: 40px; width: auto;" />
+        {{else}}
+          <span class="gh-site-title">{{@site.title}}</span>
+        {{/if}}
+      </a>
+      <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px;">
+        <button class="gh-search-btn gh-mobile-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
+        <button class="gh-theme-toggle gh-mobile-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+    <svg class="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  </button>
+        <button class="gh-burger" aria-label="Main Menu">
+          <svg class="burger-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="pointer-events: none;">
+            <line x1="3" y1="8" x2="21" y2="8"></line>
+            <line x1="3" y1="16" x2="21" y2="16"></line>
+          </svg>
+          <svg class="close-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display: none; pointer-events: none;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+      
+    <nav class="gh-head-menu">
+      {{navigation}}
+    </nav>
+      
+    <div class="gh-head-actions">
+      
+      <button class="gh-search-btn gh-desktop-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+
+      
+      <button class="gh-theme-toggle gh-desktop-only" aria-label="Toggle Theme" onclick="toggleThemeMode()" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">
+        
+    <svg class="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  
+      </button>
+
+      {{#if @site.members_enabled}}
+        {{#unless @member}}
+          
+          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign in</a>
+          
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: #000000; color: #ffffff; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Subscribe</a>
+        {{else}}
+          <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
+          <a class="gh-head-btn gh-btn" href="#/portal/account" data-portal="account" style="background-color: #000000; color: #ffffff; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Account</a>
+        {{/unless}}
+      {{/if}}
+    </div>
+    </div>
+  </header>
+</div>

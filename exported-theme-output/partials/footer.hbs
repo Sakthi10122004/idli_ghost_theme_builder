@@ -1,0 +1,206 @@
+
+<style>
+  #site-footer {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    padding-top: 64px;
+    padding-bottom: 64px;
+    padding-left: 24px;
+    padding-right: 24px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    
+  }
+  #site-footer a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  #site-footer a:hover {
+    opacity: 0.7;
+  }
+
+  #site-footer .footer-social-links:empty,
+  #site-footer .footer-secondary-nav:empty,
+  #site-footer .footer-secondary-column:empty {
+    display: none !important;
+  }
+  #site-footer .footer-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 16px;
+    max-width: 100%;
+  }
+  #site-footer .footer-social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  #site-footer .footer-social-links a:hover {
+    opacity: 1;
+  }
+  #site-footer .footer-social-links svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  /* Footer Navigation Columns (Multi-Column) */
+  #site-footer .footer-nav-column .nav,
+  #site-footer .footer-nav-column .nav-secondary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #site-footer .footer-nav-column .nav li,
+  #site-footer .footer-nav-column .nav-secondary li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  #site-footer .footer-nav-column .nav a,
+  #site-footer .footer-nav-column .nav-secondary a {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+  }
+  #site-footer .footer-nav-column .nav a:hover,
+  #site-footer .footer-nav-column .nav-secondary a:hover {
+    opacity: 1;
+  }
+
+  /* Footer Secondary Navigation (Horizontal row in bottom bar) */
+  #site-footer .footer-secondary-nav,
+  #site-footer .footer-secondary-nav .nav,
+  #site-footer .footer-secondary-nav .nav-secondary,
+  #site-footer .footer-bottom ul.nav,
+  #site-footer .footer-bottom ul.nav-secondary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px 24px;
+  }
+  #site-footer .footer-secondary-nav .nav li,
+  #site-footer .footer-secondary-nav .nav-secondary li,
+  #site-footer .footer-bottom ul.nav li,
+  #site-footer .footer-bottom ul.nav-secondary li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+  #site-footer .footer-secondary-nav .nav a,
+  #site-footer .footer-secondary-nav .nav-secondary a,
+  #site-footer .footer-bottom ul.nav a,
+  #site-footer .footer-bottom ul.nav-secondary a {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.8;
+    font-size: 0.875rem;
+    transition: opacity 0.2s;
+  }
+  #site-footer .footer-secondary-nav .nav a:hover,
+  #site-footer .footer-secondary-nav .nav-secondary a:hover,
+  #site-footer .footer-bottom ul.nav a:hover,
+  #site-footer .footer-bottom ul.nav-secondary a:hover {
+    opacity: 1;
+  }
+
+  html.dark #site-footer {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+  }
+  html.dark #site-footer .footer-subscribe-btn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  #site-footer .footer-inner {
+    margin: 0 auto;
+    max-width: 1200px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #site-footer .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #site-footer .footer-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  @media (min-width: 768px) {
+    #site-footer .footer-bottom {
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      text-align: left !important;
+    }
+    #site-footer .footer-actions {
+      flex-direction: row !important;
+      justify-content: flex-end !important;
+      width: auto !important;
+    }
+    #site-footer .footer-secondary-nav,
+    #site-footer .footer-secondary-nav .nav,
+    #site-footer .footer-bottom ul.nav,
+    #site-footer .footer-bottom ul.nav-secondary {
+      justify-content: flex-end;
+    }
+  }
+</style>
+<footer 
+  id="site-footer" 
+  class="site-footer section-width-full "
+ style="padding-top: 64px; padding-bottom: 64px; background-color: #ffffff">
+  <div class="gh-container footer-inner content-width-standard align-center">
+    
+      <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
+        
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+          
+          <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
+            {{#if @site.secondary_navigation}}
+              {{navigation type="secondary"}}
+            {{else}}
+              <ul class="nav nav-secondary" role="menu">
+                <li class="nav-privacy" role="menuitem"><a href="/privacy/">Privacy Policy</a></li>
+                <li class="nav-terms" role="menuitem"><a href="/terms/">Terms of Service</a></li>
+                <li class="nav-contact" role="menuitem"><a href="/contact/">Contact</a></li>
+              </ul>
+            {{/if}}
+          </nav>
+          
+          
+        </div>
+      </div>
+    
+  </div>
+</footer>

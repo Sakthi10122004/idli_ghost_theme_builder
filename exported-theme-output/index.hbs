@@ -1,0 +1,276 @@
+{{!< default}}
+
+<section class="section" style="padding-top: 96px; padding-bottom: 96px; background-color: #ffffff; ">
+  <div class="container-width mx-auto px-6" style="position: relative; z-index: 10;">
+    <div class="container-inner" style="text-align: center">
+  <h1 class="heading heading-h1 font-heading text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight" style="font-size: 48px; font-weight: 600; letter-spacing: -2.4px; margin-bottom: 16px">Build and deploy on the AI Cloud.</h1>
+<p class="text-content font-body text-base leading-relaxed" style="font-size: 18px; margin-bottom: 24px; font-size: 18px; line-height: 1.7; text-align: left; margin-bottom: 24px">Visual builder for clean, lightweight, and modern Ghost templates styled with Geist UI guidelines.</p>
+<div class="container-inner">
+  <style>
+  #btn-hero-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    
+    background-color: var(--color-primary);
+    color: var(--color-on-primary, #ffffff);
+    
+  }
+  #btn-hero-btn-primary:hover {
+    
+    opacity: 0.85;
+    
+  }
+  html.dark #btn-hero-btn-primary,
+  html.dark-mode #btn-hero-btn-primary {
+    
+    background-color: #ffffff;
+    color: #000000;
+    
+  }
+</style>
+<a id="btn-hero-btn-primary" href="#" class="btn">Start building</a>
+<style>
+  #btn-hero-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    border: 1px solid rgba(0,0,0,0.1);
+    
+  }
+  #btn-hero-btn-secondary:hover {
+    
+    background-color: rgba(0,0,0,0.02);
+    
+  }
+  html.dark #btn-hero-btn-secondary,
+  html.dark-mode #btn-hero-btn-secondary {
+    
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    border-color: rgba(255, 255, 255, 0.2);
+    
+  }
+</style>
+<a id="btn-hero-btn-secondary" href="#" class="btn">Learn more</a>
+</div>
+</div>
+  </div>
+</section>
+<section class="section" style="padding-top: 64px; padding-bottom: 64px; background-color: #fafafa; ">
+  <div class="container-width mx-auto px-6" style="position: relative; z-index: 10;">
+    <style>
+  #post-grid-posts-grid-1 .post-grid-title {
+    font-size: 2rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-fg);
+    margin: 0 0 2rem 0;
+    text-align: center;
+  }
+  #post-grid-posts-grid-1 .post-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(100% / 3 - 2rem), 1fr));
+    gap: 2rem;
+  }
+  #post-grid-posts-grid-1 .magazine-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  @media (min-width: 992px) {
+    #post-grid-posts-grid-1 .magazine-layout {
+      grid-template-columns: 7fr 5fr;
+      gap: 3rem;
+    }
+  }
+  #post-grid-posts-grid-1 .magazine-list-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  #post-grid-posts-grid-1 .gh-post-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  #post-grid-posts-grid-1 .magazine-list-item {
+    flex-direction: row;
+    gap: 1rem;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  #post-grid-posts-grid-1 .magazine-list-item .gh-post-card-link {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  #post-grid-posts-grid-1 .gh-post-card:hover, #post-grid-posts-grid-1 .magazine-list-item:hover {
+    transform: translateY(-4px);
+  }
+  #post-grid-posts-grid-1 .gh-post-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-image {
+    width: 100%;
+    overflow: hidden;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-image-feature {
+    aspect-ratio: 16 / 9;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-image-list {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1.5rem;
+    justify-content: center;
+  }
+  #post-grid-posts-grid-1 .magazine-list-item .gh-post-card-content {
+    padding: 1rem;
+    padding-left: 0;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-tag {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-title {
+    font-family: var(--font-heading);
+    margin: 0 0 0.5rem 0;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-title-feature {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-title-list {
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-excerpt {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  #post-grid-posts-grid-1 .gh-post-card-excerpt-list {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  #post-grid-posts-grid-1 .post-grid-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  #post-grid-posts-grid-1 .post-grid-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    background: var(--color-primary);
+    color: #ffffff;
+  }
+  #post-grid-posts-grid-1:hover .post-grid-button {
+    opacity: 0.9;
+  }
+</style>
+<div id="post-grid-posts-grid-1" class="post-feed-wrapper outer " style="background-color: #ffffff; padding-top: 4rem; padding-bottom: 4rem;">
+  <div class="inner" style="max-width: 100%">
+    <h2 class="post-grid-title">Latest Stories</h2>
+    
+    <div class="post-grid-inner-container">
+      
+      <div class="post-feed">
+        {{#foreach posts}}
+        <article class="gh-post-card {{post_class}}">
+          
+    <a class="gh-post-card-link" href="{{url}}">
+      
+      {{#if feature_image}}
+      <div class="gh-post-card-image gh-post-card-image-list">
+        <img srcset="{{img_url feature_image size="s"}} 300w,
+                     {{img_url feature_image size="m"}} 600w,
+                     {{img_url feature_image size="l"}} 1000w,
+                     {{img_url feature_image size="xl"}} 2000w"
+             sizes="(max-width: 1000px) 400px, 800px"
+             src="{{img_url feature_image size="m"}}"
+             alt="{{title}}"
+             loading="lazy"
+        />
+      </div>
+      {{/if}}
+      
+      <div class="gh-post-card-content">
+        
+        {{#if primary_tag}}
+          <span class="gh-post-card-tag">{{primary_tag.name}}</span>
+        {{/if}}
+        
+        <h3 class="gh-post-card-title gh-post-card-title-list">{{title}}</h3>
+        
+        <p class="gh-post-card-excerpt gh-post-card-excerpt-list">{{excerpt words="20"}}</p>
+        
+      </div>
+    </a>
+  
+        </article>
+        {{/foreach}}
+      </div>
+      
+    </div>
+    
+    
+  </div>
+</div>
+  </div>
+</section>
