@@ -99,15 +99,15 @@ export default function DashboardPage() {
         const parsed: ThemeProject[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+          const activeProj = (storedActiveId ? parsed.find((t) => t.id === storedActiveId) : null) || parsed[0];
+
           queueMicrotask(() => {
             setThemes(parsed);
+            if (activeProj) {
+              setActiveThemeId(activeProj.id);
+              setDocument(activeProj.document, activeProj.id);
+            }
           });
-
-          const activeProj = (storedActiveId ? parsed.find((t) => t.id === storedActiveId) : null) || parsed[0];
-          if (activeProj) {
-            setActiveThemeId(activeProj.id);
-            setDocument(activeProj.document, activeProj.id);
-          }
         }
       } else {
         localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(defaultInitialThemes));
@@ -127,9 +127,10 @@ export default function DashboardPage() {
             const data = await res.json();
             if (data.document && data.document.metadata) {
               const dbDoc = data.document;
+              const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+              
               setThemes((prevThemes) => {
                 const updated = [...prevThemes];
-                const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
                 const matchIdx = updated.findIndex(
                   (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === "theme-primary" || t.name === dbDoc.metadata.name
                 );
@@ -143,12 +144,8 @@ export default function DashboardPage() {
                     document: dbDoc,
                     updatedAt: "Just now",
                   };
-                  if (updated[matchIdx].id === (storedActiveId || "theme-primary")) {
-                    setDocument(dbDoc, updated[matchIdx].id);
-                    setActiveThemeId(updated[matchIdx].id);
-                  }
                 } else {
-                  const newTheme: ThemeProject = {
+                  updated.unshift({
                     id: "theme-primary",
                     name: dbDoc.metadata.name,
                     author: dbDoc.metadata.author,
@@ -156,16 +153,20 @@ export default function DashboardPage() {
                     description: dbDoc.metadata.description || "",
                     updatedAt: "Just now",
                     document: dbDoc,
-                  };
-                  updated.unshift(newTheme);
-                  setDocument(dbDoc, "theme-primary");
-                  setActiveThemeId("theme-primary");
+                  });
                 }
                 try {
                   localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
                 } catch {}
                 return updated;
               });
+
+              // Safely update editor store outside of setThemes reducer
+              const targetId = storedActiveId || "theme-primary";
+              if (targetId === "theme-primary" || !storedActiveId) {
+                setDocument(dbDoc, targetId);
+                setActiveThemeId(targetId);
+              }
             }
           }
         })
