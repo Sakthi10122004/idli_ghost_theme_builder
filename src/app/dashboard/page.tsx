@@ -51,46 +51,9 @@ export default function DashboardPage() {
     setActiveThemeId 
   } = useEditorStore();
 
-  // Initialize themes from localStorage or fallback to default themeDoc
-  const [themes, setThemes] = useState<ThemeProject[]>(() => {
-    if (typeof window === "undefined") {
-      return [{
-        id: "theme-primary",
-        name: themeDoc.metadata.name || "Sakthi T4GC",
-        author: themeDoc.metadata.author || "Sakthi T4GC",
-        version: themeDoc.metadata.version || "1.0.0",
-        description: themeDoc.metadata.description || "A Vercel-inspired theme visual build",
-        updatedAt: "Just now",
-        document: themeDoc,
-      }];
-    }
-    try {
-      // Check v2 key first, then fallback to v1 for migration
-      const stored = localStorage.getItem(STORAGE_THEMES_KEY) || localStorage.getItem("ghost_user_themes_v1");
-      if (stored) {
-        const parsed: ThemeProject[] = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-          // Match by explicit activeThemeId or storedActiveId or exact name
-          const matchIdx = parsed.findIndex(
-            (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === activeThemeId || t.name === themeDoc.metadata.name
-          );
-          if (matchIdx >= 0) {
-            parsed[matchIdx].document = themeDoc;
-            parsed[matchIdx].name = themeDoc.metadata.name;
-            parsed[matchIdx].author = themeDoc.metadata.author;
-            parsed[matchIdx].version = themeDoc.metadata.version;
-            parsed[matchIdx].description = themeDoc.metadata.description || "";
-            parsed[matchIdx].updatedAt = "Just now";
-          }
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load themes from storage:", e);
-    }
-
-    return [{
+  // Deterministic default theme for initial render (matches on server and client)
+  const defaultInitialThemes: ThemeProject[] = [
+    {
       id: "theme-primary",
       name: themeDoc.metadata.name || "Sakthi T4GC",
       author: themeDoc.metadata.author || "Sakthi T4GC",
@@ -98,8 +61,11 @@ export default function DashboardPage() {
       description: themeDoc.metadata.description || "A Vercel-inspired theme visual build",
       updatedAt: "Just now",
       document: themeDoc,
-    }];
-  });
+    },
+  ];
+
+  const [themes, setThemes] = useState<ThemeProject[]>(defaultInitialThemes);
+  const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState<string | null>(null);
@@ -119,14 +85,49 @@ export default function DashboardPage() {
   const [editVersion, setEditVersion] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
-  // Synchronize themes list changes into localStorage
+  // Load themes from localStorage after client hydration mount
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_THEMES_KEY) || localStorage.getItem("ghost_user_themes_v1");
+      if (stored) {
+        const parsed: ThemeProject[] = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+          // Match by explicit activeThemeId or storedActiveId or exact name
+          const matchIdx = parsed.findIndex(
+            (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === activeThemeId || t.name === themeDoc.metadata.name
+          );
+          if (matchIdx >= 0) {
+            parsed[matchIdx].document = themeDoc;
+            parsed[matchIdx].name = themeDoc.metadata.name;
+            parsed[matchIdx].author = themeDoc.metadata.author;
+            parsed[matchIdx].version = themeDoc.metadata.version;
+            parsed[matchIdx].description = themeDoc.metadata.description || "";
+            parsed[matchIdx].updatedAt = "Just now";
+          }
+          queueMicrotask(() => {
+            setThemes(parsed);
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load themes from storage:", e);
+    } finally {
+      queueMicrotask(() => {
+        setHasLoadedFromStorage(true);
+      });
+    }
+  }, [activeThemeId, themeDoc]);
+
+  // Synchronize themes list changes into localStorage once loaded
+  useEffect(() => {
+    if (!hasLoadedFromStorage) return;
     try {
       localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(themes));
     } catch (err) {
       console.error("Failed to save themes:", err);
     }
-  }, [themes]);
+  }, [themes, hasLoadedFromStorage]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -527,7 +528,7 @@ export default function DashboardPage() {
               <span className="text-xs font-mono uppercase tracking-wider">Total Themes</span>
               <Layers size={16} />
             </div>
-            <div className="text-lg font-bold text-brand-ink">
+            <div className="text-lg font-bold text-brand-ink" suppressHydrationWarning>
               {themes.length} {themes.length === 1 ? "Theme" : "Themes"}
             </div>
             <div className="text-xs text-brand-mute mt-1">
@@ -557,7 +558,7 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-bold text-brand-ink">
                   My Themes
                 </h3>
-                <span className="font-mono text-[11px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-mute">
+                <span className="font-mono text-[11px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-mute" suppressHydrationWarning>
                   {filteredThemes.length} {filteredThemes.length === 1 ? "theme" : "themes"}
                 </span>
               </div>
