@@ -1,5 +1,5 @@
-import { generateThemeFiles } from "./src/components/builder/compiler";
-import { INITIAL_THEME_DOCUMENT } from "./src/store/editorStore";
+import { generateThemeFiles } from "./src/components/builder/compiler.ts";
+import { INITIAL_THEME_DOCUMENT } from "./src/store/editorStore.ts";
 import fs from "fs";
 import path from "path";
 

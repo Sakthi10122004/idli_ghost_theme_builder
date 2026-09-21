@@ -1767,9 +1767,8 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     if (spGeneral?.subheading) customConfig["stats_subheading"].default = spGeneral.subheading;
 
     const statsList = (Array.isArray(sp.stats) ? sp.stats : []) as Array<Record<string, unknown>>;
-    const maxDynamicStats = 6;
     
-    for (let i = 0; i < maxDynamicStats; i++) {
+    for (let i = 0; i < statsList.length; i++) {
       const st = statsList[i] || {};
       const num = i + 1;
       customConfig[`stat_${num}_value`] = {
@@ -1784,6 +1783,12 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
         name: `Stat ${num}: Label`,
         description: `Description label for Stat ${num}`,
         default: st.label || "",
+        group: "homepage"
+      };
+      customConfig[`stat_${num}_icon`] = {
+        type: "image",
+        name: `Stat ${num}: Icon`,
+        description: `Upload an icon image for Stat ${num}`,
         group: "homepage"
       };
     }

@@ -47,10 +47,22 @@ export const generateHTML = (block: BuilderBlock): string => {
     const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${stat.value || ""}{{/if}}`;
     const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${stat.label || ""}{{/if}}`;
 
+    const defaultIconHtml = (stat.iconType === 'image' && stat.imageUrl) 
+      ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` 
+      : stat.icon 
+        ? `<div class="stats-icon">${stat.icon}</div>` 
+        : '';
+        
+    const iconHbs = `{{#if @custom.stat_${num}_icon}}
+<div class="stats-icon image"><img src="{{@custom.stat_${num}_icon}}" alt="${stat.label}" /></div>
+{{else}}
+${defaultIconHtml}
+{{/if}}`;
+
     if (general.layoutStyle === "cards") {
       return `
         <div class="stats-item card">
-          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
+          ${iconHbs}
           <dd class="stats-value">${valueHbs}</dd>
           <dt class="stats-label">${labelHbs}</dt>
         </div>
@@ -65,7 +77,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     } else if (general.layoutStyle === "accent-cards") {
       return `
         <div class="stats-item accent-card">
-          ${(stat.iconType === 'image' && stat.imageUrl) ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` : stat.icon ? `<div class="stats-icon">${stat.icon}</div>` : ''}
+          ${iconHbs}
           <dd class="stats-value">${valueHbs}</dd>
           <dt class="stats-label">${labelHbs}</dt>
         </div>
@@ -88,18 +100,11 @@ export const generateHTML = (block: BuilderBlock): string => {
     `;
   };
 
-  const maxDynamicStats = 6;
   let statsHtml = "";
-  for (let i = 0; i < maxDynamicStats; i++) {
-    const statObj = stats[i] || { value: "", label: "", icon: "", iconType: "svg" };
+  for (let i = 0; i < stats.length; i++) {
+    const statObj = stats[i];
     const renderedMarkup = renderStat(statObj, i);
-    
-    if (i < stats.length) {
-      statsHtml += renderedMarkup;
-    } else {
-      const num = i + 1;
-      statsHtml += `\n{{#if @custom.stat_${num}_value}}\n${renderedMarkup}\n{{/if}}\n`;
-    }
+    statsHtml += renderedMarkup;
   }
 
 

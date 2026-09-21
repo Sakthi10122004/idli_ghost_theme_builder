@@ -336,7 +336,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   // If CAROUSEL is enabled
   if (isCarousel) {
     const isDynamic = p.carouselMode === "dynamic";
-    const dynamicTag = (p.dynamicTag || "hero-carousel").replace(/^#\s*/, "").trim();
+    const rawTag = (p.dynamicTag || "hero-carousel").replace(/^#\s*/, "").trim();
+    const dynamicTag = rawTag.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
     const showArrows = p.showArrows ?? true;
     const showDots = p.showDots ?? true;
     const autoplay = p.autoplay ?? true;
@@ -379,7 +380,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
     if (isDynamic) {
       slidesHtml = `
-  {{#get "posts" filter="tag:hash-${dynamicTag},tag:${dynamicTag}" include="tags,authors" limit="10"}}
+  {{#get "posts" filter="tags:${dynamicTag}" include="tags,authors" limit="10"}}
     {{#if posts}}
       {{#foreach posts}}
       <div class="carousel-slide{{#if @first}} active{{/if}}" role="group" aria-roledescription="slide">
