@@ -1,6 +1,7 @@
 import { ThemeDocument, BuilderBlock } from "../../types/theme";
 import { componentRegistry } from "@/editor/components/registry";
 import { toTranslucent } from "@/editor/components/shared/background";
+import { CASPER_ICON_PARTIALS } from "./casperIcons";
 
 /**
  * Resolves a responsive style property (using desktop value by default for server-side theme files)
@@ -1739,7 +1740,7 @@ html.dark-mode .btn-secondary {
 export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   const files: Record<string, string> = {};
 
-  const customConfig: Record<string, any> = {};
+  const customConfig: Record<string, Record<string, unknown>> = {};
 
   // Scan all blocks for stats blocks and declare custom settings ONLY for what is actually referenced in templates
   const statsBlocks = Object.values(doc.blocks).filter((b) => b.type === "stats");
@@ -1760,11 +1761,12 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     };
 
     const firstStats = statsBlocks[0];
-    const sp = (firstStats.props || {}) as any;
-    if (sp.general?.heading) customConfig["stats_heading"].default = sp.general.heading;
-    if (sp.general?.subheading) customConfig["stats_subheading"].default = sp.general.subheading;
+    const sp = (firstStats.props || {}) as Record<string, unknown>;
+    const spGeneral = (sp.general || {}) as Record<string, unknown>;
+    if (spGeneral?.heading) customConfig["stats_heading"].default = spGeneral.heading;
+    if (spGeneral?.subheading) customConfig["stats_subheading"].default = spGeneral.subheading;
 
-    const statsList = Array.isArray(sp.stats) ? sp.stats : [];
+    const statsList = (Array.isArray(sp.stats) ? sp.stats : []) as Array<Record<string, unknown>>;
     const maxDynamicStats = 6;
     
     for (let i = 0; i < maxDynamicStats; i++) {
@@ -1787,7 +1789,7 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   }
 
-  const pkgConfig: Record<string, any> = {
+  const pkgConfig: Record<string, unknown> = {
     posts_per_page: 5,
     card_assets: true
   };
@@ -1833,6 +1835,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
 
   if (headerCompiled) files["partials/header.hbs"] = headerCompiled;
   if (footerCompiled) files["partials/footer.hbs"] = footerCompiled;
+
+  // 2b. Bundle standard Casper icon partials
+  for (const [iconPath, iconContent] of Object.entries(CASPER_ICON_PARTIALS)) {
+    files[iconPath] = iconContent;
+  }
 
   // 3. Generate default.hbs wrapper page
   files["default.hbs"] = `

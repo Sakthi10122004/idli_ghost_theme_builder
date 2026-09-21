@@ -125,8 +125,8 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
         {(p.general?.showSocialIcons ?? true) && (
           <div className="flex flex-col gap-2 pl-3 border-l-2 border-brand-hairline ml-1 my-1">
             <div className="bg-gray-50 border border-gray-200/80 rounded p-2 text-[10px] text-gray-600 leading-snug">
-              <span className="font-semibold text-gray-800 block mb-0.5">Dynamic Accounts (Ghost Native)</span>
-              Uses Ghost&apos;s <code className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded text-brand-primary">{"{{social_url}}"}</code> helper. In Ghost, configure your accounts in <span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">Settings → General → Social accounts</span>.
+              <span className="font-semibold text-gray-800 block mb-0.5">Social Accounts</span>
+              Facebook and X automatically link to your Ghost site settings (<span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">@site.facebook</span> and <span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">@site.twitter</span>). You can also set custom URLs below.
             </div>
 
             <div className="flex items-center justify-between mt-1 mb-0.5">
@@ -154,34 +154,52 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
               {ALL_SOCIAL_PLATFORMS.map((platform) => {
                 const activePlatforms: SocialPlatform[] = p.general?.socialPlatforms || DEFAULT_SOCIAL_PLATFORMS;
                 const isChecked = activePlatforms.includes(platform.id);
+                const socialUrls = (p.general?.socialUrls || {}) as Record<string, string>;
                 return (
-                  <label 
-                    key={platform.id} 
-                    className={`flex items-center justify-between px-2 py-1.5 rounded text-[11px] cursor-pointer transition-colors ${
-                      isChecked ? 'bg-white border border-gray-200 text-gray-800 shadow-2xs' : 'hover:bg-gray-100/70 text-gray-500 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-4 h-4 flex items-center justify-center text-gray-600">
-                        {platform.renderIcon({ size: 14 })}
-                      </span>
-                      <span className="font-medium text-[11px]">{platform.label}</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) => {
-                        let updated: SocialPlatform[];
-                        if (e.target.checked) {
-                          updated = [...activePlatforms, platform.id];
-                        } else {
-                          updated = activePlatforms.filter(id => id !== platform.id);
-                        }
-                        updateNestedProp("general", "socialPlatforms", updated);
-                      }}
-                      className="rounded-xs border-gray-300 w-3.5 h-3.5 accent-brand-primary cursor-pointer"
-                    />
-                  </label>
+                  <div key={platform.id} className="flex flex-col">
+                    <label 
+                      className={`flex items-center justify-between px-2 py-1.5 rounded text-[11px] cursor-pointer transition-colors ${
+                        isChecked ? 'bg-white border border-gray-200 text-gray-800 shadow-2xs' : 'hover:bg-gray-100/70 text-gray-500 border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 flex items-center justify-center text-gray-600">
+                          {platform.renderIcon({ size: 14 })}
+                        </span>
+                        <span className="font-medium text-[11px]">{platform.label}</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          let updated: SocialPlatform[];
+                          if (e.target.checked) {
+                            updated = [...activePlatforms, platform.id];
+                          } else {
+                            updated = activePlatforms.filter(id => id !== platform.id);
+                          }
+                          updateNestedProp("general", "socialPlatforms", updated);
+                        }}
+                        className="rounded-xs border-gray-300 w-3.5 h-3.5 accent-brand-primary cursor-pointer"
+                      />
+                    </label>
+                    {isChecked && (
+                      <div className="px-2 py-1">
+                        <input
+                          type="url"
+                          placeholder={platform.id === "facebook" || platform.id === "twitter" ? "Custom URL (defaults to Ghost settings)" : `https://${platform.id}.com/...`}
+                          value={socialUrls[platform.id] || ""}
+                          onChange={(e) => {
+                            updateNestedProp("general", "socialUrls", {
+                              ...socialUrls,
+                              [platform.id]: e.target.value
+                            });
+                          }}
+                          className="w-full px-2 py-1 border border-brand-hairline rounded-xs text-[10px] bg-white text-brand-ink focus:outline-none placeholder:text-gray-400"
+                        />
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -193,7 +211,7 @@ export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
           <label className="text-[11px] font-sans text-brand-body">Show Copyright</label>
         </div>
 
-        {p.general?.showCopyright && (
+        {(p.general?.showCopyright ?? true) && (
           <div className="mt-2">
             <label className="text-[11px] font-sans font-semibold text-brand-body">Custom Copyright</label>
             <input

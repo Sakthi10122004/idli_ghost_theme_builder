@@ -26,7 +26,7 @@ import {
   Sparkles,
   AlertTriangle
 } from "lucide-react";
-import { useEditorStore, INITIAL_THEME_DOCUMENT } from "@/store/editorStore";
+import { useEditorStore, INITIAL_THEME_DOCUMENT, unwrapStandaloneSections } from "@/store/editorStore";
 import { ThemeDocument } from "@/types/theme";
 
 interface ThemeProject {
@@ -43,7 +43,7 @@ const STORAGE_THEMES_KEY = "ghost_user_themes_v2";
 const STORAGE_ACTIVE_ID_KEY = "ghost_active_theme_id_v2";
 
 function createThemeId(): string {
-  return `theme-${Date.now()}`;
+  return `theme-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 export default function DashboardPage() {
@@ -101,16 +101,23 @@ export default function DashboardPage() {
       if (stored) {
         const parsed: ThemeProject[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const migratedParsed = parsed.map((t) => ({
+            ...t,
+            document: unwrapStandaloneSections(t.document),
+          }));
           const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-          const activeProj = (storedActiveId ? parsed.find((t) => t.id === storedActiveId) : null) || parsed[0];
+          const activeProj = (storedActiveId ? migratedParsed.find((t) => t.id === storedActiveId) : null) || migratedParsed[0];
 
           startTransition(() => {
-            setThemes(parsed);
+            setThemes(migratedParsed);
             if (activeProj) {
               setActiveThemeId(activeProj.id);
               setDocument(activeProj.document, activeProj.id);
             }
           });
+          try {
+            localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(migratedParsed));
+          } catch {}
         }
       } else {
         localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(defaultInitialThemes));
