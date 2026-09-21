@@ -717,8 +717,11 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
     newPages.error = { sections: [...INITIAL_THEME_DOCUMENT.pages.error.sections] };
   }
 
-  // Ensure any newly referenced block IDs exist in newBlocks
+  // Ensure any newly referenced block IDs exist in newBlocks and remove duplicates
   Object.keys(newPages).forEach((pageKey) => {
+    // Remove duplicates to prevent React duplicate key errors
+    newPages[pageKey].sections = Array.from(new Set(newPages[pageKey].sections));
+    
     newPages[pageKey].sections.forEach((sid) => {
       if (!newBlocks[sid] && initialBlocks[sid]) {
         newBlocks[sid] = JSON.parse(JSON.stringify(initialBlocks[sid]));
