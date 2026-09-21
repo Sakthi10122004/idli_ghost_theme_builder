@@ -16,12 +16,16 @@ import {
   Layout, 
   ChevronRight,
   CheckCircle2,
-  Terminal
+  Terminal,
+  Menu,
+  X
 } from "lucide-react";
 
 export default function LandingPage() {
   const [activeDevice, setActiveDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [activeTab, setActiveTab] = useState<"visual" | "code">("visual");
+  const [isMockMobileMenuOpen, setIsMockMobileMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const starterTemplates = [
     {
@@ -96,8 +100,29 @@ export default function LandingPage() {
             <span>Open Builder</span>
             <ArrowRight size={13} />
           </Link>
+          <button
+            type="button"
+            onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+            className="md:hidden p-1.5 text-brand-body hover:text-brand-ink rounded-md hover:bg-brand-canvas-soft transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {isMobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </header>
+
+      {/* Mobile Drawer for Landing Page Header */}
+      {isMobileNavOpen && (
+        <div className="md:hidden bg-white/95 backdrop-blur-md border-b border-brand-hairline px-6 py-4 flex flex-col gap-3 text-xs font-medium text-brand-body shadow-level-2 animate-in slide-in-from-top-1 duration-150">
+          <a href="#features" onClick={() => setIsMobileNavOpen(false)} className="py-1 hover:text-brand-ink transition-colors">Features</a>
+          <a href="#compiler" onClick={() => setIsMobileNavOpen(false)} className="py-1 hover:text-brand-ink transition-colors">Compiler</a>
+          <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="py-1 hover:text-brand-ink transition-colors">Templates</a>
+          <a href="#faq" onClick={() => setIsMobileNavOpen(false)} className="py-1 hover:text-brand-ink transition-colors">FAQ</a>
+          <Link href="/dashboard" onClick={() => setIsMobileNavOpen(false)} className="py-1 text-brand-ink font-semibold hover:text-brand-primary transition-colors">
+            Dashboard
+          </Link>
+        </div>
+      )}
 
       {/* ─── 2. Hero Band with Signature Mesh Gradient ─── */}
       <section className="relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-32 px-6">
@@ -163,21 +188,21 @@ export default function LandingPage() {
               {/* Viewport Switcher Controls */}
               <div className="hidden sm:flex items-center gap-1 bg-white border border-brand-hairline rounded-md p-0.5">
                 <button
-                  onClick={() => setActiveDevice("desktop")}
+                  onClick={() => { setActiveDevice("desktop"); setIsMockMobileMenuOpen(false); }}
                   className={`p-1 rounded text-xs transition-colors ${activeDevice === "desktop" ? "bg-brand-primary text-white" : "text-brand-mute hover:text-brand-ink"}`}
                   title="Desktop View"
                 >
                   <Monitor size={13} />
                 </button>
                 <button
-                  onClick={() => setActiveDevice("tablet")}
+                  onClick={() => { setActiveDevice("tablet"); setIsMockMobileMenuOpen(false); }}
                   className={`p-1 rounded text-xs transition-colors ${activeDevice === "tablet" ? "bg-brand-primary text-white" : "text-brand-mute hover:text-brand-ink"}`}
                   title="Tablet View"
                 >
                   <Tablet size={13} />
                 </button>
                 <button
-                  onClick={() => setActiveDevice("mobile")}
+                  onClick={() => { setActiveDevice("mobile"); setIsMockMobileMenuOpen(false); }}
                   className={`p-1 rounded text-xs transition-colors ${activeDevice === "mobile" ? "bg-brand-primary text-white" : "text-brand-mute hover:text-brand-ink"}`}
                   title="Mobile View"
                 >
@@ -211,15 +236,43 @@ export default function LandingPage() {
                   }`}
                 >
                   {/* Mock Site Header */}
-                  <div className="px-6 py-4 border-b border-brand-hairline flex items-center justify-between text-xs">
-                    <span className="font-bold tracking-tight text-sm">Sakthi T4GC</span>
-                    <div className="flex items-center gap-4 text-brand-body font-medium">
-                      <span>Stories</span>
-                      <span>About</span>
-                      <span>Membership</span>
+                  <div className="px-4 sm:px-6 py-3.5 border-b border-brand-hairline flex items-center justify-between text-xs bg-white relative z-20">
+                    <span className="font-bold tracking-tight text-sm text-brand-ink">Sakthi T4GC</span>
+                    
+                    {/* Desktop/Tablet Navigation Links */}
+                    <div className={`${activeDevice === "mobile" ? "hidden" : "hidden md:flex"} items-center gap-5 text-brand-body font-medium`}>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors">Stories</span>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors">About</span>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors">Membership</span>
                     </div>
-                    <span className="px-3 py-1 bg-brand-primary text-white rounded-full text-[11px] font-semibold">Subscribe</span>
+
+                    {/* Actions & Mobile Hamburger */}
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 sm:px-3 py-1 bg-brand-primary text-white rounded-full text-[11px] font-semibold hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap">
+                        Subscribe
+                      </span>
+
+                      {/* Mobile Hamburger Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => setIsMockMobileMenuOpen(!isMockMobileMenuOpen)}
+                        className={`${activeDevice === "mobile" ? "flex" : "flex md:hidden"} p-1 text-brand-body hover:text-brand-ink rounded hover:bg-brand-canvas-soft transition-colors`}
+                        aria-label="Toggle mobile menu"
+                        title="Toggle navigation menu"
+                      >
+                        {isMockMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Mock Mobile Dropdown Navigation Drawer */}
+                  {isMockMobileMenuOpen && (
+                    <div className={`${activeDevice === "mobile" ? "flex" : "flex md:hidden"} flex-col px-5 py-3 bg-brand-canvas-soft border-b border-brand-hairline gap-2.5 text-xs font-medium text-brand-body animate-in slide-in-from-top-1 duration-150`}>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors py-0.5">Stories</span>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors py-0.5">About</span>
+                      <span className="hover:text-brand-ink cursor-pointer transition-colors py-0.5">Membership</span>
+                    </div>
+                  )}
 
                   {/* Mock Hero Story */}
                   <div className="p-8 sm:p-12 text-center space-y-4 max-w-2xl mx-auto">
@@ -228,7 +281,7 @@ export default function LandingPage() {
                       <span>•</span>
                       <span className="text-brand-mute">August 20, 2026</span>
                     </div>
-                    <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-brand-ink leading-tight">
+                    <h2 className={`${activeDevice === "mobile" ? "text-2xl" : "text-2xl sm:text-4xl"} font-bold tracking-tight text-brand-ink leading-tight`}>
                       Designing modern publication themes with Ghost
                     </h2>
                     <p className="text-sm text-brand-body leading-relaxed max-w-lg mx-auto">
@@ -242,7 +295,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Mock Post Grid Snippet */}
-                  <div className="px-6 pb-8 border-t border-brand-hairline pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`px-4 sm:px-6 pb-8 border-t border-brand-hairline pt-6 grid ${activeDevice === "mobile" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"} gap-3 sm:gap-4`}>
                     <div className="p-4 bg-brand-canvas-soft border border-brand-hairline rounded-md">
                       <span className="text-[10px] font-mono uppercase text-blue-600 font-semibold">Architecture</span>
                       <h4 className="font-semibold text-xs text-brand-ink mt-1">Decoupled presentation with AST compiler</h4>
