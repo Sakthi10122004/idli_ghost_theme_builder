@@ -260,17 +260,15 @@ export const compileToHbs = (block: BuilderBlock) => {
               </div>
               <ul class="editorial-sidebar-list">
           {{else}}
-            {{#if (lt @index 5)}}
-              <li class="editorial-sidebar-item">
-                <a href="{{url}}">
-                  <span class="editorial-index">0{{@index}}</span>
-                  <div class="editorial-info">
-                    <h5>{{title}}</h5>
-                    <span class="editorial-date">{{date format="MMM D"}}</span>
-                  </div>
-                </a>
-              </li>
-            {{/if}}
+            <li class="editorial-sidebar-item">
+              <a href="{{url}}">
+                <span class="editorial-index">0{{@index}}</span>
+                <div class="editorial-info">
+                  <h5>{{title}}</h5>
+                  <span class="editorial-date">{{date format="MMM D"}}</span>
+                </div>
+              </a>
+            </li>
           {{/if}}
           {{#if @last}}
               </ul>

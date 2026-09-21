@@ -49,11 +49,11 @@ export const CanvasElement = ({
         {/* Comment 1 */}
         <div className="flex items-start gap-3 bg-white dark:bg-neutral-900 p-4 rounded-xl border border-brand-hairline dark:border-neutral-800 shadow-level-1">
           <div className="w-8 h-8 rounded-full bg-emerald-700 dark:bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 select-none">
-            SK
+            AR
           </div>
           <div className="flex-1 space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-ink dark:text-white">Sakthi K</span>
+              <span className="text-xs font-semibold text-brand-ink dark:text-white">Alex Rivera</span>
               <span className="text-[10px] text-brand-mute dark:text-neutral-400">· Just now</span>
             </div>
             <p className="text-xs text-brand-body dark:text-neutral-300 leading-relaxed">

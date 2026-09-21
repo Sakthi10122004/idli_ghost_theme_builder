@@ -41,6 +41,10 @@ interface ThemeProject {
 const STORAGE_THEMES_KEY = "ghost_user_themes_v2";
 const STORAGE_ACTIVE_ID_KEY = "ghost_active_theme_id_v2";
 
+function createThemeId(): string {
+  return `theme-${Date.now()}`;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { 
@@ -48,17 +52,19 @@ export default function DashboardPage() {
     updateMetadata, 
     setDocument, 
     activeThemeId, 
-    setActiveThemeId 
+    setActiveThemeId,
+    setUserId,
+    saveTheme,
   } = useEditorStore();
 
   // Deterministic default theme for initial render (matches on server and client)
   const defaultInitialThemes: ThemeProject[] = [
     {
       id: "theme-primary",
-      name: themeDoc.metadata.name || "Sakthi T4GC",
-      author: themeDoc.metadata.author || "Sakthi T4GC",
-      version: themeDoc.metadata.version || "1.0.0",
-      description: themeDoc.metadata.description || "A Vercel-inspired theme visual build",
+      name: themeDoc.metadata?.name || "My Ghost Theme",
+      author: themeDoc.metadata?.author || "Ghost Creator",
+      version: themeDoc.metadata?.version || "1.0.0",
+      description: themeDoc.metadata?.description || "A clean, modern Ghost publication theme",
       updatedAt: "Just now",
       document: themeDoc,
     },
@@ -85,7 +91,7 @@ export default function DashboardPage() {
   const [editVersion, setEditVersion] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
-  // Load themes from localStorage after client hydration mount
+  // Load themes from localStorage & cloud database after client hydration mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_THEMES_KEY) || localStorage.getItem("ghost_user_themes_v1");
@@ -93,31 +99,84 @@ export default function DashboardPage() {
         const parsed: ThemeProject[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-          // Match by explicit activeThemeId or storedActiveId or exact name
-          const matchIdx = parsed.findIndex(
-            (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === activeThemeId || t.name === themeDoc.metadata.name
-          );
-          if (matchIdx >= 0) {
-            parsed[matchIdx].document = themeDoc;
-            parsed[matchIdx].name = themeDoc.metadata.name;
-            parsed[matchIdx].author = themeDoc.metadata.author;
-            parsed[matchIdx].version = themeDoc.metadata.version;
-            parsed[matchIdx].description = themeDoc.metadata.description || "";
-            parsed[matchIdx].updatedAt = "Just now";
-          }
           queueMicrotask(() => {
             setThemes(parsed);
           });
+
+          const activeProj = (storedActiveId ? parsed.find((t) => t.id === storedActiveId) : null) || parsed[0];
+          if (activeProj) {
+            setActiveThemeId(activeProj.id);
+            setDocument(activeProj.document, activeProj.id);
+          }
         }
+      } else {
+        localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(defaultInitialThemes));
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, defaultInitialThemes[0].id);
       }
+      queueMicrotask(() => {
+        setHasLoadedFromStorage(true);
+      });
+
+      // Check cloud database if logged in and sync cloud-saved theme
+      fetch("/api/auth/me")
+        .then((res) => res.json())
+        .then(async (authData) => {
+          if (authData.authenticated && authData.userId) {
+            setUserId(authData.userId);
+            const res = await fetch(`/api/theme?userId=${encodeURIComponent(authData.userId)}`);
+            const data = await res.json();
+            if (data.document && data.document.metadata) {
+              const dbDoc = data.document;
+              setThemes((prevThemes) => {
+                const updated = [...prevThemes];
+                const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+                const matchIdx = updated.findIndex(
+                  (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === "theme-primary" || t.name === dbDoc.metadata.name
+                );
+                if (matchIdx >= 0) {
+                  updated[matchIdx] = {
+                    ...updated[matchIdx],
+                    name: dbDoc.metadata.name,
+                    author: dbDoc.metadata.author,
+                    version: dbDoc.metadata.version,
+                    description: dbDoc.metadata.description || "",
+                    document: dbDoc,
+                    updatedAt: "Just now",
+                  };
+                  if (updated[matchIdx].id === (storedActiveId || "theme-primary")) {
+                    setDocument(dbDoc, updated[matchIdx].id);
+                    setActiveThemeId(updated[matchIdx].id);
+                  }
+                } else {
+                  const newTheme: ThemeProject = {
+                    id: "theme-primary",
+                    name: dbDoc.metadata.name,
+                    author: dbDoc.metadata.author,
+                    version: dbDoc.metadata.version,
+                    description: dbDoc.metadata.description || "",
+                    updatedAt: "Just now",
+                    document: dbDoc,
+                  };
+                  updated.unshift(newTheme);
+                  setDocument(dbDoc, "theme-primary");
+                  setActiveThemeId("theme-primary");
+                }
+                try {
+                  localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+                } catch {}
+                return updated;
+              });
+            }
+          }
+        })
+        .catch(console.error);
     } catch (e) {
       console.error("Failed to load themes from storage:", e);
-    } finally {
       queueMicrotask(() => {
         setHasLoadedFromStorage(true);
       });
     }
-  }, [activeThemeId, themeDoc]);
+  }, []);
 
   // Synchronize themes list changes into localStorage once loaded
   useEffect(() => {
@@ -145,7 +204,7 @@ export default function DashboardPage() {
 
   const handleDuplicateTheme = (theme: ThemeProject) => {
     const duplicatedDoc: ThemeDocument = JSON.parse(JSON.stringify(theme.document));
-    const newId = `theme-${Date.now()}`;
+    const newId = createThemeId();
     const newName = `${theme.name} (Copy)`;
     duplicatedDoc.metadata.name = newName;
 
@@ -204,11 +263,11 @@ export default function DashboardPage() {
     e.preventDefault();
     if (!newThemeName.trim()) return;
 
-    const newId = `theme-${Date.now()}`;
+    const newId = createThemeId();
     const baseDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
     baseDoc.metadata = {
       name: newThemeName.trim(),
-      author: newThemeAuthor.trim() || "Sakthi T4GC",
+      author: newThemeAuthor.trim() || activeTheme?.author || "Ghost Creator",
       version: "1.0.0",
       description: newThemeDescription.trim() || "A custom Ghost publication theme",
     };
@@ -292,9 +351,10 @@ export default function DashboardPage() {
             },
           };
         }
-        // If this is the active theme, update Zustand store too
+        // If this is the active theme, update Zustand store and cloud DB
         if (t.id === activeThemeId || t.name === themeDoc.metadata.name) {
           updateMetadata(updatedDoc.metadata);
+          setTimeout(() => saveTheme(), 100);
         }
         return {
           ...t,
@@ -380,6 +440,8 @@ export default function DashboardPage() {
       setIsExporting(null);
     }
   };
+
+  const activeTheme = themes.find((t) => t.id === activeThemeId) || themes[0];
 
   const filteredThemes = themes.filter(
     (t) =>
@@ -500,10 +562,10 @@ export default function DashboardPage() {
               <FileCode2 size={16} />
             </div>
             <div className="text-lg font-bold text-brand-ink truncate">
-              {themeDoc.metadata.name || "Sakthi T4GC"}
+              {activeTheme?.name || themeDoc.metadata?.name || "My Ghost Theme"}
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              v{themeDoc.metadata.version || "1.0.0"} · By {themeDoc.metadata.author || "Sakthi T4GC"}
+              v{activeTheme?.version || themeDoc.metadata?.version || "1.0.0"} · By {activeTheme?.author || themeDoc.metadata?.author || "Ghost Creator"}
             </div>
           </div>
 
@@ -577,7 +639,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredThemes.map((theme) => {
-              const isActive = (activeThemeId ? theme.id === activeThemeId : false) || theme.name === themeDoc.metadata.name;
+              const isActive = theme.id === (activeTheme?.id || activeThemeId);
               const pages = Object.keys(theme.document.pages || {});
               const blocksCount = Object.keys(theme.document.blocks || {}).length;
               const isCurrentlyExporting = isExporting === theme.id;
@@ -880,7 +942,7 @@ export default function DashboardPage() {
                 <label className="block font-semibold text-brand-ink mb-1">Author Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Sakthi T4GC"
+                  placeholder="e.g. Acme Studio"
                   value={newThemeAuthor}
                   onChange={(e) => setNewThemeAuthor(e.target.value)}
                   className="w-full px-3 py-2 border border-brand-hairline rounded-md text-brand-ink focus:outline-none focus:border-brand-primary"

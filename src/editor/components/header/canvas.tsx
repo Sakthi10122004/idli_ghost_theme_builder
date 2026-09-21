@@ -30,7 +30,7 @@ export const CanvasElement = ({ block }: {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { deviceMode, document: doc } = useEditorStore();
 
-  const siteTitle = general.siteTitle || (doc?.metadata?.name && doc.metadata.name !== "My Ghost Theme" ? doc.metadata.name : "Sakthi T4GC");
+  const siteTitle = general.siteTitle || doc?.metadata?.name || "Ghost Publication";
 
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
     { label: "Home", url: "/" },

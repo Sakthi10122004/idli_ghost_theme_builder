@@ -129,7 +129,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             value={g.siteTitle ?? ""}
             onChange={(e) => updateCategory("general", "siteTitle", e.target.value)}
             className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-            placeholder="e.g. Sakthi T4GC"
+            placeholder="e.g. My Publication"
           />
         </div>
 

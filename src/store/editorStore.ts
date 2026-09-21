@@ -62,10 +62,10 @@ export const DEFAULT_DESIGN_TOKENS = {
 
 export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
   metadata: {
-    name: "Sakthi T4GC",
+    name: "My Ghost Theme",
     version: "1.0.0",
-    author: "Sakthi T4GC",
-    description: "A Vercel-inspired theme visual build",
+    author: "Ghost Creator",
+    description: "A clean, modern Ghost publication theme",
   },
   settings: {
     containerWidth: 1200,
@@ -91,7 +91,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       type: "header",
       props: {
         general: {
-          siteTitle: "Sakthi T4GC",
+          siteTitle: "My Ghost Theme",
         },
         navItems: [
           { label: "Home", url: "/" },
@@ -692,6 +692,16 @@ export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
   return modified ? { ...migrated, blocks: newBlocks, pages: newPages } : migrated;
 }
 
+interface LocalStorageThemeItem {
+  id: string;
+  name?: string;
+  author?: string;
+  version?: string;
+  description?: string;
+  updatedAt?: string;
+  document?: ThemeDocument;
+}
+
 export const useEditorStore = create<EditorState>((set, get) => ({
   document: unwrapStandaloneSections(INITIAL_THEME_DOCUMENT),
   selectedBlockId: null,
@@ -735,6 +745,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         console.log(`[Zustand Store] loadTheme completed. AST document successfully hydrated.`);
         const unwrappedDoc = unwrapStandaloneSections(data.document);
         set({ document: unwrappedDoc, saveStatus: "saved" });
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("ghost_user_themes_v2");
+            if (stored) {
+              const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+              const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === activeThemeId);
+              if (idx >= 0) {
+                parsed[idx].document = unwrappedDoc;
+                parsed[idx].name = unwrappedDoc.metadata?.name || parsed[idx].name;
+                parsed[idx].author = unwrappedDoc.metadata?.author || parsed[idx].author;
+                parsed[idx].version = unwrappedDoc.metadata?.version || parsed[idx].version;
+                parsed[idx].description = unwrappedDoc.metadata?.description || parsed[idx].description;
+                parsed[idx].updatedAt = "Just now";
+                localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+              }
+            }
+          } catch {}
+        }
       } else {
         console.log(`[Zustand Store] loadTheme completed. No layout record found, using defaults.`);
       }
@@ -745,7 +773,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   saveTheme: async () => {
     try {
-      const { userId, document } = get();
+      const { userId, document, activeThemeId } = get();
       console.log(`[Zustand Store] saveTheme task initiated for userId: "${userId}"`);
       set({ isSaving: true, saveStatus: "saving" });
       
@@ -763,6 +791,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         console.warn("[Zustand Store] saveTheme returned validation errors.");
         set({ isSaving: false, saveStatus: "error" });
       }
+
+      // Also sync into localStorage so dashboard stays instantly up to date
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("ghost_user_themes_v2");
+          if (stored) {
+            const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+            const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === activeThemeId);
+            if (idx >= 0) {
+              parsed[idx].document = document;
+              parsed[idx].name = document.metadata?.name || parsed[idx].name;
+              parsed[idx].author = document.metadata?.author || parsed[idx].author;
+              parsed[idx].version = document.metadata?.version || parsed[idx].version;
+              parsed[idx].description = document.metadata?.description || parsed[idx].description;
+              parsed[idx].updatedAt = "Just now";
+              localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+            }
+          }
+        } catch {}
+      }
     } catch (error) {
       console.error("[Zustand Store] saveTheme task failed:", error);
       set({ isSaving: false, saveStatus: "error" });
@@ -771,15 +819,36 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   updateMetadata: (metadata) => set((state) => {
     const historyUpdate = saveToHistory(state);
+    const newDoc = {
+      ...state.document,
+      metadata: {
+        ...state.document.metadata,
+        ...metadata,
+      },
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("ghost_user_themes_v2");
+        if (stored) {
+          const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+          const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === state.activeThemeId);
+          if (idx >= 0) {
+            parsed[idx].document = newDoc;
+            if (metadata.name) parsed[idx].name = metadata.name;
+            if (metadata.author) parsed[idx].author = metadata.author;
+            if (metadata.version) parsed[idx].version = metadata.version;
+            if (metadata.description !== undefined) parsed[idx].description = metadata.description;
+            parsed[idx].updatedAt = "Just now";
+            localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+    }
+
     return {
       ...historyUpdate,
-      document: {
-        ...state.document,
-        metadata: {
-          ...state.document.metadata,
-          ...metadata,
-        },
-      },
+      document: newDoc,
     };
   }),
 

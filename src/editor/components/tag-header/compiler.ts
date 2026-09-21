@@ -19,7 +19,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     : "";
 
   const countMarkup = p.showCount
-    ? `  <span class="gh-tag-header-count">{{count.posts}} post{{#unless (eq count.posts 1)}}s{{/unless}}</span>`
+    ? `  <span class="gh-tag-header-count">{{plural count.posts empty="0 posts" singular="% post" plural="% posts"}}</span>`
     : "";
 
   return `<style>

@@ -43,7 +43,7 @@ export const defaultProps: HeaderProps = {
     layoutStyle: "Logo on Left",
     logoSize: 40,
     showLogo: true,
-    siteTitle: "Sakthi T4GC",
+    siteTitle: "Ghost Publication",
     showSearch: true,
     showThemeSwitcher: true,
     showSignIn: true,
