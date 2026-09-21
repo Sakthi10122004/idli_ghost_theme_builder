@@ -46,7 +46,12 @@ export default function Builder() {
         if (data.authenticated) {
           setUserId(data.userId);
           setIsAuthenticated(true);
-          await loadTheme();
+          const currentStore = useEditorStore.getState();
+          const storedActiveId = typeof window !== "undefined" ? localStorage.getItem("ghost_active_theme_id_v2") : null;
+          const activeId = currentStore.activeThemeId || storedActiveId;
+          if (!activeId || activeId === "theme-primary") {
+            await loadTheme();
+          }
         }
       })
       .catch(console.error)
@@ -56,7 +61,12 @@ export default function Builder() {
   const handleAuthSuccess = (userId: string) => {
     setUserId(userId);
     setIsAuthenticated(true);
-    loadTheme();
+    const currentStore = useEditorStore.getState();
+    const storedActiveId = typeof window !== "undefined" ? localStorage.getItem("ghost_active_theme_id_v2") : null;
+    const activeId = currentStore.activeThemeId || storedActiveId;
+    if (!activeId || activeId === "theme-primary") {
+      loadTheme();
+    }
   };
 
   if (!isHydrated || checkingAuth) {

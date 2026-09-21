@@ -62,10 +62,11 @@ export const DEFAULT_DESIGN_TOKENS = {
 
 export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
   metadata: {
-    name: "My Ghost Theme",
+    name: "Untitled Theme",
     version: "1.0.0",
     author: "Ghost Creator",
     description: "A clean, modern Ghost publication theme",
+    themeId: "theme-primary",
   },
   settings: {
     containerWidth: 1200,
@@ -91,13 +92,12 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       type: "header",
       props: {
         general: {
-          siteTitle: "My Ghost Theme",
+          siteTitle: "",
         },
         navItems: [
           { label: "Home", url: "/" },
           { label: "About", url: "/about" },
-          { label: "Team", url: "/team" },
-          { label: "About 2", url: "/about-2" }
+          { label: "Team", url: "/team" }
         ]
       },
       styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
@@ -744,13 +744,19 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       if (data.document) {
         console.log(`[Zustand Store] loadTheme completed. AST document successfully hydrated.`);
         const unwrappedDoc = unwrapStandaloneSections(data.document);
+        const dbThemeId = unwrappedDoc.metadata?.themeId;
+        if (dbThemeId && activeThemeId && dbThemeId !== activeThemeId) {
+          console.log(`[Zustand Store] Skipping loadTheme: db themeId "${dbThemeId}" does not match active themeId "${activeThemeId}"`);
+          return;
+        }
         set({ document: unwrappedDoc, saveStatus: "saved" });
         if (typeof window !== "undefined") {
           try {
             const stored = localStorage.getItem("ghost_user_themes_v2");
             if (stored) {
               const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
-              const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === activeThemeId);
+              const targetThemeId = dbThemeId || activeThemeId;
+              const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === targetThemeId);
               if (idx >= 0) {
                 parsed[idx].document = unwrappedDoc;
                 parsed[idx].name = unwrappedDoc.metadata?.name || parsed[idx].name;
@@ -777,10 +783,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       console.log(`[Zustand Store] saveTheme task initiated for userId: "${userId}"`);
       set({ isSaving: true, saveStatus: "saving" });
       
+      const docWithThemeId = {
+        ...document,
+        metadata: {
+          ...document.metadata,
+          themeId: activeThemeId,
+        },
+      };
+
       const res = await fetch("/api/theme", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, document }),
+        body: JSON.stringify({ userId, document: docWithThemeId }),
       });
       
       const data = await res.json();
@@ -825,7 +839,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         ...state.document.metadata,
         ...metadata,
       },
+      blocks: {
+        ...state.document.blocks,
+      },
     };
+
+    if (metadata.name && newDoc.blocks && newDoc.blocks["header-sec-1"]) {
+      const curTitle = newDoc.blocks["header-sec-1"].props?.general?.siteTitle;
+      if (!curTitle || curTitle === "My Ghost Theme" || curTitle === state.document.metadata?.name) {
+        newDoc.blocks["header-sec-1"] = {
+          ...newDoc.blocks["header-sec-1"],
+          props: {
+            ...newDoc.blocks["header-sec-1"].props,
+            general: {
+              ...newDoc.blocks["header-sec-1"].props?.general,
+              siteTitle: metadata.name,
+            },
+          },
+        };
+      }
+    }
 
     if (typeof window !== "undefined") {
       try {

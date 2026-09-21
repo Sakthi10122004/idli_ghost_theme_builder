@@ -43,7 +43,7 @@ export const defaultProps: HeaderProps = {
     layoutStyle: "Logo on Left",
     logoSize: 40,
     showLogo: true,
-    siteTitle: "Ghost Publication",
+    siteTitle: "",
     showSearch: true,
     showThemeSwitcher: true,
     showSignIn: true,
@@ -77,8 +77,7 @@ export const defaultProps: HeaderProps = {
   navItems: [
     { label: "Home", url: "/" },
     { label: "About", url: "/about" },
-    { label: "Team", url: "/team" },
-    { label: "About 2", url: "/about-2" }
+    { label: "Team", url: "/team" }
   ]
 };
 

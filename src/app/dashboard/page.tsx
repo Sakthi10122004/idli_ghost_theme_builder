@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, startTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import JSZip from "jszip";
@@ -23,7 +23,8 @@ import {
   Copy,
   Trash2,
   Clock,
-  Sparkles
+  Sparkles,
+  AlertTriangle
 } from "lucide-react";
 import { useEditorStore, INITIAL_THEME_DOCUMENT } from "@/store/editorStore";
 import { ThemeDocument } from "@/types/theme";
@@ -53,6 +54,7 @@ export default function DashboardPage() {
     setDocument, 
     activeThemeId, 
     setActiveThemeId,
+    userId,
     setUserId,
     saveTheme,
   } = useEditorStore();
@@ -61,7 +63,7 @@ export default function DashboardPage() {
   const defaultInitialThemes: ThemeProject[] = [
     {
       id: "theme-primary",
-      name: themeDoc.metadata?.name || "My Ghost Theme",
+      name: themeDoc.metadata?.name || "Untitled Theme",
       author: themeDoc.metadata?.author || "Ghost Creator",
       version: themeDoc.metadata?.version || "1.0.0",
       description: themeDoc.metadata?.description || "A clean, modern Ghost publication theme",
@@ -78,6 +80,7 @@ export default function DashboardPage() {
   const [exportSuccessId, setExportSuccessId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const [themeToEdit, setThemeToEdit] = useState<ThemeProject | null>(null);
+  const [themeToDelete, setThemeToDelete] = useState<ThemeProject | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // New Theme Form State
@@ -101,7 +104,7 @@ export default function DashboardPage() {
           const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
           const activeProj = (storedActiveId ? parsed.find((t) => t.id === storedActiveId) : null) || parsed[0];
 
-          queueMicrotask(() => {
+          startTransition(() => {
             setThemes(parsed);
             if (activeProj) {
               setActiveThemeId(activeProj.id);
@@ -113,7 +116,7 @@ export default function DashboardPage() {
         localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(defaultInitialThemes));
         localStorage.setItem(STORAGE_ACTIVE_ID_KEY, defaultInitialThemes[0].id);
       }
-      queueMicrotask(() => {
+      startTransition(() => {
         setHasLoadedFromStorage(true);
       });
 
@@ -127,12 +130,14 @@ export default function DashboardPage() {
             const data = await res.json();
             if (data.document && data.document.metadata) {
               const dbDoc = data.document;
-              const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-              
+              const dbThemeId = dbDoc.metadata.themeId;
+              const dbThemeName = dbDoc.metadata.name;
+
               setThemes((prevThemes) => {
                 const updated = [...prevThemes];
+                // Match ONLY by explicit themeId if present, or if theme-primary matches dbThemeName
                 const matchIdx = updated.findIndex(
-                  (t) => (storedActiveId ? t.id === storedActiveId : false) || t.id === "theme-primary" || t.name === dbDoc.metadata.name
+                  (t) => (dbThemeId ? t.id === dbThemeId : false) || (t.id === "theme-primary" && t.name === dbThemeName)
                 );
                 if (matchIdx >= 0) {
                   updated[matchIdx] = {
@@ -144,28 +149,35 @@ export default function DashboardPage() {
                     document: dbDoc,
                     updatedAt: "Just now",
                   };
-                } else {
-                  updated.unshift({
-                    id: "theme-primary",
+                  try {
+                    localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+                  } catch {}
+                } else if (
+                  updated.length === 0 ||
+                  (updated.length === 1 && updated[0].id === "theme-primary" && updated[0].name === "My Ghost Theme")
+                ) {
+                  // Fresh session with only default starter theme: safely hydrate cloud theme
+                  const cloudThemeId = dbThemeId || "theme-primary";
+                  updated[0] = {
+                    id: cloudThemeId,
                     name: dbDoc.metadata.name,
                     author: dbDoc.metadata.author,
                     version: dbDoc.metadata.version,
                     description: dbDoc.metadata.description || "",
                     updatedAt: "Just now",
                     document: dbDoc,
-                  });
+                  };
+                  try {
+                    localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+                  } catch {}
                 }
-                try {
-                  localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
-                } catch {}
                 return updated;
               });
 
-              // Safely update editor store outside of setThemes reducer
-              const targetId = storedActiveId || "theme-primary";
-              if (targetId === "theme-primary" || !storedActiveId) {
-                setDocument(dbDoc, targetId);
-                setActiveThemeId(targetId);
+              // Only setDocument in editor store if the active theme matches this db theme
+              const currentActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+              if (dbThemeId && currentActiveId === dbThemeId) {
+                setDocument(dbDoc, dbThemeId);
               }
             }
           }
@@ -208,6 +220,7 @@ export default function DashboardPage() {
     const newId = createThemeId();
     const newName = `${theme.name} (Copy)`;
     duplicatedDoc.metadata.name = newName;
+    duplicatedDoc.metadata.themeId = newId;
 
     if (duplicatedDoc.blocks && duplicatedDoc.blocks["header-sec-1"]) {
       duplicatedDoc.blocks["header-sec-1"].props = {
@@ -237,12 +250,72 @@ export default function DashboardPage() {
     showToast(`Duplicated "${theme.name}" as "${newName}"!`);
   };
 
-  const handleDeleteTheme = (id: string) => {
+  const handleDeleteClick = (theme: ThemeProject) => {
+    setThemeToDelete(theme);
+  };
+
+  const confirmDeleteTheme = async () => {
+    if (!themeToDelete) return;
+    const id = themeToDelete.id;
+    const targetName = themeToDelete.name;
+
     if (themes.length <= 1) {
-      alert("You must keep at least one theme project.");
+      // User is deleting their only theme: reset workspace to a fresh starter theme
+      const freshDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
+      const freshId = createThemeId();
+      freshDoc.metadata = {
+        name: "My Ghost Theme",
+        author: "Ghost Creator",
+        version: "1.0.0",
+        description: "A clean, modern Ghost publication theme",
+        themeId: freshId,
+      };
+      if (freshDoc.blocks && freshDoc.blocks["header-sec-1"]) {
+        freshDoc.blocks["header-sec-1"].props = {
+          ...freshDoc.blocks["header-sec-1"].props,
+          general: {
+            ...freshDoc.blocks["header-sec-1"].props?.general,
+            siteTitle: "",
+          },
+        };
+      }
+
+      const freshTheme: ThemeProject = {
+        id: freshId,
+        name: freshDoc.metadata.name,
+        author: freshDoc.metadata.author,
+        version: freshDoc.metadata.version,
+        description: freshDoc.metadata.description || "",
+        updatedAt: "Just now",
+        document: freshDoc,
+      };
+
+      const updated = [freshTheme];
+      setThemes(updated);
+      try {
+        localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(updated));
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, freshId);
+      } catch {}
+
+      setDocument(freshDoc, freshId);
+      setActiveThemeId(freshId);
+
+      if (userId) {
+        try {
+          await fetch("/api/theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, document: freshDoc }),
+          });
+        } catch {}
+      }
+
+      showToast(`Deleted theme "${targetName}". Workspace reset with a fresh starter theme.`);
+      setThemeToDelete(null);
       return;
     }
-    const themeToDelete = themes.find((t) => t.id === id);
+
+    // Multiple themes exist
     const updated = themes.filter((t) => t.id !== id);
     setThemes(updated);
     try {
@@ -256,21 +329,33 @@ export default function DashboardPage() {
       try {
         localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated[0].id);
       } catch {}
+      if (userId && updated[0].document) {
+        try {
+          fetch("/api/theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, document: updated[0].document }),
+          }).catch(() => {});
+        } catch {}
+      }
     }
-    showToast(`Deleted theme "${themeToDelete?.name || ""}".`);
+    showToast(`Deleted theme "${targetName}".`);
+    setThemeToDelete(null);
   };
 
   const handleCreateTheme = (e: React.FormEvent, openBuilder = true) => {
     e.preventDefault();
-    if (!newThemeName.trim()) return;
+    const trimmedName = newThemeName.trim();
+    if (!trimmedName) return;
 
     const newId = createThemeId();
     const baseDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
     baseDoc.metadata = {
-      name: newThemeName.trim(),
+      name: trimmedName,
       author: newThemeAuthor.trim() || activeTheme?.author || "Ghost Creator",
       version: "1.0.0",
       description: newThemeDescription.trim() || "A custom Ghost publication theme",
+      themeId: newId,
     };
 
     // Update siteTitle in header block so visual canvas renders the new theme name
@@ -279,14 +364,14 @@ export default function DashboardPage() {
         ...baseDoc.blocks["header-sec-1"].props,
         general: {
           ...baseDoc.blocks["header-sec-1"].props?.general,
-          siteTitle: newThemeName.trim(),
+          siteTitle: trimmedName,
         },
       };
     }
 
     const newProject: ThemeProject = {
       id: newId,
-      name: baseDoc.metadata.name,
+      name: trimmedName,
       author: baseDoc.metadata.author,
       version: baseDoc.metadata.version,
       description: baseDoc.metadata.description || "",
@@ -306,6 +391,15 @@ export default function DashboardPage() {
     setDocument(baseDoc, newId);
     setActiveThemeId(newId);
 
+    // Save newly created theme into user DB session so cloud sync doesn't overwrite it
+    if (userId) {
+      fetch("/api/theme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, document: baseDoc }),
+      }).catch(() => {});
+    }
+
     setShowNewModal(false);
     setNewThemeName("");
     setNewThemeAuthor("");
@@ -314,7 +408,7 @@ export default function DashboardPage() {
     if (openBuilder) {
       router.push("/builder");
     } else {
-      showToast(`Created theme "${newProject.name}"!`);
+      showToast(`Created theme "${trimmedName}"!`);
     }
   };
 
@@ -563,10 +657,18 @@ export default function DashboardPage() {
               <FileCode2 size={16} />
             </div>
             <div className="text-lg font-bold text-brand-ink truncate">
-              {activeTheme?.name || themeDoc.metadata?.name || "My Ghost Theme"}
+              {!hasLoadedFromStorage ? (
+                <span className="inline-block h-5 w-28 bg-gray-200/80 animate-pulse rounded align-middle" />
+              ) : (
+                activeTheme?.name || themeDoc.metadata?.name || "Untitled Theme"
+              )}
             </div>
             <div className="text-xs text-brand-mute mt-1">
-              v{activeTheme?.version || themeDoc.metadata?.version || "1.0.0"} · By {activeTheme?.author || themeDoc.metadata?.author || "Ghost Creator"}
+              {!hasLoadedFromStorage ? (
+                <span className="inline-block h-3.5 w-36 bg-gray-100 animate-pulse rounded align-middle" />
+              ) : (
+                `v${activeTheme?.version || themeDoc.metadata?.version || "1.0.0"} · By ${activeTheme?.author || themeDoc.metadata?.author || "Ghost Creator"}`
+              )}
             </div>
           </div>
 
@@ -592,7 +694,11 @@ export default function DashboardPage() {
               <Layers size={16} />
             </div>
             <div className="text-lg font-bold text-brand-ink" suppressHydrationWarning>
-              {themes.length} {themes.length === 1 ? "Theme" : "Themes"}
+              {!hasLoadedFromStorage ? (
+                <span className="inline-block h-5 w-16 bg-gray-200/80 animate-pulse rounded align-middle" />
+              ) : (
+                `${themes.length} ${themes.length === 1 ? "Theme" : "Themes"}`
+              )}
             </div>
             <div className="text-xs text-brand-mute mt-1">
               Independent Ghost publication projects
@@ -622,7 +728,7 @@ export default function DashboardPage() {
                   My Themes
                 </h3>
                 <span className="font-mono text-[11px] bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded text-brand-mute" suppressHydrationWarning>
-                  {filteredThemes.length} {filteredThemes.length === 1 ? "theme" : "themes"}
+                  {!hasLoadedFromStorage ? "..." : `${filteredThemes.length} ${filteredThemes.length === 1 ? "theme" : "themes"}`}
                 </span>
               </div>
               <p className="text-xs text-brand-body mt-0.5">
@@ -639,7 +745,31 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredThemes.map((theme) => {
+            {!hasLoadedFromStorage ? (
+              <div className="bg-white border border-brand-hairline rounded-xl p-5 flex flex-col justify-between min-h-[290px] animate-pulse">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-md bg-gray-200" />
+                      <div className="space-y-1.5">
+                        <div className="h-4 w-28 bg-gray-200 rounded" />
+                        <div className="h-2.5 w-20 bg-gray-100 rounded" />
+                      </div>
+                    </div>
+                    <div className="h-5 w-14 bg-gray-100 rounded-full" />
+                  </div>
+                  <div className="h-3 w-48 bg-gray-100 rounded mt-3" />
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <div className="h-14 bg-brand-canvas-soft rounded-lg" />
+                    <div className="h-14 bg-brand-canvas-soft rounded-lg" />
+                  </div>
+                </div>
+                <div className="pt-4">
+                  <div className="h-9 w-full bg-gray-200 rounded-lg" />
+                </div>
+              </div>
+            ) : (
+              filteredThemes.map((theme) => {
               const isActive = theme.id === (activeTheme?.id || activeThemeId);
               const pages = Object.keys(theme.document.pages || {});
               const blocksCount = Object.keys(theme.document.blocks || {}).length;
@@ -781,23 +911,21 @@ export default function DashboardPage() {
                             <Copy size={11} />
                             <span>Duplicate</span>
                           </button>
-                          {themes.length > 1 && (
-                            <button
-                              onClick={() => handleDeleteTheme(theme.id)}
-                              className="hover:text-rose-600 transition-colors text-[11px] font-medium flex items-center gap-1"
-                              title="Delete Theme"
-                            >
-                              <Trash2 size={11} />
-                              <span>Delete</span>
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleDeleteClick(theme)}
+                            className="hover:text-rose-600 transition-colors text-[11px] font-medium flex items-center gap-1"
+                            title="Delete Theme"
+                          >
+                            <Trash2 size={11} />
+                            <span>Delete</span>
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               );
-            })}
+            }))}
 
             {/* Create New Theme Card */}
             <button
@@ -1060,6 +1188,81 @@ export default function DashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Warning Modal */}
+      {themeToDelete && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setThemeToDelete(null);
+          }}
+        >
+          <div className="bg-white border border-brand-hairline rounded-xl shadow-level-5 max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 shrink-0">
+                  <AlertTriangle size={20} className="stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-brand-ink">Delete Theme</h3>
+                  <p className="text-xs text-brand-mute">This action cannot be undone.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setThemeToDelete(null)} 
+                className="text-brand-mute hover:text-brand-ink p-1 rounded-md hover:bg-brand-canvas-soft transition-colors"
+                title="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-brand-body leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-brand-ink">&ldquo;{themeToDelete.name}&rdquo;</span>? This will permanently remove the theme document, layouts, custom templates, and styling settings.
+            </p>
+
+            <div className="bg-brand-canvas-soft/80 border border-brand-hairline rounded-lg p-3 text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-brand-mute font-medium">Theme Name:</span>
+                <span className="font-semibold text-brand-ink">{themeToDelete.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-brand-mute font-medium">Author / Version:</span>
+                <span className="text-brand-body">{themeToDelete.author} &bull; v{themeToDelete.version}</span>
+              </div>
+              {themes.length === 1 ? (
+                <div className="pt-1.5 border-t border-brand-hairline/60 flex items-start gap-1.5 text-amber-700 text-[11px] font-medium">
+                  <AlertTriangle size={13} className="shrink-0 mt-0.5 text-amber-500" />
+                  <span>This is your only theme project. Deleting it will reset your workspace and initialize a clean starter theme.</span>
+                </div>
+              ) : themeToDelete.id === activeThemeId ? (
+                <div className="pt-1.5 border-t border-brand-hairline/60 flex items-center gap-1.5 text-amber-700 text-[11px] font-medium">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse" />
+                  Currently active theme — editor will automatically switch to your next theme.
+                </div>
+              ) : null}
+            </div>
+
+            <div className="pt-2 border-t border-brand-hairline flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setThemeToDelete(null)}
+                className="px-3.5 py-1.5 border border-brand-hairline rounded-md text-xs font-medium text-brand-body hover:bg-brand-canvas-soft hover:text-brand-ink transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteTheme}
+                className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+              >
+                <Trash2 size={13} />
+                <span>{themes.length === 1 ? "Delete & Reset" : "Delete Theme"}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

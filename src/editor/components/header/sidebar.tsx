@@ -1,5 +1,12 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useEditorStore } from "@/store/editorStore";
+
+const DEFAULT_NAV_ITEMS = [
+  { label: "Home", url: "/" },
+  { label: "About", url: "/about" },
+  { label: "Team", url: "/team" }
+];
 
 const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
   <button 
@@ -86,6 +93,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   onChangeProps: (props: Record<string, unknown>) => void;
   onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
+  const { document: doc } = useEditorStore();
   const p = block.props || {};
   const g = p.general || {};
   const a = p.appearance || {};
@@ -126,10 +134,10 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <label className="text-[11px] font-sans font-semibold text-brand-body">Site / Publication Title</label>
           <input
             type="text"
-            value={g.siteTitle ?? ""}
+            value={g.siteTitle === "My Ghost Theme" ? "" : (g.siteTitle ?? "")}
             onChange={(e) => updateCategory("general", "siteTitle", e.target.value)}
             className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-            placeholder="e.g. My Publication"
+            placeholder={doc?.metadata?.name || "e.g. My Publication"}
           />
         </div>
 
@@ -236,12 +244,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <button
             type="button"
             onClick={() => {
-              const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
-                { label: "Home", url: "/" },
-                { label: "About", url: "/about" },
-                { label: "Team", url: "/team" },
-                { label: "About 2", url: "/about-2" }
-              ];
+              const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
               onChangeProps({
                 ...p,
                 navItems: [...currentItems, { label: "New Link", url: "#" }]
@@ -254,23 +257,13 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         </div>
 
         <div className="flex flex-col gap-2 mt-1">
-          {(Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
-            { label: "Home", url: "/" },
-            { label: "About", url: "/about" },
-            { label: "Team", url: "/team" },
-            { label: "About 2", url: "/about-2" }
-          ]).map((item: { label: string; url: string }, idx: number) => (
+          {(Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : DEFAULT_NAV_ITEMS).map((item: { label: string; url: string }, idx: number) => (
             <div key={idx} className="flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 rounded p-1.5">
               <input
                 type="text"
                 value={item.label}
                 onChange={(e) => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
-                    { label: "Home", url: "/" },
-                    { label: "About", url: "/about" },
-                    { label: "Team", url: "/team" },
-                    { label: "About 2", url: "/about-2" }
-                  ];
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
                   currentItems[idx] = { ...currentItems[idx], label: e.target.value };
                   onChangeProps({ ...p, navItems: currentItems });
                 }}
@@ -281,12 +274,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 type="text"
                 value={item.url}
                 onChange={(e) => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
-                    { label: "Home", url: "/" },
-                    { label: "About", url: "/about" },
-                    { label: "Team", url: "/team" },
-                    { label: "About 2", url: "/about-2" }
-                  ];
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
                   currentItems[idx] = { ...currentItems[idx], url: e.target.value };
                   onChangeProps({ ...p, navItems: currentItems });
                 }}
@@ -296,12 +284,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               <button
                 type="button"
                 onClick={() => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [
-                    { label: "Home", url: "/" },
-                    { label: "About", url: "/about" },
-                    { label: "Team", url: "/team" },
-                    { label: "About 2", url: "/about-2" }
-                  ];
+                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
                   currentItems.splice(idx, 1);
                   onChangeProps({ ...p, navItems: currentItems });
                 }}
