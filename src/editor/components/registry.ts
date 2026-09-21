@@ -169,6 +169,11 @@ import * as postNavigationCanvas from "./post-navigation/canvas";
 import * as postNavigationSidebar from "./post-navigation/sidebar";
 import * as postNavigationCompiler from "./post-navigation/compiler";
 
+import * as tagHeader from "./tag-header/schema";
+import * as tagHeaderCanvas from "./tag-header/canvas";
+import * as tagHeaderSidebar from "./tag-header/sidebar";
+import * as tagHeaderCompiler from "./tag-header/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -184,6 +189,7 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "featured-posts": { type: "featured-posts", ...featuredPosts, ...featuredPostsCanvas, ...featuredPostsSidebar, ...featuredPostsCompiler },
   "author-profile": { type: "author-profile", ...authorProfile, ...authorProfileCanvas, ...authorProfileSidebar, ...authorProfileCompiler },
   "tag-archive": { type: "tag-archive", ...tagArchive, ...tagArchiveCanvas, ...tagArchiveSidebar, ...tagArchiveCompiler },
+  "tag-header": { type: "tag-header", ...tagHeader, ...tagHeaderCanvas, ...tagHeaderSidebar, ...tagHeaderCompiler },
   faq: { type: "faq", ...faq, ...faqCanvas, ...faqSidebar, ...faqCompiler },
   testimonials: { type: "testimonials", ...testimonials, ...testimonialsCanvas, ...testimonialsSidebar, ...testimonialsCompiler },
   "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },

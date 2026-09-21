@@ -1,7 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveCommentsProps } from "./schema";
-import { useEditorStore } from "@/store/editorStore";
 import { Sparkles, AlertTriangle } from "lucide-react";
 
 export const SidebarElement = ({
@@ -13,10 +12,6 @@ export const SidebarElement = ({
   onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
   const p = resolveCommentsProps(block.props);
-  const { activePage } = useEditorStore();
-
-  const isPostOrPage =
-    activePage === "post" || activePage === "page" || activePage?.startsWith("custom-");
 
   const updateProp = <K extends keyof ReturnType<typeof resolveCommentsProps>>(
     key: K,
@@ -27,18 +22,14 @@ export const SidebarElement = ({
 
   return (
     <div className="flex flex-col gap-4 text-xs font-sans text-brand-ink">
-      {/* Warning on non-post context pages */}
-      {!isPostOrPage && (
-        <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-md p-2.5 flex items-start gap-2">
-          <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-[11px] leading-snug">
-            <strong className="font-semibold block mb-0.5">Post / Page Context Required</strong>
-            Ghost comments only render inside a post or page template (within a{" "}
-            <code className="font-mono text-[10px] bg-amber-100 px-1 py-0.5 rounded">{"{{#post}}"}</code>{" "}
-            block). On <strong>{activePage || "this page"}</strong>, Ghost will not display comments.
-          </div>
+      {/* Post Context Badge */}
+      <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-md p-2.5 flex items-start gap-2">
+        <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+        <div className="text-[11px] leading-snug">
+          <strong className="font-semibold block mb-0.5">Template Context</strong>
+          Only works on Post or Page templates (requires ambient Ghost post context).
         </div>
-      )}
+      </div>
 
       {/* Ghost Info Box */}
       <div className="bg-purple-50 border border-purple-200/80 rounded-md p-3">

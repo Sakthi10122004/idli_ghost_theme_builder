@@ -315,6 +315,7 @@ export default function LeftSidebar() {
     { type: "comments", label: "Comments", category: "Ghost Core", icon: MessageCircle },
     { type: "post-navigation", label: "Post Navigation", category: "Ghost Core", icon: ArrowLeftRight },
     { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User },
+    { type: "tag-header", label: "Tag Header", category: "Ghost Core", icon: Tag },
     { type: "tag-archive", label: "Tag Archive", category: "Ghost Core", icon: Tag },
     { type: "share", label: "Post / Page Share", category: "Ghost Core", icon: Share2 },
   ];

@@ -29,6 +29,7 @@ export const STANDALONE_SECTION_TYPES = new Set([
   "comments",
   "author-profile",
   "tag-archive",
+  "tag-header",
   "page-detail",
   "error-view",
   "post-navigation",
@@ -77,12 +78,12 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     footer: "footer-sec-3",
   },
   pages: {
-    home: { sections: ["hero-sec-1", "featured-posts-sec", "posts-sec-2", "newsletter-sec"] },
-    post: { sections: ["post-content-sec", "post-author-sec", "post-nav-sec", "post-related-sec", "post-comments-sec"] },
-    page: { sections: ["page-content-sec"] },
-    author: { sections: ["author-profile-sec", "author-posts-sec"] },
-    tag: { sections: ["tag-archive-sec", "tag-posts-sec"] },
-    error: { sections: ["error-main-sec"] },
+    home: { sections: ["header-sec-1", "hero-sec-1", "posts-sec-2", "footer-sec-3"] },
+    post: { sections: ["header-sec-1", "post-content-sec", "post-author-sec", "post-nav-sec", "related-posts-sec", "comments-sec", "footer-sec-3"] },
+    page: { sections: ["header-sec-1", "page-content-sec", "footer-sec-3"] },
+    author: { sections: ["header-sec-1", "author-profile-sec", "post-grid-sec", "footer-sec-3"] },
+    tag: { sections: ["header-sec-1", "tag-header-sec", "post-grid-sec", "footer-sec-3"] },
+    error: { sections: ["header-sec-1", "error-main-sec", "footer-sec-3"] },
   },
   blocks: {
     "header-sec-1": {
@@ -188,7 +189,9 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       id: "post-content-sec",
       type: "post-content",
       props: {
+        showTag: true,
         showPrimaryTag: true,
+        showFeaturedFlag: true,
         showFeaturedBadge: true,
         showExcerpt: true,
         showByline: true,
@@ -214,13 +217,25 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     "post-nav-sec": {
       id: "post-nav-sec",
       type: "post-navigation",
-      props: { showImage: true, showExcerpt: true },
+      props: { showImage: true, showExcerpt: false },
+      styles: {},
+    },
+    "related-posts-sec": {
+      id: "related-posts-sec",
+      type: "related-posts",
+      props: { heading: "You might also like", count: 3, showImage: true, showExcerpt: true },
       styles: {},
     },
     "post-related-sec": {
       id: "post-related-sec",
       type: "related-posts",
-      props: { heading: "Recommended for you", count: 3, showImage: true, showExcerpt: true },
+      props: { heading: "You might also like", count: 3, showImage: true, showExcerpt: true },
+      styles: {},
+    },
+    "comments-sec": {
+      id: "comments-sec",
+      type: "comments",
+      props: { heading: "Discussion", showCount: true },
       styles: {},
     },
     "post-comments-sec": {
@@ -253,6 +268,12 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       },
       styles: {},
     },
+    "post-grid-sec": {
+      id: "post-grid-sec",
+      type: "post-grid",
+      props: { title: "Latest Stories", limit: 6, columns: 3 },
+      styles: {},
+    },
     "author-posts-sec": {
       id: "author-posts-sec",
       type: "post-grid",
@@ -261,6 +282,16 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     },
 
     // Tag Archive Blocks
+    "tag-header-sec": {
+      id: "tag-header-sec",
+      type: "tag-header",
+      props: {
+        showFeatureImage: true,
+        showDescription: true,
+        showCount: true,
+      },
+      styles: {},
+    },
     "tag-archive-sec": {
       id: "tag-archive-sec",
       type: "tag-archive",
@@ -524,7 +555,7 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
 
   // Post page migration
   if (!newPages.post || !newPages.post.sections || newPages.post.sections.length === 0) {
-    newPages.post = { sections: [...INITIAL_THEME_DOCUMENT.pages.post.sections] };
+    newPages.post = { sections: ["post-content-sec", "post-author-sec", "post-nav-sec", "related-posts-sec", "comments-sec"] };
   } else {
     const hasPostContent = newPages.post.sections.some(
       (sid) => newBlocks[sid]?.type === "post-content"
@@ -534,8 +565,8 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
         "post-content-sec",
         "post-author-sec",
         "post-nav-sec",
-        "post-related-sec",
-        "post-comments-sec",
+        "related-posts-sec",
+        "comments-sec",
       ];
     } else {
       const postTypes = newPages.post.sections.map((sid) => newBlocks[sid]?.type);
@@ -546,35 +577,53 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
         newPages.post.sections.push("post-nav-sec");
       }
       if (!postTypes.includes("related-posts")) {
-        newPages.post.sections.push("post-related-sec");
+        newPages.post.sections.push("related-posts-sec");
       }
       if (!postTypes.includes("comments")) {
-        newPages.post.sections.push("post-comments-sec");
+        newPages.post.sections.push("comments-sec");
       }
     }
   }
 
   // Author page migration: author-profile + post-grid
   if (!newPages.author || !newPages.author.sections || newPages.author.sections.length === 0) {
-    newPages.author = { sections: [...INITIAL_THEME_DOCUMENT.pages.author.sections] };
+    newPages.author = { sections: ["author-profile-sec", "post-grid-sec"] };
   } else {
+    const hasAuthorProfile = newPages.author.sections.some(
+      (sid) => newBlocks[sid]?.type === "author-profile"
+    );
+    if (!hasAuthorProfile) {
+      newPages.author.sections.unshift("author-profile-sec");
+    }
     const hasPostGrid = newPages.author.sections.some(
       (sid) => newBlocks[sid]?.type === "post-grid"
     );
     if (!hasPostGrid) {
-      newPages.author.sections.push("author-posts-sec");
+      newPages.author.sections.push("post-grid-sec");
     }
   }
 
-  // Tag page migration: tag-archive + post-grid
+  // Tag page migration: tag-header + post-grid
   if (!newPages.tag || !newPages.tag.sections || newPages.tag.sections.length === 0) {
-    newPages.tag = { sections: [...INITIAL_THEME_DOCUMENT.pages.tag.sections] };
+    newPages.tag = { sections: ["tag-header-sec", "post-grid-sec"] };
   } else {
+    const archiveIndex = newPages.tag.sections.findIndex(
+      (sid) => sid === "tag-archive-sec" || newBlocks[sid]?.type === "tag-archive"
+    );
+    if (archiveIndex !== -1) {
+      newPages.tag.sections[archiveIndex] = "tag-header-sec";
+    }
+    const hasTagHeader = newPages.tag.sections.some(
+      (sid) => newBlocks[sid]?.type === "tag-header"
+    );
+    if (!hasTagHeader) {
+      newPages.tag.sections.unshift("tag-header-sec");
+    }
     const hasPostGrid = newPages.tag.sections.some(
       (sid) => newBlocks[sid]?.type === "post-grid"
     );
     if (!hasPostGrid) {
-      newPages.tag.sections.push("tag-posts-sec");
+      newPages.tag.sections.push("post-grid-sec");
     }
   }
 

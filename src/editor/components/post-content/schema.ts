@@ -1,5 +1,7 @@
 export interface PostContentProps {
+  showTag?: boolean;
   showPrimaryTag?: boolean;
+  showFeaturedFlag?: boolean;
   showFeaturedBadge?: boolean;
   showExcerpt?: boolean;
   showByline?: boolean;
@@ -11,7 +13,9 @@ export interface PostContentProps {
 }
 
 export const defaultProps: PostContentProps = {
+  showTag: true,
   showPrimaryTag: true,
+  showFeaturedFlag: true,
   showFeaturedBadge: true,
   showExcerpt: true,
   showByline: true,
@@ -25,9 +29,14 @@ export const defaultProps: PostContentProps = {
 export const defaultStyles = {};
 
 export function resolvePostContentProps(raw?: Record<string, unknown>): PostContentProps {
+  const showTag = raw?.showTag !== undefined ? Boolean(raw.showTag) : raw?.showPrimaryTag !== false;
+  const showFeaturedFlag = raw?.showFeaturedFlag !== undefined ? Boolean(raw.showFeaturedFlag) : raw?.showFeaturedBadge !== false;
+
   return {
-    showPrimaryTag: raw?.showPrimaryTag !== false,
-    showFeaturedBadge: raw?.showFeaturedBadge !== false,
+    showTag,
+    showPrimaryTag: showTag,
+    showFeaturedFlag,
+    showFeaturedBadge: showFeaturedFlag,
     showExcerpt: raw?.showExcerpt !== false,
     showByline: raw?.showByline !== false,
     showAuthorAvatar: raw?.showAuthorAvatar !== false,

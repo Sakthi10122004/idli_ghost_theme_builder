@@ -40,8 +40,8 @@ export const SidebarElement = ({
           <span className="text-[11px] font-medium text-brand-body">Primary Tag Badge</span>
           <input
             type="checkbox"
-            checked={p.showPrimaryTag}
-            onChange={(e) => updateProp("showPrimaryTag", e.target.checked)}
+            checked={p.showTag}
+            onChange={(e) => updateProp("showTag", e.target.checked)}
             className="rounded border-brand-hairline"
           />
         </label>
@@ -50,8 +50,8 @@ export const SidebarElement = ({
           <span className="text-[11px] font-medium text-brand-body">Featured Flag Badge</span>
           <input
             type="checkbox"
-            checked={p.showFeaturedBadge}
-            onChange={(e) => updateProp("showFeaturedBadge", e.target.checked)}
+            checked={p.showFeaturedFlag}
+            onChange={(e) => updateProp("showFeaturedFlag", e.target.checked)}
             className="rounded border-brand-hairline"
           />
         </label>
@@ -92,40 +92,6 @@ export const SidebarElement = ({
             className="rounded border-brand-hairline"
           />
         </label>
-
-        {p.showByline && (
-          <div className="pl-3 border-l-2 border-brand-hairline flex flex-col gap-2 mt-1">
-            <label className="flex items-center justify-between cursor-pointer py-0.5">
-              <span className="text-[11px] text-brand-body">Author Avatar</span>
-              <input
-                type="checkbox"
-                checked={p.showAuthorAvatar}
-                onChange={(e) => updateProp("showAuthorAvatar", e.target.checked)}
-                className="rounded border-brand-hairline"
-              />
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer py-0.5">
-              <span className="text-[11px] text-brand-body">Publish Date</span>
-              <input
-                type="checkbox"
-                checked={p.showPublishDate}
-                onChange={(e) => updateProp("showPublishDate", e.target.checked)}
-                className="rounded border-brand-hairline"
-              />
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer py-0.5">
-              <span className="text-[11px] text-brand-body">Reading Time</span>
-              <input
-                type="checkbox"
-                checked={p.showReadingTime}
-                onChange={(e) => updateProp("showReadingTime", e.target.checked)}
-                className="rounded border-brand-hairline"
-              />
-            </label>
-          </div>
-        )}
       </div>
 
       {/* Layout Width */}

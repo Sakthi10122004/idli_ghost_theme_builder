@@ -29,14 +29,14 @@ export const CanvasElement = ({
       {/* Header Container */}
       <header className={`post-header ${maxContentWidth} mx-auto text-center mb-8`}>
         {/* Primary Tag & Featured Flag */}
-        {(p.showPrimaryTag || p.showFeaturedBadge) && (
+        {(p.showTag || p.showFeaturedFlag) && (
           <div className="flex items-center justify-center gap-2 mb-4">
-            {p.showFeaturedBadge && (
+            {p.showFeaturedFlag && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-brand-primary text-white">
                 Featured
               </span>
             )}
-            {p.showPrimaryTag && (
+            {p.showTag && (
               <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-600 hover:underline cursor-pointer">
                 Design Systems
               </span>

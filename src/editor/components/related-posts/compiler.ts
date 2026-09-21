@@ -134,10 +134,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
     border-color: var(--color-hairline, #333333);
   }
 </style>
-{{#get "posts" filter="tags:{{primary_tag.slug}}+id:-{{id}}" limit="${limit}" as |related|}}
-  {{#if related}}
-  <section id="${wrapperId}" class="gh-related-posts"${styleAttr}>
-    <h3 class="gh-related-heading">${p.heading}</h3>
+<section id="${wrapperId}" class="gh-related-posts"${styleAttr}>
+  <h3 class="gh-related-heading">${p.heading}</h3>
+  {{#get "posts" filter="tags:{{primary_tag.slug}}+id:-{{id}}" limit="${limit}" include="authors" as |related|}}
+    {{#if related}}
     <div class="gh-related-grid">
       {{#foreach related}}
         <article class="gh-related-card">${imageMarkup}
@@ -148,8 +148,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
         </article>
       {{/foreach}}
     </div>
-  </section>
-  {{/if}}
-{{/get}}`;
+    {{/if}}
+  {{/get}}
+</section>`;
 
 };

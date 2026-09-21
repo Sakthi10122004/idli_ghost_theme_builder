@@ -1,7 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolvePostNavigationProps } from "./schema";
-import { useEditorStore } from "@/store/editorStore";
 import { Sparkles, AlertTriangle } from "lucide-react";
 
 export const SidebarElement = ({
@@ -13,9 +12,6 @@ export const SidebarElement = ({
   onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
   const p = resolvePostNavigationProps(block.props);
-  const { activePage } = useEditorStore();
-
-  const isPostPage = activePage === "post";
 
   const updateProp = <K extends keyof ReturnType<typeof resolvePostNavigationProps>>(
     key: K,
@@ -26,16 +22,14 @@ export const SidebarElement = ({
 
   return (
     <div className="flex flex-col gap-4 text-xs font-sans text-brand-ink">
-      {/* Context Warning if placed on non-post template */}
-      {!isPostPage && (
-        <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-md p-2.5 flex items-start gap-2">
-          <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-[11px] leading-snug">
-            <strong className="font-semibold block mb-0.5">Post Context Required</strong>
-            Post Navigation relies on Ghost&apos;s <code className="font-mono text-[10px] bg-amber-100 px-1 py-0.5 rounded">{"{{#prev_post}}"}</code> and <code className="font-mono text-[10px] bg-amber-100 px-1 py-0.5 rounded">{"{{#next_post}}"}</code> helpers. On <strong>{activePage || "this page"}</strong>, Ghost has no chronological post context.
-          </div>
+      {/* Post Context Badge */}
+      <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-md p-2.5 flex items-start gap-2">
+        <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+        <div className="text-[11px] leading-snug">
+          <strong className="font-semibold block mb-0.5">Template Context</strong>
+          Only works on Post or Page templates (requires ambient Ghost post context).
         </div>
-      )}
+      </div>
 
       {/* Info Box */}
       <div className="bg-blue-50 border border-blue-200/80 rounded-md p-3">

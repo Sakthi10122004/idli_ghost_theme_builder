@@ -168,5 +168,97 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
         }
       };
     }
-  }
+  },
+  {
+    id: "post-full",
+    name: "Full Post Stack",
+    description: "Complete article layout with header, author card, navigation, related posts, and comments.",
+    generateBlocks: () => {
+      const contentId = generateId("post-content");
+      const authorId = generateId("author-profile");
+      const navId = generateId("post-navigation");
+      const relatedId = generateId("related-posts");
+      const commentsId = generateId("comments");
+
+      return {
+        sections: [contentId, authorId, navId, relatedId, commentsId],
+        blocks: {
+          [contentId]: {
+            id: contentId,
+            type: "post-content",
+            props: {
+              showTag: true,
+              showPrimaryTag: true,
+              showFeaturedFlag: true,
+              showFeaturedBadge: true,
+              showExcerpt: true,
+              showByline: true,
+              showFeatureImage: true,
+              contentWidth: "regular",
+            },
+            styles: {},
+          },
+          [authorId]: {
+            id: authorId,
+            type: "author-profile",
+            props: {
+              name: "Alex Rivera",
+              bio: "Author bio and publication details.",
+              layoutStyle: "card",
+            },
+            styles: {},
+          },
+          [navId]: {
+            id: navId,
+            type: "post-navigation",
+            props: { showImage: true, showExcerpt: false },
+            styles: {},
+          },
+          [relatedId]: {
+            id: relatedId,
+            type: "related-posts",
+            props: { heading: "You might also like", count: 3, showImage: true, showExcerpt: true },
+            styles: {},
+          },
+          [commentsId]: {
+            id: commentsId,
+            type: "comments",
+            props: { heading: "Discussion", showCount: true },
+            styles: {},
+          },
+        },
+      };
+    },
+  },
+  {
+    id: "archive-with-feed",
+    name: "Archive Banner with Feed",
+    description: "Single tag or author header with ambient posts feed.",
+    generateBlocks: () => {
+      const headerId = generateId("tag-header");
+      const gridId = generateId("post-grid");
+
+      return {
+        sections: [headerId, gridId],
+        blocks: {
+          [headerId]: {
+            id: headerId,
+            type: "tag-header",
+            props: {
+              showFeatureImage: true,
+              showDescription: true,
+              showCount: true,
+            },
+            styles: {},
+          },
+          [gridId]: {
+            id: gridId,
+            type: "post-grid",
+            props: { title: "Stories under this topic", limit: 6, columns: 3 },
+            styles: {},
+          },
+        },
+      };
+    },
+  },
 ];
