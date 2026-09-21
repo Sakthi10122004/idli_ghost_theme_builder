@@ -331,10 +331,10 @@ export const CanvasElement = ({ block }: {
             </span>
           )}
           <h1 className={`text-[2.75rem] md:text-[3.5rem] font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
-            {useSiteData ? "{{@site.title}}" : (title || "Build beautiful layouts.")}
+            {useSiteData ? "{{@site.title}}" : (title || "Thoughts, stories & ideas.")}
           </h1>
           <p className={`text-lg md:text-xl leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
-            {useSiteData ? "{{@site.description}}" : (subtitle || "A visual workspace built directly on layout AST compilation logic, adhering strictly to Geist presets.")}
+            {useSiteData ? "{{@site.description}}" : (subtitle || "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.")}
           </p>
           <div className={buttonGroupClasses}>
             <button
@@ -348,7 +348,7 @@ export const CanvasElement = ({ block }: {
                   : "#ffffff"
               }}
             >
-              {buttonLabel || "Start Free"}
+              {buttonLabel || "Start Reading"}
             </button>
             {(showSecondaryButton ?? true) && (
               <button
@@ -358,7 +358,7 @@ export const CanvasElement = ({ block }: {
                     : "border-[var(--color-hairline-strong)] text-[var(--color-ink)] hover:border-[var(--color-primary)]"
                 }`}
               >
-                {secondaryButtonLabel || "Documentation"}
+                {secondaryButtonLabel || "Subscribe"}
               </button>
             )}
           </div>

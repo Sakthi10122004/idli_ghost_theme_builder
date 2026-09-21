@@ -30,13 +30,14 @@ export const CanvasElement = ({ block }: {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { deviceMode, document: doc } = useEditorStore();
 
-  const siteTitle = general.siteTitle || (doc?.metadata?.name && doc.metadata.name !== "My Ghost Theme" ? doc.metadata.name : "Sakthi T4GC");
+  const siteTitle = (general.siteTitle && general.siteTitle !== "My Ghost Theme")
+    ? general.siteTitle
+    : doc?.metadata?.name || general.siteTitle || "Ghost Publication";
 
   const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
     { label: "Home", url: "/" },
     { label: "About", url: "/about" },
-    { label: "Team", url: "/team" },
-    { label: "About 2", url: "/about-2" }
+    { label: "Team", url: "/team" }
   ];
 
   const layout = general.layoutStyle || "Logo on Left";
@@ -208,8 +209,8 @@ export const CanvasElement = ({ block }: {
    * Renders the hamburger / close toggle button for mobile view.
    */
   const renderBurgerButton = () => (
-    <button 
-      className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50 text-neutral-900 dark:text-white" 
+    <button
+      className="p-2 opacity-80 hover:opacity-100 transition-opacity relative z-50 text-neutral-900 dark:text-white"
       aria-label="Menu"
       style={{ color: "inherit" }}
       onClick={(e) => {
@@ -357,9 +358,8 @@ export const CanvasElement = ({ block }: {
    * Renders the desktop navigation links.
    */
   const renderDesktopNav = (justify: string = "center") => (
-    <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden ${
-      justify === "center" ? "justify-center" : "justify-start"
-    }`}>
+    <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden ${justify === "center" ? "justify-center" : "justify-start"
+      }`}>
       {items.map((item: HeaderNavItem, idx: number) => (
         <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
           {item.label}

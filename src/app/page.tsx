@@ -29,7 +29,7 @@ export default function LandingPage() {
 
   const starterTemplates = [
     {
-      name: "Sakthi T4GC (Default)",
+      name: "Apex Minimal (Default)",
       tagline: "Vercel-inspired Developer Publication",
       desc: "Minimalist black-and-ink aesthetics with Geist typography, subtle stacked shadows, and mesh gradients.",
       badge: "Featured",
@@ -237,7 +237,7 @@ export default function LandingPage() {
                 >
                   {/* Mock Site Header */}
                   <div className="px-4 sm:px-6 py-3.5 border-b border-brand-hairline flex items-center justify-between text-xs bg-white relative z-20">
-                    <span className="font-bold tracking-tight text-sm text-brand-ink">Sakthi T4GC</span>
+                    <span className="font-bold tracking-tight text-sm text-brand-ink">Apex Journal</span>
                     
                     {/* Desktop/Tablet Navigation Links */}
                     <div className={`${activeDevice === "mobile" ? "hidden" : "hidden md:flex"} items-center gap-5 text-brand-body font-medium`}>
@@ -506,7 +506,7 @@ export default function LandingPage() {
 
             <pre className="text-neutral-300 text-[11px] leading-relaxed overflow-x-auto py-2">
 {`{
-  "name": "sakthi-t4gc",
+  "name": "apex-minimal",
   "version": "1.0.0",
   "engines": { "ghost": ">=4.0.0" },
   "keywords": ["ghost-theme"],

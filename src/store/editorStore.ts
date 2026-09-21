@@ -62,10 +62,11 @@ export const DEFAULT_DESIGN_TOKENS = {
 
 export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
   metadata: {
-    name: "Sakthi T4GC",
+    name: "Untitled Theme",
     version: "1.0.0",
-    author: "Sakthi T4GC",
-    description: "A Vercel-inspired theme visual build",
+    author: "Ghost Creator",
+    description: "A clean, modern Ghost publication theme",
+    themeId: "theme-primary",
   },
   settings: {
     containerWidth: 1200,
@@ -78,7 +79,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     footer: "footer-sec-3",
   },
   pages: {
-    home: { sections: ["header-sec-1", "hero-sec-1", "posts-sec-2", "footer-sec-3"] },
+    home: { sections: ["header-sec-1", "hero-sec-1", "featured-posts-sec", "post-grid-sec", "newsletter-sec", "footer-sec-3"] },
     post: { sections: ["header-sec-1", "post-content-sec", "post-author-sec", "post-nav-sec", "related-posts-sec", "comments-sec", "footer-sec-3"] },
     page: { sections: ["header-sec-1", "page-content-sec", "footer-sec-3"] },
     author: { sections: ["header-sec-1", "author-profile-sec", "post-grid-sec", "footer-sec-3"] },
@@ -91,13 +92,12 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       type: "header",
       props: {
         general: {
-          siteTitle: "Sakthi T4GC",
+          siteTitle: "",
         },
         navItems: [
           { label: "Home", url: "/" },
           { label: "About", url: "/about" },
-          { label: "Team", url: "/team" },
-          { label: "About 2", url: "/about-2" }
+          { label: "Team", url: "/team" }
         ]
       },
       styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
@@ -105,83 +105,100 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     "footer-sec-3": {
       id: "footer-sec-3",
       type: "footer",
-      props: { copyright: "© 2026 Ghost Theme Builder" },
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
+      props: {
+        copyright: "© 2026 Ghost Theme Builder. Published with Ghost.",
+        general: {
+          layoutStyle: "Simple Minimal",
+          showSecondaryNav: true,
+          secondaryNavTitle: "More",
+          showSocialIcons: true,
+          socialPlatforms: ["facebook", "twitter", "instagram", "linkedin"],
+          showSubscribeBox: false,
+          showCopyright: true,
+          customCopyrightText: "© 2026 Ghost Theme Builder. Published with Ghost.",
+        },
+        colors: {
+          syncWithHeader: false,
+          backgroundColor: "#ffffff",
+          textColor: "#1a1a1a",
+        },
+        layout: {
+          sectionWidth: "full",
+          contentWidth: "standard",
+        },
+        spacing: {
+          paddingTop: 40,
+          paddingBottom: 40,
+        },
+      },
+      styles: { backgroundColor: "#ffffff", paddingTop: "40px", paddingBottom: "40px" },
     },
 
     // Home Page Blocks
     "hero-sec-1": {
       id: "hero-sec-1",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "96px", paddingBottom: "96px" },
-      childrenIds: ["hero-container-1"],
-    },
-    "hero-container-1": {
-      id: "hero-container-1",
-      type: "container",
-      props: {},
-      styles: { textAlign: "center" },
-      childrenIds: ["hero-heading-1", "hero-text-1", "hero-cta-row-1"],
-    },
-    "hero-heading-1": {
-      id: "hero-heading-1",
-      type: "heading",
-      props: { text: "Build and deploy on the AI Cloud.", level: 1 },
-      styles: { fontSize: "48px", letterSpacing: "-2.4px", fontWeight: "600", marginBottom: "16px" },
-    },
-    "hero-text-1": {
-      id: "hero-text-1",
-      type: "text",
-      props: { text: "Visual builder for clean, lightweight, and modern Ghost templates styled with Geist UI guidelines." },
-      styles: { fontSize: "18px", marginBottom: "24px" },
-    },
-    "hero-cta-row-1": {
-      id: "hero-cta-row-1",
-      type: "container",
-      props: {},
-      styles: { display: "flex", gap: "16px", justifyContent: "center" },
-      childrenIds: ["hero-btn-primary", "hero-btn-secondary"],
-    },
-    "hero-btn-primary": {
-      id: "hero-btn-primary",
-      type: "button",
-      props: { label: "Start building", href: "#", variant: "primary" },
-      styles: {},
-    },
-    "hero-btn-secondary": {
-      id: "hero-btn-secondary",
-      type: "button",
-      props: { label: "Learn more", href: "#", variant: "secondary" },
-      styles: {},
+      type: "hero",
+      props: {
+        eyebrowText: "A Ghost Publication",
+        title: "Thoughts, stories & ideas.",
+        subtitle: "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.",
+        buttonLabel: "Start Reading",
+        buttonUrl: "#posts",
+        showSecondaryButton: true,
+        secondaryButtonLabel: "Subscribe",
+        secondaryButtonUrl: "#newsletter",
+        useSiteData: false,
+        useCoverImageAsBackground: false,
+      },
+      styles: {
+        backgroundColor: "#ffffff",
+        paddingTop: "80px",
+        paddingBottom: "80px",
+        layout: "center",
+      },
     },
     "featured-posts-sec": {
       id: "featured-posts-sec",
       type: "featured-posts",
-      props: { title: "Featured Highlights", limit: 3 },
-      styles: {},
+      props: {
+        title: "Featured Highlights",
+        heading: "Featured Highlights",
+        description: "Hand-picked stories and top editorial selections from our writers.",
+        layout: "split",
+        limit: 3,
+        autoScroll: false,
+      },
+      styles: {
+        backgroundColor: "#ffffff",
+        paddingTop: "64px",
+        paddingBottom: "64px",
+      },
     },
-    "posts-sec-2": {
-      id: "posts-sec-2",
-      type: "section",
-      props: {},
-      styles: { backgroundColor: "#fafafa", paddingTop: "64px", paddingBottom: "64px" },
-      childrenIds: ["posts-grid-1"],
-    },
-    "posts-grid-1": {
-      id: "posts-grid-1",
+    "post-grid-sec": {
+      id: "post-grid-sec",
       type: "post-grid",
       props: { title: "Latest Stories", limit: 6, columns: 3 },
-      styles: {},
+      styles: {
+        backgroundColor: "#ffffff",
+        paddingTop: "64px",
+        paddingBottom: "64px",
+      },
     },
     "newsletter-sec": {
       id: "newsletter-sec",
       type: "newsletter",
       props: {
         title: "Subscribe to our publication",
-        subtitle: "Get the latest articles and design insights delivered directly to your inbox."
+        subtitle: "Get the latest articles and design insights delivered directly to your inbox.",
+        buttonLabel: "Subscribe",
+        placeholder: "you@example.com",
       },
-      styles: {},
+      styles: {
+        backgroundColor: "#fafafa",
+        paddingTop: "64px",
+        paddingBottom: "64px",
+        layout: "center",
+      },
     },
 
     // Post Page Blocks
@@ -268,12 +285,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       },
       styles: {},
     },
-    "post-grid-sec": {
-      id: "post-grid-sec",
-      type: "post-grid",
-      props: { title: "Latest Stories", limit: 6, columns: 3 },
-      styles: {},
-    },
+
     "author-posts-sec": {
       id: "author-posts-sec",
       type: "post-grid",
@@ -528,8 +540,44 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
     newBlocks[footerId] = {
       id: footerId,
       type: "footer",
-      props: { copyright: "© 2026 Ghost Theme Builder" },
-      styles: { backgroundColor: "#ffffff", paddingTop: "64px", paddingBottom: "64px" },
+      props: {
+        copyright: "© 2026 Ghost Theme Builder. Published with Ghost.",
+        general: {
+          layoutStyle: "Simple Minimal",
+          showSecondaryNav: true,
+          secondaryNavTitle: "More",
+          showSocialIcons: true,
+          socialPlatforms: ["facebook", "twitter", "instagram", "linkedin"],
+          showSubscribeBox: false,
+          showCopyright: true,
+          customCopyrightText: "© 2026 Ghost Theme Builder. Published with Ghost.",
+        },
+      },
+      styles: { backgroundColor: "#ffffff", paddingTop: "40px", paddingBottom: "40px" },
+    };
+  } else if (newBlocks[footerId]) {
+    const ftr = newBlocks[footerId];
+    const ftrProps = (ftr.props || {}) as Record<string, unknown>;
+    const ftrGeneral = (ftrProps.general || {}) as Record<string, unknown>;
+    newBlocks[footerId] = {
+      ...ftr,
+      props: {
+        ...ftrProps,
+        copyright: (ftrGeneral.customCopyrightText as string) || (ftrProps.copyright as string) || "© 2026 Ghost Theme Builder. Published with Ghost.",
+        general: {
+          layoutStyle: (ftrGeneral.layoutStyle as string) || "Simple Minimal",
+          showSecondaryNav: ftrGeneral.showSecondaryNav !== false,
+          secondaryNavTitle: (ftrGeneral.secondaryNavTitle as string) || "More",
+          showSocialIcons: ftrGeneral.showSocialIcons !== false,
+          socialPlatforms: Array.isArray(ftrGeneral.socialPlatforms) && ftrGeneral.socialPlatforms.length > 0
+            ? ftrGeneral.socialPlatforms
+            : ["facebook", "twitter", "instagram", "linkedin"],
+          showSubscribeBox: ftrGeneral.showSubscribeBox === true,
+          showCopyright: ftrGeneral.showCopyright !== false,
+          customCopyrightText: (ftrGeneral.customCopyrightText as string) || (ftrProps.copyright as string) || "© 2026 Ghost Theme Builder. Published with Ghost.",
+          socialUrls: (ftrGeneral.socialUrls as Record<string, string>) || (ftrProps.socialUrls as Record<string, string>) || {},
+        },
+      },
     };
   }
 
@@ -552,6 +600,43 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
 
   // Ensure default page templates exist and have standard blocks
   const initialBlocks = INITIAL_THEME_DOCUMENT.blocks;
+
+  // Home page migration: ensure publication hero, featured-posts, post-grid, and newsletter
+  const isOldSaasHome =
+    newBlocks["hero-heading-1"]?.props?.text === "Build and deploy on the AI Cloud." ||
+    newBlocks["hero-sec-1"]?.type === "section" ||
+    (newPages.home?.sections && (
+      newPages.home.sections.includes("posts-sec-2") ||
+      (newPages.home.sections.length <= 2 && newPages.home.sections.includes("hero-sec-1") && !newPages.home.sections.includes("post-grid-sec"))
+    ));
+
+  if (isOldSaasHome) {
+    newBlocks["hero-sec-1"] = JSON.parse(JSON.stringify(initialBlocks["hero-sec-1"]));
+    delete newBlocks["hero-container-1"];
+    delete newBlocks["hero-heading-1"];
+    delete newBlocks["hero-text-1"];
+    delete newBlocks["hero-cta-row-1"];
+    delete newBlocks["hero-btn-primary"];
+    delete newBlocks["hero-btn-secondary"];
+    delete newBlocks["posts-sec-2"];
+    delete newBlocks["posts-grid-1"];
+
+    newPages.home = {
+      sections: ["hero-sec-1", "featured-posts-sec", "post-grid-sec", "newsletter-sec"],
+    };
+  } else if (!newPages.home || !newPages.home.sections || newPages.home.sections.length === 0) {
+    newPages.home = {
+      sections: ["hero-sec-1", "featured-posts-sec", "post-grid-sec", "newsletter-sec"],
+    };
+  } else {
+    // If user has home page but post-grid is missing, Ghost functionally requires a post feed
+    const hasPostFeed = newPages.home.sections.some(
+      (sid) => newBlocks[sid]?.type === "post-grid"
+    );
+    if (!hasPostFeed) {
+      newPages.home.sections.push("post-grid-sec");
+    }
+  }
 
   // Post page migration
   if (!newPages.post || !newPages.post.sections || newPages.post.sections.length === 0) {
@@ -695,6 +780,16 @@ export function unwrapStandaloneSections(doc: ThemeDocument): ThemeDocument {
   return modified ? { ...migrated, blocks: newBlocks, pages: newPages } : migrated;
 }
 
+interface LocalStorageThemeItem {
+  id: string;
+  name?: string;
+  author?: string;
+  version?: string;
+  description?: string;
+  updatedAt?: string;
+  document?: ThemeDocument;
+}
+
 export const useEditorStore = create<EditorState>((set, get) => ({
   document: unwrapStandaloneSections(INITIAL_THEME_DOCUMENT),
   selectedBlockId: null,
@@ -737,7 +832,31 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       if (data.document) {
         console.log(`[Zustand Store] loadTheme completed. AST document successfully hydrated.`);
         const unwrappedDoc = unwrapStandaloneSections(data.document);
+        const dbThemeId = unwrappedDoc.metadata?.themeId;
+        if (dbThemeId && activeThemeId && dbThemeId !== activeThemeId) {
+          console.log(`[Zustand Store] Skipping loadTheme: db themeId "${dbThemeId}" does not match active themeId "${activeThemeId}"`);
+          return;
+        }
         set({ document: unwrappedDoc, saveStatus: "saved" });
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("ghost_user_themes_v2");
+            if (stored) {
+              const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+              const targetThemeId = dbThemeId || activeThemeId;
+              const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === targetThemeId);
+              if (idx >= 0) {
+                parsed[idx].document = unwrappedDoc;
+                parsed[idx].name = unwrappedDoc.metadata?.name || parsed[idx].name;
+                parsed[idx].author = unwrappedDoc.metadata?.author || parsed[idx].author;
+                parsed[idx].version = unwrappedDoc.metadata?.version || parsed[idx].version;
+                parsed[idx].description = unwrappedDoc.metadata?.description || parsed[idx].description;
+                parsed[idx].updatedAt = "Just now";
+                localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+              }
+            }
+          } catch {}
+        }
       } else {
         console.log(`[Zustand Store] loadTheme completed. No layout record found, using defaults.`);
       }
@@ -748,14 +867,22 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   saveTheme: async () => {
     try {
-      const { userId, document } = get();
+      const { userId, document, activeThemeId } = get();
       console.log(`[Zustand Store] saveTheme task initiated for userId: "${userId}"`);
       set({ isSaving: true, saveStatus: "saving" });
       
+      const docWithThemeId = {
+        ...document,
+        metadata: {
+          ...document.metadata,
+          themeId: activeThemeId,
+        },
+      };
+
       const res = await fetch("/api/theme", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, document }),
+        body: JSON.stringify({ userId, document: docWithThemeId }),
       });
       
       const data = await res.json();
@@ -766,6 +893,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         console.warn("[Zustand Store] saveTheme returned validation errors.");
         set({ isSaving: false, saveStatus: "error" });
       }
+
+      // Also sync into localStorage so dashboard stays instantly up to date
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("ghost_user_themes_v2");
+          if (stored) {
+            const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+            const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === activeThemeId);
+            if (idx >= 0) {
+              parsed[idx].document = document;
+              parsed[idx].name = document.metadata?.name || parsed[idx].name;
+              parsed[idx].author = document.metadata?.author || parsed[idx].author;
+              parsed[idx].version = document.metadata?.version || parsed[idx].version;
+              parsed[idx].description = document.metadata?.description || parsed[idx].description;
+              parsed[idx].updatedAt = "Just now";
+              localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+            }
+          }
+        } catch {}
+      }
     } catch (error) {
       console.error("[Zustand Store] saveTheme task failed:", error);
       set({ isSaving: false, saveStatus: "error" });
@@ -774,23 +921,64 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   updateMetadata: (metadata) => set((state) => {
     const historyUpdate = saveToHistory(state);
+    const newDoc = {
+      ...state.document,
+      metadata: {
+        ...state.document.metadata,
+        ...metadata,
+      },
+      blocks: {
+        ...state.document.blocks,
+      },
+    };
+
+    if (metadata.name && newDoc.blocks && newDoc.blocks["header-sec-1"]) {
+      const curTitle = newDoc.blocks["header-sec-1"].props?.general?.siteTitle;
+      if (!curTitle || curTitle === "My Ghost Theme" || curTitle === state.document.metadata?.name) {
+        newDoc.blocks["header-sec-1"] = {
+          ...newDoc.blocks["header-sec-1"],
+          props: {
+            ...newDoc.blocks["header-sec-1"].props,
+            general: {
+              ...newDoc.blocks["header-sec-1"].props?.general,
+              siteTitle: metadata.name,
+            },
+          },
+        };
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("ghost_user_themes_v2");
+        if (stored) {
+          const parsed: LocalStorageThemeItem[] = JSON.parse(stored);
+          const idx = parsed.findIndex((t: LocalStorageThemeItem) => t.id === state.activeThemeId);
+          if (idx >= 0) {
+            parsed[idx].document = newDoc;
+            if (metadata.name) parsed[idx].name = metadata.name;
+            if (metadata.author) parsed[idx].author = metadata.author;
+            if (metadata.version) parsed[idx].version = metadata.version;
+            if (metadata.description !== undefined) parsed[idx].description = metadata.description;
+            parsed[idx].updatedAt = "Just now";
+            localStorage.setItem("ghost_user_themes_v2", JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+    }
+
     return {
       ...historyUpdate,
-      document: {
-        ...state.document,
-        metadata: {
-          ...state.document.metadata,
-          ...metadata,
-        },
-      },
+      document: newDoc,
     };
   }),
 
   setDocument: (document, themeId) => set((state) => {
     const historyUpdate = saveToHistory(state);
+    const migratedDoc = unwrapStandaloneSections(document);
     return {
       ...historyUpdate,
-      document: JSON.parse(JSON.stringify(document)),
+      document: migratedDoc,
       selectedBlockId: null,
       activePage: "home",
       ...(themeId ? { activeThemeId: themeId } : {}),

@@ -548,15 +548,15 @@ ${scriptHtml}`;
     ? `<span class="hero-eyebrow">${p.eyebrowText}</span>`
     : "";
 
-  const title = useSiteData ? "{{@site.title}}" : (p.title || "Build beautiful templates.");
-  const subtitle = useSiteData ? "{{@site.description}}" : (p.subtitle || "A visual workspace built directly on layout AST compilation logic.");
-  const buttonLabel = p.buttonLabel || "Start Free";
-  const buttonUrl = p.buttonUrl || "#";
+  const title = useSiteData ? "{{@site.title}}" : (p.title || "Thoughts, stories & ideas.");
+  const subtitle = useSiteData ? "{{@site.description}}" : (p.subtitle || "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.");
+  const buttonLabel = p.buttonLabel || "Start Reading";
+  const buttonUrl = p.buttonUrl || "#posts";
   const buttonBgColor = p.buttonBgColor;
   const buttonTextColor = p.buttonTextColor;
   const showSecondaryButton = p.showSecondaryButton ?? true;
-  const secondaryButtonLabel = p.secondaryButtonLabel || "Documentation";
-  const secondaryButtonUrl = p.secondaryButtonUrl || "#";
+  const secondaryButtonLabel = p.secondaryButtonLabel || "Subscribe";
+  const secondaryButtonUrl = p.secondaryButtonUrl || "#newsletter";
   const imageUrl = p.imageUrl || "";
   const imageAlt = p.imageAlt || "Hero Image";
 

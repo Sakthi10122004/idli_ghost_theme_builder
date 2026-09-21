@@ -29,48 +29,73 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
 
   const htmlAnchor = advanced.htmlAnchor || 'site-footer';
   
-  const copyrightHtml = general.customCopyrightText 
-    ? general.customCopyrightText 
+  const showCopyright = general.showCopyright !== false && p.showCopyright !== false;
+  const showSocialIcons = general.showSocialIcons !== false && p.showSocialIcons !== false;
+
+  const rawCopyright = general.customCopyrightText || p.customCopyrightText || p.copyright || general.copyright;
+  const copyrightHtml = (typeof rawCopyright === "string" && rawCopyright.trim() !== "")
+    ? rawCopyright 
     : `&copy; {{date format="YYYY"}} {{@site.title}}. Published with <a href="https://ghost.org" target="_blank" rel="noopener">Ghost</a>.`;
+
+  const DEFAULT_PLATFORM_URLS: Record<SocialPlatform, string> = {
+    facebook: "https://facebook.com",
+    twitter: "https://twitter.com",
+    instagram: "https://instagram.com",
+    linkedin: "https://linkedin.com",
+    youtube: "https://youtube.com",
+    threads: "https://threads.net",
+    bluesky: "https://bsky.app",
+    tiktok: "https://tiktok.com",
+    mastodon: "https://mastodon.social",
+  };
 
   const activePlatforms: SocialPlatform[] = Array.isArray(general.socialPlatforms) && general.socialPlatforms.length > 0
     ? general.socialPlatforms
-    : DEFAULT_SOCIAL_PLATFORMS;
+    : (Array.isArray(p.socialPlatforms) && p.socialPlatforms.length > 0 ? p.socialPlatforms : DEFAULT_SOCIAL_PLATFORMS);
+
+  const customUrls = (general.socialUrls || p.socialUrls || {}) as Record<string, string>;
 
   const socialLinksParts = activePlatforms.map(platform => {
-    const config = ALL_SOCIAL_PLATFORMS.find(p => p.id === platform);
+    const config = ALL_SOCIAL_PLATFORMS.find(cfg => cfg.id === platform);
     if (!config) return "";
     const label = config.label;
     const partial = config.casperIconPartial;
+    const userUrl = customUrls[platform]?.trim();
     
+    if (userUrl) {
+      return `<a href="${userUrl}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "${partial}"}}
+        </a>`;
+    }
+
     if (platform === "facebook") {
-      return `{{#if (social_url type="facebook")}}
-        <a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
-          {{> "icons/facebook"}}
-        </a>
-      {{else}}{{#if @site.facebook}}
+      return `{{#if @site.facebook}}
         <a href="{{@site.facebook}}" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
           {{> "icons/facebook"}}
         </a>
-      {{/if}}{{/if}}`;
-    }
-    if (platform === "twitter") {
-      return `{{#if (social_url type="twitter")}}
-        <a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
-          {{> "icons/x"}}
+      {{else}}
+        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/facebook"}}
         </a>
-      {{else}}{{#if @site.twitter}}
+      {{/if}}`;
+    }
+
+    if (platform === "twitter") {
+      return `{{#if @site.twitter}}
         <a href="{{@site.twitter}}" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
           {{> "icons/x"}}
         </a>
-      {{/if}}{{/if}}`;
-    }
-
-    return `{{#if (social_url type="${platform}")}}
-        <a href="{{social_url type="${platform}"}}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
-          {{> "${partial}"}}
+      {{else}}
+        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/x"}}
         </a>
       {{/if}}`;
+    }
+
+    const defaultUrl = DEFAULT_PLATFORM_URLS[platform] || "#";
+    return `<a href="${defaultUrl}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+        {{> "${partial}"}}
+      </a>`;
   }).filter(Boolean).join("\n      ");
 
   const socialIconsHtml = `
@@ -87,7 +112,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
         <div>
           <h4 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">{{@site.title}}</h4>
           <p style="opacity: 0.8; line-height: 1.5; margin-bottom: 24px;">{{@site.description}}</p>
-          ${general.showSocialIcons ? socialIconsHtml : ''}
+          ${showSocialIcons ? socialIconsHtml : ''}
         </div>
         <div class="footer-nav-column">
           <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">Navigation</h4>
@@ -116,7 +141,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
         </div>
         ` : ''}
       </div>
-      ${general.showCopyright ? `
+      ${showCopyright ? `
       <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding-top: 24px; border-top: 1px solid currentColor; text-align: center;">
         <div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>
       </div>
@@ -136,7 +161,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
       ` : ''}
       
       <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; ${general.showSubscribeBox !== false ? 'padding-top: 24px; border-top: 1px solid currentColor;' : ''}">
-        ${general.showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
+        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
         <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
           ${general.showSecondaryNav !== false ? `
           <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
@@ -151,7 +176,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
             {{/if}}
           </nav>
           ` : ''}
-          ${general.showSocialIcons ? socialIconsHtml : ''}
+          ${showSocialIcons ? socialIconsHtml : ''}
         </div>
       </div>
     `;
@@ -159,7 +184,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     // Simple Minimal
     innerHtml = `
       <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
-        ${general.showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
+        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
         <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
           ${general.showSecondaryNav !== false ? `
           <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
@@ -174,7 +199,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
             {{/if}}
           </nav>
           ` : ''}
-          ${general.showSocialIcons ? socialIconsHtml : ''}
+          ${showSocialIcons ? socialIconsHtml : ''}
         </div>
       </div>
     `;

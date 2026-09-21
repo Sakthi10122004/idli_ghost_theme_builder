@@ -9,7 +9,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
-  const { title, buttonLabel, placeholder } = block.props;
+  const { title, subtitle, buttonLabel, placeholder } = block.props;
   const bgStyle = getBackgroundStyle(block.styles);
   const layout = block.styles?.layout || "right";
   
@@ -48,9 +48,9 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   return (
     <div className={wrapperClasses} style={bgStyle}>
       <div className={textClasses}>
-        <h3 className="text-lg font-bold text-brand-ink tracking-tight">{title || "Join our technical newsletter"}</h3>
+        <h3 className="text-lg font-bold text-brand-ink tracking-tight">{title || "Subscribe to our publication"}</h3>
         <p className="text-xs text-brand-body leading-relaxed">
-          Stay up to date with new features, theme validation presets, and visual editor architecture tutorials.
+          {subtitle || "Get the latest articles and design insights delivered directly to your inbox."}
         </p>
       </div>
       <div className={formContainerClasses}>

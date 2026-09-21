@@ -41,11 +41,11 @@ export function CanvasElement({ block, onClick }: {
   const showSecondaryNav = p.general?.showSecondaryNav !== false;
   const secondaryNavTitle = p.general?.secondaryNavTitle || "More";
   const secondaryNavItems: FooterNavItem[] = DEFAULT_SECONDARY_NAV;
-  const showSocialIcons = p.general?.showSocialIcons !== false;
-  const showCopyright = p.general?.showCopyright !== false;
+  const showSocialIcons = p.general?.showSocialIcons !== false && p.showSocialIcons !== false;
+  const showCopyright = p.general?.showCopyright !== false && p.showCopyright !== false;
   const showSubscribeBox = p.general?.showSubscribeBox !== false;
   
-  const copyrightText = p.general?.customCopyrightText || "© 2026 Ghost Theme Builder. Published with Ghost.";
+  const copyrightText = p.general?.customCopyrightText || p.copyright || "© 2026 Ghost Theme Builder. Published with Ghost.";
 
   const paddingTop = 
     p.spacing?.paddingTop !== undefined ? (typeof p.spacing.paddingTop === 'number' ? `${p.spacing.paddingTop}px` : p.spacing.paddingTop) :

@@ -3,6 +3,7 @@ export interface ThemeMetadata {
   version: string;
   author: string;
   description?: string;
+  themeId?: string;
 }
 
 export interface DesignTokens {
