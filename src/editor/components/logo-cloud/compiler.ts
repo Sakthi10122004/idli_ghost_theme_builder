@@ -83,7 +83,7 @@ export const generateHTML = (block: BuilderBlock): string => {
       contentHtml = `
         <div class="logo-cloud-marquee-wrapper mask-edges">
           <div class="logo-cloud-marquee-track">
-            {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
+            {{#get "posts" filter="tags:${tag}" limit="${limit}"}}
               ${ghostLoop}
               ${ghostLoop}
             {{/get}}
@@ -92,7 +92,7 @@ export const generateHTML = (block: BuilderBlock): string => {
       `;
     } else if (general.layoutStyle === "grid") {
       contentHtml = `
-        {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
+        {{#get "posts" filter="tags:${tag}" limit="${limit}"}}
           <div class="logo-cloud-grid" style="--logo-cloud-cols: ${general.columns}; grid-template-columns: repeat(var(--logo-cloud-cols), minmax(0, 1fr));">
             ${ghostLoop}
           </div>
@@ -102,7 +102,7 @@ export const generateHTML = (block: BuilderBlock): string => {
       contentHtml = `
         <div class="logo-cloud-row-wrapper">
           <div class="logo-cloud-row">
-            {{#get "posts" filter="tag:${tag}" limit="${limit}"}}
+            {{#get "posts" filter="tags:${tag}" limit="${limit}"}}
               ${ghostLoop}
             {{/get}}
           </div>

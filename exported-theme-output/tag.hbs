@@ -62,7 +62,7 @@
   {{/if}}
   <h1 class="gh-tag-header-title">{{name}}</h1>
   {{#if description}}<p class="gh-tag-header-description">{{description}}</p>{{/if}}
-  <span class="gh-tag-header-count">{{count.posts}} post{{#unless (eq count.posts 1)}}s{{/unless}}</span>
+  <span class="gh-tag-header-count">{{plural count.posts empty="0 posts" singular="1 post" plural="% posts"}}</span>
 </header>
 {{/tag}}
 <style>

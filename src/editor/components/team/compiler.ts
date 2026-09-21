@@ -62,7 +62,7 @@ export const generateHTML = (block: BuilderBlock): string => {
       : "";
 
   const tag = general.dynamicTag || "team";
-  const dynamicMembersHtml = `{{#get "posts" filter="tag:${tag}" limit="100" formats="html"}}
+  const dynamicMembersHtml = `{{#get "posts" filter="tags:${tag}" limit="100" formats="html"}}
       {{#foreach posts}}
         <div class="team-card">
           {{#if canonical_url}}

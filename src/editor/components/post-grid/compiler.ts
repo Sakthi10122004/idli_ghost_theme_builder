@@ -97,7 +97,8 @@ export const compileToHbs = (block: BuilderBlock) => {
     getHelperStart = `{{#get "posts" filter="featured:true" limit="${limit}" include="tags,authors"}}`;
     getHelperEnd = `{{/get}}`;
   } else if (source === "tag" && general.tag) {
-    getHelperStart = `{{#get "posts" filter="tag:${general.tag}" limit="${limit}" include="tags,authors"}}`;
+    const slugTag = general.tag.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
+    getHelperStart = `{{#get "posts" filter="tags:${slugTag}" limit="${limit}" include="tags,authors"}}`;
     getHelperEnd = `{{/get}}`;
   } else if (source === "custom") {
     const filterString = p.manualFilter || "all";
