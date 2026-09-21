@@ -1,3 +1,9 @@
+export interface HeaderNavItem {
+  label: string;
+  url: string;
+  children?: Array<{ label: string; url: string }>;
+}
+
 export interface HeaderProps {
   general: {
     layoutStyle: "Logo on Left" | "Logo in Center" | "Stacked";
@@ -13,6 +19,7 @@ export interface HeaderProps {
     subscribeText?: string;
     memberPreviewState?: "visitor" | "member";
     sticky: boolean;
+    dropdownPrefix?: string;
   };
   appearance: {
     backgroundColor: string;
@@ -35,7 +42,7 @@ export interface HeaderProps {
     paddingTop?: number;
     paddingBottom?: number;
   };
-  navItems?: Array<{ label: string; url: string }>;
+  navItems?: HeaderNavItem[];
 }
 
 export const defaultProps: HeaderProps = {

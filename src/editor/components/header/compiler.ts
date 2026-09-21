@@ -339,6 +339,119 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${htmlAnchor} .gh-head-btn:hover {
     opacity: 1 !important;
   }
+
+  /* ===== Dropdown Menus (Desktop) ===== */
+  #${htmlAnchor} .nav-dropdown-parent {
+    position: relative;
+  }
+  #${htmlAnchor} .nav-dropdown-parent > a {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+  }
+  #${htmlAnchor} .nav-dropdown-chevron {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+    opacity: 0.5;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  #${htmlAnchor} .nav-dropdown-parent:hover .nav-dropdown-chevron,
+  #${htmlAnchor} .nav-dropdown-parent:focus-within .nav-dropdown-chevron {
+    transform: rotate(180deg);
+    opacity: 0.8;
+  }
+  #${htmlAnchor} .nav-dropdown-card {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    min-width: 180px;
+    padding-top: 8px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  }
+  #${htmlAnchor} .nav-dropdown-parent:hover > .nav-dropdown-card,
+  #${htmlAnchor} .nav-dropdown-parent:focus-within > .nav-dropdown-card {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  #${htmlAnchor} .nav-dropdown-inner {
+    background: #ffffff;
+    color: #171717;
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 10px 15px -3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  html.dark #${htmlAnchor} .nav-dropdown-inner {
+    background: #1f1f1f;
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.08);
+  }
+  #${htmlAnchor} .nav-dropdown-inner a {
+    padding: 8px 14px !important;
+    border-radius: 5px;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+    display: block !important;
+    opacity: 1 !important;
+    transition: background 0.15s;
+  }
+  #${htmlAnchor} .nav-dropdown-inner a:hover {
+    background: rgba(0,0,0,0.05);
+  }
+  html.dark #${htmlAnchor} .nav-dropdown-inner a:hover {
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* ===== Mobile Accordion Dropdown ===== */
+  @media (max-width: 767px) {
+    #${htmlAnchor} .nav-dropdown-card {
+      display: none !important;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .nav-dropdown-parent {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.25s ease;
+      opacity: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion.is-open {
+      max-height: 500px;
+      opacity: 1;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion a {
+      font-size: 1.125rem !important;
+      font-weight: 500 !important;
+      opacity: 0.7 !important;
+      padding: 6px 0 !important;
+      text-align: center !important;
+    }
+    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion a:hover {
+      opacity: 1 !important;
+    }
+  }
   
   #${htmlAnchor} .gh-mobile-only {
     display: none !important;
@@ -750,6 +863,112 @@ function toggleThemeMode() {
     document.addEventListener('DOMContentLoaded', function() { syncCommentsTheme(isDark); });
   } else {
     syncCommentsTheme(isDark);
+  }
+})();
+
+// ===== Navigation Dropdown Enhancer =====
+// Transforms Ghost Admin flat nav items into nested dropdown menus.
+// Items whose label starts with the configured prefix are grouped
+// as children of the preceding parent item.
+(function initDropdownNav() {
+  var DROPDOWN_PREFIX = ${JSON.stringify(general.dropdownPrefix || "-")};
+
+  function enhance() {
+    var head = document.getElementById('${htmlAnchor}');
+    if (!head) return;
+    var navList = head.querySelector('.gh-head-menu .nav');
+    if (!navList) return;
+
+    var items = Array.prototype.slice.call(navList.children);
+    var i = 0;
+
+    while (i < items.length) {
+      var li = items[i];
+      var link = li.querySelector('a');
+      if (!link) { i++; continue; }
+
+      // Collect consecutive prefixed siblings as children
+      var children = [];
+      var j = i + 1;
+      while (j < items.length) {
+        var childLi = items[j];
+        var childLink = childLi.querySelector('a');
+        if (!childLink) break;
+        var label = childLink.textContent.trim();
+        if (label.indexOf(DROPDOWN_PREFIX) !== 0) break;
+        // Strip prefix from label
+        childLink.textContent = label.substring(DROPDOWN_PREFIX.length).trim();
+        children.push(childLi);
+        j++;
+      }
+
+      if (children.length === 0) { i++; continue; }
+
+      // Wrap the parent li
+      li.classList.add('nav-dropdown-parent');
+
+      // Add chevron to parent link
+      var chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      chevron.setAttribute('class', 'nav-dropdown-chevron');
+      chevron.setAttribute('viewBox', '0 0 24 24');
+      chevron.setAttribute('fill', 'none');
+      chevron.setAttribute('stroke', 'currentColor');
+      chevron.setAttribute('stroke-width', '2.5');
+      chevron.setAttribute('stroke-linecap', 'round');
+      chevron.setAttribute('stroke-linejoin', 'round');
+      var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', '6 9 12 15 18 9');
+      chevron.appendChild(polyline);
+      link.appendChild(chevron);
+
+      // Desktop: create floating dropdown card
+      var card = document.createElement('div');
+      card.className = 'nav-dropdown-card';
+      var inner = document.createElement('div');
+      inner.className = 'nav-dropdown-inner';
+
+      // Mobile: create accordion container
+      var accordion = document.createElement('div');
+      accordion.className = 'nav-accordion';
+
+      for (var k = 0; k < children.length; k++) {
+        var childLinkEl = children[k].querySelector('a');
+        if (childLinkEl) {
+          // Desktop card link
+          var desktopLink = childLinkEl.cloneNode(true);
+          inner.appendChild(desktopLink);
+          // Mobile accordion link
+          var mobileLink = childLinkEl.cloneNode(true);
+          accordion.appendChild(mobileLink);
+        }
+        // Remove original child li from the nav
+        children[k].parentNode.removeChild(children[k]);
+      }
+
+      card.appendChild(inner);
+      li.appendChild(card);
+      li.appendChild(accordion);
+
+      // Mobile tap handler: toggle accordion
+      (function(parentLi, acc) {
+        parentLi.querySelector('a').addEventListener('click', function(e) {
+          if (window.innerWidth < 768) {
+            e.preventDefault();
+            acc.classList.toggle('is-open');
+          }
+        });
+      })(li, accordion);
+
+      // Update items array since we removed elements
+      items = Array.prototype.slice.call(navList.children);
+      i++;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhance);
+  } else {
+    enhance();
   }
 })();
 </script>

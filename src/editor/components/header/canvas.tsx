@@ -10,12 +10,37 @@ const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
 interface HeaderNavItem {
   label: string;
   url?: string;
+  children?: Array<{ label: string; url: string }>;
 }
 
 const widthRank = (w: string | undefined) => {
   const i = WIDTH_ORDER.indexOf((w as typeof WIDTH_ORDER[number]) ?? "full");
   return i === -1 ? WIDTH_ORDER.length - 1 : i;
 };
+
+/**
+ * Chevron SVG indicator for dropdown parent items.
+ */
+const ChevronDown = ({ open, size = 14 }: { open?: boolean; size?: number }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{
+      transition: "transform 0.2s ease",
+      transform: open ? "rotate(180deg)" : "rotate(0deg)",
+      flexShrink: 0,
+      opacity: 0.6,
+    }}
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 export const CanvasElement = ({ block }: {
   block: BuilderBlock;
@@ -28,13 +53,15 @@ export const CanvasElement = ({ block }: {
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdownIdx, setOpenDropdownIdx] = useState<number | null>(null);
+  const [mobileAccordionIdx, setMobileAccordionIdx] = useState<number | null>(null);
   const { deviceMode, document: doc } = useEditorStore();
 
   const siteTitle = (general.siteTitle && general.siteTitle !== "My Ghost Theme")
     ? general.siteTitle
     : doc?.metadata?.name || general.siteTitle || "Ghost Publication";
 
-  const items = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
+  const items: HeaderNavItem[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
     { label: "Home", url: "/" },
     { label: "About", url: "/about" },
     { label: "Team", url: "/team" }
@@ -216,6 +243,7 @@ export const CanvasElement = ({ block }: {
       onClick={(e) => {
         e.stopPropagation();
         setIsMobileMenuOpen(!isMobileMenuOpen);
+        setMobileAccordionIdx(null);
       }}
     >
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -243,12 +271,11 @@ export const CanvasElement = ({ block }: {
   );
 
   /**
-   * Renders the full-screen mobile menu overlay.
+   * Renders the full-screen mobile menu overlay with accordion dropdowns.
    */
   const renderMobileOverlay = () => {
     if (!isMobile) return null;
 
-    // Always render but control visibility via CSS
     const overlayContent = (
       <div
         className="gh-head"
@@ -282,22 +309,64 @@ export const CanvasElement = ({ block }: {
           {renderMobileTopBarActions()}
         </div>
 
-        {/* Nav items with staggered animation */}
-        <div className="flex flex-col items-center justify-start gap-5 px-6 pt-10 pb-8">
-          <nav className="flex flex-col items-center gap-5 w-full">
-            {items.map((item: HeaderNavItem, idx: number) => (
-              <span
-                key={idx}
-                className="cursor-pointer hover:opacity-100 transition-opacity text-[1.5rem] leading-[1.3] font-semibold"
-                style={{
-                  opacity: isMobileMenuOpen ? 1 : 0,
-                  transform: isMobileMenuOpen ? 'translateY(0)' : 'translateY(-12px)',
-                  transition: `opacity 0.3s ease ${idx * 0.05}s, transform 0.3s ease ${idx * 0.05}s`,
-                }}
-              >
-                {item.label}
-              </span>
-            ))}
+        {/* Nav items with accordion for dropdowns */}
+        <div className="flex flex-col items-center justify-start gap-2 px-6 pt-10 pb-8">
+          <nav className="flex flex-col items-center gap-2 w-full">
+            {items.map((item: HeaderNavItem, idx: number) => {
+              const hasChildren = item.children && item.children.length > 0;
+              const isAccordionOpen = mobileAccordionIdx === idx;
+
+              return (
+                <div key={idx} className="w-full flex flex-col items-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (hasChildren) {
+                        setMobileAccordionIdx(isAccordionOpen ? null : idx);
+                      }
+                    }}
+                    className="cursor-pointer hover:opacity-100 transition-opacity text-[1.5rem] leading-[1.3] font-semibold flex items-center gap-2"
+                    style={{
+                      opacity: isMobileMenuOpen ? 1 : 0,
+                      transform: isMobileMenuOpen ? 'translateY(0)' : 'translateY(-12px)',
+                      transition: `opacity 0.3s ease ${idx * 0.05}s, transform 0.3s ease ${idx * 0.05}s`,
+                      background: 'none',
+                      border: 'none',
+                      color: 'inherit',
+                      padding: '8px 0',
+                    }}
+                  >
+                    {item.label}
+                    {hasChildren && <ChevronDown open={isAccordionOpen} size={18} />}
+                  </button>
+
+                  {/* Accordion sub-items */}
+                  {hasChildren && (
+                    <div
+                      style={{
+                        maxHeight: isAccordionOpen ? `${(item.children?.length ?? 0) * 48}px` : "0px",
+                        overflow: "hidden",
+                        transition: "max-height 0.3s ease, opacity 0.25s ease",
+                        opacity: isAccordionOpen ? 1 : 0,
+                        width: "100%",
+                      }}
+                    >
+                      <div className="flex flex-col items-center gap-1 py-2">
+                        {item.children?.map((child, cidx) => (
+                          <span
+                            key={cidx}
+                            className="text-[1.125rem] opacity-70 hover:opacity-100 transition-opacity py-1.5"
+                          >
+                            {child.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
 
@@ -355,16 +424,118 @@ export const CanvasElement = ({ block }: {
   };
 
   /**
-   * Renders the desktop navigation links.
+   * Renders a single desktop nav item (with optional dropdown on hover).
+   * Uses a portal to render the dropdown card outside the nav DOM tree
+   * so that builder canvas CSS can't interfere with absolute positioning.
    */
-  const renderDesktopNav = (justify: string = "center") => (
-    <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-hidden ${justify === "center" ? "justify-center" : "justify-start"
-      }`}>
-      {items.map((item: HeaderNavItem, idx: number) => (
+  const DropdownNavItem = ({ item, idx }: { item: HeaderNavItem; idx: number }) => {
+    const triggerRef = React.useRef<HTMLDivElement>(null);
+    const [pos, setPos] = React.useState<{ top: number; left: number; width: number } | null>(null);
+
+    const handleMouseEnter = React.useCallback(() => {
+      setOpenDropdownIdx(idx);
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        // Get position relative to the canvas-preview-frame container (portal target)
+        const portal = document.getElementById("canvas-preview-frame");
+        const portalRect = portal?.getBoundingClientRect();
+        setPos({
+          top: rect.bottom - (portalRect?.top ?? 0),
+          left: rect.left + rect.width / 2 - (portalRect?.left ?? 0),
+          width: rect.width,
+        });
+      }
+    }, [idx]);
+
+    const handleMouseLeave = React.useCallback(() => {
+      setOpenDropdownIdx(null);
+    }, []);
+
+    const isOpen = openDropdownIdx === idx;
+
+    // The dropdown portal content
+    const dropdownPortal = isOpen && pos && typeof document !== "undefined" ? createPortal(
+      <div
+        onMouseEnter={() => setOpenDropdownIdx(idx)}
+        onMouseLeave={() => setOpenDropdownIdx(null)}
+        style={{
+          position: "absolute",
+          top: `${pos.top}px`,
+          left: `${pos.left}px`,
+          transform: "translateX(-50%)",
+          zIndex: 99999,
+          paddingTop: "4px",
+          minWidth: "180px",
+        }}
+      >
+        <div
+          className="nav-dropdown"
+          style={{
+            borderRadius: "8px",
+            padding: "6px",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.08), 0 10px 15px -3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+            border: "1px solid rgba(0,0,0,0.06)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          }}
+        >
+          <style>{`
+            .nav-dropdown { background: #ffffff; color: #171717; }
+            html.dark .nav-dropdown { background: #1f1f1f; color: #ffffff; border-color: rgba(255,255,255,0.08) !important; }
+            .nav-dropdown-item { padding: 8px 14px; border-radius: 5px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+            .nav-dropdown-item:hover { background: rgba(0,0,0,0.05); }
+            html.dark .nav-dropdown-item:hover { background: rgba(255,255,255,0.08); }
+          `}</style>
+          {item.children?.map((child, cidx) => (
+            <div key={cidx} className="nav-dropdown-item">
+              {child.label}
+            </div>
+          ))}
+        </div>
+      </div>,
+      document.getElementById("canvas-preview-frame") || document.body
+    ) : null;
+
+    return (
+      <>
+        <div
+          ref={triggerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{ display: "inline-flex", alignItems: "center" }}
+        >
+          <span className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2 flex items-center gap-1.5">
+            {item.label}
+            <ChevronDown open={isOpen} />
+          </span>
+        </div>
+        {dropdownPortal}
+      </>
+    );
+  };
+
+  const renderDesktopNavItem = (item: HeaderNavItem, idx: number) => {
+    const hasChildren = item.children && item.children.length > 0;
+
+    if (!hasChildren) {
+      return (
         <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
           {item.label}
         </span>
-      ))}
+      );
+    }
+
+    return <DropdownNavItem key={idx} item={item} idx={idx} />;
+  };
+
+  /**
+   * Renders the desktop navigation links with dropdown support.
+   */
+  const renderDesktopNav = (justify: string = "center") => (
+    <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-visible ${justify === "center" ? "justify-center" : "justify-start"
+      }`}>
+      {items.map((item: HeaderNavItem, idx: number) => renderDesktopNavItem(item, idx))}
     </nav>
   );
 
@@ -392,6 +563,7 @@ export const CanvasElement = ({ block }: {
           backdropFilter: glassEnabled ? `blur(${glassBlur})` : undefined,
           WebkitBackdropFilter: glassEnabled ? `blur(${glassBlur})` : undefined,
           transition: "all 0.15s ease-in-out",
+          overflow: "visible",
         }}
       >
         {/* Inner container receives Content Width */}
@@ -404,6 +576,7 @@ export const CanvasElement = ({ block }: {
             padding: isMobile ? "0 16px" : `${headerPt} 24px ${headerPb} 24px`,
             display: "flex",
             alignItems: "center",
+            overflow: "visible",
           }}
         >
 
@@ -417,12 +590,8 @@ export const CanvasElement = ({ block }: {
             /* ============ STACKED DESKTOP ============ */
             <div className="flex flex-col items-center gap-4 text-center w-full">
               {renderLogo()}
-              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90">
-                {items.map((item: HeaderNavItem, idx: number) => (
-                  <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
-                    {item.label}
-                  </span>
-                ))}
+              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90" style={{ overflow: "visible" }}>
+                {items.map((item: HeaderNavItem, idx: number) => renderDesktopNavItem(item, idx))}
               </nav>
               {renderActions()}
             </div>

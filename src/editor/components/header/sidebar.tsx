@@ -8,6 +8,12 @@ const DEFAULT_NAV_ITEMS = [
   { label: "Team", url: "/team" }
 ];
 
+interface NavItemWithChildren {
+  label: string;
+  url: string;
+  children?: Array<{ label: string; url: string }>;
+}
+
 const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
   <button 
     type="button"
@@ -256,43 +262,127 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           </button>
         </div>
 
+        {/* Dropdown Prefix */}
+        <div className="flex flex-col gap-1 mt-1 p-2.5 bg-indigo-50/60 border border-indigo-100 rounded-lg">
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-[11px] font-semibold text-gray-700">Dropdown Prefix</label>
+            <input
+              type="text"
+              value={g.dropdownPrefix ?? "-"}
+              onChange={(e) => updateCategory("general", "dropdownPrefix", e.target.value)}
+              className="w-16 px-2 py-1 text-[11px] font-mono text-center border border-indigo-200 rounded bg-white focus:outline-none focus:border-indigo-400"
+              placeholder="-"
+            />
+          </div>
+          <p className="text-[9px] text-gray-500 leading-[1.4]">
+            In Ghost Admin → Navigation, prefix sub-items with this character (e.g. <code className="font-mono bg-white px-1 py-0.5 rounded text-indigo-600">{g.dropdownPrefix || "-"} Sublink</code>) to group them as dropdowns.
+          </p>
+        </div>
+
         <div className="flex flex-col gap-2 mt-1">
-          {(Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : DEFAULT_NAV_ITEMS).map((item: { label: string; url: string }, idx: number) => (
-            <div key={idx} className="flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 rounded p-1.5">
-              <input
-                type="text"
-                value={item.label}
-                onChange={(e) => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
-                  currentItems[idx] = { ...currentItems[idx], label: e.target.value };
-                  onChangeProps({ ...p, navItems: currentItems });
-                }}
-                className="w-1/2 px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none"
-                placeholder="Label"
-              />
-              <input
-                type="text"
-                value={item.url}
-                onChange={(e) => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
-                  currentItems[idx] = { ...currentItems[idx], url: e.target.value };
-                  onChangeProps({ ...p, navItems: currentItems });
-                }}
-                className="w-1/2 px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none font-mono"
-                placeholder="URL"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const currentItems = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
-                  currentItems.splice(idx, 1);
-                  onChangeProps({ ...p, navItems: currentItems });
-                }}
-                className="text-gray-400 hover:text-red-500 px-1 text-sm font-bold cursor-pointer"
-                title="Remove Link"
-              >
-                ×
-              </button>
+          {(Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : DEFAULT_NAV_ITEMS).map((item: NavItemWithChildren, idx: number) => (
+            <div key={idx} className="flex flex-col gap-0">
+              {/* Parent nav item row */}
+              <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 rounded-t p-1.5" style={{ borderRadius: item.children && item.children.length > 0 ? '6px 6px 0 0' : '6px' }}>
+                <input
+                  type="text"
+                  value={item.label}
+                  onChange={(e) => {
+                    const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                    currentItems[idx] = { ...currentItems[idx], label: e.target.value };
+                    onChangeProps({ ...p, navItems: currentItems });
+                  }}
+                  className="w-[38%] px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none"
+                  placeholder="Label"
+                />
+                <input
+                  type="text"
+                  value={item.url}
+                  onChange={(e) => {
+                    const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                    currentItems[idx] = { ...currentItems[idx], url: e.target.value };
+                    onChangeProps({ ...p, navItems: currentItems });
+                  }}
+                  className="w-[38%] px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:outline-none font-mono"
+                  placeholder="URL"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                    const children = currentItems[idx].children || [];
+                    currentItems[idx] = { ...currentItems[idx], children: [...children, { label: "Sub Link", url: "#" }] };
+                    onChangeProps({ ...p, navItems: currentItems });
+                  }}
+                  className="text-indigo-500 hover:text-indigo-700 text-[9px] font-semibold cursor-pointer whitespace-nowrap px-1"
+                  title="Add Sub-link"
+                >
+                  + Sub
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                    currentItems.splice(idx, 1);
+                    onChangeProps({ ...p, navItems: currentItems });
+                  }}
+                  className="text-gray-400 hover:text-red-500 px-1 text-sm font-bold cursor-pointer"
+                  title="Remove Link"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Child sub-link rows */}
+              {item.children && item.children.length > 0 && (
+                <div className="flex flex-col border-l-2 border-indigo-200 ml-3 bg-indigo-50/30 rounded-b border border-t-0 border-gray-200/60">
+                  {item.children.map((child: { label: string; url: string }, cidx: number) => (
+                    <div key={cidx} className="flex items-center gap-1.5 px-2 py-1 border-b border-gray-100 last:border-b-0">
+                      <span className="text-[10px] text-indigo-400 font-mono select-none">↳</span>
+                      <input
+                        type="text"
+                        value={child.label}
+                        onChange={(e) => {
+                          const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                          const children = [...(currentItems[idx].children || [])];
+                          children[cidx] = { ...children[cidx], label: e.target.value };
+                          currentItems[idx] = { ...currentItems[idx], children };
+                          onChangeProps({ ...p, navItems: currentItems });
+                        }}
+                        className="w-[38%] px-2 py-0.5 text-[10px] border border-gray-200 rounded bg-white focus:outline-none"
+                        placeholder="Sub Label"
+                      />
+                      <input
+                        type="text"
+                        value={child.url}
+                        onChange={(e) => {
+                          const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                          const children = [...(currentItems[idx].children || [])];
+                          children[cidx] = { ...children[cidx], url: e.target.value };
+                          currentItems[idx] = { ...currentItems[idx], children };
+                          onChangeProps({ ...p, navItems: currentItems });
+                        }}
+                        className="w-[38%] px-2 py-0.5 text-[10px] font-mono border border-gray-200 rounded bg-white focus:outline-none"
+                        placeholder="/url"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentItems: NavItemWithChildren[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? [...p.navItems] : [...DEFAULT_NAV_ITEMS];
+                          const children = [...(currentItems[idx].children || [])];
+                          children.splice(cidx, 1);
+                          currentItems[idx] = { ...currentItems[idx], children };
+                          onChangeProps({ ...p, navItems: currentItems });
+                        }}
+                        className="text-gray-400 hover:text-red-500 px-0.5 text-xs font-bold cursor-pointer"
+                        title="Remove Sub-link"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
