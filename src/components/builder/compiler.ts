@@ -204,7 +204,7 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
     }
     return markup;
   }
-  return "";
+  return `<!-- WARNING: unknown block type "${block.type}" (id: ${block.id}) — this block will not render. Check componentRegistry in registry.ts for the correct type name. -->`;
 }
 
 /**
