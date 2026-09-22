@@ -234,7 +234,15 @@ export const compileToHbs = (block: BuilderBlock): string => {
     ${!(showCover || textColor) ? 'color: var(--color-fg, #171717);' : ''}
   }
   html.dark #${uid}.hero-block {
-    ${!showCover && (!block.styles?.backgroundType || block.styles?.backgroundType === 'solid') && (!block.styles?.backgroundColor || block.styles?.backgroundColor === '#ffffff' || block.styles?.backgroundColor === '#fff') ? 'background-color: var(--color-bg, #111111);' : ''}
+    ${(() => {
+      if (showCover) return '';
+      if (block.styles?.backgroundType && block.styles.backgroundType !== 'solid') return '';
+      const bg = (block.styles?.backgroundColor || '').trim().toLowerCase();
+      const isDefault = !bg || bg === '#ffffff' || bg === '#fff' || bg === 'white'
+        || bg === 'rgb(255, 255, 255)' || bg === 'rgb(255,255,255)'
+        || bg.startsWith('var(--color-bg') || bg.startsWith('var(--color-canvas');
+      return isDefault ? 'background-color: var(--color-bg, #111111);' : '';
+    })()}
     ${!textColor && !showCover ? 'color: var(--color-fg, #ffffff);' : ''}
   }
   html.dark #${uid} .hero-btn-primary {

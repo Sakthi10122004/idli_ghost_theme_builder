@@ -548,7 +548,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     flex-shrink: 0;
     border-radius: 0.25rem;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-image-secondary img {
     width: 100%;
@@ -653,7 +653,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     flex-shrink: 0;
     border-radius: 0.25rem;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-list-image img {
     width: 100%;

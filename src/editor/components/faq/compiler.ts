@@ -13,7 +13,7 @@ export const generateHTML = (block: BuilderBlock): string => {
   const bgCss = getBackgroundCSS(styles, appearance);
   const wrapperId = p.advanced?.htmlAnchor || `faq-${block.id}`;
   const cornerRadius = (general.itemCornerStyle || "rounded") === "rectangle" ? "0px" : "0.75rem";
-  const itemBg = appearance?.itemBgColor || "#f8fafc";
+  const itemBg = appearance?.itemBgColor || "var(--color-canvas-soft, #f8fafc)";
   
   const renderFaqItem = (item: any, idx: number) => {
     const isFirst = idx === 0;
@@ -261,6 +261,20 @@ export const generateHTML = (block: BuilderBlock): string => {
   @media (min-width: 1024px) {
     #${wrapperId} .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #${wrapperId} .lg\\:mt-0 { margin-top: 0; }
+  }
+  html.dark #${wrapperId} .faq-item {
+    background-color: var(--color-canvas-soft, #1a1a1a);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  html.dark #${wrapperId} .faq-chevron-wrapper {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  html.dark #${wrapperId} .faq-button:hover .faq-chevron-wrapper {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  html.dark #${wrapperId} .faq-answer-wrapper.is-open,
+  html.dark #${wrapperId} .faq-button[aria-expanded="true"] + .faq-answer-wrapper {
+    border-top-color: rgba(255, 255, 255, 0.08);
   }
 </style>
 <div id="${wrapperId}" class="faq-section ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}">

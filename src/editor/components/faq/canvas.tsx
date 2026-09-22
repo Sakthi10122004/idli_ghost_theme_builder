@@ -38,7 +38,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     return (
       <div
         key={item.id}
-        className={`w-full min-w-full p-5 sm:p-6 mb-4 border border-black/5 shadow-xs transition-all duration-200 ${cornerClass}`}
+        className={`w-full min-w-full p-5 sm:p-6 mb-4 border border-black/5 dark:border-white/10 shadow-xs transition-all duration-200 ${cornerClass}`}
         style={{ backgroundColor: itemBg }}
       >
         <dt className="w-full min-w-full">
@@ -50,8 +50,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             aria-expanded={isOpen}
             onClick={() => toggle(item.id)}
           >
-            <span className="text-base sm:text-lg font-bold leading-snug flex-1 min-w-0">{item.question}</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/5 group-hover:bg-black/10 shrink-0 transition-colors">
+            <span className="text-base sm:text-lg font-bold leading-snug flex-1 min-w-0 text-brand-ink dark:text-brand-ink">{item.question}</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/20 shrink-0 transition-colors">
               <svg
                 className={`h-4 w-4 transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
                 fill="none"
@@ -66,12 +66,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         </dt>
         <dd
           className={`grid transition-all duration-300 ease-in-out w-full min-w-full ${
-            isOpen ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-black/5' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'
+            isOpen ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-black/5 dark:border-white/10' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'
           }`}
           id={`faq-${block.id}-${item.id}`}
         >
           <div className="overflow-hidden">
-            <p className="text-sm sm:text-base leading-relaxed text-gray-600 w-full" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+            <p className="text-sm sm:text-base leading-relaxed text-brand-body dark:text-neutral-400 w-full" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
               {item.answer}
             </p>
           </div>

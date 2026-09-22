@@ -17,7 +17,7 @@ export const CanvasElement = ({
 
   return (
     <div
-      className="w-full mx-auto my-4 overflow-hidden rounded-md border border-brand-hairline bg-brand-canvas-soft flex items-center justify-center"
+      className="w-full mx-auto my-4 overflow-hidden rounded-md border border-brand-hairline dark:border-white/10 bg-brand-canvas-soft dark:bg-neutral-900 flex items-center justify-center"
       style={{
         maxWidth: p.maxWidth || "100%",
         aspectRatio: p.aspectRatio && p.aspectRatio !== "auto" ? p.aspectRatio : undefined,

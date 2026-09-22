@@ -295,9 +295,10 @@ function SortableElement({
 }
 
 export default function Canvas() {
-  const { document: themeDoc, activePage, deviceMode, selectedBlockId, selectBlock, deleteBlock } = useEditorStore();
+  const { document: themeDoc, activePage, deviceMode, selectedBlockId, selectBlock, deleteBlock, previewColorMode } = useEditorStore();
   const pageSections = themeDoc.pages[activePage]?.sections || [];
   const { isPreviewMode } = useEditorStore();
+  const isDark = previewColorMode === "dark";
 
   // Register canvas container as a droppable target zone
   const { setNodeRef: setCanvasDropRef, isOver: isCanvasOver } = useDroppable({
@@ -553,7 +554,7 @@ export default function Canvas() {
         id="canvas-preview-frame"
         ref={setCanvasDropRef}
         onClick={() => selectBlock(null)}
-        className={`${getViewportWidthClass()} mx-auto relative bg-white shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${
+        className={`${getViewportWidthClass()} mx-auto relative shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
           isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20 scale-[1.002]" : "border-brand-hairline"
         }`}
       >

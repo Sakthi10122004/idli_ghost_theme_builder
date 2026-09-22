@@ -139,7 +139,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     font-weight: 600;
     border-radius: var(--radius-pill);
     background-color: var(--color-primary);
-    color: #ffffff;
+    color: var(--color-on-primary, #ffffff);
     text-decoration: none;
     border: none;
     cursor: pointer;
@@ -147,6 +147,17 @@ export const compileToHbs = (block: BuilderBlock) => {
   }
   #newsletter-${block.id} .btn-primary:hover {
     opacity: 0.85;
+  }
+  html.dark #newsletter-${block.id} {
+    border-color: rgba(255,255,255,0.1);
+  }
+  html.dark #newsletter-${block.id} .input-field {
+    background-color: var(--color-canvas-soft, #1a1a1a);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--color-fg, #ffffff);
+  }
+  html.dark #newsletter-${block.id} .newsletter-title {
+    color: var(--color-fg, #ffffff);
   }
 </style>
 <div id="newsletter-${block.id}" class="newsletter-block">

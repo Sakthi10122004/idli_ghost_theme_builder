@@ -88,7 +88,7 @@ export function CanvasElement({ block, onClick }: {
 
   return (
     <footer 
-      className={`site-footer w-full px-4 sm:px-6 transition-all overflow-hidden section-width-${sectionWidth} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}`}
+      className={`site-footer w-full px-4 sm:px-6 transition-all overflow-hidden section-width-${sectionWidth} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''} text-brand-ink dark:text-brand-ink`}
       style={{ 
         ...bgStyleObj, 
         color: text, 

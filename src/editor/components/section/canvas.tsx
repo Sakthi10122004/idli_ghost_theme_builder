@@ -68,7 +68,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 
   return (
     <section 
-      className={`relative w-full ${backgroundVideoUrl ? 'overflow-hidden' : ''} ${block.styles?.backgroundType === 'mesh' ? 'mesh-glow' : ''}`}
+      className={`relative w-full text-brand-ink dark:text-brand-ink ${backgroundVideoUrl ? 'overflow-hidden' : ''} ${block.styles?.backgroundType === 'mesh' ? 'mesh-glow' : ''}`}
       style={{ 
         ...bgStyle, 
         paddingTop: getStyleValue(block.styles?.paddingTop), 

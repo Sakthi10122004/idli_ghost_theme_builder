@@ -101,7 +101,7 @@ export const CanvasElement = ({
         </div>
       )}
       <HeadingTag
-        className={`heading font-heading leading-tight transition-all text-brand-ink ${getLevelClasses(level)} ${isDarkText ? "heading-dark-adaptive" : ""}`}
+        className={`heading font-heading leading-tight transition-all text-brand-ink dark:text-white ${getLevelClasses(level)} ${isDarkText ? "heading-dark-adaptive" : ""}`}
         style={titleStyle}
       >
         {displayText}

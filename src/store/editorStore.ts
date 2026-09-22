@@ -194,7 +194,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
         placeholder: "you@example.com",
       },
       styles: {
-        backgroundColor: "#fafafa",
+        backgroundColor: "var(--color-canvas-soft, #fafafa)",
         paddingTop: "64px",
         paddingBottom: "64px",
         layout: "center",

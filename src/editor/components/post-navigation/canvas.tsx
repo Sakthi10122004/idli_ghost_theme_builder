@@ -13,14 +13,14 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  const isDark = useCanvasDarkMode();
+  useCanvasDarkMode();
   const p = resolvePostNavigationProps(block.props);
 
   return (
     <nav className="w-full py-8 border-t border-brand-hairline">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Prev Post */}
-        <div className={`flex gap-4 items-center p-4 ${isDark ? "bg-neutral-900 text-white" : "bg-brand-canvas text-brand-ink"} border border-brand-hairline rounded-md shadow-level-1 hover:border-brand-hairline-strong transition-all cursor-pointer group`}>
+        <div className="flex gap-4 items-center p-4 bg-brand-canvas dark:bg-neutral-900 text-brand-ink dark:text-white border border-brand-hairline dark:border-white/10 rounded-md shadow-level-1 hover:border-brand-hairline-strong transition-all cursor-pointer group">
           {p.showImage && (
             <div className="w-14 h-14 bg-brand-canvas-soft-2 border border-brand-hairline rounded-sm overflow-hidden shrink-0">
               <img
@@ -46,7 +46,7 @@ export const CanvasElement = ({
         </div>
 
         {/* Next Post */}
-        <div className={`flex flex-row-reverse gap-4 items-center p-4 ${isDark ? "bg-neutral-900 text-white" : "bg-brand-canvas text-brand-ink"} border border-brand-hairline rounded-md shadow-level-1 hover:border-brand-hairline-strong transition-all cursor-pointer group text-right`}>
+        <div className="flex flex-row-reverse gap-4 items-center p-4 bg-brand-canvas dark:bg-neutral-900 text-brand-ink dark:text-white border border-brand-hairline dark:border-white/10 rounded-md shadow-level-1 hover:border-brand-hairline-strong transition-all cursor-pointer group text-right">
           {p.showImage && (
             <div className="w-14 h-14 bg-brand-canvas-soft-2 border border-brand-hairline rounded-sm overflow-hidden shrink-0">
               <img

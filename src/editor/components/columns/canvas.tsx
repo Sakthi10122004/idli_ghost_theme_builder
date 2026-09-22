@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ renderChildren }: {
   block?: BuilderBlock;
@@ -8,8 +9,9 @@ export const CanvasElement = ({ renderChildren }: {
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   return (
-    <div className="flex flex-wrap gap-6 w-full [&>*]:flex-1 [&>*]:min-w-[250px]">
+    <div className="flex flex-wrap gap-6 w-full [&>*]:flex-1 [&>*]:min-w-[250px] text-brand-ink dark:text-brand-ink">
       {renderChildren ? renderChildren() : null}
     </div>
   );

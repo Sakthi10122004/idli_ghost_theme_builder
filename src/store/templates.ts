@@ -78,7 +78,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: gridSecId,
             type: "section",
             props: {},
-            styles: { paddingTop: "32px", paddingBottom: "64px", backgroundColor: "#fafafa" },
+            styles: { paddingTop: "32px", paddingBottom: "64px", backgroundColor: "var(--color-canvas-soft, #fafafa)" },
             childrenIds: [gridId],
           },
           [gridId]: {
@@ -156,7 +156,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: testimonialsSecId,
             type: "section",
             props: {},
-            styles: { paddingTop: "64px", paddingBottom: "96px", backgroundColor: "#fafafa" },
+            styles: { paddingTop: "64px", paddingBottom: "96px", backgroundColor: "var(--color-canvas-soft, #fafafa)" },
             childrenIds: [testimonialsId],
           },
           [testimonialsId]: {

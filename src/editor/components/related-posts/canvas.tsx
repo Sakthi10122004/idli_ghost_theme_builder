@@ -12,7 +12,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  const isDark = useCanvasDarkMode();
+  useCanvasDarkMode();
   const p = resolveRelatedPostsProps(block.props);
 
   const mockPosts = [
@@ -55,7 +55,7 @@ export const CanvasElement = ({
         {displayPosts.map((post) => (
           <article
             key={post.id}
-            className={`border border-brand-hairline rounded-md overflow-hidden shadow-level-2 group cursor-pointer ${isDark ? "bg-neutral-900 text-white" : "bg-brand-canvas text-brand-ink"}`}
+            className="border border-brand-hairline dark:border-white/10 rounded-md overflow-hidden shadow-level-2 group cursor-pointer bg-brand-canvas dark:bg-neutral-900 text-brand-ink dark:text-white"
           >
             {p.showImage && (
               <div className="aspect-video bg-brand-canvas-soft-2 overflow-hidden">

@@ -28,7 +28,10 @@ function getInlineStyles(block: BuilderBlock): string {
     if (val) stylePairs.push(`font-size: ${val}`);
   }
   if (styles.textColor) {
-    const val = resolveStyleValue(styles.textColor);
+    let val = resolveStyleValue(styles.textColor);
+    if (val === "#171717" || val === "#000000" || val === "#111111") {
+      val = "var(--color-fg)";
+    }
     if (val) stylePairs.push(`color: ${val}`);
   }
   if (styles.fontWeight) {
@@ -75,6 +78,11 @@ function getInlineStyles(block: BuilderBlock): string {
 
   if (styles.backgroundColor) {
     let val = resolveStyleValue(styles.backgroundColor);
+    if (val === "#ffffff" || val === "#fff") {
+      val = "var(--color-bg)";
+    } else if (val === "#fafafa") {
+      val = "var(--color-canvas-soft, #fafafa)";
+    }
     if (glassEnabled && val) {
       val = toTranslucent(val);
     }
@@ -388,6 +396,10 @@ ul.nav, ul.nav-secondary {
   --color-canvas: var(--color-bg);
   --color-ink: var(--color-fg);
   --color-hairline: #ebebeb;
+  --color-canvas-soft: #fafafa;
+  --color-body: ${colorMuted};
+  --color-border: #ebebeb;
+  --color-on-primary: #ffffff;
   
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -411,8 +423,11 @@ html.dark {
   --color-on-primary: #000000;
   --color-muted: #a3a3a3;
   --color-mute: #a3a3a3;
+  --color-body: #a3a3a3;
   --color-hairline: #333333;
+  --color-border: #333333;
   --color-canvas: #111111;
+  --color-canvas-soft: #1a1a1a;
   --color-ink: #ffffff;
 }
 
@@ -460,6 +475,25 @@ html.dark .gh-logo-dark { display: inline-block !important; }
 
 /* Ensure sections and buttons adapt cleanly in Ghost dark mode */
 html.dark .section,
+html.dark .hero,
+html.dark .hero-section,
+html.dark .footer,
+html.dark .footer-section,
+html.dark .site-footer,
+html.dark .featured-posts,
+html.dark .featured-posts-section,
+html.dark .testimonials,
+html.dark .testimonials-section,
+html.dark .pricing,
+html.dark .pricing-section,
+html.dark .pricing-table,
+html.dark .newsletter,
+html.dark .newsletter-section,
+html.dark .newsletter-block,
+html.dark .faq,
+html.dark .faq-section,
+html.dark .stats,
+html.dark .stats-section,
 html.dark .logo-cloud-section {
   background-color: var(--color-bg);
   color: var(--color-fg);

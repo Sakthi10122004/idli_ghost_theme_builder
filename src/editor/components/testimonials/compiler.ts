@@ -519,7 +519,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       justify-content: space-between;
       gap: 10px;
       padding-top: 0.85rem;
-      border-top: 1px solid #f4f4f5;
+      border-top: 1px solid var(--color-hairline, #f4f4f5);
       margin-top: auto;
       min-width: 0;
       text-align: left;
@@ -538,13 +538,13 @@ export const compileToHbs = (block: BuilderBlock) => {
       border-radius: 50%;
       object-fit: cover;
       flex-shrink: 0;
-      border: 1px solid #e4e4e7;
+      border: 1px solid var(--color-hairline, #e4e4e7);
     }
     #${uid} .gh-author-avatar-fallback {
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #e4e4e7;
+      background: var(--color-canvas-soft, #e4e4e7);
       color: var(--color-fg, #27272a);
       font-size: 12px;
       font-weight: 700;
@@ -552,7 +552,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      border: 1px solid #d4d4d8;
+      border: 1px solid var(--color-hairline, #d4d4d8);
     }
     #${uid} .gh-author-details {
       display: flex;
@@ -590,7 +590,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       gap: 4px;
       margin-top: 3px;
       font-size: 10px;
-      color: #a1a1aa;
+      color: var(--color-muted, #a1a1aa);
       line-height: 1.2;
       text-align: left;
       flex-wrap: wrap;
@@ -609,11 +609,11 @@ export const compileToHbs = (block: BuilderBlock) => {
       display: inline;
     }
     #${uid} .gh-meta-sep {
-      color: #d4d4d8;
+      color: var(--color-hairline, #d4d4d8);
     }
     #${uid} .gh-author-meta {
       font-size: 10px;
-      color: #a1a1aa;
+      color: var(--color-muted, #a1a1aa);
       font-family: monospace;
       line-height: 1.2;
       white-space: nowrap;
@@ -624,7 +624,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #f4f4f5;
+      background: var(--color-canvas-soft, #f4f4f5);
       color: var(--color-muted, #71717a);
       display: flex;
       align-items: center;
@@ -634,8 +634,14 @@ export const compileToHbs = (block: BuilderBlock) => {
       flex-shrink: 0;
     }
     #${uid} .gh-social-link:hover {
-      background: #e4e4e7;
+      background: var(--color-hairline, #e4e4e7);
       color: var(--color-fg, #18181b);
+    }
+    html.dark #${uid} .gh-card-bordered,
+    html.dark #${uid} .gh-card-elevated,
+    html.dark #${uid} .gh-card-soft {
+      background: var(--color-canvas-soft, #1a1a1a);
+      border-color: var(--color-border, #333333);
     }
   </style>
   ${headerHtml}

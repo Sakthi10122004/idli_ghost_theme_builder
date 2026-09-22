@@ -18,7 +18,7 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   const deviceMode = useEditorStore((s) => s.deviceMode);
-  const isDark = useCanvasDarkMode();
+  useCanvasDarkMode();
   const isMobile = deviceMode === "mobile";
   const tiers = block.props.tiers || [];
   return (
@@ -26,7 +26,7 @@ export const CanvasElement = ({ block }: {
       {block.props.title && <h3 className="text-sm font-mono uppercase tracking-wider text-muted mb-6">{block.props.title}</h3>}
       <div className={`pricing-grid flex ${isMobile ? "flex-col" : "flex-col md:flex-row"} justify-center gap-6 max-w-4xl mx-auto`}>
         {tiers.map((tier: PricingTier, idx: number) => (
-          <div key={idx} className={`pricing-tier border border-brand-hairline rounded-md p-6 ${isDark ? "bg-neutral-900 text-white" : "bg-brand-canvas text-brand-ink"} flex flex-col justify-between flex-1 transition-colors`}>
+          <div key={idx} className="pricing-tier border border-brand-hairline dark:border-white/10 rounded-md p-6 bg-brand-canvas dark:bg-neutral-900 text-brand-ink dark:text-white flex flex-col justify-between flex-1 transition-colors">
             <div className="mb-6">
               <span className="tier-name text-[10px] font-mono uppercase tracking-wider text-muted font-semibold">{tier.name}</span>
               <span className="tier-price block text-3xl font-bold mt-2">{tier.price}</span>
