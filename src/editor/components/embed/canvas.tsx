@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveEmbedProps } from "./schema";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -11,6 +12,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p = resolveEmbedProps(block.props);
 
   return (

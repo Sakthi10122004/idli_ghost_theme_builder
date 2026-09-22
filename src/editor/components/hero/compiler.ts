@@ -216,8 +216,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     cursor: pointer;
   }
   #${uid} .hero-btn-primary {
-    background-color: ${p.buttonBgColor || '#171717'};
-    color: ${p.buttonTextColor || '#ffffff'};
+    background-color: ${p.buttonBgColor || 'var(--color-primary, #171717)'};
+    color: ${p.buttonTextColor || 'var(--color-on-primary, #ffffff)'};
     border: 1px solid transparent;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
@@ -230,16 +230,16 @@ export const compileToHbs = (block: BuilderBlock): string => {
     border: 2px solid ${(showCover || textColor) ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
   }
   #${uid} .hero-btn-secondary:hover {
-    border-color: ${(showCover || textColor) ? (textColor || '#ffffff') : '#171717'};
-    ${!(showCover || textColor) ? 'color: #171717;' : ''}
+    border-color: ${(showCover || textColor) ? (textColor || '#ffffff') : 'var(--color-fg, #171717)'};
+    ${!(showCover || textColor) ? 'color: var(--color-fg, #171717);' : ''}
   }
   html.dark #${uid}.hero-block {
     ${!showCover && (!block.styles?.backgroundType || block.styles?.backgroundType === 'solid') && (!block.styles?.backgroundColor || block.styles?.backgroundColor === '#ffffff' || block.styles?.backgroundColor === '#fff') ? 'background-color: var(--color-bg, #111111);' : ''}
     ${!textColor && !showCover ? 'color: var(--color-fg, #ffffff);' : ''}
   }
   html.dark #${uid} .hero-btn-primary {
-    background-color: ${p.buttonBgColor && p.buttonBgColor !== '#171717' ? p.buttonBgColor : '#ffffff'};
-    color: ${p.buttonTextColor && p.buttonTextColor !== '#ffffff' ? p.buttonTextColor : '#000000'};
+    background-color: ${p.buttonBgColor && p.buttonBgColor !== '#171717' ? p.buttonBgColor : 'var(--color-primary, #ffffff)'};
+    color: ${p.buttonTextColor && p.buttonTextColor !== '#ffffff' ? p.buttonTextColor : 'var(--color-on-primary, #000000)'};
   }
   html.dark #${uid} .hero-btn-secondary {
     border-color: rgba(255,255,255,0.2);
@@ -279,7 +279,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     height: 2.75rem;
     border-radius: 9999px;
     background-color: rgba(255, 255, 255, 0.85);
-    color: #171717;
+    color: var(--color-fg, #171717);
     border: 1px solid rgba(0,0,0,0.06);
     display: flex;
     align-items: center;
@@ -289,7 +289,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     transition: all 0.2s ease;
   }
   #${uid} .carousel-btn-nav:hover {
-    background-color: #ffffff;
+    background-color: var(--color-bg, #ffffff);
     transform: translateY(-50%) scale(1.05);
   }
   #${uid} .carousel-prev { left: 1rem; }
@@ -315,11 +315,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
   #${uid} .carousel-dot.active {
     width: 1.75rem;
-    background-color: #171717;
+    background-color: var(--color-fg, #171717);
   }
   html.dark #${uid} .carousel-btn-nav {
     background-color: rgba(30, 30, 30, 0.85);
-    color: #ffffff;
+    color: var(--color-fg, #ffffff);
     border-color: rgba(255,255,255,0.1);
   }
   html.dark #${uid} .carousel-btn-nav:hover {
@@ -329,7 +329,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     background-color: rgba(255,255,255,0.3);
   }
   html.dark #${uid} .carousel-dot.active {
-    background-color: #ffffff;
+    background-color: var(--color-fg, #ffffff);
   }
 </style>`;
 

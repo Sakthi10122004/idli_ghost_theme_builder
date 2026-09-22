@@ -22,11 +22,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
   function syncGhostCommentsTheme() {
     try {
       var isDark = document.documentElement.classList.contains('dark') || 
-                   document.documentElement.classList.contains('dark-mode') || 
                    (!localStorage.getItem('theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       var sec = document.querySelector('.gh-comments-section');
       if (sec) {
-        sec.style.color = isDark ? '#ffffff' : '#171717';
+        sec.style.color = isDark ? 'var(--color-fg, #ffffff)' : 'var(--color-fg, #171717)';
         sec.classList.toggle('dark', isDark);
       }
       var script = document.querySelector('script[data-ghost-comments]');

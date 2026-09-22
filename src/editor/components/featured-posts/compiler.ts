@@ -7,10 +7,10 @@ export const compileToHbs = (block: BuilderBlock) => {
   const autoScroll = Boolean(p.autoScroll);
   const heading = p.heading !== undefined ? p.heading : (p.title || "Featured Articles");
   const description = p.description !== undefined ? p.description : "Hand-picked stories and top editorial selections from our writers.";
-  const headingColor = p.headingColor || "#171717";
-  const descriptionColor = p.descriptionColor || "#666666";
-  const cardTitleColor = p.cardTitleColor || "#171717";
-  const cardTextColor = p.cardTextColor || "#4d4d4d";
+  const headingColor = p.headingColor || "var(--color-fg, #171717)";
+  const descriptionColor = p.descriptionColor || "var(--color-muted, #666666)";
+  const cardTitleColor = p.cardTitleColor || "var(--color-fg, #171717)";
+  const cardTextColor = p.cardTextColor || "var(--color-muted, #4d4d4d)";
   const wrapperId = p.advanced?.htmlAnchor || `featured-posts-${block.id}`;
 
   let layoutMarkup = "";
@@ -488,7 +488,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     }
   }
   #${wrapperId} .featured-post-main {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.375rem;
     overflow: hidden;
@@ -498,7 +498,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .featured-post-image-main {
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-image-main img {
     width: 100%;
@@ -592,7 +592,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   }
   #${wrapperId} .featured-post-grid-card,
   #${wrapperId} .featured-post-carousel-card {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.375rem;
     overflow: hidden;
@@ -602,7 +602,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .featured-post-image-wrapper {
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-image-wrapper img {
     width: 100%;
@@ -637,7 +637,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     box-sizing: border-box;
   }
   #${wrapperId} .featured-post-list-card {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.375rem;
     padding: 1rem;
@@ -712,7 +712,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     }
   }
   #${wrapperId} .featured-post-bento-card {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 1rem;
     overflow: hidden;
@@ -725,7 +725,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     aspect-ratio: 16 / 9;
     border-radius: 0.75rem;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-bento-image img {
     width: 100%;
@@ -784,7 +784,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     }
   }
   #${wrapperId} .featured-post-editorial-main {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.75rem;
     overflow: hidden;
@@ -792,7 +792,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .featured-post-editorial-image {
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-editorial-image img {
     width: 100%;
@@ -812,7 +812,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     margin: 0;
   }
   #${wrapperId} .featured-posts-editorial-sidebar {
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.75rem;
     padding: 1.5rem;
@@ -919,7 +919,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .featured-post-masonry-card {
     break-inside: avoid;
     margin-bottom: 1.5rem;
-    background: #ffffff;
+    background: var(--color-bg, #ffffff);
     border: 1px solid var(--color-border, #ebebeb);
     border-radius: 0.75rem;
     overflow: hidden;
@@ -928,7 +928,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: #f4f4f5;
+    background: var(--color-canvas-soft, #fafafa);
   }
   #${wrapperId} .featured-post-masonry-card:nth-child(3n+1) .featured-post-masonry-image {
     aspect-ratio: 1 / 1;

@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { ShareProps, resolveShareProps } from "./schema";
 import { Share2, Share, Send, Sparkles } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -14,6 +15,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p: ShareProps = resolveShareProps(block.props);
   const deviceMode = useEditorStore((state) => state.deviceMode);
   const [showNotice, setShowNotice] = useState(false);

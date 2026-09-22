@@ -4,6 +4,7 @@ import { BuilderBlock } from "@/types/theme";
 import { WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 import { useEditorStore } from "@/store/editorStore";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 const WIDTH_ORDER = ["narrow", "standard", "wide", "full"] as const;
 
@@ -55,17 +56,80 @@ export const CanvasElement = ({ block }: {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdownIdx, setOpenDropdownIdx] = useState<number | null>(null);
   const [mobileAccordionIdx, setMobileAccordionIdx] = useState<number | null>(null);
-  const { deviceMode, document: doc } = useEditorStore();
+  const { deviceMode, document: doc, togglePreviewColorMode } = useEditorStore();
+  const isDark = useCanvasDarkMode();
 
   const siteTitle = (general.siteTitle && general.siteTitle !== "My Ghost Theme")
     ? general.siteTitle
     : doc?.metadata?.name || general.siteTitle || "Ghost Publication";
 
-  const items: HeaderNavItem[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
-    { label: "Home", url: "/" },
-    { label: "About", url: "/about" },
-    { label: "Team", url: "/team" }
-  ];
+  React.useEffect(() => {
+    const handleOutsideClick = () => {
+      setOpenDropdownIdx(null);
+    };
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  const prefix = general.dropdownPrefix || "-";
+
+  const items: HeaderNavItem[] = React.useMemo(() => {
+    const raw: HeaderNavItem[] = Array.isArray(p.navItems) && p.navItems.length > 0 ? p.navItems : [
+      { label: "Home", url: "/" },
+      { label: "About", url: "/about" },
+      { label: "Team", url: "/team" }
+    ];
+
+    const startsWithPrefix = (text: string) => {
+      if (!prefix || !text) return false;
+      const t = text.trim();
+      if (t.indexOf(prefix) === 0) return true;
+      if ((prefix === '-' || prefix === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0)) return true;
+      return false;
+    };
+
+    const stripPrefix = (text: string) => {
+      const t = text.trim();
+      if (t.indexOf(prefix) === 0) return t.substring(prefix.length).trim();
+      if ((prefix === '-' || prefix === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0)) return t.substring(1).trim();
+      return t;
+    };
+
+    const result: HeaderNavItem[] = [];
+    let i = 0;
+
+    while (i < raw.length) {
+      const item = { ...raw[i] };
+      const explicitChildren = Array.isArray(item.children) && item.children.length > 0
+        ? [...item.children]
+        : [];
+
+      const siblingChildren: { label: string; url: string }[] = [];
+      let j = i + 1;
+      while (j < raw.length) {
+        const nextItem = raw[j];
+        if (nextItem && startsWithPrefix(nextItem.label || "")) {
+          siblingChildren.push({
+            label: stripPrefix(nextItem.label || ""),
+            url: nextItem.url || "#",
+          });
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      const combined = [...explicitChildren, ...siblingChildren];
+      if (combined.length > 0) {
+        item.children = combined;
+      }
+
+      result.push(item);
+      i = j;
+    }
+
+    return result;
+  }, [p.navItems, prefix]);
 
   const layout = general.layoutStyle || "Logo on Left";
   const isLogoCenter = layout === "Logo in Center";
@@ -125,15 +189,15 @@ export const CanvasElement = ({ block }: {
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        document.documentElement.classList.toggle('dark');
+        togglePreviewColorMode();
       }}
       className={`p-1.5 opacity-80 hover:opacity-100 rounded-full ${iconHoverClass} shrink-0 transition-opacity`}
       title="Toggle Theme"
     >
-      <svg className="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg className="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: isDark ? 'none' : 'block' }}>
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
       </svg>
-      <svg className="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'none' }}>
+      <svg className="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: isDark ? 'block' : 'none' }}>
         <circle cx="12" cy="12" r="5"></circle>
         <line x1="12" y1="1" x2="12" y2="3"></line>
         <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -403,11 +467,13 @@ export const CanvasElement = ({ block }: {
       return null;
     }
 
-    if (general.logoUrl) {
+    const activeLogo = (isDark && general.darkLogoUrl) ? general.darkLogoUrl : general.logoUrl;
+
+    if (activeLogo) {
       return (
         <div className="flex items-center gap-2 shrink-0">
           <img
-            src={general.logoUrl}
+            src={activeLogo}
             alt={siteTitle}
             style={{ maxHeight: `${logoSize}px`, width: "auto" }}
             className="object-contain"
@@ -424,94 +490,68 @@ export const CanvasElement = ({ block }: {
   };
 
   /**
-   * Renders a single desktop nav item (with optional dropdown on hover).
-   * Uses a portal to render the dropdown card outside the nav DOM tree
-   * so that builder canvas CSS can't interfere with absolute positioning.
+   * Renders a single desktop nav item with dropdown on hover and click.
    */
   const DropdownNavItem = ({ item, idx }: { item: HeaderNavItem; idx: number }) => {
-    const triggerRef = React.useRef<HTMLDivElement>(null);
-    const [pos, setPos] = React.useState<{ top: number; left: number; width: number } | null>(null);
-
-    const handleMouseEnter = React.useCallback(() => {
-      setOpenDropdownIdx(idx);
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        // Get position relative to the canvas-preview-frame container (portal target)
-        const portal = document.getElementById("canvas-preview-frame");
-        const portalRect = portal?.getBoundingClientRect();
-        setPos({
-          top: rect.bottom - (portalRect?.top ?? 0),
-          left: rect.left + rect.width / 2 - (portalRect?.left ?? 0),
-          width: rect.width,
-        });
-      }
-    }, [idx]);
-
-    const handleMouseLeave = React.useCallback(() => {
-      setOpenDropdownIdx(null);
-    }, []);
-
     const isOpen = openDropdownIdx === idx;
 
-    // The dropdown portal content
-    const dropdownPortal = isOpen && pos && typeof document !== "undefined" ? createPortal(
+    return (
       <div
+        className="relative inline-flex items-center"
         onMouseEnter={() => setOpenDropdownIdx(idx)}
         onMouseLeave={() => setOpenDropdownIdx(null)}
-        style={{
-          position: "absolute",
-          top: `${pos.top}px`,
-          left: `${pos.left}px`,
-          transform: "translateX(-50%)",
-          zIndex: 99999,
-          paddingTop: "4px",
-          minWidth: "180px",
-        }}
+        style={{ position: "relative" }}
       >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenDropdownIdx(isOpen ? null : idx);
+          }}
+          className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2 flex items-center gap-1.5 bg-transparent border-none text-inherit font-inherit text-[1.15rem] leading-normal"
+          style={{ color: "inherit", background: "none" }}
+        >
+          <span>{item.label}</span>
+          <ChevronDown open={isOpen} />
+        </button>
+
+        {/* Dropdown Card */}
         <div
-          className="nav-dropdown"
+          className={`nav-dropdown-card transition-all duration-200 ${
+            isOpen
+              ? "opacity-100 visible pointer-events-auto translate-y-0"
+              : "opacity-0 invisible pointer-events-none -translate-y-1"
+          }`}
           style={{
-            borderRadius: "8px",
-            padding: "6px",
-            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.08), 0 10px 15px -3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-            border: "1px solid rgba(0,0,0,0.06)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: isOpen ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(-4px)",
+            minWidth: "180px",
+            paddingTop: "6px",
+            zIndex: 1000,
           }}
         >
-          <style>{`
-            .nav-dropdown { background: #ffffff; color: #171717; }
-            html.dark .nav-dropdown { background: #1f1f1f; color: #ffffff; border-color: rgba(255,255,255,0.08) !important; }
-            .nav-dropdown-item { padding: 8px 14px; border-radius: 5px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-            .nav-dropdown-item:hover { background: rgba(0,0,0,0.05); }
-            html.dark .nav-dropdown-item:hover { background: rgba(255,255,255,0.08); }
-          `}</style>
-          {item.children?.map((child, cidx) => (
-            <div key={cidx} className="nav-dropdown-item">
-              {child.label}
-            </div>
-          ))}
-        </div>
-      </div>,
-      document.getElementById("canvas-preview-frame") || document.body
-    ) : null;
+          {/* Hover bridge */}
+          <div style={{ position: "absolute", top: "-6px", left: 0, right: 0, height: "10px" }} />
 
-    return (
-      <>
-        <div
-          ref={triggerRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          style={{ display: "inline-flex", alignItems: "center" }}
-        >
-          <span className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2 flex items-center gap-1.5">
-            {item.label}
-            <ChevronDown open={isOpen} />
-          </span>
+          <div
+            className="nav-dropdown-inner bg-white dark:bg-[#1f1f1f] text-[#171717] dark:text-white rounded-lg p-1.5 shadow-xl border border-black/10 dark:border-white/10 flex flex-col gap-0.5"
+            style={{
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {item.children?.map((child, cidx) => (
+              <div
+                key={cidx}
+                className="px-3.5 py-2 rounded-md text-[14px] font-medium whitespace-nowrap cursor-pointer transition-colors duration-150 text-[#171717] dark:text-gray-100 hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white select-none text-left"
+              >
+                {child.label}
+              </div>
+            ))}
+          </div>
         </div>
-        {dropdownPortal}
-      </>
+      </div>
     );
   };
 
@@ -564,6 +604,7 @@ export const CanvasElement = ({ block }: {
           WebkitBackdropFilter: glassEnabled ? `blur(${glassBlur})` : undefined,
           transition: "all 0.15s ease-in-out",
           overflow: "visible",
+          zIndex: 40,
         }}
       >
         {/* Inner container receives Content Width */}

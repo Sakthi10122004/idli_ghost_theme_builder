@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { HeadingProps, resolveHeadingProps, isDarkColor } from "./schema";
 import { Sparkles } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -14,6 +15,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p: HeadingProps = resolveHeadingProps(block.props);
   const deviceMode = useEditorStore((state) => state.deviceMode);
 

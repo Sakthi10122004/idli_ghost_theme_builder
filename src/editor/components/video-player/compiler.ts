@@ -22,6 +22,9 @@ export const compileToHbs = (block: BuilderBlock): string => {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     position: relative;
   }
+  html.dark #${wrapperId} .video-container {
+    background-color: #000000;
+  }
   #${wrapperId} .video-container iframe {
     width: 100%;
     height: 100%;

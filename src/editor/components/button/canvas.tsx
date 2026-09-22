@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block }: {
   block: BuilderBlock;
@@ -8,6 +9,7 @@ export const CanvasElement = ({ block }: {
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  const isDark = useCanvasDarkMode();
   const { label, variant } = block.props;
   const isSecondary = variant === "secondary";
   const customShadow = block.styles?.boxShadow;

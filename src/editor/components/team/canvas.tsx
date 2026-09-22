@@ -4,8 +4,10 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { TeamProps, TeamMember, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
+  useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as TeamProps;
   const assets = useEditorStore((s) => s.document.assets) || {};
   const deviceMode = useEditorStore((s) => s.deviceMode);

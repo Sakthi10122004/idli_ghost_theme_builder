@@ -3,6 +3,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveTagHeaderProps } from "./schema";
 import { useEditorStore } from "@/store/editorStore";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -13,6 +14,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p = resolveTagHeaderProps(block.props);
   const deviceMode = useEditorStore((s) => s.deviceMode);
   const isMobile = deviceMode === "mobile";

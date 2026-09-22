@@ -328,28 +328,23 @@ export const generateHTML = (block: BuilderBlock): string => {
   }
 
   /* Dark mode overrides */
-  html.dark #${wrapperId},
-  html.dark-mode #${wrapperId} {
+  html.dark #${wrapperId} {
     background-color: var(--color-bg) !important;
   }
   ${!headingColor ? `
-  html.dark #${wrapperId} .logo-cloud-heading,
-  html.dark-mode #${wrapperId} .logo-cloud-heading {
+  html.dark #${wrapperId} .logo-cloud-heading {
     color: var(--color-fg) !important;
   }
   ` : ''}${!subheadingColor ? `
-  html.dark #${wrapperId} .logo-cloud-subheading,
-  html.dark-mode #${wrapperId} .logo-cloud-subheading {
+  html.dark #${wrapperId} .logo-cloud-subheading {
     color: var(--color-muted, var(--color-mute, #a3a3a3)) !important;
   }
   ` : ''}
   ${general.invertInDark !== false ? `
-  html.dark #${wrapperId} .logo-cloud-item img,
-  html.dark-mode #${wrapperId} .logo-cloud-item img {
+  html.dark #${wrapperId} .logo-cloud-item img {
     filter: invert(1) brightness(0.95);
   }
-  html.dark #${wrapperId} .logo-cloud-item:hover img,
-  html.dark-mode #${wrapperId} .logo-cloud-item:hover img {
+  html.dark #${wrapperId} .logo-cloud-item:hover img {
     filter: invert(1) brightness(1);
   }
   ` : ''}

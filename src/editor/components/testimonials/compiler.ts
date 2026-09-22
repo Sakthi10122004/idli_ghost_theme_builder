@@ -351,9 +351,9 @@ export const compileToHbs = (block: BuilderBlock) => {
       text-transform: uppercase;
       padding: 4px 12px;
       border-radius: 9999px;
-      background: #f4f4f5;
-      color: ${textColor ? textColor : "#18181b"};
-      border: 1px solid #e4e4e7;
+      background: var(--color-canvas-soft, #f4f4f5);
+      color: ${textColor ? textColor : "var(--color-fg, #18181b)"};
+      border: 1px solid var(--color-hairline, #e4e4e7);
       margin-bottom: 0.75rem;
     }
     #${uid} .gh-testimonials-title {
@@ -361,12 +361,12 @@ export const compileToHbs = (block: BuilderBlock) => {
       font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1.2;
-      color: ${textColor ? textColor : "#18181b"};
+      color: ${textColor ? textColor : "var(--color-fg, #18181b)"};
       margin: 0 0 0.5rem 0;
     }
     #${uid} .gh-testimonials-subtitle {
       font-size: 1rem;
-      color: ${textColor ? textColor : "#71717a"};
+      color: ${textColor ? textColor : "var(--color-muted, #71717a)"};
       ${textColor ? "opacity: 0.85;" : ""}
       line-height: 1.6;
       margin: 0;
@@ -446,33 +446,33 @@ export const compileToHbs = (block: BuilderBlock) => {
       }
     }
     #${uid} .gh-card-bordered {
-      background: #ffffff;
-      border: 1px solid #e4e4e7;
+      background: var(--color-bg, #ffffff);
+      border: 1px solid var(--color-hairline, #e4e4e7);
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     #${uid} .gh-card-soft {
-      background: #f4f4f5;
-      border: 1px solid #e4e4e7;
+      background: var(--color-canvas-soft, #f4f4f5);
+      border: 1px solid var(--color-hairline, #e4e4e7);
     }
     #${uid} .gh-card-elevated {
-      background: #ffffff;
-      border: 1px solid #f4f4f5;
+      background: var(--color-bg, #ffffff);
+      border: 1px solid var(--color-hairline, #f4f4f5);
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
     }
     #${uid} .gh-card-minimal {
       background: transparent;
-      border: 1px solid #e4e4e7;
+      border: 1px solid var(--color-hairline, #e4e4e7);
     }
     #${uid} .gh-card-featured {
-      border: 2px solid #18181b;
+      border: 2px solid var(--color-fg, #18181b);
       box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     }
     #${uid} .gh-featured-pill {
       position: absolute;
       top: -11px;
       right: 16px;
-      background: #18181b;
-      color: #ffffff;
+      background: var(--color-primary, #18181b);
+      color: var(--color-on-primary, #ffffff);
       font-size: 10px;
       font-family: monospace;
       font-weight: 600;
@@ -500,7 +500,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     #${uid} .gh-testimonial-quote {
       font-size: 15px;
       line-height: 1.6;
-      color: #27272a;
+      color: var(--color-fg, #27272a);
       margin: 0;
       word-break: break-word;
     }
@@ -545,7 +545,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       height: 40px;
       border-radius: 50%;
       background: #e4e4e7;
-      color: #27272a;
+      color: var(--color-fg, #27272a);
       font-size: 12px;
       font-weight: 700;
       display: flex;
@@ -565,7 +565,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     #${uid} .gh-author-name {
       font-size: 13px;
       font-weight: 600;
-      color: #18181b;
+      color: var(--color-fg, #18181b);
       line-height: 1.3;
       white-space: nowrap;
       overflow: hidden;
@@ -575,7 +575,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     }
     #${uid} .gh-author-role {
       font-size: 11px;
-      color: #71717a;
+      color: var(--color-muted, #71717a);
       line-height: 1.3;
       margin-top: 1px;
       white-space: nowrap;
@@ -599,7 +599,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      color: #71717a;
+      color: var(--color-muted, #71717a);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -625,7 +625,7 @@ export const compileToHbs = (block: BuilderBlock) => {
       height: 28px;
       border-radius: 50%;
       background: #f4f4f5;
-      color: #71717a;
+      color: var(--color-muted, #71717a);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -635,7 +635,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     }
     #${uid} .gh-social-link:hover {
       background: #e4e4e7;
-      color: #18181b;
+      color: var(--color-fg, #18181b);
     }
   </style>
   ${headerHtml}

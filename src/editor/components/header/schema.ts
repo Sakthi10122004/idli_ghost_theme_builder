@@ -11,6 +11,7 @@ export interface HeaderProps {
     showLogo: boolean;
     siteTitle?: string;
     logoUrl?: string;
+    darkLogoUrl?: string;
     showSearch: boolean;
     showThemeSwitcher: boolean;
     showSignIn: boolean;

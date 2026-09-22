@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { ImageProps, resolveImageProps } from "./schema";
 import { Image as ImageIcon, Sparkles, ExternalLink } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 const EMPTY_ASSETS: Record<string, string> = {};
 
@@ -16,6 +17,7 @@ export function CanvasElement({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) {
+  useCanvasDarkMode();
   const p: ImageProps = resolveImageProps(block.props);
   const assets = useEditorStore((state) => state.document.assets) || EMPTY_ASSETS;
 

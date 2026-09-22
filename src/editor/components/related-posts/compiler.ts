@@ -128,8 +128,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       padding: 2rem 1rem;
     }
   }
-  html.dark #${wrapperId} .gh-related-card,
-  html.dark-mode #${wrapperId} .gh-related-card {
+  html.dark #${wrapperId} .gh-related-card {
     background-color: var(--color-bg, #111111);
     border-color: var(--color-hairline, #333333);
   }

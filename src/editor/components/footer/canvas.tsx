@@ -4,6 +4,7 @@ import { useEditorStore } from "@/store/editorStore";
 import { DEFAULT_SECONDARY_NAV, FooterNavItem, WIDTH_VALUES } from "./schema";
 import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export function CanvasElement({ block, onClick }: {
   block: BuilderBlock;
@@ -17,6 +18,7 @@ export function CanvasElement({ block, onClick }: {
   const document = useEditorStore(state => state.document);
   const deviceMode = useEditorStore(state => state.deviceMode);
   const isMobile = deviceMode === 'mobile';
+  const isDark = useCanvasDarkMode();
 
   const headerBlock = Object.values(document.blocks).find(b => b.type === "header");
   const headerAppearance = headerBlock?.props?.appearance || {};
@@ -144,8 +146,8 @@ export function CanvasElement({ block, onClick }: {
             <h3 className="text-2xl font-bold mb-3">Subscribe to our newsletter</h3>
             <p className="opacity-80 mb-6">Get the latest posts delivered right to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-[400px] mx-auto">
-              <input type="email" placeholder="Your email address" className="flex-1 px-4 py-3 rounded-md outline-none text-black" readOnly />
-              <button className="footer-subscribe-btn px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || 'var(--ghost-accent-color, var(--color-primary))', color: p.colors?.buttonTextColor || '#ffffff' }}>Subscribe</button>
+              <input type="email" placeholder="Your email address" className="flex-1 px-4 py-3 rounded-md outline-none text-brand-ink bg-brand-canvas border border-brand-hairline" readOnly />
+              <button className="footer-subscribe-btn px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || 'var(--ghost-accent-color, var(--color-primary))', color: p.colors?.buttonTextColor || (isDark ? 'var(--color-on-primary, #000000)' : '#ffffff') }}>Subscribe</button>
             </div>
           </div>
         )}

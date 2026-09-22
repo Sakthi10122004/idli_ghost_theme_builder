@@ -143,6 +143,31 @@ function getHoverClass(block: BuilderBlock): string {
 }
 
 /**
+ * Parses two CSS inline-style strings into property→value maps and merges
+ * them.  `incoming` values (the generic Style-panel overrides) win over
+ * `existing` values (the component's own hardcoded defaults), eliminating
+ * duplicate property declarations in the final `style="..."` attribute.
+ */
+function mergeStyleStrings(existing: string, incoming: string): string {
+  const parse = (s: string): Record<string, string> => {
+    const map: Record<string, string> = {};
+    s.split(";").forEach((decl) => {
+      const idx = decl.indexOf(":");
+      if (idx === -1) return;
+      const prop = decl.substring(0, idx).trim();
+      const val = decl.substring(idx + 1).trim();
+      if (prop && val) map[prop] = val;
+    });
+    return map;
+  };
+  // incoming (Style panel) wins over existing (component defaults)
+  const merged = { ...parse(existing), ...parse(incoming) };
+  return Object.entries(merged)
+    .map(([k, v]) => `${k}: ${v}`)
+    .join("; ");
+}
+
+/**
  * Compiles a specific visual builder block to its Handlebars/HTML string.
  */
 function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>, isPageContext: boolean = false): string {
@@ -193,7 +218,13 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
           if (styleMatch) {
             const inlineStylesStr = styleMatch[1];
             if (attributes.includes('style="')) {
-              attributes = attributes.replace('style="', `style="${inlineStylesStr}; `);
+              // Deduplicate: parse both the existing attribute and incoming
+              // styles into maps, letting Style-panel values win.
+              const existingMatch = attributes.match(/style="([^"]*)"/);
+              if (existingMatch) {
+                const merged = mergeStyleStrings(existingMatch[1], inlineStylesStr);
+                attributes = attributes.replace(/style="[^"]*"/, `style="${merged}"`);
+              }
             } else {
               attributes = `${attributes} style="${inlineStylesStr}"`;
             }
@@ -373,7 +404,7 @@ ul.nav, ul.nav-secondary {
   --content-width: 720px;
 }
 
-html.dark, html.dark-mode {
+html.dark {
   --color-bg: #111111;
   --color-fg: #ffffff;
   --color-primary: #ffffff;
@@ -385,13 +416,27 @@ html.dark, html.dark-mode {
   --color-ink: #ffffff;
 }
 
+/* Global dark mode logo toggle */
+.gh-logo-dark { display: none; }
+html.dark .gh-logo-light { display: none !important; }
+html.dark .gh-logo-dark { display: inline-block !important; }
+
+/* 1.1. Core Site Layout Wrappers */
 /* 1.1. Core Site Layout Wrappers */
 .site-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
+  position: relative;
+  overflow-x: clip;
+}
+.gh-head-wrapper,
+.gh-head,
+#gh-head {
+  position: relative !important;
+  z-index: 9999 !important;
+  overflow: visible !important;
 }
 .site-main {
   flex-grow: 1;
@@ -399,6 +444,15 @@ html.dark, html.dark-mode {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.hero-block {
+  position: relative;
+  z-index: 1;
+}
+.nav-dropdown-card {
+  z-index: 10000 !important;
 }
 .site-main > * {
   width: 100%;
@@ -406,72 +460,24 @@ html.dark, html.dark-mode {
 
 /* Ensure sections and buttons adapt cleanly in Ghost dark mode */
 html.dark .section,
-html.dark-mode .section,
-html.dark .logo-cloud-section,
-html.dark-mode .logo-cloud-section {
+html.dark .logo-cloud-section {
   background-color: var(--color-bg);
   color: var(--color-fg);
 }
 
-html.dark .section[style*="background-color: #ffffff"],
-html.dark-mode .section[style*="background-color: #ffffff"],
-html.dark .section[style*="background-color:#ffffff"],
-html.dark-mode .section[style*="background-color:#ffffff"],
-html.dark .section[style*="background-color: rgb(255, 255, 255)"],
-html.dark-mode .section[style*="background-color: rgb(255, 255, 255)"] {
-  background-color: var(--color-bg) !important;
-}
-
-/* Heading dark mode adaptation */
+/* Heading and text dark mode adaptation */
 html.dark .heading-dark-adaptive,
-html.dark-mode .heading-dark-adaptive,
-html.dark .heading[style*="color: #000000"],
-html.dark-mode .heading[style*="color: #000000"],
-html.dark .heading[style*="color:#000000"],
-html.dark-mode .heading[style*="color:#000000"],
-html.dark .heading[style*="color: #171717"],
-html.dark-mode .heading[style*="color: #171717"],
-html.dark .heading[style*="color:#171717"],
-html.dark-mode .heading[style*="color:#171717"],
-html.dark .heading[style*="color: #0a0a0a"],
-html.dark-mode .heading[style*="color: #0a0a0a"],
-html.dark .heading[style*="color: #111111"],
-html.dark-mode .heading[style*="color: #111111"],
-html.dark .heading[style*="color: rgb(0, 0, 0)"],
-html.dark-mode .heading[style*="color: rgb(0, 0, 0)"],
-html.dark .heading[style*="color: rgb(23, 23, 23)"],
-html.dark-mode .heading[style*="color: rgb(23, 23, 23)"],
-html.dark .heading[style*="color: black"],
-html.dark-mode .heading[style*="color: black"],
 html.dark .text-dark-adaptive,
-html.dark-mode .text-dark-adaptive,
-html.dark .text-dark-adaptive p,
-html.dark-mode .text-dark-adaptive p,
-html.dark .text-content[style*="color: #000000"],
-html.dark-mode .text-content[style*="color: #000000"],
-html.dark .text-content[style*="color:#000000"],
-html.dark-mode .text-content[style*="color:#000000"],
-html.dark .text-content[style*="color: #171717"],
-html.dark-mode .text-content[style*="color: #171717"],
-html.dark .text-content[style*="color:#171717"],
-html.dark-mode .text-content[style*="color:#171717"],
-html.dark .text-content[style*="color: rgb(0, 0, 0)"],
-html.dark-mode .text-content[style*="color: rgb(0, 0, 0)"],
-html.dark .text-content[style*="color: rgb(23, 23, 23)"],
-html.dark-mode .text-content[style*="color: rgb(23, 23, 23)"],
-html.dark .text-content[style*="color: black"],
-html.dark-mode .text-content[style*="color: black"] {
+html.dark .text-dark-adaptive p {
   color: var(--color-fg, #ffffff) !important;
 }
 
-html.dark .btn-primary,
-html.dark-mode .btn-primary {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+html.dark .btn-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
 }
 
-html.dark .btn-secondary,
-html.dark-mode .btn-secondary {
+html.dark .btn-secondary {
   background-color: var(--color-bg) !important;
   color: var(--color-fg) !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
@@ -482,8 +488,7 @@ html.dark-mode .btn-secondary {
   background: transparent !important;
   background-color: transparent !important;
 }
-html.dark .gh-head-actions,
-html.dark-mode .gh-head-actions {
+html.dark .gh-head-actions {
   background: transparent !important;
   background-color: transparent !important;
 }
@@ -506,15 +511,25 @@ html.dark-mode .gh-head-actions {
 .gh-burger svg {
   stroke: currentColor;
 }
-html.dark .gh-burger,
-html.dark-mode .gh-burger {
+html.dark .gh-burger {
   color: #ffffff !important;
 }
-html.dark .gh-burger svg,
-html.dark-mode .gh-burger svg {
+html.dark .gh-burger svg {
   stroke: #ffffff !important;
 }
 
+/* Base Navigation Dropdown Rules */
+.nav-dropdown-parent {
+  position: relative;
+}
+.nav-accordion {
+  display: none !important;
+}
+@media (max-width: 767px) {
+  .nav-dropdown-card {
+    display: none !important;
+  }
+}
 
 /* 3. Ghost Native Post & Page Share (#/share) */
 .gh-share-wrapper {
@@ -626,26 +641,21 @@ html.dark-mode .gh-burger svg {
 }
 
 /* Dark Mode */
-html.dark .gh-share-btn.gh-share-pill,
-html.dark-mode .gh-share-btn.gh-share-pill {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+html.dark .gh-share-btn.gh-share-pill {
+  background-color: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
 }
-html.dark .gh-share-btn.gh-share-outline,
-html.dark-mode .gh-share-btn.gh-share-outline {
+html.dark .gh-share-btn.gh-share-outline {
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
 }
-html.dark .gh-share-btn.gh-share-ghost,
-html.dark-mode .gh-share-btn.gh-share-ghost {
+html.dark .gh-share-btn.gh-share-ghost {
   color: #ffffff !important;
 }
-html.dark .gh-share-btn.gh-share-ghost:hover,
-html.dark-mode .gh-share-btn.gh-share-ghost:hover {
+html.dark .gh-share-btn.gh-share-ghost:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-html.dark .gh-share-btn.gh-share-icon-only,
-html.dark-mode .gh-share-btn.gh-share-icon-only {
+html.dark .gh-share-btn.gh-share-icon-only {
   border-color: rgba(255, 255, 255, 0.2);
   color: #ffffff !important;
 }
@@ -709,7 +719,6 @@ html.dark-mode .gh-share-btn.gh-share-icon-only {
   color-scheme: light;
 }
 html.dark .gh-comments-section,
-html.dark-mode .gh-comments-section,
 .gh-comments-section.dark {
   color: #ffffff !important;
   color-scheme: dark;
@@ -743,18 +752,14 @@ html.dark-mode .gh-comments-section,
   font-weight: 400;
   color: var(--color-muted, #737373);
 }
-html.dark .gh-comments-header,
-html.dark-mode .gh-comments-header {
+html.dark .gh-comments-header {
   border-bottom-color: var(--color-hairline, #333333);
 }
 html.dark .gh-comments-icon,
-html.dark-mode .gh-comments-icon,
-html.dark .gh-comments-heading,
-html.dark-mode .gh-comments-heading {
+html.dark .gh-comments-heading {
   color: var(--color-ink, #ffffff) !important;
 }
-html.dark .gh-comments-count,
-html.dark-mode .gh-comments-count {
+html.dark .gh-comments-count {
   color: var(--color-muted, #a3a3a3) !important;
 }
 
@@ -1489,28 +1494,22 @@ html.dark .hover-effect-glow:hover {
     font-size: 0.9375rem;
   }
 }
-html.dark .author-card,
-html.dark-mode .author-card {
+html.dark .author-card {
   background-color: var(--color-bg, #111111);
   border-color: var(--color-hairline, #333333);
 }
-html.dark .author-card-avatar,
-html.dark-mode .author-card-avatar {
+html.dark .author-card-avatar {
   border-color: var(--color-hairline, #333333);
 }
-html.dark .author-card-initial,
-html.dark-mode .author-card-initial {
+html.dark .author-card-initial {
   background-color: #222222;
   color: #ffffff;
 }
-html.dark .author-card-name a,
-html.dark-mode .author-card-name a {
+html.dark .author-card-name a {
   color: var(--color-ink, #ffffff);
 }
 html.dark .author-card-bio,
-html.dark-mode .author-card-bio,
-html.dark .author-card-eyebrow,
-html.dark-mode .author-card-eyebrow {
+html.dark .author-card-eyebrow {
   color: var(--color-muted, #a3a3a3);
 }
 
@@ -1539,8 +1538,7 @@ html.dark-mode .author-card-eyebrow {
   width: 100%;
   box-sizing: border-box;
 }
-html.dark .divider-hairline,
-html.dark-mode .divider-hairline {
+html.dark .divider-hairline {
   border-top-color: var(--color-hairline, #333333);
 }
 
@@ -1677,14 +1675,12 @@ html.dark-mode .divider-hairline {
 .btn-secondary:hover {
   background-color: rgba(0, 0, 0, 0.03);
 }
-html.dark .btn-primary,
-html.dark-mode .btn-primary {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+html.dark .btn-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
 }
-html.dark .btn-secondary,
-html.dark-mode .btn-secondary {
-  color: #ffffff !important;
+html.dark .btn-secondary {
+  color: var(--color-fg) !important;
   border-color: var(--color-hairline, #333333) !important;
 }
 

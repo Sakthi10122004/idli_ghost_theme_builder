@@ -9,8 +9,10 @@ import {
   DEFAULT_GALLERY_ITEMS,
 } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
+  useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as GridGalleryProps;
   const assets = useEditorStore((s) => s.document.assets) || {};
   const general = p.general || defaultProps.general;
@@ -319,7 +321,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
               const src = resolveUrl(item.url);
               const captionText = item.caption || item.alt || `Gallery Image ${idx + 1}`;
               return (
-                <div key={item.id || idx} className={`flex flex-col sm:flex-row gap-4 items-start sm:items-center border border-brand-hairline ${roundedClass} p-4 bg-white shadow-level-1 group hover:shadow-level-2 transition-all`}>
+                <div key={item.id || idx} className={`flex flex-col sm:flex-row gap-4 items-start sm:items-center border border-brand-hairline ${roundedClass} p-4 bg-white dark:bg-neutral-900 shadow-level-1 group hover:shadow-level-2 transition-all`}>
                   <div className={`w-full sm:w-40 h-28 overflow-hidden shrink-0 ${roundedClass} bg-brand-canvas-soft-2 border border-brand-hairline`}>
                     <img
                       src={src}
@@ -351,7 +353,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
               return (
                 <div
                   key={item.id || idx}
-                  className={`border border-brand-hairline ${roundedClass} overflow-hidden bg-white shadow-level-2 hover:shadow-level-3 transition-all group flex flex-col ${
+                  className={`border border-brand-hairline ${roundedClass} overflow-hidden bg-white dark:bg-neutral-900 shadow-level-2 hover:shadow-level-3 transition-all group flex flex-col ${
                     isLarge ? "md:col-span-2 md:flex-row md:items-stretch" : ""
                   }`}
                 >
@@ -408,7 +410,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
                   key={item.id || idx} 
                   className={`group relative ${w} ${trans} ${rot} ${zIndex} transition-all duration-300 hover:z-40 hover:scale-[1.03] hover:rotate-0`}
                 >
-                  <div className={`w-full bg-white p-2.5 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 shadow-level-2 border border-brand-hairline flex flex-col`}>
+                  <div className={`w-full bg-white dark:bg-neutral-900 p-2.5 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 shadow-level-2 border border-brand-hairline flex flex-col`}>
                     <div className={`w-full ${aspect} overflow-hidden bg-brand-canvas-soft-2 relative`}>
                       <img
                         src={src}

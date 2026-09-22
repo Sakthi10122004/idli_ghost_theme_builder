@@ -225,7 +225,7 @@ ${defaultIconHtml}
   
   /* Cards Style */
   #${wrapperId} .stats-item.card {
-    background-color: #ffffff;
+    background-color: var(--color-bg, #ffffff);
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -396,25 +396,20 @@ ${defaultIconHtml}
   }
 
   /* Dark Mode Styles */
-  html.dark #${wrapperId} .stats-item.card,
-  html.dark-mode #${wrapperId} .stats-item.card {
+  html.dark #${wrapperId} .stats-item.card {
     background-color: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
-  html.dark #${wrapperId} .stats-item.accent-card,
-  html.dark-mode #${wrapperId} .stats-item.accent-card {
+  html.dark #${wrapperId} .stats-item.accent-card {
     background-color: rgba(255, 255, 255, 0.04);
     border-color: rgba(255, 255, 255, 0.1);
   }
   html.dark #${wrapperId} .stats-grid.divider,
-  html.dark-mode #${wrapperId} .stats-grid.divider,
-  html.dark #${wrapperId} .stats-item.divider-cell,
-  html.dark-mode #${wrapperId} .stats-item.divider-cell {
+  html.dark #${wrapperId} .stats-item.divider-cell {
     border-color: rgba(255, 255, 255, 0.12);
   }
-  html.dark #${wrapperId} .stats-item.bordered,
-  html.dark-mode #${wrapperId} .stats-item.bordered {
+  html.dark #${wrapperId} .stats-item.bordered {
     border-top-color: rgba(255, 255, 255, 0.12);
   }
 </style>

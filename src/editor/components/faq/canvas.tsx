@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { BuilderBlock } from "@/types/theme";
 import { FAQProps, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
+  useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as FAQProps;
   const general = p.general;
   const items = p.items || [];
@@ -29,7 +31,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
   const bgStyle = getBackgroundStyle(styles, appearance);
   const cornerClass = (general.itemCornerStyle || "rounded") === "rectangle" ? "rounded-none" : "rounded-xl";
-  const itemBg = appearance?.itemBgColor || "#f8fafc";
+  const itemBg = appearance?.itemBgColor || "var(--color-canvas-soft, #f8fafc)";
 
   const renderFaqItem = (item: any) => {
     const isOpen = openIds.has(item.id);

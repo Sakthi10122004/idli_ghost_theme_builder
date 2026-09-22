@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveTagArchiveProps } from "./schema";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -11,6 +12,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p = resolveTagArchiveProps(block.props);
   const isBanner = p.layoutStyle === "banner";
 
@@ -52,7 +54,7 @@ export const CanvasElement = ({
         {mockTags.map((tag) => (
           <div
             key={tag.name}
-            className="p-4 border border-brand-hairline rounded-md bg-white hover:border-brand-hairline-strong shadow-level-2 flex justify-between items-center transition-all cursor-pointer"
+            className="p-4 border border-brand-hairline rounded-md bg-white dark:bg-neutral-900 hover:border-brand-hairline-strong shadow-level-2 flex justify-between items-center transition-all cursor-pointer"
           >
             <span className="text-xs font-bold text-brand-ink">{tag.name}</span>
             {p.showCount && (

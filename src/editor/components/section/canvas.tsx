@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
   block: BuilderBlock;
@@ -8,6 +9,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const { backgroundVideoUrl, enableParallax = false, contentWidth } = block.styles || {};
   
   // Extract background styles from inline styles that the builder applies

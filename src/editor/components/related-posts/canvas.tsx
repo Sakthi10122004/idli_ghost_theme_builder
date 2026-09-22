@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveRelatedPostsProps } from "./schema";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -11,6 +12,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  const isDark = useCanvasDarkMode();
   const p = resolveRelatedPostsProps(block.props);
 
   const mockPosts = [
@@ -53,7 +55,7 @@ export const CanvasElement = ({
         {displayPosts.map((post) => (
           <article
             key={post.id}
-            className="bg-white border border-brand-hairline rounded-md overflow-hidden shadow-level-2 group cursor-pointer"
+            className={`border border-brand-hairline rounded-md overflow-hidden shadow-level-2 group cursor-pointer ${isDark ? "bg-neutral-900 text-white" : "bg-brand-canvas text-brand-ink"}`}
           >
             {p.showImage && (
               <div className="aspect-video bg-brand-canvas-soft-2 overflow-hidden">

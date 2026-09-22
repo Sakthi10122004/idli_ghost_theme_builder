@@ -39,7 +39,7 @@ export const STANDALONE_SECTION_TYPES = new Set([
 
 export const DEFAULT_DESIGN_TOKENS = {
   colors: {
-    background: "#ffffff",
+    background: "var(--color-bg)",
     foreground: "#171717",
     muted: "#888888",
     primary: "#171717",
@@ -100,7 +100,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
           { label: "Team", url: "/team" }
         ]
       },
-      styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
+      styles: { backgroundColor: "var(--color-bg)", paddingTop: "16px", paddingBottom: "16px" },
     },
     "footer-sec-3": {
       id: "footer-sec-3",
@@ -119,8 +119,8 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
         },
         colors: {
           syncWithHeader: false,
-          backgroundColor: "#ffffff",
-          textColor: "#1a1a1a",
+          backgroundColor: "var(--color-bg)",
+          textColor: "var(--color-fg)",
         },
         layout: {
           sectionWidth: "full",
@@ -131,7 +131,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
           paddingBottom: 40,
         },
       },
-      styles: { backgroundColor: "#ffffff", paddingTop: "40px", paddingBottom: "40px" },
+      styles: { backgroundColor: "var(--color-bg)", paddingTop: "40px", paddingBottom: "40px" },
     },
 
     // Home Page Blocks
@@ -151,7 +151,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
         useCoverImageAsBackground: false,
       },
       styles: {
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--color-bg)",
         paddingTop: "80px",
         paddingBottom: "80px",
         layout: "center",
@@ -169,7 +169,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
         autoScroll: false,
       },
       styles: {
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--color-bg)",
         paddingTop: "64px",
         paddingBottom: "64px",
       },
@@ -179,7 +179,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       type: "post-grid",
       props: { title: "Latest Stories", limit: 6, columns: 3 },
       styles: {
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--color-bg)",
         paddingTop: "64px",
         paddingBottom: "64px",
       },
@@ -352,6 +352,10 @@ interface EditorState {
   userId: string;
   isSaving: boolean;
   saveStatus: "idle" | "saving" | "saved" | "error";
+
+  previewColorMode: "light" | "dark";
+  togglePreviewColorMode: () => void;
+  setPreviewColorMode: (mode: "light" | "dark") => void;
 
   setDeviceMode: (mode: "desktop" | "tablet" | "mobile") => void;
   setActivePage: (page: string) => void;
@@ -532,7 +536,7 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
       id: headerId,
       type: "header",
       props: {},
-      styles: { backgroundColor: "#ffffff", paddingTop: "16px", paddingBottom: "16px" },
+      styles: { backgroundColor: "var(--color-bg)", paddingTop: "16px", paddingBottom: "16px" },
     };
   }
   if (!footerId) {
@@ -553,7 +557,7 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
           customCopyrightText: "© 2026 Ghost Theme Builder. Published with Ghost.",
         },
       },
-      styles: { backgroundColor: "#ffffff", paddingTop: "40px", paddingBottom: "40px" },
+      styles: { backgroundColor: "var(--color-bg)", paddingTop: "40px", paddingBottom: "40px" },
     };
   } else if (newBlocks[footerId]) {
     const ftr = newBlocks[footerId];
@@ -805,6 +809,21 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isSaving: false,
   saveStatus: "idle",
 
+  previewColorMode: "light",
+  togglePreviewColorMode: () => set((state) => {
+    const next = state.previewColorMode === "dark" ? "light" : "dark";
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", next === "dark");
+    }
+    return { previewColorMode: next };
+  }),
+  setPreviewColorMode: (mode) => set(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", mode === "dark");
+    }
+    return { previewColorMode: mode };
+  }),
+
   setUserId: (userId) => {
     console.log(`[Zustand Store] Active userId set to: "${userId}"`);
     set({ userId });
@@ -1005,7 +1024,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         id: customSecId,
         type: "section",
         props: {},
-        styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "#ffffff" },
+        styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "var(--color-bg)" },
         childrenIds: [customContentId],
       },
       [customContentId]: {

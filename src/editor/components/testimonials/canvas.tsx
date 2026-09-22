@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { getBackgroundStyle } from "@/editor/components/shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -26,6 +27,7 @@ export const CanvasElement = ({
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
+  const isDark = useCanvasDarkMode();
   const deviceMode = useEditorStore((state) => state.deviceMode);
   const props = block.props || {};
   const items: TestimonialItem[] = props.items || [];
@@ -329,7 +331,7 @@ export const CanvasElement = ({
                       }`}
                       style={{ width: "100%", display: "block" }}
                     >
-                      "{item.quote || "Add your testimonial quote here..."}"
+                      &ldquo;{item.quote || "Add your testimonial quote here..."}&rdquo;
                     </p>
                   </div>
                 </div>

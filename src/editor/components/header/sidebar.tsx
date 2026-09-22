@@ -99,7 +99,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   onChangeProps: (props: Record<string, unknown>) => void;
   onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
-  const { document: doc } = useEditorStore();
+  const { document: doc, addAsset } = useEditorStore();
   const p = block.props || {};
   const g = p.general || {};
   const a = p.appearance || {};
@@ -155,6 +155,57 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             onChange={(e) => updateCategory("general", "logoUrl", e.target.value)}
             className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
             placeholder="https://..."
+          />
+          <input
+            type="file"
+            accept="image/*"
+            className="text-[10px] w-full file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                const dataUri = ev.target?.result as string;
+                if (!dataUri) return;
+                const ext = file.name.split(".").pop() || "png";
+                const id = Math.random().toString(36).substring(7);
+                const assetPath = `assets/images/header/${id}.${ext}`;
+                addAsset(assetPath, dataUri);
+                updateCategory("general", "logoUrl", `asset://${assetPath.replace("assets/", "")}`);
+              };
+              reader.readAsDataURL(file);
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">Dark Mode Logo URL (Optional)</label>
+          <input
+            type="text"
+            value={g.darkLogoUrl ?? ""}
+            onChange={(e) => updateCategory("general", "darkLogoUrl", e.target.value)}
+            className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+            placeholder="https://... (Used in dark mode)"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            className="text-[10px] w-full file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                const dataUri = ev.target?.result as string;
+                if (!dataUri) return;
+                const ext = file.name.split(".").pop() || "png";
+                const id = Math.random().toString(36).substring(7);
+                const assetPath = `assets/images/header/${id}.${ext}`;
+                addAsset(assetPath, dataUri);
+                updateCategory("general", "darkLogoUrl", `asset://${assetPath.replace("assets/", "")}`);
+              };
+              reader.readAsDataURL(file);
+            }}
           />
         </div>
 

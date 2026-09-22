@@ -154,8 +154,8 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
         <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">Subscribe to our newsletter</h3>
         <p style="opacity: 0.8; margin-bottom: 24px;">Get the latest posts delivered right to your inbox.</p>
         <form data-members-form="subscribe" style="display: flex; flex-direction: column; gap: 8px; max-width: 400px; margin: 0 auto;">
-          <input data-members-email type="email" required placeholder="Your email address" style="flex: 1; padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); outline: none; color: #000;">
-          <button type="submit" class="footer-subscribe-btn" style="padding: 12px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; background-color: ${colors.buttonBgColor || '#000000'}; color: ${colors.buttonTextColor || '#ffffff'}; transition: opacity 0.2s;">Subscribe</button>
+          <input data-members-email type="email" required placeholder="Your email address" style="flex: 1; padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); outline: none; color: var(--color-fg); background-color: var(--color-bg);">
+          <button type="submit" class="footer-subscribe-btn" style="padding: 12px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; background-color: ${colors.buttonBgColor || 'var(--color-primary, #000000)'}; color: ${colors.buttonTextColor || 'var(--color-on-primary, #ffffff)'}; transition: opacity 0.2s;">Subscribe</button>
         </form>
       </div>
       ` : ''}
@@ -349,12 +349,12 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   }
 
   html.dark #${htmlAnchor} {
-    background-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--color-bg) !important;
+    color: var(--color-fg) !important;
   }
   html.dark #${htmlAnchor} .footer-subscribe-btn {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
   }
   #${htmlAnchor} .footer-inner {
     margin: 0 auto;

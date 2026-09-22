@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { getBackgroundStyle } from "../shared/background";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
   block: BuilderBlock;
@@ -18,6 +19,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 
   const spacing = p.spacing || {};
 
+  const isDark = useCanvasDarkMode();
   const bgStyleObj = getBackgroundStyle(styles, appearance);
 
   const limit = general.limit || 3;
@@ -86,7 +88,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
             <article 
               className="lg:col-span-7 border border-brand-hairline rounded-md overflow-hidden flex flex-col"
-              style={{ backgroundColor: appearance.backgroundColor || "#ffffff", color: appearance.textColor || "#111827" }}
+              style={{ backgroundColor: appearance.backgroundColor || (isDark ? "var(--color-bg, #111111)" : "var(--color-bg, #ffffff)"), color: appearance.textColor || "var(--color-fg)" }}
             >
               {showFeatureImage && (
                 <div className="w-full aspect-video bg-brand-canvas-soft-2 shrink-0">
@@ -109,8 +111,8 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
               {listPosts.map(post => (
                 <article 
                   key={post.id} 
-                  className="flex gap-4 border border-brand-hairline rounded-md overflow-hidden bg-white"
-                  style={{ backgroundColor: appearance.backgroundColor || "#ffffff", color: appearance.textColor || "#111827" }}
+                  className="flex gap-4 border border-brand-hairline rounded-md overflow-hidden bg-brand-canvas"
+                  style={{ backgroundColor: appearance.backgroundColor || (isDark ? "var(--color-bg, #111111)" : "var(--color-bg, #ffffff)"), color: appearance.textColor || "var(--color-fg)" }}
                 >
                   {showFeatureImage && (
                     <div className="w-1/3 min-h-[120px] bg-brand-canvas-soft-2 shrink-0">
@@ -137,10 +139,10 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             {displayPosts.map(post => (
             <article 
               key={post.id} 
-              className="post-card border border-brand-hairline rounded-md overflow-hidden flex flex-col"
+              className="post-card border border-brand-hairline rounded-md overflow-hidden flex flex-col bg-brand-canvas"
               style={{ 
-                backgroundColor: appearance.backgroundColor || "#ffffff",
-                color: appearance.textColor || "#111827"
+                backgroundColor: appearance.backgroundColor || (isDark ? "var(--color-bg, #111111)" : "var(--color-bg, #ffffff)"),
+                color: appearance.textColor || "var(--color-fg)"
               }}
             >
               {showFeatureImage && (

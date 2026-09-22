@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { StatsProps, StatItem, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
 import { useEditorStore } from "@/store/editorStore";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 function resolveStyleValue(val: unknown, fallback: string = ""): string {
   if (!val) return fallback;
@@ -16,6 +17,7 @@ function resolveStyleValue(val: unknown, fallback: string = ""): string {
 }
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
+  useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as StatsProps;
   const general = p.general || defaultProps.general || { heading: "Our impact", subheading: "", layoutStyle: "row", columns: 3 };
   const stats = p.stats || defaultProps.stats || [];

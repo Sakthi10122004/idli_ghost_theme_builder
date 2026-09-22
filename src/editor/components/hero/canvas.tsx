@@ -4,6 +4,7 @@ import { getBackgroundStyle } from "../shared/background";
 import { useEditorStore } from "@/store/editorStore";
 import { HeroSlide } from "./schema";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 function resolveStyleValue(val: unknown, fallback: string = ""): string {
   if (!val) return fallback;
@@ -24,6 +25,7 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   const p = block.props || {};
+  const isDark = useCanvasDarkMode();
   const isCarousel = !!p.enableCarousel;
   const useSiteData = p.useSiteData ?? false;
   const useCoverImageAsBackground = p.useCoverImageAsBackground ?? true;
@@ -202,7 +204,7 @@ export const CanvasElement = ({ block }: {
                     : "var(--color-primary, #171717)",
                   color: p.buttonTextColor
                     ? p.buttonTextColor
-                    : "#ffffff"
+                    : (isDark ? "var(--color-on-primary, #000000)" : "#ffffff")
                 }}
               >
                 {isDynamic ? (p.buttonLabel || "Read Article") : (current.buttonLabel || p.buttonLabel || "Learn More")}
@@ -348,7 +350,7 @@ export const CanvasElement = ({ block }: {
                   : "var(--color-primary, #171717)",
                 color: p.buttonTextColor
                   ? p.buttonTextColor
-                  : "#ffffff"
+                  : (isDark ? "var(--color-on-primary, #000000)" : "#ffffff")
               }}
             >
               {buttonLabel || "Start Reading"}

@@ -29,11 +29,10 @@ export const compileToHbs = (block: BuilderBlock) => {
     background-color: rgba(0,0,0,0.02);
     `}
   }
-  html.dark #btn-${block.id},
-  html.dark-mode #btn-${block.id} {
+  html.dark #btn-${block.id} {
     ${isPrimary ? `
-    background-color: #ffffff;
-    color: #000000;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary, #000000);
     ` : `
     background-color: var(--color-bg);
     color: var(--color-fg);

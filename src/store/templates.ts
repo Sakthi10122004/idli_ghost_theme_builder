@@ -22,7 +22,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: sectionId,
             type: "section",
             props: {},
-            styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "#ffffff" },
+            styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "var(--color-bg)" },
             childrenIds: [],
           }
         }
@@ -52,7 +52,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: heroSecId,
             type: "section",
             props: {},
-            styles: { paddingTop: "96px", paddingBottom: "64px", backgroundColor: "#ffffff" },
+            styles: { paddingTop: "96px", paddingBottom: "64px", backgroundColor: "var(--color-bg)" },
             childrenIds: [heroContainerId],
           },
           [heroContainerId]: {
@@ -91,7 +91,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: newsletterSecId,
             type: "section",
             props: {},
-            styles: { paddingTop: "64px", paddingBottom: "96px", backgroundColor: "#ffffff" },
+            styles: { paddingTop: "64px", paddingBottom: "96px", backgroundColor: "var(--color-bg)" },
             childrenIds: [newsletterId],
           },
           [newsletterId]: {
@@ -143,7 +143,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
             id: featuresSecId,
             type: "section",
             props: {},
-            styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "#ffffff" },
+            styles: { paddingTop: "96px", paddingBottom: "96px", backgroundColor: "var(--color-bg)" },
             childrenIds: [featuresId],
           },
           [featuresId]: {

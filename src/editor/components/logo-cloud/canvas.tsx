@@ -5,8 +5,10 @@ import { useEditorStore } from "@/store/editorStore";
 import { LogoCloudProps, resolveLogoCloudProps, GENERIC_SVG_PLACEHOLDER } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
 import { LOGO_CLOUD_MAX_WIDTH } from "./constants";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export function CanvasElement({ block }: { block: BuilderBlock }) {
+  useCanvasDarkMode();
   const p: LogoCloudProps = resolveLogoCloudProps(block.props);
   const assets = useEditorStore((s) => s.document.assets) || {};
   const general = p.general;

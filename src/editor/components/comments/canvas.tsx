@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveCommentsProps } from "./schema";
 import { MessageSquare } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -12,6 +13,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p = resolveCommentsProps(block.props);
 
   return (

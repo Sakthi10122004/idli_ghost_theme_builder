@@ -1,84 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
-
-const getBackgroundCSS = (styles: Record<string, unknown> | undefined, appearance: Record<string, unknown> | undefined, important = false): string => {
-  const bgType = styles?.backgroundType || "solid";
-  const defaultBg = appearance?.backgroundColor || "#ffffff";
-  const imp = important ? " !important" : "";
-
-  switch (bgType) {
-    case "solid":
-      return `background-color: ${appearance?.backgroundColor || "#ffffff"}${imp};`;
-    case "linear": {
-      const c1 = styles?.gradientColor1 || "#000000";
-      const c2 = styles?.gradientColor2 || "#333333";
-      const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
-      return `background-image: linear-gradient(${angle}deg, ${c1}, ${c2})${imp};`;
-    }
-    case "radial": {
-      const c1 = styles?.gradientColor1 || "#000000";
-      const c2 = styles?.gradientColor2 || "#333333";
-      const pos = styles?.gradientPosition || "center";
-      return `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2})${imp};`;
-    }
-    case "mesh": {
-      const m1 = styles?.meshColor1 || "#ff0080";
-      const m2 = styles?.meshColor2 || "#7928ca";
-      const m3 = styles?.meshColor3 || "#0070f3";
-      return `
-    background-color: ${defaultBg}${imp};
-    background-image: 
-      radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
-      radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
-      radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%)${imp};
-      `;
-    }
-    case "pattern": {
-      const pType = styles?.patternType || "dots";
-      const pColor = styles?.patternColor || "#000000";
-      if (pType === "dots") {
-        return `
-    background-color: ${defaultBg}${imp};
-    background-image: radial-gradient(${pColor} 1px, transparent 1px)${imp};
-    background-size: 20px 20px${imp};
-        `;
-      } else if (pType === "lines") {
-        return `
-    background-color: ${defaultBg}${imp};
-    background-image: repeating-linear-gradient(45deg, ${pColor}20 0, ${pColor}20 1px, transparent 1px, transparent 10px)${imp};
-        `;
-      } else if (pType === "noise") {
-        return `
-    background-color: ${pColor}${imp};
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")${imp};
-        `;
-      }
-      return `background-color: ${defaultBg}${imp};`;
-    }
-    case "image": {
-      const url = styles?.bgImageUrl || "";
-      const overlayColor = String(styles?.bgOverlayColor || "#000000");
-      const opacity = typeof styles?.bgOverlayOpacity === "number" ? styles.bgOverlayOpacity : 0.5;
-      
-      let r = 0, g = 0, b = 0;
-      if (overlayColor.length === 7) {
-        r = parseInt(overlayColor.slice(1, 3), 16);
-        g = parseInt(overlayColor.slice(3, 5), 16);
-        b = parseInt(overlayColor.slice(5, 7), 16);
-      }
-      
-      const overlay = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      return `
-    background-color: ${defaultBg}${imp};
-    background-image: linear-gradient(${overlay}, ${overlay})${url ? `, url('${url}')` : ""}${imp};
-    background-size: cover${imp};
-    background-position: center${imp};
-      `;
-    }
-    default:
-      return `background-color: ${appearance?.backgroundColor || "#ffffff"}${imp};`;
-  }
-};
+import { getBackgroundCSS } from "../shared/background";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
@@ -92,10 +14,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const isStacked = layoutStyle === "Stacked";
 
   const palette = {
-    bg: appearance.backgroundColor || "#ffffff",
-    text: appearance.textColor || "#000000",
-    buttonBg: appearance.buttonBgColor || "#000000",
-    buttonText: appearance.buttonTextColor || "#ffffff",
+    bg: appearance.backgroundColor || "var(--color-bg, #ffffff)",
+    text: appearance.textColor || "var(--color-fg, #171717)",
+    buttonBg: appearance.buttonBgColor || "var(--color-primary, #171717)",
+    buttonText: appearance.buttonTextColor || "var(--color-on-primary, #ffffff)",
   };
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";
@@ -127,9 +49,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
     <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
-          <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${general.darkLogoUrl}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
         {{else}}
-          <span class="gh-site-title">{{@site.title}}</span>
+          ${general.logoUrl ? `
+          <img src="${general.logoUrl}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${general.darkLogoUrl}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          ` : `<span class="gh-site-title">{{@site.title}}</span>`}
         {{/if}}
       </a>
       <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px;">
@@ -340,9 +266,22 @@ export const compileToHbs = (block: BuilderBlock): string => {
     opacity: 1 !important;
   }
 
-  /* ===== Dropdown Menus (Desktop) ===== */
+  /* ===== Dropdown Menus & Header Stacking ===== */
+  .gh-head-wrapper,
+  #${htmlAnchor}.gh-head,
+  .gh-head {
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+  }
+  #${htmlAnchor} .gh-head-inner,
+  #${htmlAnchor} .gh-head-menu,
+  #${htmlAnchor} .gh-head-menu .nav {
+    overflow: visible !important;
+  }
   #${htmlAnchor} .nav-dropdown-parent {
-    position: relative;
+    position: relative !important;
+    overflow: visible !important;
   }
   #${htmlAnchor} .nav-dropdown-parent > a {
     display: inline-flex !important;
@@ -359,7 +298,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     margin-left: 2px;
   }
   #${htmlAnchor} .nav-dropdown-parent:hover .nav-dropdown-chevron,
-  #${htmlAnchor} .nav-dropdown-parent:focus-within .nav-dropdown-chevron {
+  #${htmlAnchor} .nav-dropdown-parent:focus-within .nav-dropdown-chevron,
+  #${htmlAnchor} .nav-dropdown-parent.is-open .nav-dropdown-chevron {
     transform: rotate(180deg);
     opacity: 0.8;
   }
@@ -367,53 +307,83 @@ export const compileToHbs = (block: BuilderBlock): string => {
     position: absolute;
     top: 100%;
     left: 50%;
-    transform: translateX(-50%) translateY(-6px);
+    transform: translateX(-50%) translateY(-4px);
     min-width: 180px;
-    padding-top: 8px;
-    z-index: 100;
+    padding-top: 6px;
+    z-index: 10000 !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
   }
+  #${htmlAnchor} .nav-dropdown-card::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 10px;
+  }
   #${htmlAnchor} .nav-dropdown-parent:hover > .nav-dropdown-card,
-  #${htmlAnchor} .nav-dropdown-parent:focus-within > .nav-dropdown-card {
+  #${htmlAnchor} .nav-dropdown-parent:focus-within > .nav-dropdown-card,
+  #${htmlAnchor} .nav-dropdown-parent.is-open > .nav-dropdown-card {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);
   }
   #${htmlAnchor} .nav-dropdown-inner {
-    background: #ffffff;
-    color: #171717;
+    background: var(--color-bg);
+    color: var(--color-fg);
     border-radius: 8px;
     padding: 6px;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 10px 15px -3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
   html.dark #${htmlAnchor} .nav-dropdown-inner {
-    background: #1f1f1f;
-    color: #ffffff;
-    border-color: rgba(255,255,255,0.08);
+    background: #1f1f1f !important;
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2) !important;
   }
-  #${htmlAnchor} .nav-dropdown-inner a {
+  #${htmlAnchor} .nav-dropdown-inner a,
+  #${htmlAnchor} .nav-dropdown-link {
+    color: var(--color-fg) !important;
     padding: 8px 14px !important;
     border-radius: 5px;
     font-size: 14px !important;
     font-weight: 500 !important;
     white-space: nowrap;
     display: block !important;
+    opacity: 0.9 !important;
+    text-decoration: none !important;
+    text-align: left !important;
+    transition: background 0.15s, opacity 0.15s, color 0.15s;
+    line-height: 1.4 !important;
+  }
+  #${htmlAnchor} .nav-dropdown-inner a:hover,
+  #${htmlAnchor} .nav-dropdown-link:hover {
+    background: rgba(0,0,0,0.05) !important;
     opacity: 1 !important;
-    transition: background 0.15s;
+    color: var(--color-fg) !important;
   }
-  #${htmlAnchor} .nav-dropdown-inner a:hover {
-    background: rgba(0,0,0,0.05);
+  html.dark #${htmlAnchor} .nav-dropdown-inner a,
+  html.dark #${htmlAnchor} .nav-dropdown-link {
+    color: #f3f4f6 !important;
   }
-  html.dark #${htmlAnchor} .nav-dropdown-inner a:hover {
-    background: rgba(255,255,255,0.08);
+  html.dark #${htmlAnchor} .nav-dropdown-inner a:hover,
+  html.dark #${htmlAnchor} .nav-dropdown-link:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* CRITICAL: Mobile Accordion must NEVER be visible on desktop */
+  #${htmlAnchor} .nav-accordion {
+    display: none !important;
   }
 
   /* ===== Mobile Accordion Dropdown ===== */
@@ -421,34 +391,52 @@ export const compileToHbs = (block: BuilderBlock): string => {
     #${htmlAnchor} .nav-dropdown-card {
       display: none !important;
     }
-    .gh-head-open #${htmlAnchor}.gh-head .nav-dropdown-parent {
+    .gh-head-open #${htmlAnchor}.gh-head .nav-dropdown-parent,
+    #${htmlAnchor} .nav-dropdown-parent {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
       width: 100% !important;
     }
-    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion {
+    #${htmlAnchor} .nav-dropdown-parent > a {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      cursor: pointer;
+    }
+    #${htmlAnchor} .nav-accordion {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease, opacity 0.25s ease;
       opacity: 0;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
     }
-    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion.is-open {
+    #${htmlAnchor} .nav-accordion.is-open {
       max-height: 500px;
       opacity: 1;
+      padding: 4px 0 !important;
     }
-    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion a {
+    #${htmlAnchor} .nav-accordion a,
+    #${htmlAnchor} .nav-accordion-link {
       font-size: 1.125rem !important;
       font-weight: 500 !important;
-      opacity: 0.7 !important;
-      padding: 6px 0 !important;
+      opacity: 0.75 !important;
+      padding: 8px 0 !important;
       text-align: center !important;
+      color: inherit !important;
+      text-decoration: none !important;
+      display: block !important;
+      transition: opacity 0.15s ease;
     }
-    .gh-head-open #${htmlAnchor}.gh-head .nav-accordion a:hover {
+    #${htmlAnchor} .nav-accordion a:hover,
+    #${htmlAnchor} .nav-accordion-link:hover {
       opacity: 1 !important;
     }
   }
@@ -697,8 +685,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   html.dark #${htmlAnchor}.gh-head,
   html.dark #${htmlAnchor}.gh-head.gh-head-open,
   html.dark .gh-head-open #${htmlAnchor}.gh-head {
-    background-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--color-bg) !important;
+    color: var(--color-fg) !important;
   }
 
   /* Ensure all header text, branding, and links cleanly adapt to white in dark mode */
@@ -746,9 +734,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
   
   html.dark #${htmlAnchor}.gh-head .gh-head-btn {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
   }
+
+  /* Dark mode logo toggle */
+  .gh-logo-dark { display: none; }
+  html.dark .gh-logo-light { display: none; }
+  html.dark .gh-logo-dark { display: inline-block; }
 
   html.dark #${htmlAnchor}.gh-head .icon-moon { display: none !important; }
   html.dark #${htmlAnchor}.gh-head .icon-sun { display: block !important; }
@@ -757,31 +750,48 @@ export const compileToHbs = (block: BuilderBlock): string => {
 
 </style>
 
+<div class="gh-head-wrapper" style="width: 100%; padding: 0; background-color: transparent; position: relative; z-index: 9999; overflow: visible;">
+  <header 
+    id="${htmlAnchor}" 
+    class="gh-head section-width-${appearance.sectionWidth || 'full'} ${styles.backgroundType === "mesh" ? 'mesh-glow' : ''}"
+    style="
+      position: relative;
+      z-index: 9999;
+      ${inlineBgCss}
+      color: ${palette.text};
+      width: 100%;
+      ${isSectionFull ? "" : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`}
+      margin-bottom: ${styles.marginBottom || '0px'};
+      box-shadow: ${shadowValue};
+      opacity: ${styles.opacity ?? 1};
+      ${glassEnabled ? `backdrop-filter: blur(${styles.backdropBlur || '12px'}); -webkit-backdrop-filter: blur(${styles.backdropBlur || '12px'});` : ""}
+      transition: all 0.15s ease-in-out;
+      overflow: visible;
+    "
+  >
+    <div class="gh-head-inner content-width-${appearance.contentWidth || 'wide'}" style="width: 100%; max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto; overflow: visible;">
+      ${brandHtml}
+      ${navHtml}
+      ${actionsHtml}
+    </div>
+  </header>
+</div>
+
 <script>
 (function() {
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  function init() {
-    const head = document.getElementById('${htmlAnchor}');
+  function initBurger() {
+    const head = document.getElementById('${htmlAnchor}') || document.querySelector('.gh-head');
     const burger = head ? head.querySelector('.gh-burger') : null;
     
     if (!head || !burger) return;
+    if (burger.dataset.bound) return;
+    burger.dataset.bound = "true";
 
-    // Check if there's a pre-existing open state (e.g., from server-side)
-    const isOpen = head.classList.contains('gh-head-open');
-    
-    // Toggle function
     function toggleMenu(e) {
       e.stopPropagation();
       head.classList.toggle('gh-head-open');
       document.body.classList.toggle('gh-head-open');
       
-      // Toggle burger/close icons
       const burgerIcon = burger.querySelector('.burger-icon');
       const closeIcon = burger.querySelector('.close-icon');
       if (burgerIcon && closeIcon) {
@@ -791,10 +801,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
       }
     }
 
-    // Click handler
     burger.addEventListener('click', toggleMenu);
     
-    // Close menu when clicking outside
     document.addEventListener('click', function(e) {
       if (head.classList.contains('gh-head-open')) {
         const isClickInside = head.contains(e.target);
@@ -812,12 +820,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
       }
     });
 
-    // Handle escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && head.classList.contains('gh-head-open')) {
         head.classList.remove('gh-head-open');
         document.body.classList.remove('gh-head-open');
-        
         const burgerIcon = burger.querySelector('.burger-icon');
         const closeIcon = burger.querySelector('.close-icon');
         if (burgerIcon && closeIcon) {
@@ -827,6 +833,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
       }
     });
   }
+
+  initBurger();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBurger);
+  }
+  window.addEventListener('pageshow', initBurger);
 })();
 
 function syncCommentsTheme(isDark) {
@@ -873,10 +885,33 @@ function toggleThemeMode() {
 (function initDropdownNav() {
   var DROPDOWN_PREFIX = ${JSON.stringify(general.dropdownPrefix || "-")};
 
+  function startsWithPrefix(text, prefix) {
+    if (!prefix || !text) return false;
+    var t = text.replace(/\u00a0/g, ' ').trim();
+    var p = prefix.replace(/\u00a0/g, ' ').trim();
+    if (t.indexOf(p) === 0) return true;
+    if ((p === '-' || p === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0 || t.indexOf('-') === 0)) {
+      return true;
+    }
+    return false;
+  }
+
+  function stripPrefix(text, prefix) {
+    var t = text.replace(/\u00a0/g, ' ').trim();
+    var p = prefix.replace(/\u00a0/g, ' ').trim();
+    if (t.indexOf(p) === 0) {
+      return t.substring(p.length).replace(/^[\s\u00a0]+/, '').trim();
+    }
+    if ((p === '-' || p === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0 || t.indexOf('-') === 0)) {
+      return t.substring(1).replace(/^[\s\u00a0]+/, '').trim();
+    }
+    return t;
+  }
+
   function enhance() {
-    var head = document.getElementById('${htmlAnchor}');
+    var head = document.getElementById('${htmlAnchor}') || document.querySelector('.gh-head');
     if (!head) return;
-    var navList = head.querySelector('.gh-head-menu .nav');
+    var navList = head.querySelector('.gh-head-menu .nav') || head.querySelector('.gh-head-menu ul') || head.querySelector('.nav') || head.querySelector('ul[role="menu"]');
     if (!navList) return;
 
     var items = Array.prototype.slice.call(navList.children);
@@ -884,6 +919,10 @@ function toggleThemeMode() {
 
     while (i < items.length) {
       var li = items[i];
+      if (li.classList.contains('nav-dropdown-parent')) {
+        i++;
+        continue;
+      }
       var link = li.querySelector('a');
       if (!link) { i++; continue; }
 
@@ -894,10 +933,10 @@ function toggleThemeMode() {
         var childLi = items[j];
         var childLink = childLi.querySelector('a');
         if (!childLink) break;
-        var label = childLink.textContent.trim();
-        if (label.indexOf(DROPDOWN_PREFIX) !== 0) break;
+        var label = (childLink.textContent || '').trim();
+        if (!startsWithPrefix(label, DROPDOWN_PREFIX)) break;
         // Strip prefix from label
-        childLink.textContent = label.substring(DROPDOWN_PREFIX.length).trim();
+        childLink.textContent = stripPrefix(label, DROPDOWN_PREFIX);
         children.push(childLi);
         j++;
       }
@@ -907,19 +946,21 @@ function toggleThemeMode() {
       // Wrap the parent li
       li.classList.add('nav-dropdown-parent');
 
-      // Add chevron to parent link
-      var chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      chevron.setAttribute('class', 'nav-dropdown-chevron');
-      chevron.setAttribute('viewBox', '0 0 24 24');
-      chevron.setAttribute('fill', 'none');
-      chevron.setAttribute('stroke', 'currentColor');
-      chevron.setAttribute('stroke-width', '2.5');
-      chevron.setAttribute('stroke-linecap', 'round');
-      chevron.setAttribute('stroke-linejoin', 'round');
-      var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      polyline.setAttribute('points', '6 9 12 15 18 9');
-      chevron.appendChild(polyline);
-      link.appendChild(chevron);
+      // Add chevron to parent link if not present
+      if (!link.querySelector('.nav-dropdown-chevron')) {
+        var chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        chevron.setAttribute('class', 'nav-dropdown-chevron');
+        chevron.setAttribute('viewBox', '0 0 24 24');
+        chevron.setAttribute('fill', 'none');
+        chevron.setAttribute('stroke', 'currentColor');
+        chevron.setAttribute('stroke-width', '2.5');
+        chevron.setAttribute('stroke-linecap', 'round');
+        chevron.setAttribute('stroke-linejoin', 'round');
+        var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', '6 9 12 15 18 9');
+        chevron.appendChild(polyline);
+        link.appendChild(chevron);
+      }
 
       // Desktop: create floating dropdown card
       var card = document.createElement('div');
@@ -934,67 +975,86 @@ function toggleThemeMode() {
       for (var k = 0; k < children.length; k++) {
         var childLinkEl = children[k].querySelector('a');
         if (childLinkEl) {
-          // Desktop card link
           var desktopLink = childLinkEl.cloneNode(true);
+          desktopLink.className = 'nav-dropdown-link';
           inner.appendChild(desktopLink);
-          // Mobile accordion link
           var mobileLink = childLinkEl.cloneNode(true);
+          mobileLink.className = 'nav-accordion-link';
           accordion.appendChild(mobileLink);
         }
-        // Remove original child li from the nav
-        children[k].parentNode.removeChild(children[k]);
+        if (children[k].parentNode) {
+          children[k].parentNode.removeChild(children[k]);
+        }
       }
 
       card.appendChild(inner);
       li.appendChild(card);
       li.appendChild(accordion);
 
-      // Mobile tap handler: toggle accordion
+      // Tap / Click handlers:
       (function(parentLi, acc) {
-        parentLi.querySelector('a').addEventListener('click', function(e) {
+        var pLink = parentLi.querySelector('a');
+        if (!pLink) return;
+
+        pLink.addEventListener('click', function(e) {
           if (window.innerWidth < 768) {
             e.preventDefault();
+            e.stopPropagation();
             acc.classList.toggle('is-open');
+            parentLi.classList.toggle('is-open');
+          } else {
+            var href = pLink.getAttribute('href');
+            if (!href || href === '#' || href === 'javascript:' || href === 'javascript:void(0)') {
+              e.preventDefault();
+              parentLi.classList.toggle('is-open');
+            }
           }
         });
       })(li, accordion);
 
-      // Update items array since we removed elements
       items = Array.prototype.slice.call(navList.children);
       i++;
     }
+
+    if (!window.__gh_dropdown_click_bound) {
+      window.__gh_dropdown_click_bound = true;
+      document.addEventListener('click', function(e) {
+        if (window.innerWidth >= 768) {
+          var openParents = document.querySelectorAll('.nav-dropdown-parent.is-open');
+          for (var p = 0; p < openParents.length; p++) {
+            if (!openParents[p].contains(e.target)) {
+              openParents[p].classList.remove('is-open');
+            }
+          }
+        }
+      });
+    }
   }
 
+  // 1. Run immediately since header HTML is already in DOM right above this script
+  enhance();
+
+  // 2. Run on DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', enhance);
-  } else {
-    enhance();
+  }
+
+  // 3. Run on page transitions / browser back-forward cache (BFCache)
+  window.addEventListener('pageshow', enhance);
+  window.addEventListener('popstate', enhance);
+
+  // 4. Short retries to catch any dynamic render
+  setTimeout(enhance, 50);
+  setTimeout(enhance, 250);
+
+  // 5. MutationObserver to automatically group items if nav is dynamically inserted/updated
+  var head = document.getElementById('${htmlAnchor}') || document.querySelector('.gh-head');
+  if (typeof MutationObserver !== 'undefined' && head) {
+    var observer = new MutationObserver(function() {
+      enhance();
+    });
+    observer.observe(head, { childList: true, subtree: true });
   }
 })();
-</script>
-
-<div style="width: 100%; padding: 0; background-color: transparent;">
-  <header 
-    id="${htmlAnchor}" 
-    class="gh-head section-width-${appearance.sectionWidth || 'full'} ${styles.backgroundType === "mesh" ? 'mesh-glow' : ''}"
-    style="
-      position: relative;
-      ${inlineBgCss}
-      color: ${palette.text};
-      width: 100%;
-      ${isSectionFull ? "" : `max-width: ${sectionMaxWidth}; margin-left: auto; margin-right: auto; border-radius: 12px;`}
-      margin-bottom: ${styles.marginBottom || '0px'};
-      box-shadow: ${shadowValue};
-      opacity: ${styles.opacity ?? 1};
-      ${glassEnabled ? `backdrop-filter: blur(${styles.backdropBlur || '12px'}); -webkit-backdrop-filter: blur(${styles.backdropBlur || '12px'});` : ""}
-      transition: all 0.15s ease-in-out;
-    "
-  >
-    <div class="gh-head-inner content-width-${appearance.contentWidth || 'wide'}" style="width: 100%; max-width: ${contentMaxWidth}; margin-left: auto; margin-right: auto;">
-      ${brandHtml}
-      ${navHtml}
-      ${actionsHtml}
-    </div>
-  </header>
-</div>`;
+</script>`;
 };

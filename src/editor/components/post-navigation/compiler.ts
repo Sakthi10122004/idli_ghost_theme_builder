@@ -131,13 +131,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  html.dark #${wrapperId} .gh-post-nav-card,
-  html.dark-mode #${wrapperId} .gh-post-nav-card {
+  html.dark #${wrapperId} .gh-post-nav-card {
     background-color: var(--color-bg, #111111);
     border-color: var(--color-hairline, #333333);
   }
-  html.dark #${wrapperId},
-  html.dark-mode #${wrapperId} {
+  html.dark #${wrapperId} {
     border-top-color: var(--color-hairline, #333333);
   }
 </style>

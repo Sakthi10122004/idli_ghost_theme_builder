@@ -110,7 +110,8 @@ export const getBackgroundStyle = (styles: any, appearance?: any): React.CSSProp
   };
 };
 
-export const getBackgroundCSS = (styles: any, appearance?: any): string => {
+export const getBackgroundCSS = (styles: any, appearance?: any, important = false): string => {
+  const imp = important ? " !important" : "";
   const bgType = styles?.backgroundType || "solid";
   let defaultBg = appearance?.backgroundColor || styles?.backgroundColor || "var(--color-bg)";
   const glassBlur = styles?.backdropBlur;
@@ -120,25 +121,25 @@ export const getBackgroundCSS = (styles: any, appearance?: any): string => {
     defaultBg = toTranslucent(defaultBg);
   }
 
-  const glassCss = glassEnabled ? `backdrop-filter: blur(${glassBlur}); -webkit-backdrop-filter: blur(${glassBlur}); ` : "";
+  const glassCss = glassEnabled ? `backdrop-filter: blur(${glassBlur})${imp}; -webkit-backdrop-filter: blur(${glassBlur})${imp}; ` : "";
 
-  let baseCss = `background-color: ${defaultBg};`;
+  let baseCss = `background-color: ${defaultBg}${imp};`;
   switch (bgType) {
     case "solid":
-      baseCss = `background-color: ${defaultBg};`;
+      baseCss = `background-color: ${defaultBg}${imp};`;
       break;
     case "linear": {
       const c1 = styles?.gradientColor1 || "#000000";
       const c2 = styles?.gradientColor2 || "#333333";
       const angle = styles?.gradientAngle !== undefined ? styles.gradientAngle : 90;
-      baseCss = `background-image: linear-gradient(${angle}deg, ${c1}, ${c2}); background-color: ${defaultBg};`;
+      baseCss = `background-image: linear-gradient(${angle}deg, ${c1}, ${c2})${imp}; background-color: ${defaultBg}${imp};`;
       break;
     }
     case "radial": {
       const c1 = styles?.gradientColor1 || "#000000";
       const c2 = styles?.gradientColor2 || "#333333";
       const pos = styles?.gradientPosition || "center";
-      baseCss = `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2}); background-color: ${defaultBg};`;
+      baseCss = `background-image: radial-gradient(circle at ${pos}, ${c1}, ${c2})${imp}; background-color: ${defaultBg}${imp};`;
       break;
     }
     case "mesh": {
@@ -146,11 +147,11 @@ export const getBackgroundCSS = (styles: any, appearance?: any): string => {
       const m2 = styles?.meshColor2 || "#7928ca";
       const m3 = styles?.meshColor3 || "#0070f3";
       baseCss = `
-        background-color: ${defaultBg};
+        background-color: ${defaultBg}${imp};
         background-image: 
           radial-gradient(at 0% 0%, ${m1}40 0, transparent 50%),
           radial-gradient(at 50% 100%, ${m2}40 0, transparent 50%),
-          radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%);
+          radial-gradient(at 100% 0%, ${m3}40 0, transparent 50%)${imp};
       `;
       break;
     }
@@ -159,19 +160,19 @@ export const getBackgroundCSS = (styles: any, appearance?: any): string => {
       const pColor = styles?.patternColor || "#000000";
       if (pType === "dots") {
         baseCss = `
-          background-color: ${defaultBg};
-          background-image: radial-gradient(${pColor} 1px, transparent 1px);
-          background-size: 20px 20px;
+          background-color: ${defaultBg}${imp};
+          background-image: radial-gradient(${pColor} 1px, transparent 1px)${imp};
+          background-size: 20px 20px${imp};
         `;
       } else if (pType === "lines") {
         baseCss = `
-          background-color: ${defaultBg};
-          background-image: repeating-linear-gradient(45deg, ${pColor} 0, ${pColor} 1px, transparent 1px, transparent 10px);
+          background-color: ${defaultBg}${imp};
+          background-image: repeating-linear-gradient(45deg, ${pColor} 0, ${pColor} 1px, transparent 1px, transparent 10px)${imp};
         `;
       } else if (pType === "noise") {
         baseCss = `
-          background-color: ${defaultBg};
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+          background-color: ${defaultBg}${imp};
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")${imp};
         `;
       }
       break;
@@ -182,12 +183,12 @@ export const getBackgroundCSS = (styles: any, appearance?: any): string => {
       const opacity = styles?.bgOverlayOpacity !== undefined ? styles.bgOverlayOpacity : 0.5;
       const hexOpacity = Math.round(opacity * 255).toString(16).padStart(2, '0');
       baseCss = url 
-        ? `background-color: ${defaultBg}; background-image: linear-gradient(to right, ${overlay}${hexOpacity}, ${overlay}${hexOpacity}), url('${url}'); background-size: cover; background-position: center;`
-        : `background-color: ${defaultBg};`;
+        ? `background-color: ${defaultBg}${imp}; background-image: linear-gradient(to right, ${overlay}${hexOpacity}, ${overlay}${hexOpacity}), url('${url}')${imp}; background-size: cover${imp}; background-position: center${imp};`
+        : `background-color: ${defaultBg}${imp};`;
       break;
     }
     default:
-      baseCss = `background-color: ${defaultBg};`;
+      baseCss = `background-color: ${defaultBg}${imp};`;
   }
 
   return `${glassCss}${baseCss}`;

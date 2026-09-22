@@ -89,7 +89,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     display: block;
     text-align: center;
     background-color: var(--color-primary, #171717);
-    color: #ffffff !important;
+    color: var(--color-on-primary, #ffffff) !important;
     text-decoration: none;
     padding: 0.625rem 1rem;
     border-radius: var(--radius-pill, 9999px);
@@ -100,19 +100,16 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .tier-btn:hover {
     opacity: 0.9;
   }
-  html.dark #${wrapperId} .pricing-tier,
-  html.dark-mode #${wrapperId} .pricing-tier {
+  html.dark #${wrapperId} .pricing-tier {
     background-color: var(--color-bg, #111111);
     border-color: var(--color-hairline, #333333);
   }
-  html.dark #${wrapperId} .tier-price,
-  html.dark-mode #${wrapperId} .tier-price {
-    color: #ffffff;
+  html.dark #${wrapperId} .tier-price {
+    color: var(--color-fg, #ffffff);
   }
-  html.dark #${wrapperId} .tier-btn,
-  html.dark-mode #${wrapperId} .tier-btn {
-    background-color: #ffffff;
-    color: #000000 !important;
+  html.dark #${wrapperId} .tier-btn {
+    background-color: var(--color-primary, #ffffff);
+    color: var(--color-on-primary, #000000) !important;
   }
 </style>
 <div id="${wrapperId}" class="pricing-table-block">

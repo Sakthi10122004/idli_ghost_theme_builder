@@ -1,19 +1,21 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   onClick,
 }: {
   block: BuilderBlock;
-  isSelected: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  onDelete: (e: React.MouseEvent) => void;
-  renderChildren: () => React.ReactNode;
+  isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
+  renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   return (
     <div
       onClick={onClick}
-      className="error-view-block py-16 text-center w-full bg-white border border-brand-hairline rounded-sm"
+      className="error-view-block py-16 text-center w-full bg-white dark:bg-neutral-900 border border-brand-hairline rounded-sm"
     >
       <h1 className="text-4xl font-bold text-brand-ink">404</h1>
       <p className="text-xs text-brand-mute mt-2">Page not found</p>

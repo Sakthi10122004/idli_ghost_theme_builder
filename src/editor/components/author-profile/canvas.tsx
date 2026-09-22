@@ -3,6 +3,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveAuthorProfileProps } from "./schema";
 import { MapPin, Globe } from "lucide-react";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
@@ -13,6 +14,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const p = resolveAuthorProfileProps(block.props);
   const isBanner = p.layoutStyle === "banner";
   const authorInitial = (p.name || "A").charAt(0);
@@ -56,7 +58,7 @@ export const CanvasElement = ({
   }
 
   return (
-    <section className="author-card w-full max-w-[720px] mx-auto my-8 p-5 border border-brand-hairline rounded-md bg-white shadow-level-1 flex items-center gap-4">
+    <section className="author-card w-full max-w-[720px] mx-auto my-8 p-5 border border-brand-hairline rounded-md bg-white dark:bg-neutral-900 shadow-level-1 flex items-center gap-4">
       <div className="w-14 h-14 rounded-full overflow-hidden border border-brand-hairline shrink-0 shadow-xs">
         {p.avatarUrl ? (
           <img src={p.avatarUrl} alt={p.name || "Author"} className="w-full h-full object-cover" />

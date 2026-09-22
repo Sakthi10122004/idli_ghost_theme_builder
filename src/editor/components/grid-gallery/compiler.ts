@@ -818,7 +818,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .gallery-collage-link {
     display: flex;
     flex-direction: column;
-    background-color: #ffffff;
+    background-color: var(--color-bg, #ffffff);
     padding: 0.625rem 0.625rem 2rem 0.625rem;
     border: 1px solid var(--color-hairline, #ebebeb);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);

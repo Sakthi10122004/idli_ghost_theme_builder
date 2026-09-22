@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
   block: BuilderBlock;
@@ -8,6 +9,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
   onDelete: (e: React.MouseEvent) => void;
   renderChildren: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   return (
     <div className="video-player-wrapper py-6 flex justify-center w-full">
       <div className="video-container aspect-video w-full max-w-2xl bg-black rounded-md overflow-hidden">

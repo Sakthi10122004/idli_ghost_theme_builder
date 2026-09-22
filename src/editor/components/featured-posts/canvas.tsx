@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({ block }: {
   block: BuilderBlock;
@@ -8,6 +9,7 @@ export const CanvasElement = ({ block }: {
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
+  useCanvasDarkMode();
   const limit = block.props.limit !== undefined ? block.props.limit : 3;
   const allMockPosts = [
     { id: 1, title: "Building custom Ghost themes with Next.js", excerpt: "Learn how to establish an elegant AST rendering architecture.", date: "August 20, 2026", readingTime: "4 min read", category: "Engineering", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" },
@@ -24,10 +26,10 @@ export const CanvasElement = ({ block }: {
   const secondaries = mockPosts.slice(1);
   const heading = block.props.heading !== undefined ? block.props.heading : (block.props.title || "Featured Articles");
   const description = block.props.description !== undefined ? block.props.description : "Hand-picked stories and top editorial selections from our writers.";
-  const headingColor = block.props.headingColor || "#171717";
-  const descriptionColor = block.props.descriptionColor || "#666666";
-  const cardTitleColor = block.props.cardTitleColor || "#171717";
-  const cardTextColor = block.props.cardTextColor || "#4d4d4d";
+  const headingColor = block.props.headingColor || "var(--color-ink)";
+  const descriptionColor = block.props.descriptionColor || "var(--color-mute)";
+  const cardTitleColor = block.props.cardTitleColor || "var(--color-ink)";
+  const cardTextColor = block.props.cardTextColor || "var(--color-body)";
   const layout = block.props.layout || "split";
   const autoScroll = block.props.autoScroll || false;
 
@@ -65,7 +67,7 @@ export const CanvasElement = ({ block }: {
       
       {layout === "split" && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-7 bg-white border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all">
+          <div className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all">
             <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
               <img src={featured.image} alt={featured.title} className="w-full h-full object-cover grayscale opacity-90 transition-all duration-300" />
             </div>
@@ -100,7 +102,7 @@ export const CanvasElement = ({ block }: {
             : "grid-cols-1 md:grid-cols-3"
         }`}>
           {mockPosts.map(post => (
-            <div key={post.id} className={`bg-white border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all ${mockPosts.length === 1 ? "w-full max-w-[420px]" : "w-full"}`}>
+            <div key={post.id} className={`bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all ${mockPosts.length === 1 ? "w-full max-w-[420px]" : "w-full"}`}>
               <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90 transition-all duration-300" />
               </div>
@@ -117,7 +119,7 @@ export const CanvasElement = ({ block }: {
       {layout === "list" && (
         <div className="flex flex-col gap-4">
           {mockPosts.map(post => (
-            <div key={post.id} className="bg-white border border-brand-hairline rounded-md p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center shadow-level-1 group hover:shadow-level-2 transition-all">
+            <div key={post.id} className="bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center shadow-level-1 group hover:shadow-level-2 transition-all">
               <div className="w-full sm:w-40 h-28 bg-brand-canvas-soft-2 border border-brand-hairline rounded-sm overflow-hidden shrink-0">
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90" />
               </div>
@@ -136,7 +138,7 @@ export const CanvasElement = ({ block }: {
           <div className="overflow-hidden relative group/carousel w-full py-2">
             <div className="flex gap-6 w-max animate-[marquee_25s_linear_infinite] group-hover/carousel:[animation-play-state:paused]">
               {[...mockPosts, ...mockPosts].map((post, idx) => (
-                <div key={`${post.id}-${idx}`} className="min-w-[260px] max-w-[300px] bg-white border border-brand-hairline rounded-md overflow-hidden flex flex-col shrink-0 shadow-level-2 group hover:shadow-level-3 transition-all">
+                <div key={`${post.id}-${idx}`} className="min-w-[260px] max-w-[300px] bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shrink-0 shadow-level-2 group hover:shadow-level-3 transition-all">
                   <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                     <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90 transition-all duration-300" />
                   </div>
@@ -152,7 +154,7 @@ export const CanvasElement = ({ block }: {
         ) : (
           <div className={`flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-thin ${mockPosts.length <= 2 ? 'justify-center' : ''}`}>
             {mockPosts.map(post => (
-              <div key={post.id} className="min-w-[260px] max-w-[300px] bg-white border border-brand-hairline rounded-md overflow-hidden flex flex-col shrink-0 snap-start shadow-level-2 group hover:shadow-level-3 transition-all">
+              <div key={post.id} className="min-w-[260px] max-w-[300px] bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shrink-0 snap-start shadow-level-2 group hover:shadow-level-3 transition-all">
                 <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90 transition-all duration-300" />
                 </div>
@@ -174,7 +176,7 @@ export const CanvasElement = ({ block }: {
             return (
               <div
                 key={post.id}
-                className={`bg-white border border-brand-hairline rounded-2xl p-6 flex flex-col justify-between shadow-level-2 hover:shadow-level-3 transition-all ${
+                className={`bg-white dark:bg-neutral-900 border border-brand-hairline rounded-2xl p-6 flex flex-col justify-between shadow-level-2 hover:shadow-level-3 transition-all ${
                   isLarge ? "md:col-span-2 flex-col md:flex-row gap-6 items-center" : "gap-4"
                 }`}
               >
@@ -206,7 +208,7 @@ export const CanvasElement = ({ block }: {
       {layout === "editorial" && (
         <div className="flex flex-col gap-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-7 bg-white border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 group hover:shadow-level-3 transition-all">
+            <div className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 group hover:shadow-level-3 transition-all">
               <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                 <img src={featured.image} alt={featured.title} className="w-full h-full object-cover grayscale opacity-90" />
               </div>
@@ -217,7 +219,7 @@ export const CanvasElement = ({ block }: {
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white border border-brand-hairline rounded-xl p-6 shadow-level-1 flex flex-col gap-4">
+            <div className="lg:col-span-5 bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl p-6 shadow-level-1 flex flex-col gap-4">
               <div className="flex items-center gap-2 pb-3 border-b border-brand-hairline">
                 <span className="text-amber-500 font-bold text-sm">&#9733;</span>
                 <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-brand-ink">Editor's Picks</h4>
@@ -241,7 +243,7 @@ export const CanvasElement = ({ block }: {
           {mockPosts.length > 3 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-brand-hairline">
               {mockPosts.slice(3).map(post => (
-                <div key={post.id} className="bg-white border border-brand-hairline rounded-lg overflow-hidden flex flex-col shadow-level-1 group hover:shadow-level-2 transition-all">
+                <div key={post.id} className="bg-white dark:bg-neutral-900 border border-brand-hairline rounded-lg overflow-hidden flex flex-col shadow-level-1 group hover:shadow-level-2 transition-all">
                   <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                     <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90" />
                   </div>
@@ -273,7 +275,7 @@ export const CanvasElement = ({ block }: {
                   {itemsToRender.map((post, idx) => {
                     const aspectClasses = ["aspect-square", "aspect-[4/5]", "aspect-video"][(idx + colIdx) % 3];
                     return (
-                      <div key={`${post.id}-${colIdx}-${idx}`} className="bg-white border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col shrink-0">
+                      <div key={`${post.id}-${colIdx}-${idx}`} className="bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col shrink-0">
                         <div className={`${aspectClasses} relative overflow-hidden bg-brand-canvas-soft-2`}>
                           <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90" />
                         </div>
@@ -295,7 +297,7 @@ export const CanvasElement = ({ block }: {
               {mockPosts.map((post, idx) => {
                 const aspectClasses = ["aspect-square", "aspect-[4/5]", "aspect-video"][idx % 3];
                 return (
-                  <div key={post.id} className="w-full max-w-[420px] bg-white border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col">
+                  <div key={post.id} className="w-full max-w-[420px] bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col">
                     <div className={`${aspectClasses} relative overflow-hidden bg-brand-canvas-soft-2`}>
                       <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90" />
                     </div>
@@ -313,7 +315,7 @@ export const CanvasElement = ({ block }: {
             {mockPosts.map((post, idx) => {
               const aspectClasses = ["aspect-square", "aspect-[4/5]", "aspect-video"][idx % 3];
               return (
-                <div key={post.id} className="break-inside-avoid bg-white border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col">
+                <div key={post.id} className="break-inside-avoid bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 hover:shadow-level-3 transition-all flex flex-col">
                   <div className={`${aspectClasses} relative overflow-hidden bg-brand-canvas-soft-2`}>
                     <img src={post.image} alt={post.title} className="w-full h-full object-cover grayscale opacity-90" />
                   </div>
