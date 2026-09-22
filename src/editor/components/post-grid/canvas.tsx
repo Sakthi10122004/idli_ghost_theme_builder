@@ -65,7 +65,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
 
   displayPosts = displayPosts.slice(0, limit);
 
-  const gridColsClass = layoutStyle === "list" ? "grid-cols-1" : `grid-cols-1 md:grid-cols-${columns}`;
+  const gridColsClass = layoutStyle === "list" ? "grid-cols-1" : `grid-cols-1 sm:grid-cols-2 lg:grid-cols-${columns}`;
   const isMagazine = layoutStyle === "magazine";
   const featurePost = displayPosts[0];
   const listPosts = displayPosts.slice(1);
@@ -135,7 +135,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
             </div>
           </div>
         ) : (
-          <div className={`grid ${gridColsClass} gap-6 w-full`}>
+          <div className={`grid ${gridColsClass} gap-4 sm:gap-6 lg:gap-8 w-full`}>
             {displayPosts.map(post => (
             <article 
               key={post.id} 

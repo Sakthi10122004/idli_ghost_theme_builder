@@ -357,6 +357,13 @@ interface EditorState {
   togglePreviewColorMode: () => void;
   setPreviewColorMode: (mode: "light" | "dark") => void;
 
+  isLeftSidebarOpen: boolean;
+  isRightSidebarOpen: boolean;
+  toggleLeftSidebar: (open?: boolean) => void;
+  toggleRightSidebar: (open?: boolean) => void;
+  canvasFitMode: "auto" | "100%";
+  setCanvasFitMode: (mode: "auto" | "100%") => void;
+
   setDeviceMode: (mode: "desktop" | "tablet" | "mobile") => void;
   setActivePage: (page: string) => void;
   selectBlock: (blockId: string | null) => void;
@@ -823,6 +830,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }
     return { previewColorMode: mode };
   }),
+
+  isLeftSidebarOpen: true,
+  isRightSidebarOpen: true,
+  toggleLeftSidebar: (open) => set((state) => ({ isLeftSidebarOpen: open !== undefined ? open : !state.isLeftSidebarOpen })),
+  toggleRightSidebar: (open) => set((state) => ({ isRightSidebarOpen: open !== undefined ? open : !state.isRightSidebarOpen })),
+  canvasFitMode: "auto",
+  setCanvasFitMode: (mode) => set({ canvasFitMode: mode }),
 
   setUserId: (userId) => {
     console.log(`[Zustand Store] Active userId set to: "${userId}"`);

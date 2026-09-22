@@ -1550,20 +1550,44 @@ html.dark .author-card-eyebrow {
 /* 5. Casper Layout & Container Utilities */
 .outer {
   position: relative;
-  padding: 0 4vmin;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
 }
 .inner {
   margin: 0 auto;
-  max-width: var(--container-width, 1200px);
+  max-width: min(var(--container-width, 1200px), 100%);
   width: 100%;
   box-sizing: border-box;
 }
 .container-inner {
   width: 100%;
-  max-width: var(--container-width, 1200px);
+  max-width: min(var(--container-width, 1200px), 100%);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
   box-sizing: border-box;
+}
+.fluid-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+.fluid-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 640px) {
+  .fluid-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .fluid-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 .divider-hairline {
   border: none;

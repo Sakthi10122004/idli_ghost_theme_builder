@@ -187,11 +187,11 @@ export const CanvasElement = ({ block }: {
               </span>
             )}
 
-            <h1 className={`${isMobile ? "text-4xl" : "text-[3.25rem]"} font-sans font-bold leading-[1.12] tracking-[-0.02em] break-words max-w-full transition-all duration-300 ${textColorClass}`}>
+            <h1 className={`${isMobile ? "text-3xl" : "text-[clamp(2rem,3.5vw+0.5rem,3.25rem)]"} font-sans font-bold leading-[1.12] tracking-[-0.02em] break-words max-w-full transition-all duration-300 ${textColorClass}`}>
               {isDynamic ? (safeIndex === 0 ? "Featured Story from #" + dynamicTag : current.title || "Dynamic Post Title") : (current.title || "Slide Title")}
             </h1>
 
-            <p className={`${isMobile ? "text-base" : "text-lg"} leading-relaxed max-w-[640px] break-words transition-all duration-300 ${subtitleColorClass}`}>
+            <p className={`${isMobile ? "text-base" : "text-[clamp(1rem,1.2vw+0.25rem,1.15rem)]"} leading-relaxed max-w-[640px] break-words transition-all duration-300 ${subtitleColorClass}`}>
               {current.subtitle || "Slide description and accompanying editorial copy."}
             </p>
 
@@ -335,10 +335,10 @@ export const CanvasElement = ({ block }: {
               {eyebrowText}
             </span>
           )}
-          <h1 className={`${isMobile ? "text-4xl" : "text-[3.5rem]"} font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
+          <h1 className={`${isMobile ? "text-3xl" : "text-[clamp(2rem,4vw+0.5rem,3.5rem)]"} font-sans font-bold leading-[1.1] tracking-[-0.02em] break-words max-w-full ${textColorClass}`}>
             {useSiteData ? "{{@site.title}}" : (title || "Thoughts, stories & ideas.")}
           </h1>
-          <p className={`${isMobile ? "text-lg" : "text-xl"} leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
+          <p className={`${isMobile ? "text-base" : "text-[clamp(1rem,1.25vw+0.25rem,1.25rem)]"} leading-relaxed max-w-[600px] break-words ${subtitleColorClass}`}>
             {useSiteData ? "{{@site.description}}" : (subtitle || "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.")}
           </p>
           <div className={buttonGroupClasses}>

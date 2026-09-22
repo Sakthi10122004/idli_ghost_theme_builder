@@ -1,6 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { getBackgroundCSS } from "../shared/background";
-import { WIDTH_VALUES } from "./schema";
+import { WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./schema";
 import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPageContext: boolean, blocks?: Record<string, BuilderBlock>) => {
@@ -160,9 +160,9 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
       </div>
       ` : ''}
       
-      <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; ${general.showSubscribeBox !== false ? 'padding-top: 24px; border-top: 1px solid currentColor;' : ''}">
-        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
-        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+      <div class="footer-bottom" style="width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; font-size: 0.875rem; line-height: 1.5; box-sizing: border-box; ${general.showSubscribeBox !== false ? 'padding-top: 24px; border-top: 1px solid currentColor;' : ''}">
+        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7; text-align: left; flex-shrink: 0; font-size: 0.875rem;">${copyrightHtml}</div>` : ''}
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 24px;">
           ${general.showSecondaryNav !== false ? `
           <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
             {{#if @site.secondary_navigation}}
@@ -183,9 +183,9 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   } else {
     // Simple Minimal
     innerHtml = `
-      <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
-        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7;">${copyrightHtml}</div>` : ''}
-        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+      <div class="footer-bottom" style="width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; font-size: 0.875rem; line-height: 1.5; box-sizing: border-box;">
+        ${showCopyright ? `<div class="footer-copyright" style="opacity: 0.7; text-align: left; flex-shrink: 0; font-size: 0.875rem;">${copyrightHtml}</div>` : ''}
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 24px;">
           ${general.showSecondaryNav !== false ? `
           <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
             {{#if @site.secondary_navigation}}
@@ -205,35 +205,61 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     `;
   }
 
-  const pt = spacing.paddingTop !== undefined 
-    ? (typeof spacing.paddingTop === 'number' ? `${spacing.paddingTop}px` : spacing.paddingTop)
-    : (block.styles?.paddingTop 
-        ? (typeof block.styles.paddingTop === 'number' ? `${block.styles.paddingTop}px` : block.styles.paddingTop)
-        : `${spacing.padding?.topBottom || 40}px`);
+  const resolvePadding = (val: unknown, fallback: string = "40px"): string => {
+    if (val === undefined || val === null || val === "") return fallback;
+    if (typeof val === "number") return `${val}px`;
+    if (typeof val === "string") {
+      return val.endsWith("px") || val.endsWith("rem") || val.endsWith("em") || val.endsWith("%")
+        ? val
+        : `${val}px`;
+    }
+    if (typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const resolved = obj.desktop ?? obj.tablet ?? obj.mobile;
+      if (resolved !== undefined && resolved !== null) {
+        return resolvePadding(resolved, fallback);
+      }
+    }
+    return fallback;
+  };
 
-  const pb = spacing.paddingBottom !== undefined 
-    ? (typeof spacing.paddingBottom === 'number' ? `${spacing.paddingBottom}px` : spacing.paddingBottom)
-    : (block.styles?.paddingBottom 
-        ? (typeof block.styles.paddingBottom === 'number' ? `${block.styles.paddingBottom}px` : block.styles.paddingBottom)
-        : `${spacing.padding?.topBottom || 40}px`);
+  const pt = resolvePadding(
+    spacing.paddingTop ?? block.styles?.paddingTop ?? spacing.padding?.topBottom,
+    "40px"
+  );
+  const pb = resolvePadding(
+    spacing.paddingBottom ?? block.styles?.paddingBottom ?? spacing.padding?.topBottom,
+    "40px"
+  );
+  const plr = resolvePadding(
+    spacing.paddingLeft ?? spacing.paddingRight ?? spacing.padding?.leftRight,
+    "24px"
+  );
 
   const sectionWidth = layout.sectionWidth || "full";
   const sectionMaxWidth = WIDTH_VALUES[sectionWidth] || "100%";
   const isSectionFull = sectionWidth === "full";
+  
+  const contentWidth = layout.contentWidth || "standard";
+  const contentMaxWidth = CONTENT_WIDTH_VALUES[contentWidth] || "100%";
 
   return `
 <style>
-  #${htmlAnchor} {
+  #${htmlAnchor},
+  footer#${htmlAnchor},
+  .site-footer#${htmlAnchor} {
+    width: 100% !important;
     ${bgCss}
-    color: ${text};
-    padding-top: ${pt};
-    padding-bottom: ${pb};
-    padding-left: ${spacing.padding?.leftRight || 24}px;
-    padding-right: ${spacing.padding?.leftRight || 24}px;
-    max-width: ${sectionMaxWidth};
-    margin-left: auto;
-    margin-right: auto;
-    ${!isSectionFull ? 'border-radius: 12px; margin-top: 24px; margin-bottom: 24px;' : ''}
+    color: ${text} !important;
+    padding-top: ${pt} !important;
+    padding-bottom: ${pb} !important;
+    padding-left: ${plr} !important;
+    padding-right: ${plr} !important;
+    max-width: ${sectionMaxWidth} !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+    ${!isSectionFull ? 'border-radius: 12px !important; margin-top: 24px !important; margin-bottom: 24px !important;' : ''}
   }
   #${htmlAnchor} a {
     color: inherit;
@@ -358,52 +384,74 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
   }
   #${htmlAnchor} .footer-inner {
     margin: 0 auto;
-    max-width: 1200px;
+    max-width: ${contentMaxWidth};
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
   }
   #${htmlAnchor} .footer-bottom {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 20px;
-    text-align: center;
+    justify-content: space-between;
+    gap: 24px;
     width: 100%;
     box-sizing: border-box;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  #${htmlAnchor} .footer-copyright {
+    opacity: 0.7;
+    font-size: 0.875rem;
+    text-align: left;
+    flex-shrink: 0;
   }
   #${htmlAnchor} .footer-actions {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    box-sizing: border-box;
+    justify-content: flex-end;
+    gap: 24px;
   }
-  @media (min-width: 768px) {
+  @media (max-width: 767px) {
     #${htmlAnchor} .footer-bottom {
-      flex-direction: row !important;
-      justify-content: space-between !important;
-      text-align: left !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      gap: 20px !important;
+    }
+    #${htmlAnchor} .footer-copyright {
+      text-align: center !important;
+      width: 100% !important;
     }
     #${htmlAnchor} .footer-actions {
-      flex-direction: row !important;
-      justify-content: flex-end !important;
-      width: auto !important;
-    }
-    #${htmlAnchor} .footer-secondary-nav,
-    #${htmlAnchor} .footer-secondary-nav .nav,
-    #${htmlAnchor} .footer-bottom ul.nav,
-    #${htmlAnchor} .footer-bottom ul.nav-secondary {
-      justify-content: flex-end;
+      justify-content: center !important;
+      width: 100% !important;
     }
   }
 </style>
 <footer 
   id="${htmlAnchor}" 
   class="site-footer section-width-${layout.sectionWidth || 'full'} ${activeStyles.backgroundType === "mesh" ? 'mesh-glow' : ''}"
+  style="
+    width: 100%;
+    ${bgCss}
+    color: ${text};
+    padding-top: ${pt};
+    padding-bottom: ${pb};
+    padding-left: ${plr};
+    padding-right: ${plr};
+    max-width: ${sectionMaxWidth};
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    ${!isSectionFull ? 'border-radius: 12px; margin-top: 24px; margin-bottom: 24px;' : ''}
+  "
 >
-  <div class="gh-container footer-inner content-width-${layout.contentWidth || 'standard'} align-${layout.align || 'center'}">
+  <div class="gh-container footer-inner content-width-${layout.contentWidth || 'standard'} align-${layout.align || 'center'}" style="margin: 0 auto; max-width: ${contentMaxWidth}; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px;">
     ${innerHtml}
   </div>
 </footer>`;

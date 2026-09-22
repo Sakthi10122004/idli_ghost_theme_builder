@@ -94,12 +94,12 @@ export const CanvasElement = ({ block }: {
       )}
 
       {layout === "grid" && (
-        <div className={`grid gap-6 ${
+        <div className={`grid gap-4 sm:gap-6 ${
           mockPosts.length === 1
             ? "grid-cols-1 justify-items-center"
             : mockPosts.length === 2
-            ? "grid-cols-1 md:grid-cols-2 justify-center"
-            : "grid-cols-1 md:grid-cols-3"
+            ? "grid-cols-1 sm:grid-cols-2 justify-center"
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         }`}>
           {mockPosts.map(post => (
             <div key={post.id} className={`bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all ${mockPosts.length === 1 ? "w-full max-w-[420px]" : "w-full"}`}>

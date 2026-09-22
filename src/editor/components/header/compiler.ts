@@ -164,18 +164,23 @@ export const compileToHbs = (block: BuilderBlock): string => {
   } else {
     desktopLayoutCss = `
       #${htmlAnchor} .gh-head-inner {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
+        display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 32px;
       }
-      #${htmlAnchor} .gh-head-brand { justify-self: start; }
+      #${htmlAnchor} .gh-head-brand { 
+        flex-shrink: 0; 
+      }
       #${htmlAnchor} .gh-head-menu { 
         display: flex; 
-        justify-content: center;
-        width: 100%;
+        justify-content: flex-start;
+        flex-grow: 1;
+        width: auto;
       }
-      #${htmlAnchor} .gh-head-actions { justify-self: end; }
+      #${htmlAnchor} .gh-head-actions { 
+        flex-shrink: 0; 
+      }
     `;
   }
 

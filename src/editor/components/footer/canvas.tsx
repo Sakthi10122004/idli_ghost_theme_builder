@@ -1,7 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
-import { DEFAULT_SECONDARY_NAV, FooterNavItem, WIDTH_VALUES } from "./schema";
+import { DEFAULT_SECONDARY_NAV, FooterNavItem, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./schema";
 import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
@@ -49,20 +49,41 @@ export function CanvasElement({ block, onClick }: {
   
   const copyrightText = p.general?.customCopyrightText || p.copyright || "© 2026 Ghost Theme Builder. Published with Ghost.";
 
-  const paddingTop = 
-    p.spacing?.paddingTop !== undefined ? (typeof p.spacing.paddingTop === 'number' ? `${p.spacing.paddingTop}px` : p.spacing.paddingTop) :
-    block.styles?.paddingTop ||
-    (p.spacing?.padding?.topBottom !== undefined ? `${p.spacing.padding.topBottom}px` : "40px");
+  const resolvePadding = (val: unknown, fallback: string = "40px"): string => {
+    if (val === undefined || val === null || val === "") return fallback;
+    if (typeof val === "number") return `${val}px`;
+    if (typeof val === "string") {
+      return val.endsWith("px") || val.endsWith("rem") || val.endsWith("em") || val.endsWith("%")
+        ? val
+        : `${val}px`;
+    }
+    if (typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const resolved = obj.desktop ?? obj.tablet ?? obj.mobile;
+      if (resolved !== undefined && resolved !== null) {
+        return resolvePadding(resolved, fallback);
+      }
+    }
+    return fallback;
+  };
 
-  const paddingBottom = 
-    p.spacing?.paddingBottom !== undefined ? (typeof p.spacing.paddingBottom === 'number' ? `${p.spacing.paddingBottom}px` : p.spacing.paddingBottom) :
-    block.styles?.paddingBottom ||
-    (p.spacing?.padding?.topBottom !== undefined ? `${p.spacing.padding.topBottom}px` : "40px");
+  const paddingTop = resolvePadding(
+    p.spacing?.paddingTop ?? block.styles?.paddingTop ?? p.spacing?.padding?.topBottom,
+    "40px"
+  );
+
+  const paddingBottom = resolvePadding(
+    p.spacing?.paddingBottom ?? block.styles?.paddingBottom ?? p.spacing?.padding?.topBottom,
+    "40px"
+  );
 
   const sectionWidth = p.layout?.sectionWidth || "full";
   const sectionMaxWidth = WIDTH_VALUES[sectionWidth] || "100%";
   const isSectionFull = sectionWidth === "full";
   
+  const contentWidth = p.layout?.contentWidth || "standard";
+  const contentMaxWidth = CONTENT_WIDTH_VALUES[contentWidth] || "100%";
+
   const activePlatforms: SocialPlatform[] = p.general?.socialPlatforms || DEFAULT_SOCIAL_PLATFORMS;
   const platformMap = React.useMemo(() => {
     return new Map(ALL_SOCIAL_PLATFORMS.map(item => [item.id, item]));
@@ -103,7 +124,7 @@ export function CanvasElement({ block, onClick }: {
       }}
       onClick={onClick}
     >
-      <div className="max-w-[1200px] mx-auto w-full flex flex-col gap-8">
+      <div className="mx-auto w-full flex flex-col gap-8" style={{ maxWidth: contentMaxWidth }}>
         
         {layoutStyle === "Multi-Column" && (
           <div className={`grid gap-8 sm:gap-10 mb-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>

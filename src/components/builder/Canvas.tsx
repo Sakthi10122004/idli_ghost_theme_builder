@@ -7,7 +7,7 @@ import React from "react";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2, Image as ImageIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { GripVertical, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 // Sortable Wrapper Component with hover/selection Drag Handle
 function SortableElement({
@@ -295,9 +295,17 @@ function SortableElement({
 }
 
 export default function Canvas() {
-  const { document: themeDoc, activePage, deviceMode, selectedBlockId, selectBlock, deleteBlock, previewColorMode } = useEditorStore();
+  const { 
+    document: themeDoc, 
+    activePage, 
+    deviceMode, 
+    selectedBlockId, 
+    selectBlock, 
+    deleteBlock, 
+    previewColorMode,
+    canvasFitMode,
+  } = useEditorStore();
   const pageSections = themeDoc.pages[activePage]?.sections || [];
-  const { isPreviewMode } = useEditorStore();
   const isDark = previewColorMode === "dark";
 
   // Register canvas container as a droppable target zone
@@ -305,41 +313,51 @@ export default function Canvas() {
     id: "canvas-root",
   });
 
-  const mockPosts = [
-    {
-      id: 1,
-      title: "Building custom Ghost themes with Next.js",
-      excerpt: "Learn how to establish an elegant AST rendering architecture for your static publication sites.",
-      date: "August 20, 2026",
-      readingTime: "4 min read",
-      category: "Engineering",
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 2,
-      title: "Design languages that scale: Geist case study",
-      excerpt: "How stark typography, 1px borders, and mesh gradients define developer branding aesthetics.",
-      date: "August 18, 2026",
-      readingTime: "6 min read",
-      category: "Design",
-      image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: 3,
-      title: "Deploying modern edge stacks to global nodes",
-      excerpt: "Optimizing startup speeds, resource footprints, and layout rendering algorithms.",
-      date: "August 15, 2026",
-      readingTime: "3 min read",
-      category: "DevOps",
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
-    }
-  ];
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const frameRef = React.useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = React.useState<number>(1280);
+  const [frameHeight, setFrameHeight] = React.useState<number>(850);
 
-  const getViewportWidthClass = () => {
-    if (deviceMode === "mobile") return "w-[375px]";
-    if (deviceMode === "tablet") return "w-[768px]";
-    return "w-full max-w-[1280px]";
-  };
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    updateSize();
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      }
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (!frameRef.current) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height > 0) {
+          setFrameHeight(entry.contentRect.height);
+        }
+      }
+    });
+    ro.observe(frameRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const targetWidth = deviceMode === "mobile" ? 375 : deviceMode === "tablet" ? 768 : 1280;
+  const availableWidth = Math.max(320, containerWidth - 48);
+
+  let scale = 1;
+  if (canvasFitMode === "auto" && availableWidth < targetWidth) {
+    scale = Math.min(1, Math.max(0.4, availableWidth / targetWidth));
+  }
+  const isScaled = scale < 0.999;
 
   const resolveStyle = (val: unknown): string | undefined => {
     if (!val) return undefined;
@@ -549,30 +567,51 @@ export default function Canvas() {
   };
 
   return (
-    <div className="flex-1 bg-brand-canvas-soft overflow-auto p-8 mesh-glow select-none">
+    <div 
+      ref={containerRef}
+      className="flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center"
+    >
       <div 
-        id="canvas-preview-frame"
-        ref={setCanvasDropRef}
-        onClick={() => selectBlock(null)}
-        className={`${getViewportWidthClass()} mx-auto relative shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-all duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
-          isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20 scale-[1.002]" : "border-brand-hairline"
-        }`}
+        className="relative flex justify-center transition-all duration-200"
+        style={{
+          width: isScaled ? `${Math.round(targetWidth * scale)}px` : `${targetWidth}px`,
+          height: isScaled ? `${Math.round(frameHeight * scale)}px` : "auto",
+          maxWidth: "100%",
+        }}
       >
-        {headerBlockId && renderBlock(headerBlockId, true)}
+        <div 
+          id="canvas-preview-frame"
+          ref={(node) => {
+            setCanvasDropRef(node);
+            frameRef.current = node;
+          }}
+          onClick={() => selectBlock(null)}
+          style={{
+            width: `${targetWidth}px`,
+            minWidth: `${targetWidth}px`,
+            transform: isScaled ? `scale(${scale})` : undefined,
+            transformOrigin: "top center",
+          }}
+          className={`relative shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
+            isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20" : "border-brand-hairline"
+          }`}
+        >
+          {headerBlockId && renderBlock(headerBlockId, true)}
 
-        <div className="flex-1 w-full flex flex-col">
-          {pageSections.length > 0 ? (
-            <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
-              {pageSections.filter(sid => !isHeaderOrFooterBlock(sid, themeDoc.blocks)).map((sid) => renderBlock(sid))}
-            </SortableContext>
-          ) : (
-            <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">
-              <p>Drag or click blocks in the sidebar to populate your theme layout.</p>
-            </div>
-          )}
+          <div className="flex-1 w-full flex flex-col">
+            {pageSections.length > 0 ? (
+              <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
+                {pageSections.filter(sid => !isHeaderOrFooterBlock(sid, themeDoc.blocks)).map((sid) => renderBlock(sid))}
+              </SortableContext>
+            ) : (
+              <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">
+                <p>Drag or click blocks in the sidebar to populate your theme layout.</p>
+              </div>
+            )}
+          </div>
+
+          {footerBlockId && renderBlock(footerBlockId, true)}
         </div>
-
-        {footerBlockId && renderBlock(footerBlockId, true)}
       </div>
     </div>
   );

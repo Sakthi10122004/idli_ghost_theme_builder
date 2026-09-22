@@ -11,7 +11,7 @@ export const CanvasElement = ({ renderChildren }: {
 }) => {
   useCanvasDarkMode();
   return (
-    <div className="flex flex-wrap gap-6 w-full [&>*]:flex-1 [&>*]:min-w-[250px] text-brand-ink dark:text-brand-ink">
+    <div className="flex flex-wrap gap-4 sm:gap-6 w-full [&>*]:flex-1 [&>*]:min-w-[min(100%,260px)] text-brand-ink dark:text-brand-ink">
       {renderChildren ? renderChildren() : null}
     </div>
   );

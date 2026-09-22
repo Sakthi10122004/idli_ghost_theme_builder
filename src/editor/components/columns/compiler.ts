@@ -5,11 +5,14 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
   #columns-${block.id} {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: clamp(1rem, 2.5vw, 2rem);
+    width: 100%;
+    box-sizing: border-box;
   }
   #columns-${block.id} > * {
-    flex: 1;
-    min-width: 250px;
+    flex: 1 1 clamp(250px, 30%, 100%);
+    min-width: min(100%, 260px);
+    box-sizing: border-box;
   }
 </style>
 <div id="columns-${block.id}">

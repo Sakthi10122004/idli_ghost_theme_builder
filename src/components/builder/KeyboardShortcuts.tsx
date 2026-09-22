@@ -15,7 +15,9 @@ export default function KeyboardShortcuts() {
     showShortcutsHelp,
     toggleShortcutsHelp,
     past,
-    future
+    future,
+    toggleLeftSidebar,
+    toggleRightSidebar,
   } = useEditorStore();
 
   useEffect(() => {
@@ -54,6 +56,18 @@ export default function KeyboardShortcuts() {
         }
       }
 
+      // Toggle Left Sidebar: Cmd/Ctrl + B or [
+      if ((cmdKey && e.key.toLowerCase() === "b") || (!cmdKey && e.key === "[")) {
+        e.preventDefault();
+        toggleLeftSidebar();
+      }
+
+      // Toggle Right Sidebar: ]
+      if (!cmdKey && e.key === "]") {
+        e.preventDefault();
+        toggleRightSidebar();
+      }
+
       // Delete: Delete / Backspace
       if (e.key === "Delete" || e.key === "Backspace") {
         if (selectedBlockId) {
@@ -72,7 +86,7 @@ export default function KeyboardShortcuts() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedBlockId, past, future, undo, redo, deleteBlock, duplicateBlock, selectBlock, toggleShortcutsHelp]);
+  }, [selectedBlockId, past, future, undo, redo, deleteBlock, duplicateBlock, selectBlock, toggleShortcutsHelp, toggleLeftSidebar, toggleRightSidebar]);
 
   if (!showShortcutsHelp) return null;
 
@@ -107,6 +121,14 @@ export default function KeyboardShortcuts() {
           <div className="flex justify-between items-center text-xs">
             <span className="text-brand-body">Delete Selected Block</span>
             <kbd className="font-mono bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded-sm text-[10px] text-brand-ink">Delete</kbd>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-brand-body">Toggle Left Sidebar</span>
+            <kbd className="font-mono bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded-sm text-[10px] text-brand-ink">⌘ B or [</kbd>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-brand-body">Toggle Right Sidebar</span>
+            <kbd className="font-mono bg-brand-canvas-soft border border-brand-hairline px-2 py-0.5 rounded-sm text-[10px] text-brand-ink">]</kbd>
           </div>
           <div className="flex justify-between items-center text-xs">
             <span className="text-brand-body">Deselect Selection</span>

@@ -16,6 +16,7 @@ import {
   Layers,
   Plus,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   Sparkles,
   Mail,
@@ -281,7 +282,15 @@ function SortableLayerItem({
 }
 
 export default function LeftSidebar() {
-  const { document: themeDoc, activePage, selectBlock, selectedBlockId, deleteBlock } = useEditorStore();
+  const { 
+    document: themeDoc, 
+    activePage, 
+    selectBlock, 
+    selectedBlockId, 
+    deleteBlock,
+    isLeftSidebarOpen,
+    toggleLeftSidebar
+  } = useEditorStore();
 
   const blocksList: BlockTemplate[] = [
     { type: "section", label: "Section", category: "Layout", icon: Square },
@@ -336,16 +345,54 @@ export default function LeftSidebar() {
 
   const sortableLayerIds = pageSections.map((sid) => `layer-${sid}`);
 
+  if (!isLeftSidebarOpen) {
+    return (
+      <aside className="w-[48px] border-r border-brand-hairline bg-white flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+        <button
+          onClick={() => toggleLeftSidebar(true)}
+          className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+          title="Expand sidebar"
+        >
+          <ChevronRight size={16} />
+        </button>
+        <div className="w-6 h-[1px] bg-brand-hairline" />
+        <button
+          onClick={() => toggleLeftSidebar(true)}
+          className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+          title="Add Components"
+        >
+          <Plus size={16} />
+        </button>
+        <button
+          onClick={() => toggleLeftSidebar(true)}
+          className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+          title="Layers Tree"
+        >
+          <Layers size={16} />
+        </button>
+      </aside>
+    );
+  }
+
   return (
-    <aside className="w-[280px] border-r border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1">
+    <aside className="w-[280px] border-r border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 transition-all duration-200">
       {/* Block List Panel */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 border-b border-brand-hairline">
         {/* Global Layout (Header / Footer) */}
         <div className="flex flex-col gap-2 pb-3 border-b border-brand-hairline">
-          <span className="text-[11px] font-sans font-semibold text-brand-body flex items-center justify-between">
-            <span>Global Layout</span>
-            <span className="text-[9px] font-mono text-purple-700 bg-purple-50 border border-purple-200 uppercase px-1.5 py-0.5 rounded font-medium">All Pages</span>
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-semibold text-brand-body flex items-center gap-1.5">
+              <span>Global Layout</span>
+              <span className="text-[9px] font-mono text-purple-700 bg-purple-50 border border-purple-200 uppercase px-1.5 py-0.5 rounded font-medium">All Pages</span>
+            </span>
+            <button
+              onClick={() => toggleLeftSidebar(false)}
+              className="p-1 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+              title="Collapse sidebar"
+            >
+              <ChevronLeft size={14} />
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
