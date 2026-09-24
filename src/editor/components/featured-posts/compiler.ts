@@ -571,11 +571,16 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .featured-posts-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: clamp(1rem, 2.5vw, 1.75rem);
     width: 100%;
     box-sizing: border-box;
   }
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
+    #${wrapperId} .featured-posts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
     #${wrapperId} .featured-posts-grid {
       grid-template-columns: repeat(3, 1fr);
     }

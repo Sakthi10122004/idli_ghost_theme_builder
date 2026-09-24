@@ -2,7 +2,7 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
-import { Trash2, Settings, Sliders } from "lucide-react";
+import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function RightSidebar() {
   const {
@@ -10,7 +10,9 @@ export default function RightSidebar() {
     document: themeDoc,
     updateBlockProps,
     updateBlockStyles,
-    deleteBlock
+    deleteBlock,
+    isRightSidebarOpen,
+    toggleRightSidebar,
   } = useEditorStore();
 
   const selectedBlock = selectedBlockId ? themeDoc.blocks[selectedBlockId] : null;
@@ -36,8 +38,32 @@ export default function RightSidebar() {
     }
   };
 
+  if (!isRightSidebarOpen) {
+    return (
+      <aside className="w-[44px] border-l border-brand-hairline bg-white flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+        <button
+          onClick={() => toggleRightSidebar(true)}
+          className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+          title="Expand inspector"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div className="w-6 h-[1px] bg-brand-hairline" />
+        <button
+          onClick={() => toggleRightSidebar(true)}
+          className={`p-2 rounded-sm transition-colors ${
+            selectedBlockId ? "text-brand-ink bg-brand-canvas-soft shadow-xs" : "text-brand-mute hover:text-brand-ink"
+          }`}
+          title={selectedBlockId ? `Inspect ${themeDoc.blocks[selectedBlockId]?.type || "Block"}` : "Inspector"}
+        >
+          <Sliders size={16} />
+        </button>
+      </aside>
+    );
+  }
+
   return (
-    <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto">
+    <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
       {selectedBlock ? (
         <div className="p-4 flex flex-col gap-6">
           {/* Header */}
@@ -48,18 +74,27 @@ export default function RightSidebar() {
                 Inspect: {selectedBlock.type}
               </span>
             </div>
-            {selectedBlock.type !== "header" &&
-              selectedBlock.type !== "footer" &&
-              themeDoc.layouts?.header !== selectedBlock.id &&
-              themeDoc.layouts?.footer !== selectedBlock.id && (
-                <button
-                  onClick={() => deleteBlock(selectedBlock.id)}
-                  className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
-                  title="Delete Block"
-                >
-                  <Trash2 size={14} />
-                </button>
-              )}
+            <div className="flex items-center gap-1">
+              {selectedBlock.type !== "header" &&
+                selectedBlock.type !== "footer" &&
+                themeDoc.layouts?.header !== selectedBlock.id &&
+                themeDoc.layouts?.footer !== selectedBlock.id && (
+                  <button
+                    onClick={() => deleteBlock(selectedBlock.id)}
+                    className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
+                    title="Delete Block"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              <button
+                onClick={() => toggleRightSidebar(false)}
+                className="p-1 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+                title="Collapse inspector"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
 
           {/* Global Layout Warning */}
@@ -389,11 +424,20 @@ export default function RightSidebar() {
       ) : (
         <div className="p-4 flex flex-col gap-6">
           {/* Default state: Theme settings */}
-          <div className="flex items-center gap-1.5 border-b border-brand-hairline pb-3">
-            <Settings size={13} className="text-brand-ink" />
-            <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink">
-              Theme Settings
-            </span>
+          <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
+            <div className="flex items-center gap-1.5">
+              <Settings size={13} className="text-brand-ink" />
+              <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink">
+                Theme Settings
+              </span>
+            </div>
+            <button
+              onClick={() => toggleRightSidebar(false)}
+              className="p-1 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+              title="Collapse inspector"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
 
           <div className="flex flex-col gap-4">

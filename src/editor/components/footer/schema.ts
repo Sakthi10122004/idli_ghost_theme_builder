@@ -18,6 +18,13 @@ export const WIDTH_VALUES: Record<string, string> = {
   full: "100%"
 };
 
+export const CONTENT_WIDTH_VALUES: Record<string, string> = {
+  narrow: "768px",
+  standard: "1024px",
+  wide: "1152px",
+  full: "100%"
+};
+
 export const defaultProps = {
   general: {
     layoutStyle: "Simple Minimal",

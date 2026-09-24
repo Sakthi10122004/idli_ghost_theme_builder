@@ -45,7 +45,7 @@ export const compileToHbs = (block: BuilderBlock) => {
 
   const gridTemplate = layoutStyle === "list" 
     ? "grid-template-columns: 1fr;" 
-    : `grid-template-columns: repeat(auto-fit, minmax(calc(100% / ${columns} - 2rem), 1fr));`;
+    : `grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));`;
 
   const isMagazine = layoutStyle === "magazine";
 
@@ -93,7 +93,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .post-feed {
     display: grid;
     ${gridTemplate}
-    gap: 2rem;
+    gap: clamp(1.25rem, 2.5vw, 2rem);
   }
   #${wrapperId} .magazine-layout {
     display: grid;

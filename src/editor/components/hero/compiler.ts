@@ -170,30 +170,20 @@ export const compileToHbs = (block: BuilderBlock): string => {
     margin-bottom: 0.5rem;
   }
   #${uid} .hero-title {
-    font-size: 2.75rem;
+    font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
     font-weight: 700;
     margin: 0;
     line-height: 1.1;
     letter-spacing: -0.02em;
     color: inherit;
   }
-  @media (min-width: 768px) {
-    #${uid} .hero-title {
-      font-size: 3.5rem;
-    }
-  }
   #${uid} .hero-subtitle {
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 1.25vw + 0.25rem, 1.25rem);
     color: inherit;
     opacity: 0.8;
     margin: 0;
     max-width: 600px;
     line-height: 1.625;
-  }
-  @media (min-width: 768px) {
-    #${uid} .hero-subtitle {
-      font-size: 1.25rem;
-    }
   }
   #${uid} .hero-actions {
     display: flex;
