@@ -1,8 +1,12 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 
-export const CanvasElement = ({ renderChildren }: {
+export const CanvasElement = ({
+  block,
+  renderChildren,
+}: {
   block?: BuilderBlock;
   isSelected?: boolean;
   onClick?: (e: React.MouseEvent) => void;
@@ -10,9 +14,58 @@ export const CanvasElement = ({ renderChildren }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   useCanvasDarkMode();
+  const { deviceMode, isPreviewMode } = useEditorStore();
+
+  const cols = Number(block?.props?.columnsCount) || 2;
+  const preset = (block?.props?.layoutPreset as string) || "equal";
+  const gap = (block?.props?.gap as string) || "24px";
+  const alignItems = (block?.props?.alignItems as string) || "stretch";
+  const stackOnMobile = block?.props?.stackOnMobile !== false;
+
+  let templateCols = `repeat(${cols}, minmax(0, 1fr))`;
+  if (cols === 2) {
+    if (preset === "left-heavy") templateCols = "2fr 1fr";
+    else if (preset === "right-heavy") templateCols = "1fr 2fr";
+    else if (preset === "golden") templateCols = "1.618fr 1fr";
+    else templateCols = "1fr 1fr";
+  } else if (cols === 3) {
+    templateCols = "repeat(3, minmax(0, 1fr))";
+  } else if (cols === 4) {
+    templateCols = "repeat(4, minmax(0, 1fr))";
+  }
+
+  const isMobile = deviceMode === "mobile" && stackOnMobile;
+  const bgColor = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || undefined;
+  const hasBg = bgColor && bgColor !== "transparent";
+  const paddingVal = (block?.styles?.paddingTop as string) || (block?.props?.padding as string) || undefined;
+
   return (
-    <div className="flex flex-wrap gap-4 sm:gap-6 w-full [&>*]:flex-1 [&>*]:min-w-[min(100%,260px)] text-brand-ink dark:text-brand-ink">
-      {renderChildren ? renderChildren() : null}
+    <div className="w-full flex flex-col gap-2">
+      {!isPreviewMode && (
+        <div className="flex items-center justify-between px-1 text-[11px] font-mono text-brand-mute select-none">
+          <span className="flex items-center gap-1.5 font-semibold text-brand-body uppercase">
+            <span>{cols}-Column Row Container</span>
+            {cols === 2 && preset !== "equal" && (
+              <span className="text-[10px] text-brand-mute font-normal">({preset})</span>
+            )}
+          </span>
+          <span className="text-[10px] text-brand-mute">Gap: {gap}</span>
+        </div>
+      )}
+      <div
+        className={`w-full grid text-brand-ink dark:text-brand-ink transition-all min-h-[40px] ${hasBg ? "rounded-md" : ""}`}
+        style={{
+          gridTemplateColumns: isMobile ? "1fr" : templateCols,
+          gap,
+          alignItems,
+          width: "100%",
+          boxSizing: "border-box",
+          backgroundColor: hasBg ? bgColor : undefined,
+          padding: paddingVal || (hasBg ? "16px" : undefined),
+        }}
+      >
+        {renderChildren ? renderChildren() : null}
+      </div>
     </div>
   );
 };

@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   useSensor,
   useSensors,
   PointerSensor,
+  DragStartEvent,
   DragEndEvent,
   DragOverEvent,
   pointerWithin,
@@ -13,9 +15,12 @@ import {
   CollisionDetection,
 } from "@dnd-kit/core";
 import { useEditorStore } from "@/store/editorStore";
+import { getBlockTemplate } from "@/editor/components/blockTemplates";
+import { Square } from "lucide-react";
 
 export default function DndWrapper({ children }: { children: React.ReactNode }) {
   const { moveBlock, insertBlockAt, document: themeDoc, activePage } = useEditorStore();
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -57,9 +62,24 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
     // Dragging from sidebar palette
     const pointerCollisions = pointerWithin(args);
     if (pointerCollisions.length > 0) {
+      // Prioritize explicit drop slots between blocks!
+      const slotCollision = pointerCollisions.find((c) =>
+        c.id.toString().startsWith("drop-slot-")
+      );
+      if (slotCollision) {
+        return [slotCollision];
+      }
       return pointerCollisions;
     }
     return closestCorners(args);
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id.toString());
+  };
+
+  const handleDragCancel = () => {
+    setActiveDragId(null);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -101,7 +121,12 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
 
     // 2. Canvas blocks real-time reordering
     if (!activeId.startsWith("sidebar-") && !activeId.startsWith("layer-")) {
-      if (overId !== "canvas-root" && !overId.startsWith("layer-") && !overId.startsWith("sidebar-")) {
+      if (
+        overId !== "canvas-root" &&
+        !overId.startsWith("layer-") &&
+        !overId.startsWith("sidebar-") &&
+        !overId.startsWith("drop-slot-")
+      ) {
         moveBlock(activeId, overId);
       }
       return;
@@ -109,6 +134,7 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDragId(null);
     const { active, over } = event;
     if (!over) return;
 
@@ -152,13 +178,28 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
         ? overId.replace("layer-", "")
         : overId;
 
-      if (targetId === "canvas-root" || targetId === "global-footer") {
+      // Drop on an explicit insertion slot: "drop-slot-[index]"
+      if (targetId.startsWith("drop-slot-")) {
+        const slotParts = targetId.replace("drop-slot-", "").split("-");
+        if (slotParts.length === 1) {
+          const slotIndex = parseInt(slotParts[0], 10);
+          insertBlockAt(blockType, isNaN(slotIndex) ? 0 : slotIndex);
+          return;
+        } else {
+          const slotIndex = parseInt(slotParts[slotParts.length - 1], 10);
+          const slotParentId = slotParts.slice(0, -1).join("-");
+          insertBlockAt(blockType, isNaN(slotIndex) ? 0 : slotIndex, slotParentId);
+          return;
+        }
+      }
+
+      if (targetId === "canvas-root" || targetId === "canvas-empty-slot" || targetId === "global-footer") {
         const sections = themeDoc.pages[activePage]?.sections || [];
         insertBlockAt(blockType, sections.length);
         return;
       }
 
-      if (targetId === "global-header") {
+      if (targetId === "global-header" || targetId === "layer-global-header") {
         insertBlockAt(blockType, 0);
         return;
       }
@@ -179,7 +220,7 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
       const overIndex = sections.indexOf(targetId);
 
       if (overIndex !== -1) {
-        insertBlockAt(blockType, overIndex);
+        insertBlockAt(blockType, overIndex + 1);
       } else {
         // Search inside containers
         for (const pid of Object.keys(themeDoc.blocks)) {
@@ -187,7 +228,7 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
           if (block.childrenIds) {
             const idx = block.childrenIds.indexOf(targetId);
             if (idx !== -1) {
-              insertBlockAt(blockType, idx, pid);
+              insertBlockAt(blockType, idx + 1, pid);
               return;
             }
           }
@@ -207,10 +248,33 @@ export default function DndWrapper({ children }: { children: React.ReactNode }) 
     <DndContext
       sensors={sensors}
       collisionDetection={customCollisionDetection}
+      onDragStart={handleDragStart}
+      onDragCancel={handleDragCancel}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       {children}
+
+      {/* Tactile floating drag preview when picking up from sidebar */}
+      <DragOverlay dropAnimation={{ duration: 150, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
+        {activeDragId?.startsWith("sidebar-") ? (() => {
+          const blockType = activeDragId.replace("sidebar-", "");
+          const tpl = getBlockTemplate(blockType);
+          const Icon = tpl?.icon || Square;
+          const label = tpl?.label || blockType;
+          return (
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-white dark:bg-zinc-900 border-2 border-brand-primary rounded-md shadow-2xl text-brand-ink dark:text-white select-none pointer-events-none transform rotate-[-2deg] scale-105 cursor-grabbing z-[9999] min-w-[170px] ring-4 ring-black/5">
+              <div className="w-7 h-7 rounded-sm bg-brand-primary/10 dark:bg-white/10 flex items-center justify-center text-brand-primary dark:text-white shrink-0">
+                <Icon size={16} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold leading-tight">{label}</span>
+                <span className="text-[10px] text-brand-mute leading-tight font-mono">Drop to put on canvas</span>
+              </div>
+            </div>
+          );
+        })() : null}
+      </DragOverlay>
     </DndContext>
   );
 }

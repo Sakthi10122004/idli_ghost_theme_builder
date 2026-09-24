@@ -1,2 +1,10 @@
-export const defaultProps = {};
-export const defaultStyles = { backgroundColor: "#ffffff", paddingTop: "96px", paddingBottom: "96px" };
+export const defaultProps = {
+  contentWidth: "1200px",
+  verticalPadding: "normal",
+};
+
+export const defaultStyles = {
+  backgroundColor: "transparent",
+  paddingTop: "64px",
+  paddingBottom: "64px",
+};

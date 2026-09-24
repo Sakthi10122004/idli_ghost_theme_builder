@@ -2,7 +2,7 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
-import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
 
 export default function RightSidebar() {
   const {
@@ -11,6 +11,9 @@ export default function RightSidebar() {
     updateBlockProps,
     updateBlockStyles,
     deleteBlock,
+    unwrapBlock,
+    wrapBlock,
+    makeAdjacent,
     isRightSidebarOpen,
     toggleRightSidebar,
   } = useEditorStore();
@@ -75,6 +78,39 @@ export default function RightSidebar() {
               </span>
             </div>
             <div className="flex items-center gap-1">
+              {/* Unwrap button */}
+              {(selectedBlock.type === "container" || selectedBlock.type === "section" || (selectedBlock.childrenIds && selectedBlock.childrenIds.length > 0)) && (
+                <button
+                  type="button"
+                  onClick={() => unwrapBlock(selectedBlock.id)}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Unwrap (extract all inner items)"
+                >
+                  <Ungroup size={14} />
+                </button>
+              )}
+              {/* Adjacent button for containers */}
+              {selectedBlock.type === "container" && (
+                <button
+                  type="button"
+                  onClick={() => makeAdjacent(selectedBlock.id)}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Duplicate beside as adjacent column"
+                >
+                  <Columns size={14} />
+                </button>
+              )}
+              {/* Wrap in container */}
+              {selectedBlock.type !== "container" && selectedBlock.type !== "section" && selectedBlock.type !== "header" && selectedBlock.type !== "footer" && (
+                <button
+                  type="button"
+                  onClick={() => wrapBlock(selectedBlock.id, "container")}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Wrap in Container"
+                >
+                  <BoxSelect size={14} />
+                </button>
+              )}
               {selectedBlock.type !== "header" &&
                 selectedBlock.type !== "footer" &&
                 themeDoc.layouts?.header !== selectedBlock.id &&
@@ -348,28 +384,32 @@ export default function RightSidebar() {
             )}
 
             {/* Section/Spacing Styles */}
-            {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
+            {(selectedBlock.type === "section" || selectedBlock.type === "container" || selectedBlock.type === "columns" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 100%, 1400px"
-                    value={getInputValue(selectedBlock.styles.width)}
-                    onChange={(e) => handleStyleChange("width", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 1200px, 800px"
-                    value={getInputValue(selectedBlock.styles.contentWidth)}
-                    onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
+                {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
+                  <>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 100%, 1400px"
+                        value={getInputValue(selectedBlock.styles.width)}
+                        onChange={(e) => handleStyleChange("width", e.target.value)}
+                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1200px, 800px"
+                        value={getInputValue(selectedBlock.styles.contentWidth)}
+                        onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
+                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Top</label>
                   <input

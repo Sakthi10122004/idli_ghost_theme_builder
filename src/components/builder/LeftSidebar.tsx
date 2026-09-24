@@ -7,10 +7,6 @@ import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { ThemeDocument, BuilderBlock } from "@/types/theme";
 import { 
-  Heading, 
-  Type, 
-  Square, 
-  Columns as ColumnsIcon, 
   Menu, 
   Trash2,
   Layers,
@@ -18,63 +14,49 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Sparkles,
-  Mail,
-  Grid,
-  Image as ImageIcon,
-  Minus,
-  Move,
-  User,
-  Tag,
-  HelpCircle,
-  MessageSquare,
-  DollarSign,
-  Image as GalleryIcon,
-  Share2,
-  Globe,
-  Play,
-  Cloud,
-  BarChart,
-  Users,
-  Code,
-  MessageCircle,
-  FileText,
-  ArrowLeftRight,
   GripVertical,
 } from "lucide-react";
 
-interface BlockTemplate {
-  type: string;
-  label: string;
-  category: "Layout" | "Content" | "Ghost Core";
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-}
+import { BLOCK_TEMPLATES, BlockTemplate } from "@/editor/components/blockTemplates";
 
-function DraggableBlockButton({ b }: { b: BlockTemplate }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+function DraggableBlockButton({
+  b,
+  onAdd,
+}: {
+  b: BlockTemplate;
+  onAdd: (type: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `sidebar-${b.type}`,
   });
 
   const Icon = b.icon;
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: 99,
-  } : undefined;
-
   return (
-    <div
+    <button
+      type="button"
       ref={setNodeRef}
-      style={style}
       {...listeners}
       {...attributes}
-      className={`flex flex-col items-center justify-center p-3 border border-brand-hairline rounded-sm hover:border-brand-hairline-strong hover:bg-brand-canvas-soft transition-all text-brand-body hover:text-brand-ink group cursor-grab active:cursor-grabbing shadow-level-2 bg-white touch-none select-none ${
-        isDragging ? "opacity-50 ring-2 ring-brand-primary" : ""
+      onClick={(e) => {
+        if (!isDragging) {
+          e.stopPropagation();
+          onAdd(b.type);
+        }
+      }}
+      className={`flex flex-col items-center justify-center p-3 border rounded-sm transition-all text-brand-body hover:text-brand-ink group cursor-grab active:cursor-grabbing shadow-level-2 bg-white select-none touch-none text-center w-full relative ${
+        isDragging
+          ? "opacity-30 border-dashed border-brand-primary scale-95"
+          : "border-brand-hairline hover:border-brand-hairline-strong hover:bg-brand-canvas-soft hover:shadow-level-3"
       }`}
+      title={`Click to put ${b.label} into canvas, or drag to position`}
     >
-      <Icon size={16} className="mb-1.5 text-brand-mute group-hover:text-brand-ink" />
-      <span className="text-[11px] font-medium">{b.label}</span>
-    </div>
+      <Icon size={16} className="mb-1.5 text-brand-mute group-hover:text-brand-ink transition-transform group-hover:scale-110" />
+      <span className="text-[11px] font-medium leading-tight">{b.label}</span>
+      <span className="text-[9px] text-brand-link opacity-0 group-hover:opacity-100 transition-opacity mt-1 font-mono flex items-center gap-0.5 pointer-events-none">
+        <Plus size={8} /> Click to put
+      </span>
+    </button>
   );
 }
 
@@ -288,46 +270,51 @@ export default function LeftSidebar() {
     selectBlock, 
     selectedBlockId, 
     deleteBlock,
+    insertBlockAt,
     isLeftSidebarOpen,
     toggleLeftSidebar
   } = useEditorStore();
 
-  const blocksList: BlockTemplate[] = [
-    { type: "section", label: "Section", category: "Layout", icon: Square },
-    { type: "container", label: "Container", category: "Layout", icon: Square },
-    { type: "columns", label: "Columns Row", category: "Layout", icon: ColumnsIcon },
-    { type: "divider", label: "Divider Line", category: "Layout", icon: Minus },
-    { type: "spacer", label: "Spacer Block", category: "Layout", icon: Move },
-    
-    { type: "heading", label: "Heading", category: "Content", icon: Heading },
-    { type: "text", label: "Text Block", category: "Content", icon: Type },
-    { type: "button", label: "Button", category: "Content", icon: Square },
-    { type: "image", label: "Image Block", category: "Content", icon: ImageIcon },
-    { type: "hero", label: "Hero Component", category: "Content", icon: Sparkles },
-    { type: "newsletter", label: "Newsletter", category: "Content", icon: Mail },
-    { type: "team", label: "Team", category: "Content", icon: Users },
-    { type: "faq", label: "FAQ", category: "Content", icon: HelpCircle },
-    { type: "logo-cloud", label: "Logo Cloud", category: "Content", icon: Cloud },
-    { type: "stats", label: "Stats", category: "Content", icon: BarChart },
-    { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare },
-    { type: "pricing-table", label: "Pricing Table", category: "Content", icon: DollarSign },
-    { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon },
-    { type: "social-links", label: "Social Links", category: "Content", icon: Globe },
-    { type: "video-player", label: "Video Player", category: "Content", icon: Play },
-    { type: "embed", label: "Embed / HTML", category: "Content", icon: Code },
-    
-    { type: "page-detail", label: "Page Detail", category: "Ghost Core", icon: FileText },
-    { type: "post-content", label: "Post Content", category: "Ghost Core", icon: FileText },
-    { type: "post-grid", label: "Post Grid", category: "Ghost Core", icon: ColumnsIcon },
-    { type: "featured-posts", label: "Featured Posts", category: "Ghost Core", icon: Grid },
-    { type: "related-posts", label: "Related Posts", category: "Ghost Core", icon: Grid },
-    { type: "comments", label: "Comments", category: "Ghost Core", icon: MessageCircle },
-    { type: "post-navigation", label: "Post Navigation", category: "Ghost Core", icon: ArrowLeftRight },
-    { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User },
-    { type: "tag-header", label: "Tag Header", category: "Ghost Core", icon: Tag },
-    { type: "tag-archive", label: "Tag Archive", category: "Ghost Core", icon: Tag },
-    { type: "share", label: "Post / Page Share", category: "Ghost Core", icon: Share2 },
-  ];
+  const handleQuickAddBlock = (blockType: string) => {
+    if (blockType === "header" || blockType === "footer") return;
+
+    if (selectedBlockId) {
+      const selBlock = themeDoc.blocks[selectedBlockId];
+
+      // 1. If selected block is a layout container, insert directly INSIDE it
+      if (
+        selBlock &&
+        (selBlock.type === "container" || selBlock.type === "columns" || selBlock.type === "section") &&
+        !(blockType === "section" && selBlock.type === "section")
+      ) {
+        insertBlockAt(blockType, selBlock.childrenIds?.length || 0, selectedBlockId);
+        return;
+      }
+
+      // 2. If selected block is a child inside a container, insert after it inside that container
+      for (const pid of Object.keys(themeDoc.blocks)) {
+        const parent = themeDoc.blocks[pid];
+        if (parent.childrenIds) {
+          const childIdx = parent.childrenIds.indexOf(selectedBlockId);
+          if (childIdx !== -1) {
+            insertBlockAt(blockType, childIdx + 1, pid);
+            return;
+          }
+        }
+      }
+
+      // 3. Otherwise if selected block is a root page section, insert after it
+      const pageSections = themeDoc.pages[activePage]?.sections || [];
+      const selectedIndex = pageSections.indexOf(selectedBlockId);
+      if (selectedIndex !== -1) {
+        insertBlockAt(blockType, selectedIndex + 1);
+        return;
+      }
+    }
+
+    const pageSections = themeDoc.pages[activePage]?.sections || [];
+    insertBlockAt(blockType, pageSections.length);
+  };
 
   const pageSections = themeDoc.pages[activePage]?.sections || [];
   const categories = ["Layout", "Content", "Ghost Core"] as const;
@@ -430,10 +417,10 @@ export default function LeftSidebar() {
           <div key={cat} className="flex flex-col gap-2">
             <span className="text-[11px] font-sans font-semibold text-brand-body">{cat}</span>
             <div className="grid grid-cols-2 gap-2">
-              {blocksList
+              {BLOCK_TEMPLATES
                 .filter((b) => b.category === cat)
                 .map((b) => (
-                  <DraggableBlockButton key={b.type} b={b} />
+                  <DraggableBlockButton key={b.type} b={b} onAdd={handleQuickAddBlock} />
                 ))}
             </div>
           </div>

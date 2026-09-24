@@ -60,13 +60,30 @@ function getInlineStyles(block: BuilderBlock): string {
     const val = resolveStyleValue(styles.paddingBottom);
     if (val) stylePairs.push(`padding-bottom: ${val}`);
   }
+  if (styles.paddingLeft) {
+    const val = resolveStyleValue(styles.paddingLeft);
+    if (val) stylePairs.push(`padding-left: ${val}`);
+  }
+  if (styles.paddingRight) {
+    const val = resolveStyleValue(styles.paddingRight);
+    if (val) stylePairs.push(`padding-right: ${val}`);
+  }
   if (styles.width) {
     const val = resolveStyleValue(styles.width);
     if (val) {
       stylePairs.push(`width: ${val}`);
       stylePairs.push(`max-width: 100%`);
-      stylePairs.push(`margin-left: auto`);
-      stylePairs.push(`margin-right: auto`);
+      const align = (block.props?.alignment as string) || (styles.textAlign as string) || "center";
+      if (align === "left") {
+        stylePairs.push(`margin-left: 0`);
+        stylePairs.push(`margin-right: auto`);
+      } else if (align === "right") {
+        stylePairs.push(`margin-left: auto`);
+        stylePairs.push(`margin-right: 0`);
+      } else {
+        stylePairs.push(`margin-left: auto`);
+        stylePairs.push(`margin-right: auto`);
+      }
       stylePairs.push(`box-sizing: border-box`);
     }
   }

@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 
 export const compileToHbs = (block: BuilderBlock) => {
-  return `<div style="height: ${block.props.height || '40px'};"></div>`;
+  const height = (block.props?.height as string) || "40px";
+  return `<div class="theme-spacer" style="height: ${height};" aria-hidden="true"></div>`;
 };

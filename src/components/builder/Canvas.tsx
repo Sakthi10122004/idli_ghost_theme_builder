@@ -4,10 +4,11 @@ import { useEditorStore } from "@/store/editorStore";
 import { BuilderBlock } from "@/types/theme";
 import { componentRegistry } from "@/editor/components/registry";
 import React from "react";
-import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useSortable, SortableContext, verticalListSortingStrategy, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { GripVertical, Trash2, ChevronUp, ChevronDown, Plus, Sparkles, Ungroup, BoxSelect, Columns } from "lucide-react";
+import { getBlockTemplate } from "@/editor/components/blockTemplates";
 
 // Sortable Wrapper Component with hover/selection Drag Handle
 function SortableElement({
@@ -29,7 +30,18 @@ function SortableElement({
   className?: string;
   isGlobal?: boolean;
 }) {
-  const { isPreviewMode, updateBlockStyles, updateBlockProps, document: themeDoc, activePage, reorderBlocks, deviceMode } = useEditorStore();
+  const {
+    isPreviewMode,
+    updateBlockStyles,
+    updateBlockProps,
+    document: themeDoc,
+    activePage,
+    reorderBlocks,
+    deviceMode,
+    unwrapBlock,
+    wrapBlock,
+    makeAdjacent,
+  } = useEditorStore();
 
   const getBlockContext = () => {
     const sections = themeDoc.pages[activePage]?.sections || [];
@@ -101,6 +113,17 @@ function SortableElement({
   const isGlassActive = !isLogoCloud && !!resolvedBlur && resolvedBlur !== "none" && resolvedBlur !== "0px";
 
   const resolvedWidth = block.styles.width ? resolveStyleLocal(block.styles.width) : undefined;
+  const blockAlign = (block.props?.alignment as string) || (block.styles?.textAlign as string) || "center";
+  const resolveMarginLeft = () => {
+    if (blockAlign === "left") return "0";
+    if (blockAlign === "right") return "auto";
+    return resolvedWidth ? "auto" : undefined;
+  };
+  const resolveMarginRight = () => {
+    if (blockAlign === "left") return "auto";
+    if (blockAlign === "right") return "0";
+    return resolvedWidth ? "auto" : undefined;
+  };
 
   const combinedStyle: React.CSSProperties = {
     ...style,
@@ -115,8 +138,8 @@ function SortableElement({
     opacity: isDragging ? 0.3 : (opacity ? parseFloat(resolveStyleLocal(opacity) || "1") : undefined),
     width: resolvedWidth,
     maxWidth: "100%",
-    marginLeft: resolvedWidth ? "auto" : undefined,
-    marginRight: resolvedWidth ? "auto" : undefined,
+    marginLeft: resolveMarginLeft(),
+    marginRight: resolveMarginRight(),
     marginBottom: block.styles.marginBottom ? resolveStyleLocal(block.styles.marginBottom) : undefined,
     boxSizing: "border-box",
   };
@@ -198,13 +221,20 @@ function SortableElement({
 
   return (
     <div
+      id={`block-${block.id}`}
       ref={setNodeRef}
       style={combinedStyle}
       onClick={isPreviewMode ? undefined : onClick}
       className={`group/sortable relative ${className} ${borderClass} ${getHoverClass()} transition-all duration-200`}
     >
       {isSidebarDragOver && (
-        <div className="absolute -top-1.5 left-0 w-full h-1 bg-brand-primary rounded-full animate-pulse z-40" />
+        <div className="absolute -bottom-1 left-0 w-full z-40 flex items-center justify-center pointer-events-none">
+          <div className="w-full h-1 bg-brand-primary rounded-full shadow-md ring-4 ring-brand-primary/20" />
+          <div className="absolute px-3 py-0.5 bg-brand-primary text-white text-[10px] font-semibold rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap">
+            <Plus size={10} strokeWidth={3} />
+            <span>Put after this section</span>
+          </div>
+        </div>
       )}
       {isDragging ? (
         <div className="w-full py-4 px-6 flex items-center justify-center text-brand-primary/60 font-mono text-[10px] uppercase font-bold tracking-wider animate-pulse">
@@ -246,6 +276,55 @@ function SortableElement({
                 <ChevronDown size={10} />
               </button>
               <span className="font-semibold uppercase tracking-wider text-[8px]">{block.type}</span>
+
+              {/* Unwrap button for containers, sections, or blocks with children */}
+              {(block.type === "container" || block.type === "section" || (block.childrenIds && block.childrenIds.length > 0)) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    unwrapBlock(block.id);
+                  }}
+                  className="px-1.5 py-0.5 rounded-xs bg-white/10 hover:bg-white/30 transition-colors flex items-center gap-1 cursor-pointer text-white"
+                  title="Unwrap (extract all inner items)"
+                >
+                  <Ungroup size={10} />
+                  <span className="text-[9px] font-sans font-medium">Unwrap</span>
+                </button>
+              )}
+
+              {/* Duplicate Beside (Adjacent) for containers */}
+              {block.type === "container" && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    makeAdjacent(block.id);
+                  }}
+                  className="px-1.5 py-0.5 rounded-xs bg-white/10 hover:bg-white/30 transition-colors flex items-center gap-1 cursor-pointer text-white"
+                  title="Duplicate beside as adjacent column"
+                >
+                  <Columns size={10} />
+                  <span className="text-[9px] font-sans font-medium">Adjacent</span>
+                </button>
+              )}
+
+              {/* Wrap button */}
+              {block.type !== "container" && block.type !== "section" && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    wrapBlock(block.id, "container");
+                  }}
+                  className="px-1.5 py-0.5 rounded-xs bg-white/10 hover:bg-white/30 transition-colors flex items-center gap-1 cursor-pointer text-white"
+                  title="Wrap this block inside a Container"
+                >
+                  <BoxSelect size={10} />
+                  <span className="text-[9px] font-sans font-medium">Wrap</span>
+                </button>
+              )}
+
               <button 
                 onClick={onDelete}
                 className="hover:bg-brand-error-deep p-0.5 rounded-xs transition-colors ml-1"
@@ -294,6 +373,269 @@ function SortableElement({
   );
 }
 
+function InsertionDropSlot({
+  index,
+  parentId,
+  activeDragId,
+  onQuickAdd,
+}: {
+  index: number;
+  parentId?: string;
+  activeDragId: string | null;
+  onQuickAdd: (index: number) => void;
+}) {
+  const slotId = parentId ? `drop-slot-${parentId}-${index}` : `drop-slot-${index}`;
+  const { setNodeRef, isOver } = useDroppable({
+    id: slotId,
+  });
+
+  const isDraggingSidebar = typeof activeDragId === "string" && activeDragId.startsWith("sidebar-");
+  const activeTemplate = isDraggingSidebar
+    ? getBlockTemplate(activeDragId.replace("sidebar-", ""))
+    : null;
+
+  if (activeDragId) {
+    return (
+      <div
+        ref={setNodeRef}
+        className={`w-full transition-all duration-150 flex items-center justify-center relative select-none ${
+          isOver ? "h-12 my-2" : "h-3 my-0.5 hover:h-6"
+        }`}
+      >
+        {/* Drop line */}
+        <div
+          className={`w-full transition-all duration-150 rounded-full ${
+            isOver
+              ? "h-1 bg-brand-primary shadow-md ring-4 ring-brand-primary/20"
+              : "h-[2px] bg-brand-primary/20"
+          }`}
+        />
+        {isOver && (
+          <div className="absolute left-1/2 -translate-x-1/2 px-3.5 py-1 bg-brand-primary text-white text-[11px] font-semibold rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap z-50 animate-in fade-in zoom-in-95 duration-100 pointer-events-none">
+            <Plus size={12} strokeWidth={3} />
+            <span>Put {activeTemplate?.label || "Component"} here</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="group/slot relative w-full h-4 -my-2 flex items-center justify-center z-20 opacity-0 hover:opacity-100 transition-opacity">
+      <div className="w-full h-[1px] bg-brand-hairline group-hover/slot:bg-brand-hairline-strong transition-colors" />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onQuickAdd(index);
+        }}
+        className="absolute left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-full shadow-xs hover:border-brand-primary hover:text-brand-primary text-brand-mute text-[10px] font-medium flex items-center gap-1 transition-all group-hover/slot:scale-105 cursor-pointer"
+        title={parentId ? "Add block here" : "Add section here"}
+      >
+        <Plus size={10} />
+        <span>{parentId ? "Add block" : "Add section"}</span>
+      </button>
+    </div>
+  );
+}
+
+function EmptyColumnSlot({
+  blockId,
+  colIndex,
+  activeDragId,
+  onAddBlock,
+}: {
+  blockId: string;
+  colIndex: number;
+  activeDragId: string | null;
+  onAddBlock: (type: string) => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `drop-slot-${blockId}-${colIndex}`,
+  });
+
+  const isDraggingSidebar = typeof activeDragId === "string" && activeDragId.startsWith("sidebar-");
+  const activeTemplate = isDraggingSidebar
+    ? getBlockTemplate(activeDragId.replace("sidebar-", ""))
+    : null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`w-full h-full min-h-[150px] rounded-md border-2 border-dashed p-4 flex flex-col items-center justify-center gap-2 text-center transition-all box-border ${
+        isOver
+          ? "border-brand-primary bg-brand-primary/5 ring-4 ring-brand-primary/10 scale-[1.01]"
+          : "border-brand-hairline-strong bg-brand-canvas-soft/30 hover:border-brand-primary/40"
+      }`}
+    >
+      <div className="w-7 h-7 rounded-full bg-white dark:bg-zinc-800 border border-brand-hairline flex items-center justify-center shadow-xs text-brand-mute">
+        <Plus size={13} />
+      </div>
+      <span className="text-[11px] font-semibold text-brand-body">
+        {isOver && activeTemplate ? `Drop ${activeTemplate.label}` : `Column ${colIndex + 1}`}
+      </span>
+      <div className="flex flex-wrap items-center justify-center gap-1 mt-0.5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("heading");
+          }}
+          className="px-2 py-0.5 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[10px] font-medium text-brand-body hover:text-brand-ink transition-all shadow-xs cursor-pointer"
+        >
+          + Heading
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("text");
+          }}
+          className="px-2 py-0.5 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[10px] font-medium text-brand-body hover:text-brand-ink transition-all shadow-xs cursor-pointer"
+        >
+          + Text
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("button");
+          }}
+          className="px-2 py-0.5 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[10px] font-medium text-brand-body hover:text-brand-ink transition-all shadow-xs cursor-pointer"
+        >
+          + Button
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("image");
+          }}
+          className="px-2 py-0.5 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[10px] font-medium text-brand-body hover:text-brand-ink transition-all shadow-xs cursor-pointer"
+        >
+          + Image
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EmptyContainerDropZone({
+  block,
+  activeDragId,
+  onAddBlock,
+}: {
+  block: BuilderBlock;
+  activeDragId: string | null;
+  onAddBlock: (type: string) => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `drop-slot-${block.id}-0`,
+  });
+
+  const isDraggingSidebar = typeof activeDragId === "string" && activeDragId.startsWith("sidebar-");
+  const activeTemplate = isDraggingSidebar
+    ? getBlockTemplate(activeDragId.replace("sidebar-", ""))
+    : null;
+
+  const label = block.type === "section" ? "Section" : "Container";
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`w-full p-5 rounded-md border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2 text-center ${
+        isOver
+          ? "border-brand-primary bg-brand-primary/5 ring-4 ring-brand-primary/10"
+          : "border-brand-hairline-strong bg-brand-canvas-soft/40 hover:border-brand-primary/40"
+      }`}
+    >
+      <div className="w-7 h-7 rounded-full bg-white dark:bg-zinc-800 border border-brand-hairline flex items-center justify-center shadow-xs text-brand-mute">
+        <Plus size={13} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs font-semibold text-brand-ink">
+          Empty {label}
+        </span>
+        <span className="text-[11px] text-brand-mute">
+          {isOver && activeTemplate ? (
+            <span className="font-semibold text-brand-primary">Drop to put {activeTemplate.label} inside</span>
+          ) : (
+            "Drop components from left sidebar or click to add"
+          )}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("heading");
+          }}
+          className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[11px] font-medium text-brand-body hover:text-brand-ink hover:border-brand-hairline-strong transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Heading</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("text");
+          }}
+          className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[11px] font-medium text-brand-body hover:text-brand-ink hover:border-brand-hairline-strong transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Text</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("columns");
+          }}
+          className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[11px] font-medium text-brand-body hover:text-brand-ink hover:border-brand-hairline-strong transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Columns</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("container");
+          }}
+          className="px-2.5 py-1 bg-brand-primary text-white border border-brand-primary rounded-sm text-[11px] font-medium hover:bg-brand-primary/90 transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Container</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("image");
+          }}
+          className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[11px] font-medium text-brand-body hover:text-brand-ink hover:border-brand-hairline-strong transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Image</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddBlock("button");
+          }}
+          className="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-brand-hairline rounded-sm text-[11px] font-medium text-brand-body hover:text-brand-ink hover:border-brand-hairline-strong transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+        >
+          <Plus size={11} />
+          <span>Button</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Canvas() {
   const { 
     document: themeDoc, 
@@ -304,7 +646,20 @@ export default function Canvas() {
     deleteBlock, 
     previewColorMode,
     canvasFitMode,
+    insertBlockAt,
   } = useEditorStore();
+  const { active } = useDndContext();
+  const activeDragId = active ? active.id.toString() : null;
+
+  React.useEffect(() => {
+    if (selectedBlockId) {
+      const el = document.getElementById(`block-${selectedBlockId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  }, [selectedBlockId]);
+
   const pageSections = themeDoc.pages[activePage]?.sections || [];
   const isDark = previewColorMode === "dark";
 
@@ -452,9 +807,11 @@ export default function Canvas() {
           onDelete={handleDelete}
           isGlobal={isGlobal}
           style={{
-            backgroundColor: effectiveBg,
-            paddingTop: block.type === 'hero' ? undefined : (resolveStyle(paddingTop) || undefined),
-            paddingBottom: block.type === 'hero' ? undefined : (resolveStyle(paddingBottom) || undefined),
+            backgroundColor: (block.type === "container" || block.type === "columns") ? undefined : effectiveBg,
+            paddingTop: (block.type === 'hero' || block.type === 'columns') ? undefined : (resolveStyle(paddingTop) || undefined),
+            paddingBottom: (block.type === 'hero' || block.type === 'columns') ? undefined : (resolveStyle(paddingBottom) || undefined),
+            paddingLeft: block.type === 'columns' ? undefined : (resolveStyle(block.styles?.paddingLeft) || undefined),
+            paddingRight: block.type === 'columns' ? undefined : (resolveStyle(block.styles?.paddingRight) || undefined),
             backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
             backgroundSize: backgroundImage ? (resolveStyle(backgroundSize) || "cover") : undefined,
             backgroundRepeat: backgroundImage ? (resolveStyle(backgroundRepeat) || "no-repeat") : undefined,
@@ -463,8 +820,8 @@ export default function Canvas() {
             clipPath: (backgroundVideoUrl && enableParallax) ? "inset(0px)" : undefined,
             width: resolveStyle(width) || undefined,
             maxWidth: "100%",
-            marginLeft: resolveStyle(width) ? "auto" : undefined,
-            marginRight: resolveStyle(width) ? "auto" : undefined,
+            marginLeft: block.props?.alignment === "left" ? "0" : (block.props?.alignment === "right" ? "auto" : (resolveStyle(width) ? "auto" : undefined)),
+            marginRight: block.props?.alignment === "left" ? "auto" : (block.props?.alignment === "right" ? "0" : (resolveStyle(width) ? "auto" : undefined)),
             display: resolveStyle(display) || undefined,
             gap: resolveStyle(gap) || undefined,
             justifyContent: resolveStyle(justifyContent) || undefined,
@@ -510,30 +867,71 @@ export default function Canvas() {
               isSelected={isSelected}
               onClick={handleClick}
               onDelete={handleDelete}
-              renderChildren={() => (
-                block.childrenIds && block.childrenIds.length > 0 ? (
+              renderChildren={() => {
+                if (block.type === "columns") {
+                  const cols = Number(block.props?.columnsCount) || 2;
+                  const validChildren = (block.childrenIds || []).filter((cid) => {
+                    const cb = themeDoc.blocks[cid];
+                    return cb && cb.type !== "header" && cb.type !== "footer";
+                  });
+                  const currentCount = validChildren.length;
+                  const emptyCount = Math.max(0, cols - currentCount);
+
+                  return (
+                    <SortableContext
+                      items={validChildren}
+                      strategy={rectSortingStrategy}
+                    >
+                      {validChildren.map((cid) => renderBlock(cid))}
+                      {Array.from({ length: emptyCount }).map((_, extraIdx) => {
+                        const slotIdx = currentCount + extraIdx;
+                        return (
+                          <EmptyColumnSlot
+                            key={`empty-col-${block.id}-${slotIdx}`}
+                            blockId={block.id}
+                            colIndex={slotIdx}
+                            activeDragId={activeDragId}
+                            onAddBlock={(type) => insertBlockAt(type, slotIdx, block.id)}
+                          />
+                        );
+                      })}
+                    </SortableContext>
+                  );
+                }
+
+                return block.childrenIds && block.childrenIds.length > 0 ? (
                   <SortableContext items={block.childrenIds} strategy={verticalListSortingStrategy}>
-                    {block.childrenIds.filter(cid => {
-                      const cb = themeDoc.blocks[cid];
-                      return cb && cb.type !== "header" && cb.type !== "footer";
-                    }).map((cid) => renderBlock(cid))}
+                    <InsertionDropSlot
+                      index={0}
+                      parentId={block.id}
+                      activeDragId={activeDragId}
+                      onQuickAdd={(idx) => insertBlockAt("heading", idx, block.id)}
+                    />
+                    {block.childrenIds
+                      .filter((cid) => {
+                        const cb = themeDoc.blocks[cid];
+                        return cb && cb.type !== "header" && cb.type !== "footer";
+                      })
+                      .map((cid, cidx) => (
+                        <React.Fragment key={cid}>
+                          {renderBlock(cid)}
+                          <InsertionDropSlot
+                            index={cidx + 1}
+                            parentId={block.id}
+                            activeDragId={activeDragId}
+                            onQuickAdd={(idx) => insertBlockAt("heading", idx, block.id)}
+                          />
+                        </React.Fragment>
+                      ))}
                   </SortableContext>
                 ) : (
-                  block.type === "section" ? (
-                    <div className="p-4 border border-dashed border-brand-hairline text-center text-xs text-brand-mute">
-                      Empty Section (Drop components here)
-                    </div>
-                  ) : block.type === "container" ? (
-                    <div className="p-2 border border-dashed border-brand-hairline text-center text-[10px] text-brand-mute">
-                      Empty Container
-                    </div>
-                  ) : block.type === "columns" ? (
-                    <div className="p-4 text-center text-xs text-brand-mute w-full">
-                      Columns container (Drop inner blocks here)
-                    </div>
-                  ) : null
-                )
-              )}
+                  <EmptyContainerDropZone
+                    block={block}
+                    activeDragId={activeDragId}
+                    onAddBlock={(type) => insertBlockAt(type, 0, block.id)}
+                  />
+                );
+              }}
             />
           </div>
         </SortableElement>
@@ -601,11 +999,69 @@ export default function Canvas() {
           <div className="flex-1 w-full flex flex-col">
             {pageSections.length > 0 ? (
               <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
-                {pageSections.filter(sid => !isHeaderOrFooterBlock(sid, themeDoc.blocks)).map((sid) => renderBlock(sid))}
+                <InsertionDropSlot
+                  index={0}
+                  activeDragId={activeDragId}
+                  onQuickAdd={(idx) => insertBlockAt("section", idx)}
+                />
+                {pageSections
+                  .filter((sid) => !isHeaderOrFooterBlock(sid, themeDoc.blocks))
+                  .map((sid, idx) => (
+                    <React.Fragment key={sid}>
+                      {renderBlock(sid)}
+                      <InsertionDropSlot
+                        index={idx + 1}
+                        activeDragId={activeDragId}
+                        onQuickAdd={(nextIdx) => insertBlockAt("section", nextIdx)}
+                      />
+                    </React.Fragment>
+                  ))}
               </SortableContext>
             ) : (
-              <div className="p-12 text-center text-brand-mute text-sm flex flex-col justify-center items-center min-h-[500px]">
-                <p>Drag or click blocks in the sidebar to populate your theme layout.</p>
+              <div
+                id="canvas-empty-slot"
+                ref={setCanvasDropRef}
+                className={`m-8 p-12 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-4 text-center transition-all ${
+                  isCanvasOver
+                    ? "border-brand-primary bg-brand-primary/5 ring-4 ring-brand-primary/10 scale-[1.01]"
+                    : "border-brand-hairline-strong bg-brand-canvas-soft/50 hover:border-brand-primary/40"
+                }`}
+              >
+                <div className="w-12 h-12 rounded-full bg-white dark:bg-zinc-800 border border-brand-hairline flex items-center justify-center shadow-xs text-brand-primary">
+                  <Sparkles size={22} />
+                </div>
+                <div className="flex flex-col gap-1 max-w-sm">
+                  <h4 className="font-sans font-bold text-sm text-brand-ink">Start building your page</h4>
+                  <p className="text-xs text-brand-mute leading-relaxed">
+                    Click any component on the left sidebar to put it here, or drag and drop directly onto the canvas.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => insertBlockAt("hero", 0)}
+                    className="px-3 py-1.5 bg-brand-primary text-white rounded-sm text-xs font-semibold hover:bg-black transition-all shadow-level-2 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={12} />
+                    <span>Add Hero</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertBlockAt("featured-posts", 0)}
+                    className="px-3 py-1.5 bg-white border border-brand-hairline text-brand-body hover:text-brand-ink rounded-sm text-xs font-medium hover:bg-brand-canvas-soft transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={12} />
+                    <span>Add Featured Posts</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertBlockAt("post-grid", 0)}
+                    className="px-3 py-1.5 bg-white border border-brand-hairline text-brand-body hover:text-brand-ink rounded-sm text-xs font-medium hover:bg-brand-canvas-soft transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus size={12} />
+                    <span>Add Post Grid</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

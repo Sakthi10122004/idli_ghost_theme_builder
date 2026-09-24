@@ -35,6 +35,8 @@ export const STANDALONE_SECTION_TYPES = new Set([
   "post-navigation",
   "related-posts",
   "columns",
+  "divider",
+  "spacer",
 ]);
 
 export const DEFAULT_DESIGN_TOKENS = {
@@ -385,6 +387,9 @@ interface EditorState {
   updateBlockStyles: (blockId: string, styles: Record<string, unknown>) => void;
   deleteBlock: (blockId: string) => void;
   duplicateBlock: (blockId: string) => void;
+  unwrapBlock: (blockId: string) => void;
+  wrapBlock: (blockId: string, wrapperType: "container" | "section" | "columns") => void;
+  makeAdjacent: (blockId: string) => void;
   reorderBlocks: (sourceIndex: number, destinationIndex: number, parentId?: string) => void;
   moveBlock: (activeId: string, overId: string) => void;
   
@@ -1329,20 +1334,60 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       newBlocks[activeInfo.parentId] = parent;
     }
 
+    // If dropping directly onto an insertion slot
+    if (overId.startsWith("drop-slot-")) {
+      const slotParts = overId.replace("drop-slot-", "").split("-");
+      if (slotParts.length === 1) {
+        const slotIdx = parseInt(slotParts[0], 10);
+        const sections = [...newPages[state.activePage].sections];
+        sections.splice(isNaN(slotIdx) ? sections.length : slotIdx, 0, activeId);
+        newPages[state.activePage].sections = sections;
+      } else {
+        const slotIdx = parseInt(slotParts[slotParts.length - 1], 10);
+        const slotParentId = slotParts.slice(0, -1).join("-");
+        if (newBlocks[slotParentId]) {
+          const parent = { ...newBlocks[slotParentId] };
+          const childrenIds = [...(parent.childrenIds || [])];
+          childrenIds.splice(isNaN(slotIdx) ? childrenIds.length : slotIdx, 0, activeId);
+          parent.childrenIds = childrenIds;
+          newBlocks[slotParentId] = parent;
+        }
+      }
+      setTimeout(() => triggerAutosave(get), 0);
+      return {
+        ...historyUpdate,
+        document: { ...state.document, blocks: newBlocks, pages: newPages }
+      };
+    }
+
     const targetIndex = overInfo.index === -1 ? 0 : overInfo.index;
-    if (overInfo.isRoot || (activeInfo.isRoot && overInfo.index !== -1)) {
+
+    // Check if dropping onto a layout container directly
+    const overBlock = newBlocks[overId];
+    const isTargetLayoutContainer =
+      overBlock &&
+      (overBlock.type === "section" || overBlock.type === "container" || overBlock.type === "columns") &&
+      !(newBlocks[activeId]?.type === "section" && overBlock.type === "section");
+
+    if (isTargetLayoutContainer) {
+      // Append inside the target layout container
+      const parent = { ...overBlock };
+      const childrenIds = [...(parent.childrenIds || [])];
+      childrenIds.push(activeId);
+      parent.childrenIds = childrenIds;
+      newBlocks[overId] = parent;
+    } else if (overInfo.parentId && newBlocks[overInfo.parentId]) {
+      // Insert adjacent to sibling child inside container
+      const parent = { ...newBlocks[overInfo.parentId] };
+      const childrenIds = [...(parent.childrenIds || [])];
+      childrenIds.splice(targetIndex, 0, activeId);
+      parent.childrenIds = childrenIds;
+      newBlocks[overInfo.parentId] = parent;
+    } else {
+      // Dropping at root page level
       const sections = [...newPages[state.activePage].sections];
       sections.splice(targetIndex, 0, activeId);
       newPages[state.activePage].sections = sections;
-    } else {
-      const destParentId = overInfo.parentId || overId;
-      if (newBlocks[destParentId]) {
-        const parent = { ...newBlocks[destParentId] };
-        const childrenIds = [...(parent.childrenIds || [])];
-        childrenIds.splice(targetIndex, 0, activeId);
-        parent.childrenIds = childrenIds;
-        newBlocks[destParentId] = parent;
-      }
     }
 
     setTimeout(() => triggerAutosave(get), 0);
@@ -1489,6 +1534,164 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       ...historyUpdate,
       document: { ...state.document, blocks: newBlocks, pages: newPages },
       selectedBlockId: newId,
+    };
+  }),
+
+  unwrapBlock: (blockId) => set((state) => {
+    if (
+      !state.document.blocks[blockId] ||
+      state.document.layouts?.header === blockId ||
+      state.document.layouts?.footer === blockId ||
+      state.document.blocks[blockId]?.type === "header" ||
+      state.document.blocks[blockId]?.type === "footer"
+    ) {
+      return {};
+    }
+    const targetBlock = state.document.blocks[blockId];
+    const childrenIds = targetBlock.childrenIds ? [...targetBlock.childrenIds] : [];
+    const historyUpdate = saveToHistory(state);
+
+    const newBlocks = { ...state.document.blocks };
+    delete newBlocks[blockId];
+
+    const newPages = JSON.parse(JSON.stringify(state.document.pages)) as ThemePages;
+    const sections = newPages[state.activePage].sections;
+    const secIdx = sections.indexOf(blockId);
+
+    if (secIdx !== -1) {
+      sections.splice(secIdx, 1, ...childrenIds);
+    } else {
+      Object.keys(newBlocks).forEach((pid) => {
+        const parent = newBlocks[pid];
+        if (parent.childrenIds && parent.childrenIds.includes(blockId)) {
+          const cidx = parent.childrenIds.indexOf(blockId);
+          const updatedCids = [...parent.childrenIds];
+          updatedCids.splice(cidx, 1, ...childrenIds);
+          newBlocks[pid] = { ...parent, childrenIds: updatedCids };
+        }
+      });
+    }
+
+    setTimeout(() => triggerAutosave(get), 0);
+
+    return {
+      ...historyUpdate,
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      selectedBlockId: childrenIds[0] || null,
+    };
+  }),
+
+  wrapBlock: (blockId, wrapperType) => set((state) => {
+    if (
+      !state.document.blocks[blockId] ||
+      state.document.layouts?.header === blockId ||
+      state.document.layouts?.footer === blockId ||
+      state.document.blocks[blockId]?.type === "header" ||
+      state.document.blocks[blockId]?.type === "footer"
+    ) {
+      return {};
+    }
+    const historyUpdate = saveToHistory(state);
+    const wrapperBlock = createNewBlock(wrapperType);
+    wrapperBlock.childrenIds = [blockId];
+    if (wrapperType === "columns") {
+      wrapperBlock.props = { ...wrapperBlock.props, columnsCount: 2, layoutPreset: "equal" };
+    }
+
+    const newBlocks = { ...state.document.blocks, [wrapperBlock.id]: wrapperBlock };
+    const newPages = JSON.parse(JSON.stringify(state.document.pages)) as ThemePages;
+    const sections = newPages[state.activePage].sections;
+    const secIdx = sections.indexOf(blockId);
+
+    if (secIdx !== -1) {
+      sections.splice(secIdx, 1, wrapperBlock.id);
+    } else {
+      Object.keys(newBlocks).forEach((pid) => {
+        const parent = newBlocks[pid];
+        if (parent.childrenIds && parent.childrenIds.includes(blockId)) {
+          const cidx = parent.childrenIds.indexOf(blockId);
+          const updatedCids = [...parent.childrenIds];
+          updatedCids.splice(cidx, 1, wrapperBlock.id);
+          newBlocks[pid] = { ...parent, childrenIds: updatedCids };
+        }
+      });
+    }
+
+    setTimeout(() => triggerAutosave(get), 0);
+
+    return {
+      ...historyUpdate,
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      selectedBlockId: wrapperBlock.id,
+    };
+  }),
+
+  makeAdjacent: (blockId) => set((state) => {
+    if (
+      !state.document.blocks[blockId] ||
+      state.document.layouts?.header === blockId ||
+      state.document.layouts?.footer === blockId ||
+      state.document.blocks[blockId]?.type === "header" ||
+      state.document.blocks[blockId]?.type === "footer"
+    ) {
+      return {};
+    }
+    const historyUpdate = saveToHistory(state);
+    const newBlocks = { ...state.document.blocks };
+    const { newId: clonedId, clonedBlocks } = duplicateBlockRecursive(blockId, newBlocks);
+    Object.assign(newBlocks, clonedBlocks);
+
+    const newPages = JSON.parse(JSON.stringify(state.document.pages)) as ThemePages;
+    const sections = newPages[state.activePage].sections;
+
+    let foundColumnsParentId: string | null = null;
+    for (const pid of Object.keys(newBlocks)) {
+      const p = newBlocks[pid];
+      if (p.type === "columns" && p.childrenIds && p.childrenIds.includes(blockId)) {
+        foundColumnsParentId = pid;
+        break;
+      }
+    }
+
+    if (foundColumnsParentId) {
+      const parentCol = newBlocks[foundColumnsParentId];
+      const curChildren = [...(parentCol.childrenIds || [])];
+      const curIdx = curChildren.indexOf(blockId);
+      curChildren.splice(curIdx + 1, 0, clonedId);
+      const newCount = Math.max(Number(parentCol.props?.columnsCount) || 2, curChildren.length);
+      newBlocks[foundColumnsParentId] = {
+        ...parentCol,
+        childrenIds: curChildren,
+        props: { ...parentCol.props, columnsCount: Math.min(4, newCount) },
+      };
+    } else {
+      const colBlock = createNewBlock("columns");
+      colBlock.props = { ...colBlock.props, columnsCount: 2, layoutPreset: "equal" };
+      colBlock.childrenIds = [blockId, clonedId];
+      newBlocks[colBlock.id] = colBlock;
+
+      const secIdx = sections.indexOf(blockId);
+      if (secIdx !== -1) {
+        sections.splice(secIdx, 1, colBlock.id);
+      } else {
+        Object.keys(newBlocks).forEach((pid) => {
+          const parent = newBlocks[pid];
+          if (parent.childrenIds && parent.childrenIds.includes(blockId)) {
+            const cidx = parent.childrenIds.indexOf(blockId);
+            const updatedCids = [...parent.childrenIds];
+            updatedCids.splice(cidx, 1, colBlock.id);
+            newBlocks[pid] = { ...parent, childrenIds: updatedCids };
+          }
+        });
+      }
+    }
+
+    setTimeout(() => triggerAutosave(get), 0);
+
+    return {
+      ...historyUpdate,
+      document: { ...state.document, blocks: newBlocks, pages: newPages },
+      selectedBlockId: clonedId,
     };
   }),
 

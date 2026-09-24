@@ -1,21 +1,51 @@
 import { BuilderBlock } from "@/types/theme";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
+  const cols = Number(block.props?.columnsCount) || 2;
+  const preset = (block.props?.layoutPreset as string) || "equal";
+  const gap = (block.props?.gap as string) || "24px";
+  const align = (block.props?.alignItems as string) || "stretch";
+  const stackMobile = block.props?.stackOnMobile !== false;
+
+  let templateCols = `repeat(${cols}, minmax(0, 1fr))`;
+  if (cols === 2) {
+    if (preset === "left-heavy") templateCols = "2fr 1fr";
+    else if (preset === "right-heavy") templateCols = "1fr 2fr";
+    else if (preset === "golden") templateCols = "1.618fr 1fr";
+    else templateCols = "1fr 1fr";
+  } else if (cols === 3) {
+    templateCols = "repeat(3, minmax(0, 1fr))";
+  } else if (cols === 4) {
+    templateCols = "repeat(4, minmax(0, 1fr))";
+  }
+
+  const mobileRule = stackMobile
+    ? `@media (max-width: 768px) { #cols-${block.id} { grid-template-columns: 1fr !important; } }`
+    : "";
+
+  const bg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
+  const hasBg = bg && bg !== "transparent";
+  const padding = (block.styles?.paddingTop as string) || (block.props?.padding as string) || "";
+
+  const extraStyles = [
+    hasBg ? `background-color: ${bg};` : "",
+    padding ? `padding: ${padding};` : (hasBg ? "padding: 16px;" : ""),
+    hasBg ? "border-radius: 6px;" : "",
+  ].filter(Boolean).join(" ");
+
   return `<style>
-  #columns-${block.id} {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(1rem, 2.5vw, 2rem);
+  #cols-${block.id} {
+    display: grid;
+    grid-template-columns: ${templateCols};
+    gap: ${gap};
+    align-items: ${align};
     width: 100%;
     box-sizing: border-box;
+    ${extraStyles}
   }
-  #columns-${block.id} > * {
-    flex: 1 1 clamp(250px, 30%, 100%);
-    min-width: min(100%, 260px);
-    box-sizing: border-box;
-  }
+  ${mobileRule}
 </style>
-<div id="columns-${block.id}">
+<div id="cols-${block.id}" class="theme-columns">
   ${compiledChildren}
 </div>`;
 };
