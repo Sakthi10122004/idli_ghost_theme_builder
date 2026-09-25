@@ -17,7 +17,20 @@ export const SidebarElement = ({
     key: K,
     value: ReturnType<typeof resolvePostNavigationProps>[K]
   ) => {
-    onChangeProps({ [key]: value });
+    const existingGeneral = (block.props?.general || {}) as Record<string, unknown>;
+    const extra: Record<string, unknown> = {};
+    if (key === "layoutStyle") {
+      extra.layout = value;
+    }
+    onChangeProps({
+      [key]: value,
+      ...extra,
+      general: {
+        ...existingGeneral,
+        [key]: value,
+        ...extra,
+      },
+    });
   };
 
   return (
@@ -43,7 +56,22 @@ export const SidebarElement = ({
       </div>
 
       {/* Toggles */}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-semibold text-brand-ink">Layout Style</span>
+          <select
+            value={p.layoutStyle}
+            onChange={(e) => updateProp("layoutStyle", e.target.value as any)}
+            className="w-full text-xs bg-brand-canvas border border-brand-hairline rounded-md px-2 py-1.5 focus:border-brand-primary outline-none"
+          >
+            <option value="split">Split (Side by side)</option>
+            <option value="stacked">Stacked (Vertical)</option>
+            <option value="minimal">Minimal (Text links)</option>
+            <option value="centered-arrows">Centered Arrows</option>
+            <option value="image-background">Image Background (Editorial)</option>
+            <option value="large-typography">Large Typography (Modern)</option>
+          </select>
+        </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"

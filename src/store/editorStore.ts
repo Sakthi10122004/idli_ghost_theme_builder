@@ -236,7 +236,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     "post-nav-sec": {
       id: "post-nav-sec",
       type: "post-navigation",
-      props: { showImage: true, showExcerpt: false },
+      props: { layoutStyle: "split", showImage: true, showExcerpt: false },
       styles: {},
     },
     "related-posts-sec": {
@@ -658,6 +658,22 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
   if (!newPages.post || !newPages.post.sections || newPages.post.sections.length === 0) {
     newPages.post = { sections: ["post-content-sec", "post-author-sec", "post-nav-sec", "related-posts-sec", "comments-sec"] };
   } else {
+    // Deduplicate post-navigation blocks if multiple exist on post page
+    const navBlockIds = newPages.post.sections.filter(
+      (sid) => newBlocks[sid]?.type === "post-navigation" || sid === "post-nav-sec" || sid.startsWith("post-navigation")
+    );
+    if (navBlockIds.length > 1) {
+      // Keep custom post-navigation block (e.g. post-navigation-yryt5t) over default post-nav-sec
+      const keptNavId = navBlockIds.find((id) => id !== "post-nav-sec") || navBlockIds[navBlockIds.length - 1];
+      newPages.post.sections = newPages.post.sections.filter(
+        (sid) => !(newBlocks[sid]?.type === "post-navigation" || sid === "post-nav-sec" || sid.startsWith("post-navigation")) || sid === keptNavId
+      );
+      // Remove default post-nav-sec if custom block is kept instead
+      if (keptNavId !== "post-nav-sec" && newBlocks["post-nav-sec"]) {
+        delete newBlocks["post-nav-sec"];
+      }
+    }
+
     const hasPostContent = newPages.post.sections.some(
       (sid) => newBlocks[sid]?.type === "post-content"
     );

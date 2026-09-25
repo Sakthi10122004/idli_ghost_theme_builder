@@ -211,7 +211,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
           [navId]: {
             id: navId,
             type: "post-navigation",
-            props: { showImage: true, showExcerpt: false },
+            props: { layoutStyle: "split", showImage: true, showExcerpt: false },
             styles: {},
           },
           [relatedId]: {
