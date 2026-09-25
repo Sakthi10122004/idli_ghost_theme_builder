@@ -1,4 +1,10 @@
-import { BuilderBlock } from "@/types/theme";
+
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  category?: string;
+}
 
 export interface FAQProps {
   general: {
@@ -8,7 +14,7 @@ export interface FAQProps {
     allowMultipleOpen: boolean;
     itemCornerStyle?: "rounded" | "rectangle";
   };
-  items: Array<{ id: string; question: string; answer: string; category?: string }>;
+  items: FAQItem[];
   appearance: {
     backgroundColor?: string;
     itemBgColor?: string;

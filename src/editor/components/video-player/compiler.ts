@@ -1,5 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
-import { escapeUrl } from "../shared/escape";
+import { escapeUrl } from "../shared/escapeHtml";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const wrapperId = `video-${block.id}`;

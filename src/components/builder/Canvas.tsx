@@ -967,10 +967,10 @@ export default function Canvas() {
   return (
     <div 
       ref={containerRef}
-      className="flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center"
+      className={`flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center ${isDark ? "dark" : ""}`}
     >
       <div 
-        className="relative flex justify-center transition-all duration-200"
+        className={`relative flex justify-center transition-all duration-200 ${isDark ? "dark" : ""}`}
         style={{
           width: isScaled ? `${Math.round(targetWidth * scale)}px` : `${targetWidth}px`,
           height: isScaled ? `${Math.round(frameHeight * scale)}px` : "auto",

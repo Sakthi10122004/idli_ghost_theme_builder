@@ -3,6 +3,9 @@
 {{#post}}
 <article class="post-full-content py-12 max-w-2xl mx-auto px-6">
   {{#if @page.show_title_and_feature_image}}
+  <header class="post-header mb-8">
+    <h1 class="text-3xl font-bold leading-tight">{{title}}</h1>
+  </header>
   {{#if feature_image}}
     <figure class="post-feature-image rounded-md overflow-hidden my-6">
       <img src="{{feature_image}}" alt="{{title}}" class="w-full h-auto" />

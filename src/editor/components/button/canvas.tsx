@@ -19,8 +19,12 @@ export const CanvasElement = ({ block }: {
     : (isSecondary ? "shadow-level-2" : "shadow-level-3");
 
   const buttonStyles = isSecondary
-    ? `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
-    : `bg-brand-primary text-brand-on-primary hover:opacity-90 ${shadowClass}`;
+    ? isDark
+      ? `bg-neutral-900 text-white border border-neutral-700 hover:bg-neutral-800 ${shadowClass}`
+      : `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
+    : isDark
+      ? `bg-white text-neutral-900 hover:bg-neutral-100 ${shadowClass}`
+      : `bg-brand-primary text-brand-on-primary hover:opacity-90 ${shadowClass}`;
 
   return (
     <button

@@ -32,8 +32,8 @@
   }
   #post-grid-post-grid-sec .post-feed {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(calc(100% / 3 - 2rem), 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: clamp(1.25rem, 2.5vw, 2rem);
   }
   #post-grid-post-grid-sec .magazine-layout {
     display: grid;
@@ -170,7 +170,7 @@
     opacity: 0.9;
   }
 </style>
-<div id="post-grid-post-grid-sec" class="post-feed-wrapper outer " style="background-color: #ffffff; padding-top: 4rem; padding-bottom: 4rem;">
+<div id="post-grid-post-grid-sec" class="post-feed-wrapper outer " style="background-color: var(--color-bg); padding-top: 64px; padding-bottom: 64px">
   <div class="inner" style="max-width: 100%">
     <h2 class="post-grid-title">Latest Stories</h2>
     

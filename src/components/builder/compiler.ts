@@ -511,7 +511,10 @@ html.dark .faq,
 html.dark .faq-section,
 html.dark .stats,
 html.dark .stats-section,
-html.dark .logo-cloud-section {
+html.dark .logo-cloud-section,
+html.dark .cards,
+html.dark .cards-section,
+html.dark .cards-block {
   background-color: var(--color-bg);
   color: var(--color-fg);
 }

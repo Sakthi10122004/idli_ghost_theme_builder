@@ -48,6 +48,9 @@
   --gradient-ship-end: #f9cb28;
 }
 
+.dark,
+:root.dark,
+html.dark,
 html.dark #canvas-preview-frame,
 #canvas-preview-frame.dark,
 html.dark body:not(:has(#canvas-preview-frame)) {

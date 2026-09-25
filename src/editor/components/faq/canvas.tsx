@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import { BuilderBlock } from "@/types/theme";
-import { FAQProps, defaultProps } from "./schema";
+import { FAQProps, FAQItem, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { isDarkColor } from "../heading/schema";
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as FAQProps;
   const general = p.general;
   const items = p.items || [];
   const appearance = p.appearance;
   const spacing = p.spacing;
   const styles = block.styles || {};
+
+  const effectiveHeadingColor = isDark && appearance?.headingColor && isDarkColor(appearance.headingColor)
+    ? "var(--color-ink, #ffffff)"
+    : (appearance?.headingColor || "var(--color-ink)");
+  const effectiveSubheadingColor = isDark && appearance?.subheadingColor && isDarkColor(appearance.subheadingColor)
+    ? "var(--color-mute, #a1a1a1)"
+    : (appearance?.subheadingColor || "var(--color-mute)");
 
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(items.length > 0 ? [items[0].id] : []));
 
@@ -33,7 +41,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const cornerClass = (general.itemCornerStyle || "rounded") === "rectangle" ? "rounded-none" : "rounded-xl";
   const itemBg = appearance?.itemBgColor || "var(--color-canvas-soft, #f8fafc)";
 
-  const renderFaqItem = (item: any) => {
+  const renderFaqItem = (item: FAQItem) => {
     const isOpen = openIds.has(item.id);
     return (
       <div
@@ -45,7 +53,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           <button
             type="button"
             className="flex w-full min-w-full items-center justify-between text-left gap-4 group cursor-pointer focus:outline-none"
-            style={{ color: appearance?.headingColor || "var(--color-ink)" }}
+            style={{ color: effectiveHeadingColor }}
             aria-controls={`faq-${block.id}-${item.id}`}
             aria-expanded={isOpen}
             onClick={() => toggle(item.id)}
@@ -71,7 +79,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           id={`faq-${block.id}-${item.id}`}
         >
           <div className="overflow-hidden">
-            <p className="text-sm sm:text-base leading-relaxed text-brand-body dark:text-neutral-400 w-full" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+            <p className="text-sm sm:text-base leading-relaxed text-brand-body dark:text-neutral-400 w-full" style={{ color: effectiveSubheadingColor }}>
               {item.answer}
             </p>
           </div>
@@ -101,7 +109,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         <div className="w-full min-w-full mx-auto mt-12 max-w-3xl">
           {categories.map((cat, idx) => (
             <div key={idx} className="mb-10 w-full min-w-full">
-              <h3 className="text-xl font-bold tracking-tight mb-4 w-full" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>{cat}</h3>
+              <h3 className="text-xl font-bold tracking-tight mb-4 w-full" style={{ color: effectiveHeadingColor }}>{cat}</h3>
               <dl className="w-full min-w-full">
                 {items.filter(i => (i.category || "General") === cat).map(renderFaqItem)}
               </dl>
@@ -127,12 +135,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         {(general.heading || general.subheading) && (
           <div className="w-full min-w-full mx-auto max-w-4xl text-center mb-8">
             {general.heading && (
-              <h2 className="w-full text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>
+              <h2 className="w-full text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: effectiveHeadingColor }}>
                 {general.heading}
               </h2>
             )}
             {general.subheading && (
-              <p className="w-full mt-4 text-base leading-7" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+              <p className="w-full mt-4 text-base leading-7" style={{ color: effectiveSubheadingColor }}>
                 {general.subheading}
               </p>
             )}

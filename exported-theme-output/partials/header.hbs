@@ -21,18 +21,23 @@
     }
     
       #gh-head .gh-head-inner {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
+        display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 32px;
       }
-      #gh-head .gh-head-brand { justify-self: start; }
+      #gh-head .gh-head-brand { 
+        flex-shrink: 0; 
+      }
       #gh-head .gh-head-menu { 
         display: flex; 
-        justify-content: center;
-        width: 100%;
+        justify-content: flex-start;
+        flex-grow: 1;
+        width: auto;
       }
-      #gh-head .gh-head-actions { justify-self: end; }
+      #gh-head .gh-head-actions { 
+        flex-shrink: 0; 
+      }
     
     #gh-head .gh-head-brand {
       display: flex;
@@ -88,6 +93,181 @@
   #gh-head .gh-head-btn:hover {
     opacity: 1 !important;
   }
+
+  /* ===== Dropdown Menus & Header Stacking ===== */
+  .gh-head-wrapper,
+  #gh-head.gh-head,
+  .gh-head {
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+  }
+  #gh-head .gh-head-inner,
+  #gh-head .gh-head-menu,
+  #gh-head .gh-head-menu .nav {
+    overflow: visible !important;
+  }
+  #gh-head .nav-dropdown-parent {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  #gh-head .nav-dropdown-parent > a {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+  }
+  #gh-head .nav-dropdown-chevron {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+    opacity: 0.5;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  #gh-head .nav-dropdown-parent:hover .nav-dropdown-chevron,
+  #gh-head .nav-dropdown-parent:focus-within .nav-dropdown-chevron,
+  #gh-head .nav-dropdown-parent.is-open .nav-dropdown-chevron {
+    transform: rotate(180deg);
+    opacity: 0.8;
+  }
+  #gh-head .nav-dropdown-card {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    min-width: 180px;
+    padding-top: 6px;
+    z-index: 10000 !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  }
+  #gh-head .nav-dropdown-card::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 10px;
+  }
+  #gh-head .nav-dropdown-parent:hover > .nav-dropdown-card,
+  #gh-head .nav-dropdown-parent:focus-within > .nav-dropdown-card,
+  #gh-head .nav-dropdown-parent.is-open > .nav-dropdown-card {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  #gh-head .nav-dropdown-inner {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 10px 15px -3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  html.dark #gh-head .nav-dropdown-inner {
+    background: #1f1f1f !important;
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2) !important;
+  }
+  #gh-head .nav-dropdown-inner a,
+  #gh-head .nav-dropdown-link {
+    color: var(--color-fg) !important;
+    padding: 8px 14px !important;
+    border-radius: 5px;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+    display: block !important;
+    opacity: 0.9 !important;
+    text-decoration: none !important;
+    text-align: left !important;
+    transition: background 0.15s, opacity 0.15s, color 0.15s;
+    line-height: 1.4 !important;
+  }
+  #gh-head .nav-dropdown-inner a:hover,
+  #gh-head .nav-dropdown-link:hover {
+    background: rgba(0,0,0,0.05) !important;
+    opacity: 1 !important;
+    color: var(--color-fg) !important;
+  }
+  html.dark #gh-head .nav-dropdown-inner a,
+  html.dark #gh-head .nav-dropdown-link {
+    color: #f3f4f6 !important;
+  }
+  html.dark #gh-head .nav-dropdown-inner a:hover,
+  html.dark #gh-head .nav-dropdown-link:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* CRITICAL: Mobile Accordion must NEVER be visible on desktop */
+  #gh-head .nav-accordion {
+    display: none !important;
+  }
+
+  /* ===== Mobile Accordion Dropdown ===== */
+  @media (max-width: 767px) {
+    #gh-head .nav-dropdown-card {
+      display: none !important;
+    }
+    .gh-head-open #gh-head.gh-head .nav-dropdown-parent,
+    #gh-head .nav-dropdown-parent {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    #gh-head .nav-dropdown-parent > a {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      cursor: pointer;
+    }
+    #gh-head .nav-accordion {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.25s ease;
+      opacity: 0;
+      margin: 0 !important;
+      padding: 0 !important;
+      list-style: none !important;
+    }
+    #gh-head .nav-accordion.is-open {
+      max-height: 500px;
+      opacity: 1;
+      padding: 4px 0 !important;
+    }
+    #gh-head .nav-accordion a,
+    #gh-head .nav-accordion-link {
+      font-size: 1.125rem !important;
+      font-weight: 500 !important;
+      opacity: 0.75 !important;
+      padding: 8px 0 !important;
+      text-align: center !important;
+      color: inherit !important;
+      text-decoration: none !important;
+      display: block !important;
+      transition: opacity 0.15s ease;
+    }
+    #gh-head .nav-accordion a:hover,
+    #gh-head .nav-accordion-link:hover {
+      opacity: 1 !important;
+    }
+  }
   
   #gh-head .gh-mobile-only {
     display: none !important;
@@ -97,7 +277,7 @@
   /* 
    * These rules use doubled-up class selectors to beat Casper's built-in
    * #gh-head specificity on the same elements. The .gh-head class is always
-   * present on the <header style="padding-top: 16px; padding-bottom: 16px; background-color: #ffffff"> alongside the #gh-head id.
+   * present on the <header style="padding-top: 16px; padding-bottom: 16px; background-color: var(--color-bg)"> alongside the #gh-head id.
    */
   @media (max-width: 767px) {
     /* -- Closed state: compact 64px bar -- */
@@ -180,7 +360,7 @@
       z-index: 3999999 !important;
       overflow-y: auto !important;
       -webkit-overflow-scrolling: touch !important;
-      background-color: #ffffff !important;
+      background-color: var(--color-bg) !important;
     }
 
     .gh-head-open #gh-head.gh-head .gh-head-inner {
@@ -333,8 +513,8 @@
   html.dark #gh-head.gh-head,
   html.dark #gh-head.gh-head.gh-head-open,
   html.dark .gh-head-open #gh-head.gh-head {
-    background-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--color-bg) !important;
+    color: var(--color-fg) !important;
   }
 
   /* Ensure all header text, branding, and links cleanly adapt to white in dark mode */
@@ -382,9 +562,14 @@
   }
   
   html.dark #gh-head.gh-head .gh-head-btn {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
   }
+
+  /* Dark mode logo toggle */
+  .gh-logo-dark { display: none; }
+  html.dark .gh-logo-light { display: none; }
+  html.dark .gh-logo-dark { display: inline-block; }
 
   html.dark #gh-head.gh-head .icon-moon { display: none !important; }
   html.dark #gh-head.gh-head .icon-sun { display: block !important; }
@@ -393,124 +578,15 @@
 
 </style>
 
-<script>
-(function() {
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  function init() {
-    const head = document.getElementById('gh-head');
-    const burger = head ? head.querySelector('.gh-burger') : null;
-    
-    if (!head || !burger) return;
-
-    // Check if there's a pre-existing open state (e.g., from server-side)
-    const isOpen = head.classList.contains('gh-head-open');
-    
-    // Toggle function
-    function toggleMenu(e) {
-      e.stopPropagation();
-      head.classList.toggle('gh-head-open');
-      document.body.classList.toggle('gh-head-open');
-      
-      // Toggle burger/close icons
-      const burgerIcon = burger.querySelector('.burger-icon');
-      const closeIcon = burger.querySelector('.close-icon');
-      if (burgerIcon && closeIcon) {
-        const open = head.classList.contains('gh-head-open');
-        burgerIcon.style.display = open ? 'none' : 'block';
-        closeIcon.style.display = open ? 'block' : 'none';
-      }
-    }
-
-    // Click handler
-    burger.addEventListener('click', toggleMenu);
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', function(e) {
-      if (head.classList.contains('gh-head-open')) {
-        const isClickInside = head.contains(e.target);
-        if (!isClickInside) {
-          head.classList.remove('gh-head-open');
-          document.body.classList.remove('gh-head-open');
-          
-          const burgerIcon = burger.querySelector('.burger-icon');
-          const closeIcon = burger.querySelector('.close-icon');
-          if (burgerIcon && closeIcon) {
-            burgerIcon.style.display = 'block';
-            closeIcon.style.display = 'none';
-          }
-        }
-      }
-    });
-
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && head.classList.contains('gh-head-open')) {
-        head.classList.remove('gh-head-open');
-        document.body.classList.remove('gh-head-open');
-        
-        const burgerIcon = burger.querySelector('.burger-icon');
-        const closeIcon = burger.querySelector('.close-icon');
-        if (burgerIcon && closeIcon) {
-          burgerIcon.style.display = 'block';
-          closeIcon.style.display = 'none';
-        }
-      }
-    });
-  }
-})();
-
-function syncCommentsTheme(isDark) {
-  try {
-    var sec = document.querySelector('.gh-comments-section');
-    if (sec) {
-      sec.style.color = isDark ? '#ffffff' : '#171717';
-      sec.classList.toggle('dark', isDark);
-    }
-    var script = document.querySelector('script[data-ghost-comments]');
-    if (script) {
-      script.dataset.colorScheme = isDark ? 'dark' : 'light';
-    }
-  } catch (e) {}
-}
-
-function toggleThemeMode() {
-  var isDark = document.documentElement.classList.toggle('dark');
-  if (isDark) {
-    localStorage.setItem('theme', 'dark');
-  } else {
-    localStorage.setItem('theme', 'light');
-  }
-  syncCommentsTheme(isDark);
-}
-
-(function initTheme() {
-  var savedTheme = localStorage.getItem('theme');
-  var isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  if (isDark) {
-    document.documentElement.classList.add('dark');
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { syncCommentsTheme(isDark); });
-  } else {
-    syncCommentsTheme(isDark);
-  }
-})();
-</script>
-
-<div style="width: 100%; padding: 0; background-color: transparent;">
+<div class="gh-head-wrapper" style="width: 100%; padding: 0; background-color: transparent; position: relative; z-index: 9999; overflow: visible;">
   <header 
     id="gh-head" 
     class="gh-head section-width-full "
     style="
       position: relative;
-      background-color: #ffffff;
-      color: #000000;
+      z-index: 9999;
+      background-color: var(--color-bg);
+      color: var(--color-fg, #171717);
       width: 100%;
       
       margin-bottom: 0px;
@@ -518,14 +594,16 @@ function toggleThemeMode() {
       opacity: 1;
       
       transition: all 0.15s ease-in-out;
+      overflow: visible;
     "
   >
-    <div class="gh-head-inner content-width-wide" style="width: 100%; max-width: 1152px; margin-left: auto; margin-right: auto;">
+    <div class="gh-head-inner content-width-wide" style="width: 100%; max-width: 1152px; margin-left: auto; margin-right: auto; overflow: visible;">
       
     <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
-          <img src="{{@site.logo}}" alt="{{@site.title}}" style="max-height: 40px; width: auto;" />
+          <img src="{{@site.logo}}" class="gh-logo" alt="{{@site.title}}" style="max-height: 40px; width: auto;" />
+          
         {{else}}
           <span class="gh-site-title">{{@site.title}}</span>
         {{/if}}
@@ -575,13 +653,294 @@ function toggleThemeMode() {
           
           <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign in</a>
           
-          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: #000000; color: #ffffff; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Subscribe</a>
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: var(--color-primary, #171717); color: var(--color-on-primary, #ffffff); padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Subscribe</a>
         {{else}}
           <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
-          <a class="gh-head-btn gh-btn" href="#/portal/account" data-portal="account" style="background-color: #000000; color: #ffffff; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Account</a>
+          <a class="gh-head-btn gh-btn" href="#/portal/account" data-portal="account" style="background-color: var(--color-primary, #171717); color: var(--color-on-primary, #ffffff); padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Account</a>
         {{/unless}}
       {{/if}}
     </div>
     </div>
   </header>
 </div>
+
+<script>
+(function() {
+  function initBurger() {
+    const head = document.getElementById('gh-head') || document.querySelector('.gh-head');
+    const burger = head ? head.querySelector('.gh-burger') : null;
+    
+    if (!head || !burger) return;
+    if (burger.dataset.bound) return;
+    burger.dataset.bound = "true";
+
+    function toggleMenu(e) {
+      e.stopPropagation();
+      head.classList.toggle('gh-head-open');
+      document.body.classList.toggle('gh-head-open');
+      
+      const burgerIcon = burger.querySelector('.burger-icon');
+      const closeIcon = burger.querySelector('.close-icon');
+      if (burgerIcon && closeIcon) {
+        const open = head.classList.contains('gh-head-open');
+        burgerIcon.style.display = open ? 'none' : 'block';
+        closeIcon.style.display = open ? 'block' : 'none';
+      }
+    }
+
+    burger.addEventListener('click', toggleMenu);
+    
+    document.addEventListener('click', function(e) {
+      if (head.classList.contains('gh-head-open')) {
+        const isClickInside = head.contains(e.target);
+        if (!isClickInside) {
+          head.classList.remove('gh-head-open');
+          document.body.classList.remove('gh-head-open');
+          
+          const burgerIcon = burger.querySelector('.burger-icon');
+          const closeIcon = burger.querySelector('.close-icon');
+          if (burgerIcon && closeIcon) {
+            burgerIcon.style.display = 'block';
+            closeIcon.style.display = 'none';
+          }
+        }
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && head.classList.contains('gh-head-open')) {
+        head.classList.remove('gh-head-open');
+        document.body.classList.remove('gh-head-open');
+        const burgerIcon = burger.querySelector('.burger-icon');
+        const closeIcon = burger.querySelector('.close-icon');
+        if (burgerIcon && closeIcon) {
+          burgerIcon.style.display = 'block';
+          closeIcon.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  initBurger();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBurger);
+  }
+  window.addEventListener('pageshow', initBurger);
+})();
+
+function syncCommentsTheme(isDark) {
+  try {
+    var sec = document.querySelector('.gh-comments-section');
+    if (sec) {
+      sec.style.color = isDark ? '#ffffff' : '#171717';
+      sec.classList.toggle('dark', isDark);
+    }
+    var script = document.querySelector('script[data-ghost-comments]');
+    if (script) {
+      script.dataset.colorScheme = isDark ? 'dark' : 'light';
+    }
+  } catch (e) {}
+}
+
+function toggleThemeMode() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  if (isDark) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+  syncCommentsTheme(isDark);
+}
+
+(function initTheme() {
+  var savedTheme = localStorage.getItem('theme');
+  var isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { syncCommentsTheme(isDark); });
+  } else {
+    syncCommentsTheme(isDark);
+  }
+})();
+
+// ===== Navigation Dropdown Enhancer =====
+// Transforms Ghost Admin flat nav items into nested dropdown menus.
+// Items whose label starts with the configured prefix are grouped
+// as children of the preceding parent item.
+(function initDropdownNav() {
+  var DROPDOWN_PREFIX = "-";
+
+  function startsWithPrefix(text, prefix) {
+    if (!prefix || !text) return false;
+    var t = text.replace(/ /g, ' ').trim();
+    var p = prefix.replace(/ /g, ' ').trim();
+    if (t.indexOf(p) === 0) return true;
+    if ((p === '-' || p === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0 || t.indexOf('-') === 0)) {
+      return true;
+    }
+    return false;
+  }
+
+  function stripPrefix(text, prefix) {
+    var t = text.replace(/ /g, ' ').trim();
+    var p = prefix.replace(/ /g, ' ').trim();
+    if (t.indexOf(p) === 0) {
+      return t.substring(p.length).replace(/^[s ]+/, '').trim();
+    }
+    if ((p === '-' || p === '--') && (t.indexOf('–') === 0 || t.indexOf('—') === 0 || t.indexOf('-') === 0)) {
+      return t.substring(1).replace(/^[s ]+/, '').trim();
+    }
+    return t;
+  }
+
+  function enhance() {
+    var head = document.getElementById('gh-head') || document.querySelector('.gh-head');
+    if (!head) return;
+    var navList = head.querySelector('.gh-head-menu .nav') || head.querySelector('.gh-head-menu ul') || head.querySelector('.nav') || head.querySelector('ul[role="menu"]');
+    if (!navList) return;
+
+    var items = Array.prototype.slice.call(navList.children);
+    var i = 0;
+
+    while (i < items.length) {
+      var li = items[i];
+      if (li.classList.contains('nav-dropdown-parent')) {
+        i++;
+        continue;
+      }
+      var link = li.querySelector('a');
+      if (!link) { i++; continue; }
+
+      // Collect consecutive prefixed siblings as children
+      var children = [];
+      var j = i + 1;
+      while (j < items.length) {
+        var childLi = items[j];
+        var childLink = childLi.querySelector('a');
+        if (!childLink) break;
+        var label = (childLink.textContent || '').trim();
+        if (!startsWithPrefix(label, DROPDOWN_PREFIX)) break;
+        // Strip prefix from label
+        childLink.textContent = stripPrefix(label, DROPDOWN_PREFIX);
+        children.push(childLi);
+        j++;
+      }
+
+      if (children.length === 0) { i++; continue; }
+
+      // Wrap the parent li
+      li.classList.add('nav-dropdown-parent');
+
+      // Add chevron to parent link if not present
+      if (!link.querySelector('.nav-dropdown-chevron')) {
+        var chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        chevron.setAttribute('class', 'nav-dropdown-chevron');
+        chevron.setAttribute('viewBox', '0 0 24 24');
+        chevron.setAttribute('fill', 'none');
+        chevron.setAttribute('stroke', 'currentColor');
+        chevron.setAttribute('stroke-width', '2.5');
+        chevron.setAttribute('stroke-linecap', 'round');
+        chevron.setAttribute('stroke-linejoin', 'round');
+        var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', '6 9 12 15 18 9');
+        chevron.appendChild(polyline);
+        link.appendChild(chevron);
+      }
+
+      // Desktop: create floating dropdown card
+      var card = document.createElement('div');
+      card.className = 'nav-dropdown-card';
+      var inner = document.createElement('div');
+      inner.className = 'nav-dropdown-inner';
+
+      // Mobile: create accordion container
+      var accordion = document.createElement('div');
+      accordion.className = 'nav-accordion';
+
+      for (var k = 0; k < children.length; k++) {
+        var childLinkEl = children[k].querySelector('a');
+        if (childLinkEl) {
+          var desktopLink = childLinkEl.cloneNode(true);
+          desktopLink.className = 'nav-dropdown-link';
+          inner.appendChild(desktopLink);
+          var mobileLink = childLinkEl.cloneNode(true);
+          mobileLink.className = 'nav-accordion-link';
+          accordion.appendChild(mobileLink);
+        }
+        if (children[k].parentNode) {
+          children[k].parentNode.removeChild(children[k]);
+        }
+      }
+
+      card.appendChild(inner);
+      li.appendChild(card);
+      li.appendChild(accordion);
+
+      // Tap / Click handlers:
+      (function(parentLi, acc) {
+        var pLink = parentLi.querySelector('a');
+        if (!pLink) return;
+
+        pLink.addEventListener('click', function(e) {
+          if (window.innerWidth < 768) {
+            e.preventDefault();
+            e.stopPropagation();
+            acc.classList.toggle('is-open');
+            parentLi.classList.toggle('is-open');
+          } else {
+            var href = pLink.getAttribute('href');
+            if (!href || href === '#' || href === 'javascript:' || href === 'javascript:void(0)') {
+              e.preventDefault();
+              parentLi.classList.toggle('is-open');
+            }
+          }
+        });
+      })(li, accordion);
+
+      items = Array.prototype.slice.call(navList.children);
+      i++;
+    }
+
+    if (!window.__gh_dropdown_click_bound) {
+      window.__gh_dropdown_click_bound = true;
+      document.addEventListener('click', function(e) {
+        if (window.innerWidth >= 768) {
+          var openParents = document.querySelectorAll('.nav-dropdown-parent.is-open');
+          for (var p = 0; p < openParents.length; p++) {
+            if (!openParents[p].contains(e.target)) {
+              openParents[p].classList.remove('is-open');
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // 1. Run immediately since header HTML is already in DOM right above this script
+  enhance();
+
+  // 2. Run on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhance);
+  }
+
+  // 3. Run on page transitions / browser back-forward cache (BFCache)
+  window.addEventListener('pageshow', enhance);
+  window.addEventListener('popstate', enhance);
+
+  // 4. Short retries to catch any dynamic render
+  setTimeout(enhance, 50);
+  setTimeout(enhance, 250);
+
+  // 5. MutationObserver to automatically group items if nav is dynamically inserted/updated
+  var head = document.getElementById('gh-head') || document.querySelector('.gh-head');
+  if (typeof MutationObserver !== 'undefined' && head) {
+    var observer = new MutationObserver(function() {
+      enhance();
+    });
+    observer.observe(head, { childList: true, subtree: true });
+  }
+})();
+</script>

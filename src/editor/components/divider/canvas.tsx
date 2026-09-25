@@ -11,14 +11,15 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
 
   const lineStyle = (block.props?.style as string) || "solid";
   const thickness = (block.props?.thickness as string) || "1px";
   const width = (block.props?.width as string) || "100%";
   const alignment = (block.props?.alignment as string) || "center";
   const margin = (block.props?.margin as string) || "32px";
-  const color = (block.props?.color as string) || "#ebebeb";
+  const defaultHairline = isDark ? "#333333" : "var(--color-hairline, #ebebeb)";
+  const color = (block.props?.color as string) || defaultHairline;
 
   const justify =
     alignment === "left"

@@ -15,7 +15,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p: HeadingProps = resolveHeadingProps(block.props);
   const deviceMode = useEditorStore((state) => state.deviceMode);
 
@@ -60,8 +60,10 @@ export const CanvasElement = ({
     }
   };
 
+  const isDarkText = isDarkColor(customTextColor);
+
   const titleStyle: React.CSSProperties = {
-    color: customTextColor || undefined,
+    color: isDark && (isDarkText || !customTextColor) ? "var(--color-ink, #ffffff)" : (customTextColor || undefined),
     fontSize: customFontSize || undefined,
     fontWeight: customFontWeight || undefined,
     letterSpacing: customLetterSpacing || undefined,
@@ -90,7 +92,6 @@ export const CanvasElement = ({
     ? (p.fallbackText || "Post or Page Title") 
     : (p.text || "Heading Text");
 
-  const isDarkText = isDarkColor(customTextColor);
 
   return (
     <div className="relative group/heading w-full">

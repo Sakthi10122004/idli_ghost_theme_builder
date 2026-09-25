@@ -6,8 +6,10 @@ import { TeamProps, TeamMember, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
+import { isDarkColor } from "../heading/schema";
+
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as TeamProps;
   const assets = useEditorStore((s) => s.document.assets) || {};
   const deviceMode = useEditorStore((s) => s.deviceMode);
@@ -19,6 +21,19 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const appearance = p.appearance || defaultProps.appearance;
   const spacing = p.spacing || defaultProps.spacing;
   const styles = block.styles || {};
+
+  const effectiveHeadingColor = isDark && appearance?.headingColor && isDarkColor(appearance.headingColor)
+    ? "var(--color-ink, #ffffff)"
+    : (appearance?.headingColor || "var(--color-ink)");
+  const effectiveSubheadingColor = isDark && appearance?.subheadingColor && isDarkColor(appearance.subheadingColor)
+    ? "var(--color-body, #a1a1a1)"
+    : (appearance?.subheadingColor || "var(--color-body)");
+  const effectiveNameColor = isDark && appearance?.nameColor && isDarkColor(appearance.nameColor)
+    ? "var(--color-ink, #ffffff)"
+    : (appearance?.nameColor || "var(--color-ink)");
+  const effectiveBioColor = isDark && appearance?.bioColor && isDarkColor(appearance.bioColor)
+    ? "var(--color-mute, #888888)"
+    : (appearance?.bioColor || "var(--color-mute)");
 
   const bgStyle = getBackgroundStyle(styles, appearance);
   const photoShape = general.photoShape || "circle";
@@ -139,7 +154,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             {general.heading && (
               <h2
                 className={`w-full ${isMobile ? "text-2xl" : "text-3xl sm:text-4xl"} font-semibold tracking-tight text-brand-ink`}
-                style={{ color: appearance?.headingColor || "var(--color-ink)" }}
+                style={{ color: effectiveHeadingColor }}
               >
                 {general.heading}
               </h2>
@@ -147,7 +162,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             {general.subheading && (
               <p
                 className={`w-full mt-3 ${isMobile ? "text-sm" : "text-base sm:text-lg"} leading-relaxed text-brand-body`}
-                style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}
+                style={{ color: effectiveSubheadingColor }}
               >
                 {general.subheading}
               </p>
@@ -167,7 +182,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
               <div className="mt-4 flex flex-col items-center">
                 <h3
                   className={`font-semibold text-brand-ink tracking-tight ${isMobile ? "text-base" : "text-base sm:text-lg"}`}
-                  style={{ color: appearance?.nameColor || "var(--color-ink)" }}
+                  style={{ color: effectiveNameColor }}
                 >
                   {member.name || "Team Member"}
                 </h3>
@@ -184,7 +199,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
                 {member.bio && (
                   <p
                     className={`text-brand-body leading-relaxed mt-2.5 max-w-[280px] whitespace-pre-line ${isMobile ? "text-xs px-2" : "text-xs sm:text-sm"}`}
-                    style={{ color: appearance?.bioColor || "var(--color-body)" }}
+                    style={{ color: effectiveBioColor }}
                   >
                     {member.bio}
                   </p>

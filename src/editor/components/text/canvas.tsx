@@ -15,7 +15,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p: TextProps = resolveTextProps(block.props);
   const deviceMode = useEditorStore((state) => state.deviceMode);
 
@@ -124,7 +124,7 @@ export const CanvasElement = ({
           fontWeight: customFontWeight || undefined,
           letterSpacing: customLetterSpacing || undefined,
           lineHeight: p.lineHeight || undefined,
-          color: customTextColor || undefined,
+          color: isDark && (isDarkText || !customTextColor) ? "var(--color-body, #a1a1a1)" : (customTextColor || undefined),
         }}
       >
         {paragraphs.length > 1 ? (

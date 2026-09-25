@@ -13,10 +13,38 @@ import React, { useEffect, useState } from "react";
 import AuthPortal from "./AuthPortal";
 
 export default function Builder() {
-  const { isPreviewMode, setUserId, loadTheme, setDocument, setActiveThemeId } = useEditorStore();
+  const { 
+    isPreviewMode, 
+    setUserId, 
+    loadTheme, 
+    setDocument, 
+    setActiveThemeId,
+    toggleLeftSidebar,
+    toggleRightSidebar,
+  } = useEditorStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Responsive sidebar auto-collapse for smaller viewports (tablets and small laptops)
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 1024) {
+        toggleLeftSidebar(false);
+        toggleRightSidebar(false);
+      } else if (width < 1280) {
+        const state = useEditorStore.getState();
+        if (state.selectedBlockId) {
+          toggleLeftSidebar(false);
+        }
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [toggleLeftSidebar, toggleRightSidebar]);
 
   useEffect(() => {
     queueMicrotask(() => {

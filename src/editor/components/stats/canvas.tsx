@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { StatsProps, StatItem, defaultProps } from "./schema";
@@ -16,14 +17,26 @@ function resolveStyleValue(val: unknown, fallback: string = ""): string {
   return fallback;
 }
 
+import { isDarkColor } from "../heading/schema";
+
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as StatsProps;
   const general = p.general || defaultProps.general || { heading: "Our impact", subheading: "", layoutStyle: "row", columns: 3 };
   const stats = p.stats || defaultProps.stats || [];
   const appearance = p.appearance || defaultProps.appearance || {};
   const spacing = p.spacing || defaultProps.spacing || { paddingTop: "4rem", paddingBottom: "4rem" };
   const styles = block.styles || {};
+
+  const effectiveValueColor = isDark && appearance?.valueColor && isDarkColor(appearance.valueColor)
+    ? "var(--color-ink, #ffffff)"
+    : (appearance?.valueColor || "var(--color-ink)");
+  const effectiveLabelColor = isDark && appearance?.labelColor && isDarkColor(appearance.labelColor)
+    ? "var(--color-mute, #a1a1a1)"
+    : (appearance?.labelColor || "var(--color-mute)");
+  const effectiveHeadingColor = isDark && appearance?.headingColor && isDarkColor(appearance.headingColor)
+    ? "var(--color-ink, #ffffff)"
+    : (appearance?.headingColor || "var(--color-ink)");
 
   const assets = useEditorStore((s) => s.document.assets) || {};
   const resolveAsset = (url?: string) => {
@@ -56,8 +69,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
               dangerouslySetInnerHTML={{ __html: stat.icon }}
             />
           ) : null}
-          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: appearance?.valueColor || "var(--color-ink)" }}>{stat.value}</dd>
-          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400" style={{ color: appearance?.labelColor || "var(--color-mute)" }}>{stat.label}</dt>
+          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: effectiveValueColor }}>{stat.value}</dd>
+          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400" style={{ color: effectiveLabelColor }}>{stat.label}</dt>
         </div>
       );
     } else if (general.layoutStyle === "accent-cards") {
@@ -74,22 +87,22 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
               dangerouslySetInnerHTML={{ __html: stat.icon }}
             />
           ) : null}
-          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: appearance?.valueColor || "var(--color-ink)" }}>{stat.value}</dd>
-          <dt className="text-sm font-medium leading-6 text-gray-600 dark:text-gray-400" style={{ color: appearance?.labelColor || "var(--color-mute)" }}>{stat.label}</dt>
+          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: effectiveValueColor }}>{stat.value}</dd>
+          <dt className="text-sm font-medium leading-6 text-gray-600 dark:text-gray-400" style={{ color: effectiveLabelColor }}>{stat.label}</dt>
         </div>
       );
     } else if (general.layoutStyle === "bordered") {
       return (
         <div key={stat.id || idx} className="flex flex-col border-t border-gray-200 dark:border-white/10 py-6">
-          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: appearance?.valueColor || "var(--color-ink)" }}>{stat.value}</dd>
-          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400" style={{ color: appearance?.labelColor || "var(--color-mute)" }}>{stat.label}</dt>
+          <dd className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: effectiveValueColor }}>{stat.value}</dd>
+          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400" style={{ color: effectiveLabelColor }}>{stat.label}</dt>
         </div>
       );
     } else if (general.layoutStyle === "divider-grid") {
       return (
         <div key={stat.id || idx} className="flex flex-col items-center justify-center text-center p-8 border-b border-r" style={{ borderColor: "var(--color-hairline, rgba(0,0,0,0.1))" }}>
-          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2" style={{ color: appearance?.labelColor || "var(--color-mute)" }}>{stat.label}</dt>
-          <dd className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white" style={{ color: appearance?.valueColor || "var(--color-ink)" }}>{stat.value}</dd>
+          <dt className="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2" style={{ color: effectiveLabelColor }}>{stat.label}</dt>
+          <dd className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white" style={{ color: effectiveValueColor }}>{stat.value}</dd>
         </div>
       );
     }
@@ -97,8 +110,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     // Default "row" and "split" stat style
     return (
       <div key={stat.id || idx} className="flex flex-col items-center text-center">
-        <dd className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: appearance?.valueColor || "var(--color-ink)" }}>{stat.value}</dd>
-        <dt className="text-base font-semibold leading-7 text-gray-600 dark:text-gray-400" style={{ color: appearance?.labelColor || "var(--color-mute)" }}>{stat.label}</dt>
+        <dd className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-2" style={{ color: effectiveValueColor }}>{stat.value}</dd>
+        <dt className="text-base font-semibold leading-7 text-gray-600 dark:text-gray-400" style={{ color: effectiveLabelColor }}>{stat.label}</dt>
       </div>
     );
   };
@@ -130,12 +143,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           <div className="w-full responsive-split gap-12 lg:gap-8">
             <div className="w-full text-left">
               {general.heading && (
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl mb-4" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl mb-4" style={{ color: effectiveHeadingColor }}>
                   {general.heading}
                 </h2>
               )}
               {general.subheading && (
-                <p className="text-lg leading-8 text-gray-600 dark:text-gray-300" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+                <p className="text-lg leading-8 text-gray-600 dark:text-gray-300" style={{ color: effectiveLabelColor }}>
                   {general.subheading}
                 </p>
               )}
@@ -151,12 +164,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
             {(general.heading || general.subheading) && (
               <div className="w-full min-w-full max-w-4xl mx-auto text-center mb-12">
                 {general.heading && (
-                  <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl" style={{ color: appearance?.headingColor || "var(--color-ink)" }}>
+                  <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl" style={{ color: effectiveHeadingColor }}>
                     {general.heading}
                   </h2>
                 )}
                 {general.subheading && (
-                  <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300" style={{ color: appearance?.subheadingColor || "var(--color-mute)" }}>
+                  <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300" style={{ color: effectiveLabelColor }}>
                     {general.subheading}
                   </p>
                 )}
