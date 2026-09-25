@@ -2,6 +2,7 @@ import { BuilderBlock } from "@/types/theme";
 import { LogoCloudProps, resolveLogoCloudProps, GENERIC_SVG_PLACEHOLDER } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
 import { LOGO_CLOUD_MAX_WIDTH } from "./constants";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const generateHTML = (block: BuilderBlock): string => {
   const p: LogoCloudProps = resolveLogoCloudProps(block.props);
@@ -42,14 +43,17 @@ export const generateHTML = (block: BuilderBlock): string => {
     if (src && src.startsWith("asset://")) {
       const path = src.replace("asset://", "");
       src = `{{asset "${path}"}}`;
+    } else if (src) {
+      src = escapeUrl(src);
     }
     const finalSrc = src || GENERIC_SVG_PLACEHOLDER;
 
+    const logoName = escapeHtml(logo.name || 'Logo');
     const isLinked = enableLinks && !!logo.linkUrl;
-    const finalUrl = isLinked ? normalizeUrl(logo.linkUrl) : "";
+    const finalUrl = isLinked ? escapeUrl(normalizeUrl(logo.linkUrl)) : "";
     const inner = isLinked
-      ? `<a href="${finalUrl}" ${targetAttr} class="logo-cloud-link" title="${logo.name || 'Logo'}"><img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" /></a>`
-      : `<img src="${finalSrc}" alt="${logo.name || 'Logo'}" class="logo-cloud-img" />`;
+      ? `<a href="${finalUrl}" ${targetAttr} class="logo-cloud-link" title="${logoName}"><img src="${finalSrc}" alt="${logoName}" class="logo-cloud-img" /></a>`
+      : `<img src="${finalSrc}" alt="${logoName}" class="logo-cloud-img" />`;
     return `<div class="logo-cloud-item ${grayscaleClass}">${inner}</div>`;
   };
 
@@ -145,8 +149,8 @@ export const generateHTML = (block: BuilderBlock): string => {
 
   const headingHtml = (general.heading || general.subheading) ? `
     <div class="logo-cloud-header">
-      ${general.heading ? `<h2 class="logo-cloud-heading">${general.heading}</h2>` : ''}
-      ${general.subheading ? `<p class="logo-cloud-subheading">${general.subheading}</p>` : ''}
+      ${general.heading ? `<h2 class="logo-cloud-heading">${escapeHtml(general.heading)}</h2>` : ''}
+      ${general.subheading ? `<p class="logo-cloud-subheading">${escapeHtml(general.subheading)}</p>` : ''}
     </div>
   ` : '';
 

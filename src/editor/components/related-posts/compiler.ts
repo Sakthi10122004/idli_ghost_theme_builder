@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { resolveRelatedPostsProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml } from "../shared/escape";
 
 function resolveStyleValue(val: unknown, fallback: string = ""): string {
   if (val === undefined || val === null) return fallback;
@@ -954,8 +955,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   ${
     p.heading || p.description
       ? `<div class="gh-related-header">
-    ${p.heading ? `<h3 class="gh-related-heading">${p.heading}</h3>` : ""}
-    ${p.description ? `<p class="gh-related-description">${p.description}</p>` : ""}
+    ${p.heading ? `<h3 class="gh-related-heading">${escapeHtml(p.heading)}</h3>` : ""}
+    ${p.description ? `<p class="gh-related-description">${escapeHtml(p.description)}</p>` : ""}
   </div>`
       : ""
   }

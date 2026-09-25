@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { ImageProps, resolveImageProps } from "./schema";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (
   block: BuilderBlock,
@@ -13,7 +14,7 @@ export const compileToHbs = (
       const path = src.replace("asset://", "");
       return `{{asset "${path}"}}`;
     }
-    return src || "";
+    return src ? escapeUrl(src) : "";
   };
 
   const getWidthClass = (mode: ImageProps["widthMode"]) => {
@@ -150,14 +151,14 @@ export const compileToHbs = (
 
   // 2. CUSTOM IMAGE SOURCE
   const src = resolveHbsSrc(p.url);
-  const altAttr = p.alt ? ` alt="${p.alt.replace(/"/g, "&quot;")}"` : ' alt=""';
+  const altAttr = p.alt ? ` alt="${escapeHtml(p.alt)}"` : ' alt=""';
   const imgTag = `<img src="${src}"${altAttr} class="${imgClasses}"${imgStyle} loading="lazy" />`;
   const wrappedImg = p.linkUrl
-    ? `<a href="${p.linkUrl}"${p.openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ""}>${imgTag}</a>`
+    ? `<a href="${escapeUrl(p.linkUrl)}"${p.openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ""}>${imgTag}</a>`
     : imgTag;
 
   const captionHtml = p.caption
-    ? `\n  <figcaption>${p.caption}</figcaption>`
+    ? `\n  <figcaption>${escapeHtml(p.caption)}</figcaption>`
     : "";
 
   return `<figure class="${cardClasses}"${cardStyle}>

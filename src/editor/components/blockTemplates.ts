@@ -17,15 +17,14 @@ import {
   DollarSign,
   Image as GalleryIcon,
   Share2,
-  Globe,
   Play,
   Cloud,
   BarChart,
   Users,
-  Code,
   MessageCircle,
   FileText,
   ArrowLeftRight,
+  Layers,
 } from "lucide-react";
 
 export interface BlockTemplate {
@@ -56,9 +55,8 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
   { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare, description: "Customer quotes and reviews" },
   { type: "pricing-table", label: "Pricing Table", category: "Content", icon: DollarSign, description: "Tiered subscription pricing plans" },
   { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon, description: "Multi-image photo grid gallery" },
-  { type: "social-links", label: "Social Links", category: "Content", icon: Globe, description: "Social media profile icon links" },
   { type: "video-player", label: "Video Player", category: "Content", icon: Play, description: "Embedded responsive video player" },
-  { type: "embed", label: "Embed / HTML", category: "Content", icon: Code, description: "Custom HTML, iframe, or third-party embed" },
+  { type: "cards", label: "Cards Grid", category: "Content", icon: Layers, description: "Multi-column feature and showcase cards" },
 
   { type: "page-detail", label: "Page Detail", category: "Ghost Core", icon: FileText, description: "Dynamic page title and content wrapper" },
   { type: "post-content", label: "Post Content", category: "Ghost Core", icon: FileText, description: "Full Ghost blog post body markup" },

@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const wrapperId = `video-${block.id}`;
@@ -34,7 +35,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
 </style>
 <div id="${wrapperId}" class="video-player-wrapper">
   <div class="video-container">
-    ${url ? `<iframe src="${url}" allowfullscreen loading="lazy"></iframe>` : ""}
+    ${url ? `<iframe src="${escapeUrl(url)}" allowfullscreen loading="lazy"></iframe>` : ""}
   </div>
 </div>`;
 };

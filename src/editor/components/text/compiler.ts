@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { TextProps, resolveTextProps, isDarkColor } from "./schema";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p: TextProps = resolveTextProps(block.props);
@@ -72,14 +73,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
   if (paragraphs.length <= 1) {
     const content = paragraphs[0] || rawText || "Add your text content here.";
     if (p.variant === "quote") {
-      return `<blockquote class="${baseClasses}"${styleAttr}><p>${content}</p></blockquote>`;
+      return `<blockquote class="${baseClasses}"${styleAttr}><p>${escapeHtml(content)}</p></blockquote>`;
     }
-    return `<p class="${baseClasses}"${styleAttr}>${content}</p>`;
+    return `<p class="${baseClasses}"${styleAttr}>${escapeHtml(content)}</p>`;
   }
 
   // Multi-paragraph custom text
   const pTags = paragraphs
-    .map((para) => `  <p class="${variantClass}${darkAdaptiveClass}">${para}</p>`)
+    .map((para) => `  <p class="${variantClass}${darkAdaptiveClass}">${escapeHtml(para)}</p>`)
     .join("\n");
 
   const wrapperClasses = `text-content font-body space-y-4${darkAdaptiveClass}${maxWidth ? " mx-auto" : ""}`.trim();

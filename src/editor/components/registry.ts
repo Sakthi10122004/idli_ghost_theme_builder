@@ -89,11 +89,6 @@ import * as gridGalleryCanvas from "./grid-gallery/canvas";
 import * as gridGallerySidebar from "./grid-gallery/sidebar";
 import * as gridGalleryCompiler from "./grid-gallery/compiler";
 
-import * as socialLinks from "./social-links/schema";
-import * as socialLinksCanvas from "./social-links/canvas";
-import * as socialLinksSidebar from "./social-links/sidebar";
-import * as socialLinksCompiler from "./social-links/compiler";
-
 import * as videoPlayer from "./video-player/schema";
 import * as videoPlayerCanvas from "./video-player/canvas";
 import * as videoPlayerSidebar from "./video-player/sidebar";
@@ -159,11 +154,6 @@ import * as relatedPostsCanvas from "./related-posts/canvas";
 import * as relatedPostsSidebar from "./related-posts/sidebar";
 import * as relatedPostsCompiler from "./related-posts/compiler";
 
-import * as embed from "./embed/schema";
-import * as embedCanvas from "./embed/canvas";
-import * as embedSidebar from "./embed/sidebar";
-import * as embedCompiler from "./embed/compiler";
-
 import * as postNavigation from "./post-navigation/schema";
 import * as postNavigationCanvas from "./post-navigation/canvas";
 import * as postNavigationSidebar from "./post-navigation/sidebar";
@@ -173,6 +163,11 @@ import * as tagHeader from "./tag-header/schema";
 import * as tagHeaderCanvas from "./tag-header/canvas";
 import * as tagHeaderSidebar from "./tag-header/sidebar";
 import * as tagHeaderCompiler from "./tag-header/compiler";
+
+import * as cards from "./cards/schema";
+import * as cardsCanvas from "./cards/canvas";
+import * as cardsSidebar from "./cards/sidebar";
+import * as cardsCompiler from "./cards/compiler";
 
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
@@ -194,7 +189,6 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   testimonials: { type: "testimonials", ...testimonials, ...testimonialsCanvas, ...testimonialsSidebar, ...testimonialsCompiler },
   "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
   "grid-gallery": { type: "grid-gallery", ...gridGallery, ...gridGalleryCanvas, ...gridGallerySidebar, ...gridGalleryCompiler },
-  "social-links": { type: "social-links", ...socialLinks, ...socialLinksCanvas, ...socialLinksSidebar, ...socialLinksCompiler },
   "video-player": { type: "video-player", ...videoPlayer, ...videoPlayerCanvas, ...videoPlayerSidebar, ...videoPlayerCompiler },
   "post-grid": { type: "post-grid", ...postGrid, ...postGridCanvas, ...postGridSidebar, ...postGridCompiler },
   header: { type: "header", ...header, ...headerCanvas, ...headerSidebar, ...headerCompiler },
@@ -208,6 +202,6 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   share: { type: "share", ...share, ...shareCanvas, ...shareSidebar, ...shareCompiler },
   comments: { type: "comments", ...comments, ...commentsCanvas, ...commentsSidebar, ...commentsCompiler },
   "related-posts": { type: "related-posts", ...relatedPosts, ...relatedPostsCanvas, ...relatedPostsSidebar, ...relatedPostsCompiler },
-  embed: { type: "embed", ...embed, ...embedCanvas, ...embedSidebar, ...embedCompiler },
   "post-navigation": { type: "post-navigation", ...postNavigation, ...postNavigationCanvas, ...postNavigationSidebar, ...postNavigationCompiler },
+  cards: { type: "cards", ...cards, ...cardsCanvas, ...cardsSidebar, ...cardsCompiler },
 };

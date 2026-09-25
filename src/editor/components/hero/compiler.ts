@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { HeroSlide } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 function resolveStyleValue(val: unknown, fallback: string = ""): string {
   if (!val) return fallback;
@@ -360,17 +361,17 @@ export const compileToHbs = (block: BuilderBlock): string => {
     <div class="carousel-slide${idx === 0 ? ' active' : ''}" role="group" aria-roledescription="slide">
       <div class="hero-content">
         <div class="hero-text-container">
-          ${slide.eyebrowText ? `<span class="hero-eyebrow">${slide.eyebrowText}</span>` : ''}
-          <h1 class="hero-title heading">${slide.title}</h1>
-          ${slide.subtitle ? `<p class="hero-subtitle text-content">${slide.subtitle}</p>` : ''}
+          ${slide.eyebrowText ? `<span class="hero-eyebrow">${escapeHtml(slide.eyebrowText)}</span>` : ''}
+          <h1 class="hero-title heading">${escapeHtml(slide.title)}</h1>
+          ${slide.subtitle ? `<p class="hero-subtitle text-content">${escapeHtml(slide.subtitle)}</p>` : ''}
           <div class="hero-actions">
-            <a href="${slide.buttonUrl || '#'}" class="hero-btn hero-btn-primary">${slide.buttonLabel || p.buttonLabel || "Learn More"}</a>
-            ${(p.showSecondaryButton ?? true) ? `<a href="${p.secondaryButtonUrl || "#"}" class="hero-btn hero-btn-secondary">${p.secondaryButtonLabel || "Documentation"}</a>` : ''}
+            <a href="${escapeUrl(slide.buttonUrl)}" class="hero-btn hero-btn-primary">${escapeHtml(slide.buttonLabel || p.buttonLabel || "Learn More")}</a>
+            ${(p.showSecondaryButton ?? true) ? `<a href="${escapeUrl(p.secondaryButtonUrl)}" class="hero-btn hero-btn-secondary">${escapeHtml(p.secondaryButtonLabel || "Documentation")}</a>` : ''}
           </div>
         </div>
         ${layout.startsWith('split') && slide.imageUrl ? `
         <div class="hero-image-container">
-          <img src="${resolveHbsAsset(slide.imageUrl)}" alt="${slide.imageAlt || slide.title}" />
+          <img src="${resolveHbsAsset(slide.imageUrl)}" alt="${escapeHtml(slide.imageAlt || slide.title)}" />
         </div>
         ` : ''}
       </div>
@@ -544,20 +545,20 @@ ${scriptHtml}`;
 
   // STANDARD NON-CAROUSEL HERO
   const eyebrowHtml = p.eyebrowText
-    ? `<span class="hero-eyebrow">${p.eyebrowText}</span>`
+    ? `<span class="hero-eyebrow">${escapeHtml(p.eyebrowText)}</span>`
     : "";
 
-  const title = useSiteData ? "{{@site.title}}" : (p.title || "Thoughts, stories & ideas.");
-  const subtitle = useSiteData ? "{{@site.description}}" : (p.subtitle || "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.");
-  const buttonLabel = p.buttonLabel || "Start Reading";
-  const buttonUrl = p.buttonUrl || "#posts";
+  const title = useSiteData ? "{{@site.title}}" : escapeHtml(p.title || "Thoughts, stories & ideas.");
+  const subtitle = useSiteData ? "{{@site.description}}" : escapeHtml(p.subtitle || "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.");
+  const buttonLabel = escapeHtml(p.buttonLabel || "Start Reading");
+  const buttonUrl = escapeUrl(p.buttonUrl || "#posts");
   const buttonBgColor = p.buttonBgColor;
   const buttonTextColor = p.buttonTextColor;
   const showSecondaryButton = p.showSecondaryButton ?? true;
-  const secondaryButtonLabel = p.secondaryButtonLabel || "Subscribe";
-  const secondaryButtonUrl = p.secondaryButtonUrl || "#newsletter";
+  const secondaryButtonLabel = escapeHtml(p.secondaryButtonLabel || "Subscribe");
+  const secondaryButtonUrl = escapeUrl(p.secondaryButtonUrl || "#newsletter");
   const imageUrl = p.imageUrl || "";
-  const imageAlt = p.imageAlt || "Hero Image";
+  const imageAlt = escapeHtml(p.imageAlt || "Hero Image");
 
   return `
 ${commonStyles}

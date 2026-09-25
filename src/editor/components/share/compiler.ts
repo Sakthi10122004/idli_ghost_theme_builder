@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { ShareProps, resolveShareProps } from "./schema";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p: ShareProps = resolveShareProps(block.props);
@@ -34,13 +35,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
     }
   }
 
+  const buttonText = escapeHtml(p.buttonText || "Share");
   const labelHtml =
     p.variant === "icon-only"
-      ? `<span class="sr-only">${p.buttonText || "Share"}</span>`
-      : `<span>${p.buttonText || "Share"}</span>`;
+      ? `<span class="sr-only">${buttonText}</span>`
+      : `<span>${buttonText}</span>`;
 
   return `<div class="gh-share-wrapper ${alignClass}"${styleAttr}>
-  <a href="#/share" class="gh-share-btn ${sizeClass} ${variantClass}"${customBgStyle} title="${p.buttonText || "Share"}">
+  <a href="#/share" class="gh-share-btn ${sizeClass} ${variantClass}"${customBgStyle} title="${buttonText}">
     ${iconSvg}
     ${labelHtml}
   </a>

@@ -49,6 +49,7 @@
 }
 
 html.dark #canvas-preview-frame,
+#canvas-preview-frame.dark,
 html.dark body:not(:has(#canvas-preview-frame)) {
   --color-primary: #ffffff;
   --color-on-primary: #000000;
@@ -72,17 +73,23 @@ html.dark body:not(:has(#canvas-preview-frame)) {
 }
 
 /* Editor Canvas Frame */
-html.dark #canvas-preview-frame {
+html.dark #canvas-preview-frame,
+#canvas-preview-frame.dark {
   background-color: var(--color-canvas) !important;
   color: var(--color-ink) !important;
 }
 
 /* Ensure components inside the editor canvas flip correctly */
 html.dark #canvas-preview-frame .builder-block-section,
+#canvas-preview-frame.dark .builder-block-section,
 html.dark #canvas-preview-frame .builder-block-hero,
+#canvas-preview-frame.dark .builder-block-hero,
 html.dark #canvas-preview-frame .hero-block,
+#canvas-preview-frame.dark .hero-block,
 html.dark #canvas-preview-frame .builder-block-logo-cloud,
+#canvas-preview-frame.dark .builder-block-logo-cloud,
 html.dark #canvas-preview-frame .logo-cloud-section,
+#canvas-preview-frame.dark .logo-cloud-section,
 html.dark .logo-cloud-section,
 html.dark .gh-head,
 html.dark .gh-head-open .gh-head,

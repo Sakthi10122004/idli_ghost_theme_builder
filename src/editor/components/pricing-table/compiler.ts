@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 interface PricingTier {
   name: string;
@@ -113,18 +114,18 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
 </style>
 <div id="${wrapperId}" class="pricing-table-block">
-  ${title ? `<h3 class="pricing-title">${title}</h3>` : ""}
+  ${title ? `<h3 class="pricing-title">${escapeHtml(title)}</h3>` : ""}
   <div class="pricing-grid">
     ${tiers.map((tier) => `
     <div class="pricing-tier">
       <div>
-        <span class="tier-name">${tier.name}</span>
-        <span class="tier-price">${tier.price}</span>
+        <span class="tier-name">${escapeHtml(tier.name)}</span>
+        <span class="tier-price">${escapeHtml(tier.price)}</span>
         <div class="tier-features">
-          ${(tier.features || []).map((f) => `<span>✓ ${f}</span>`).join("\n          ")}
+          ${(tier.features || []).map((f) => `<span>✓ ${escapeHtml(f)}</span>`).join("\n          ")}
         </div>
       </div>
-      <a href="${tier.href || "#"}" class="tier-btn">${tier.buttonLabel || "Choose Plan"}</a>
+      <a href="${tier.href ? escapeUrl(tier.href) : "#"}" class="tier-btn">${escapeHtml(tier.buttonLabel || "Choose Plan")}</a>
     </div>`).join("\n    ")}
   </div>
 </div>`;

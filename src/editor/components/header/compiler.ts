@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
@@ -50,11 +51,11 @@ export const compileToHbs = (block: BuilderBlock): string => {
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
           <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${general.darkLogoUrl}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
         {{else}}
           ${general.logoUrl ? `
-          <img src="${general.logoUrl}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${general.darkLogoUrl}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          <img src="${escapeUrl(general.logoUrl)}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
           ` : `<span class="gh-site-title">{{@site.title}}</span>`}
         {{/if}}
       </a>
@@ -118,9 +119,9 @@ export const compileToHbs = (block: BuilderBlock): string => {
       {{#if @site.members_enabled}}
         {{#unless @member}}
           ${general.showSignIn !== false ? `
-          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${general.signInText || "Sign in"}</a>` : ""}
+          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${escapeHtml(general.signInText || "Sign in")}</a>` : ""}
           ${general.showSubscribe !== false ? `
-          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${general.subscribeText || "Subscribe"}</a>` : ""}
+          <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${escapeHtml(general.subscribeText || "Subscribe")}</a>` : ""}
         {{else}}
           <a class="gh-head-link gh-signout" href="javascript:" data-members-signout style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">Sign out</a>
           <a class="gh-head-btn gh-btn" href="#/portal/account" data-portal="account" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">Account</a>

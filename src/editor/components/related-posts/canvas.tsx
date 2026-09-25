@@ -13,7 +13,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p = resolveRelatedPostsProps(block.props);
   const bgStyle = getBackgroundStyle(block.styles, p.appearance);
   const isMesh = block.styles?.backgroundType === "mesh";

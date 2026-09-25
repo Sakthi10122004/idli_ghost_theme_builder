@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const bgCSS = getBackgroundCSS(block.styles);
@@ -162,12 +163,12 @@ export const compileToHbs = (block: BuilderBlock) => {
 </style>
 <div id="newsletter-${block.id}" class="newsletter-block">
   <div class="newsletter-text">
-    <h3 class="newsletter-title">${block.props.title || "Subscribe to our publication"}</h3>
-    <p class="newsletter-subtitle">${block.props.subtitle || "Get the latest articles and design insights delivered directly to your inbox."}</p>
+    <h3 class="newsletter-title">${escapeHtml(block.props.title || "Subscribe to our publication")}</h3>
+    <p class="newsletter-subtitle">${escapeHtml(block.props.subtitle || "Get the latest articles and design insights delivered directly to your inbox.")}</p>
   </div>
   <form class="newsletter-form">
-    <input type="email" placeholder="${block.props.placeholder || 'you@domain.com'}" required class="input-field" />
-    <button type="submit" class="btn-primary shrink-0">${block.props.buttonLabel || 'Subscribe'}</button>
+    <input type="email" placeholder="${escapeHtml(block.props.placeholder || 'you@domain.com')}" required class="input-field" />
+    <button type="submit" class="btn-primary shrink-0">${escapeHtml(block.props.buttonLabel || 'Subscribe')}</button>
   </form>
 </div>`;
 };

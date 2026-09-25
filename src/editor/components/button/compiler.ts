@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const isPrimary = block.props.variant !== 'secondary';
@@ -40,5 +41,5 @@ export const compileToHbs = (block: BuilderBlock) => {
     `}
   }
 </style>
-<a id="btn-${block.id}" href="${block.props.href || '#'}" class="btn">${block.props.label || 'Click Here'}</a>`;
+<a id="btn-${block.id}" href="${escapeUrl(block.props.href)}" class="btn">${escapeHtml(block.props.label || 'Click Here')}</a>`;
 };

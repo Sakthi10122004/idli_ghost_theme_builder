@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { TeamProps, TeamMember, defaultProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const generateHTML = (block: BuilderBlock): string => {
   const p = { ...defaultProps, ...block.props } as TeamProps;
@@ -27,24 +28,27 @@ export const generateHTML = (block: BuilderBlock): string => {
     if (src && src.startsWith("asset://")) {
       const path = src.replace("asset://", "");
       src = `{{asset "${path}"}}`;
+    } else if (src) {
+      src = escapeUrl(src);
     }
 
+    const memberName = escapeHtml(member.name || "Team Member");
     const photoMarkup = src
       ? `<div class="team-photo-container">
-          <img src="${src}" alt="${member.name || "Team Member"}" class="team-photo" loading="lazy" />
+          <img src="${src}" alt="${memberName}" class="team-photo" loading="lazy" />
         </div>`
       : `<div class="team-photo-container team-photo-placeholder">
-          <span class="team-initials">${(member.name || "T").slice(0, 1)}</span>
+          <span class="team-initials">${escapeHtml((member.name || "T").slice(0, 1))}</span>
         </div>`;
 
-    const bioHtml = member.bio ? member.bio.replace(/\n/g, "<br/>") : "";
+    const bioHtml = member.bio ? escapeHtml(member.bio).replace(/\n/g, "<br/>") : "";
 
     return `
       <div class="team-card">
         ${photoMarkup}
         <div class="team-info">
-          <h3 class="team-name">${member.name || "Team Member"}</h3>
-          ${member.role ? `<p class="team-role">${member.role}</p>` : ""}
+          <h3 class="team-name">${memberName}</h3>
+          ${member.role ? `<p class="team-role">${escapeHtml(member.role)}</p>` : ""}
           ${member.bio ? `<p class="team-bio">${bioHtml}</p>` : ""}
         </div>
       </div>
@@ -55,8 +59,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     general.heading || general.subheading
       ? `
     <div class="team-header">
-      ${general.heading ? `<h2 class="team-heading">${general.heading}</h2>` : ""}
-      ${general.subheading ? `<p class="team-subheading">${general.subheading}</p>` : ""}
+      ${general.heading ? `<h2 class="team-heading">${escapeHtml(general.heading)}</h2>` : ""}
+      ${general.subheading ? `<p class="team-subheading">${escapeHtml(general.subheading)}</p>` : ""}
     </div>
   `
       : "";

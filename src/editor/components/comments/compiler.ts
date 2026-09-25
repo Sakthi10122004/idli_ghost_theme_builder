@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { resolveCommentsProps } from "./schema";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = resolveCommentsProps(block.props);
@@ -12,7 +13,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   <div class="gh-comments-header">
     <svg class="gh-comments-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <h3 class="gh-comments-heading">
-      ${p.heading}${countMarkup}
+      ${escapeHtml(p.heading)}${countMarkup}
     </h3>
   </div>
   {{comments title="" count=false mode="auto"}}

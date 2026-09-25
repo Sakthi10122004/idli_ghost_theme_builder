@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { TestimonialItem } from "./schema";
 import { getBackgroundCSS } from "@/editor/components/shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 const renderStarIcons = (filledCount: number) => {
   return Array.from({ length: 5 })
@@ -48,9 +49,9 @@ export const compileToHbs = (block: BuilderBlock) => {
   if (showSectionHeader && (props.sectionTitle || props.sectionSubtitle || props.sectionBadge)) {
     headerHtml = `
   <div class="gh-testimonials-header">
-    ${props.sectionBadge ? `<span class="gh-testimonials-badge">${props.sectionBadge}</span>` : ""}
-    ${props.sectionTitle ? `<h2 class="gh-testimonials-title">${props.sectionTitle}</h2>` : ""}
-    ${props.sectionSubtitle ? `<p class="gh-testimonials-subtitle">${props.sectionSubtitle}</p>` : ""}
+    ${props.sectionBadge ? `<span class="gh-testimonials-badge">${escapeHtml(props.sectionBadge)}</span>` : ""}
+    ${props.sectionTitle ? `<h2 class="gh-testimonials-title">${escapeHtml(props.sectionTitle)}</h2>` : ""}
+    ${props.sectionSubtitle ? `<p class="gh-testimonials-subtitle">${escapeHtml(props.sectionSubtitle)}</p>` : ""}
   </div>`;
   }
 
@@ -190,7 +191,7 @@ export const compileToHbs = (block: BuilderBlock) => {
         let avatarHtml = "";
         if (showPhotos) {
           if (item.avatar) {
-            avatarHtml = `<img src="${item.avatar}" alt="${item.author || "User"}" class="gh-author-avatar" loading="lazy" />`;
+            avatarHtml = `<img src="${escapeUrl(item.avatar)}" alt="${escapeHtml(item.author || "User")}" class="gh-author-avatar" loading="lazy" />`;
           } else {
             const initials = (item.author || "U")
               .split(" ")
@@ -198,16 +199,18 @@ export const compileToHbs = (block: BuilderBlock) => {
               .join("")
               .slice(0, 2)
               .toUpperCase();
-            avatarHtml = `<div class="gh-author-avatar-fallback">${initials}</div>`;
+            avatarHtml = `<div class="gh-author-avatar-fallback">${escapeHtml(initials)}</div>`;
           }
         }
 
         // Role & Company
         let roleHtml = "";
         if (showRoleCompany && (item.role || item.company)) {
-          roleHtml = `<span class="gh-author-role">${item.role || ""}${
+          const roleEsc = item.role ? escapeHtml(item.role) : "";
+          const compEsc = item.company ? escapeHtml(item.company) : "";
+          roleHtml = `<span class="gh-author-role">${roleEsc}${
             item.role && item.company ? " • " : ""
-          }<strong>${item.company || ""}</strong></span>`;
+          }<strong>${compEsc}</strong></span>`;
         }
 
         // Meta: Location & Date
@@ -215,15 +218,15 @@ export const compileToHbs = (block: BuilderBlock) => {
         if ((showDate && item.date) || (showLocation && item.location)) {
           metaHtml = `
           <div class="gh-author-meta-row">
-            ${showLocation && item.location ? `<span class="gh-author-location"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${item.location}</span><span class="gh-meta-sep">•</span>` : ""}
-            ${showDate && item.date ? `<span class="gh-author-meta">${item.date}</span>` : ""}
+            ${showLocation && item.location ? `<span class="gh-author-location"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${escapeHtml(item.location)}</span><span class="gh-meta-sep">•</span>` : ""}
+            ${showDate && item.date ? `<span class="gh-author-meta">${escapeHtml(item.date)}</span>` : ""}
           </div>`;
         }
 
         // Social Link
         let socialHtml = "";
         if (showSocialLink && item.socialUrl) {
-          socialHtml = `<a href="${item.socialUrl}" target="_blank" rel="noopener noreferrer" class="gh-social-link" title="View Profile">
+          socialHtml = `<a href="${escapeUrl(item.socialUrl)}" target="_blank" rel="noopener noreferrer" class="gh-social-link" title="View Profile">
             ${getSocialIconSvg(item.socialPlatform)}
           </a>`;
         }
@@ -233,13 +236,13 @@ export const compileToHbs = (block: BuilderBlock) => {
         ${isFeatured ? `<div class="gh-featured-pill">★ Featured</div>` : ""}
         ${starsHtml}
         <div class="gh-card-body">
-          <p class="gh-testimonial-quote">"${item.quote || ""}"</p>
+          <p class="gh-testimonial-quote">"${escapeHtml(item.quote || "")}"</p>
         </div>
         <div class="gh-card-footer">
           <div class="gh-author-wrap">
             ${avatarHtml}
             <div class="gh-author-details">
-              <span class="gh-author-name">${item.author || "Anonymous"}</span>
+              <span class="gh-author-name">${escapeHtml(item.author || "Anonymous")}</span>
               ${roleHtml}
               ${metaHtml}
             </div>
