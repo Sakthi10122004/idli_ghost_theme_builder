@@ -238,13 +238,20 @@ export const compileToHbs = (block: BuilderBlock): string => {
     #${htmlAnchor} .gh-head-actions .gh-head-btn { order: 4; }
     #${htmlAnchor} .gh-head-menu {
       opacity: 0.9;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #${htmlAnchor} .gh-head-menu::-webkit-scrollbar {
+      display: none;
     }
     #${htmlAnchor} .gh-head-menu .nav {
       display: inline-flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      white-space: nowrap;
       align-items: center;
       justify-content: ${isStacked ? 'center' : 'flex-start'};
-      gap: ${isStacked ? '32px' : '28px'};
+      gap: ${isStacked ? '24px' : '20px'};
       list-style: none;
       margin: 0;
       padding: 0;
@@ -253,16 +260,20 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${htmlAnchor} .gh-head-menu .nav li {
     margin: 0;
     padding: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   #${htmlAnchor} .gh-head-menu .nav a {
     color: inherit;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 500;
     opacity: 0.9;
-    padding: 8px 16px;
+    padding: 6px 12px;
     display: inline-block;
     transition: opacity 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   #${htmlAnchor} .gh-head-menu a:hover,
   #${htmlAnchor} .gh-search-btn:hover,

@@ -14,13 +14,16 @@ interface BackgroundStyles {
   bgImageUrl?: string;
   bgOverlayColor?: string;
   bgOverlayOpacity?: number;
+  backgroundColor?: string;
+  backdropBlur?: string;
 }
 
 interface BackgroundControlsProps {
-  styles: any;
-  appearance: { backgroundColor?: string };
+  styles?: BackgroundStyles & Record<string, unknown>;
+  appearance?: { backgroundColor?: string };
   onChangeStyles: (styles: Partial<BackgroundStyles>) => void;
-  updateAppearance: (key: string, value: any) => void;
+  updateAppearance?: (key: string, value: string) => void;
+  showBackdropBlur?: boolean;
 }
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
@@ -31,7 +34,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <span className="text-[12px] font-bold text-gray-900 tracking-tight">{children}</span>
 );
 
-export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, appearance, onChangeStyles, updateAppearance }) => {
+export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, appearance, onChangeStyles, updateAppearance, showBackdropBlur }) => {
   return (
     <>
       <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
@@ -52,20 +55,49 @@ export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, 
         </select>
       </div>
 
+      {showBackdropBlur && (
+        <div className="flex flex-col gap-1.5 mt-2">
+          <FieldLabel>Backdrop Blur (Glassmorphism)</FieldLabel>
+          <select
+            value={styles?.backdropBlur || ""}
+            onChange={(e) => onChangeStyles({ backdropBlur: e.target.value })}
+            className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+          >
+            <option value="">None</option>
+            <option value="4px">Light (4px)</option>
+            <option value="8px">Medium (8px)</option>
+            <option value="16px">Heavy (16px)</option>
+            <option value="24px">Extra Heavy (24px)</option>
+          </select>
+        </div>
+      )}
+
       {(styles?.backgroundType || "solid") === "solid" && (
         <div className="flex flex-col gap-1.5 mt-2">
           <FieldLabel>Background Color</FieldLabel>
           <div className="flex gap-2 items-center">
             <input
               type="color"
-              value={appearance.backgroundColor || "#ffffff"}
-              onChange={(e) => updateAppearance("backgroundColor", e.target.value)}
+              value={appearance?.backgroundColor || styles?.backgroundColor || "#ffffff"}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (updateAppearance) {
+                  updateAppearance("backgroundColor", val);
+                }
+                onChangeStyles({ backgroundColor: val });
+              }}
               className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
             />
             <input
               type="text"
-              value={appearance.backgroundColor || "#ffffff"}
-              onChange={(e) => updateAppearance("backgroundColor", e.target.value)}
+              value={appearance?.backgroundColor || styles?.backgroundColor || "#ffffff"}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (updateAppearance) {
+                  updateAppearance("backgroundColor", val);
+                }
+                onChangeStyles({ backgroundColor: val });
+              }}
               className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
             />
           </div>
@@ -168,3 +200,5 @@ export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, 
     </>
   );
 };
+
+export const BackgroundSettings = BackgroundControls;

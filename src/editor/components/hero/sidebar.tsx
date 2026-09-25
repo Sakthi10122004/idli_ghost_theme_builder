@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { HeroProps, HeroSlide } from "./schema";
 import { Sliders, Plus, Trash2, ChevronUp, ChevronDown, Upload, Tag, Layers } from "lucide-react";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 const Switch = ({ checked, onChange }: { checked: boolean; onChange: (c: boolean) => void }) => (
   <button
@@ -105,7 +106,6 @@ export const SidebarElement = ({
 }) => {
   const addAsset = useEditorStore((s) => s.addAsset);
   const p = block.props || {};
-  const bgType = (block.styles?.backgroundType as string) || "solid";
   const useSiteData = p.useSiteData ?? false;
   const isCarousel = !!p.enableCarousel;
   const layout = (block.styles?.layout as string) || "center";
@@ -705,131 +705,12 @@ export const SidebarElement = ({
           </div>
 
           {!(useSiteData && (p.useCoverImageAsBackground ?? true)) && (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-600">Type</label>
-              <select
-                value={bgType}
-                onChange={(e) => onChangeStyles({ backgroundType: e.target.value })}
-                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-              >
-                <option value="solid">Solid Color</option>
-                <option value="linear">Linear Gradient</option>
-                <option value="radial">Radial Gradient</option>
-                <option value="mesh">Mesh Gradient</option>
-                <option value="pattern">Pattern</option>
-                <option value="image">Image URL</option>
-              </select>
-            </div>
-          )}
-
-          {bgType === "solid" && !(useSiteData && (p.useCoverImageAsBackground ?? true)) && (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-600">Color</label>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="color"
-                  value={(block.styles?.backgroundColor as string) || "#fafafa"}
-                  onChange={(e) => onChangeStyles({ backgroundColor: e.target.value })}
-                  className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                />
-                <input
-                  type="text"
-                  value={(block.styles?.backgroundColor as string) || "#fafafa"}
-                  onChange={(e) => onChangeStyles({ backgroundColor: e.target.value })}
-                  className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded text-xs font-mono font-medium focus:outline-none focus:border-blue-500 bg-white uppercase"
-                />
-              </div>
-            </div>
-          )}
-
-          {bgType === "linear" && (
-            <>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-600">Colors</label>
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={(block.styles?.gradientColor1 as string) || "#000000"}
-                    onChange={(e) => onChangeStyles({ gradientColor1: e.target.value })}
-                    className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                  />
-                  <input
-                    type="color"
-                    value={(block.styles?.gradientColor2 as string) || "#333333"}
-                    onChange={(e) => onChangeStyles({ gradientColor2: e.target.value })}
-                    className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] text-gray-600">Angle</label>
-                  <span className="text-[10px] font-mono font-medium text-blue-600">{(block.styles?.gradientAngle as number) || 90}°</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="360"
-                  value={(block.styles?.gradientAngle as number) || 90}
-                  onChange={(e) => onChangeStyles({ gradientAngle: parseInt(e.target.value) })}
-                  className="w-full accent-blue-600"
-                />
-              </div>
-            </>
-          )}
-
-          {bgType === "mesh" && (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-600">Mesh Colors</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={(block.styles?.meshColor1 as string) || "#ff0080"}
-                  onChange={(e) => onChangeStyles({ meshColor1: e.target.value })}
-                  className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                />
-                <input
-                  type="color"
-                  value={(block.styles?.meshColor2 as string) || "#7928ca"}
-                  onChange={(e) => onChangeStyles({ meshColor2: e.target.value })}
-                  className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                />
-                <input
-                  type="color"
-                  value={(block.styles?.meshColor3 as string) || "#0070f3"}
-                  onChange={(e) => onChangeStyles({ meshColor3: e.target.value })}
-                  className="w-7 h-7 rounded cursor-pointer border border-gray-200 p-0"
-                />
-              </div>
-            </div>
-          )}
-
-          {bgType === "pattern" && (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-600">Pattern Type</label>
-              <select
-                value={(block.styles?.patternType as string) || "dots"}
-                onChange={(e) => onChangeStyles({ patternType: e.target.value })}
-                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-              >
-                <option value="dots">Dots</option>
-                <option value="lines">Diagonal Lines</option>
-                <option value="noise">Noise / Grain</option>
-              </select>
-            </div>
-          )}
-
-          {bgType === "image" && (
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-gray-600">Image URL</label>
-              <input
-                type="text"
-                placeholder="https://example.com/image.jpg"
-                value={(block.styles?.bgImageUrl as string) || ""}
-                onChange={(e) => onChangeStyles({ bgImageUrl: e.target.value })}
-                className="w-full px-2.5 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
-              />
-            </div>
+            <BackgroundControls
+              styles={block.styles}
+              appearance={{ backgroundColor: (block.styles?.backgroundColor as string) || "#fafafa" }}
+              onChangeStyles={(s) => onChangeStyles(s)}
+              updateAppearance={(_, v) => onChangeStyles({ backgroundColor: v })}
+            />
           )}
         </div>
 

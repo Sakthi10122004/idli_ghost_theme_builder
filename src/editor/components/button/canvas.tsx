@@ -10,13 +10,23 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   const isDark = useCanvasDarkMode();
-  const { label, variant } = block.props;
+  const { label, variant, shape = "pill" } = block.props;
   const isSecondary = variant === "secondary";
   const customShadow = block.styles?.boxShadow;
   const hasCustomShadow = customShadow !== undefined;
   const shadowClass = hasCustomShadow
     ? ""
     : (isSecondary ? "shadow-level-2" : "shadow-level-3");
+
+  const shapeClass = shape === "square"
+    ? "rounded-none"
+    : shape === "rounded"
+      ? "rounded-md"
+      : shape === "circle"
+        ? "rounded-full aspect-square min-w-[2.5rem] min-h-[2.5rem] p-2 inline-flex items-center justify-center text-center"
+        : "rounded-pill";
+
+  const paddingClass = shape === "circle" ? "" : "px-5 py-2";
 
   const buttonStyles = isSecondary
     ? isDark
@@ -28,7 +38,7 @@ export const CanvasElement = ({ block }: {
 
   return (
     <button
-      className={`${buttonStyles} px-5 py-2 text-xs font-semibold tracking-tight select-none cursor-pointer rounded-pill transition-colors`}
+      className={`${buttonStyles} ${shapeClass} ${paddingClass} text-xs font-semibold tracking-tight select-none cursor-pointer transition-colors`}
       style={customShadow && customShadow !== "none" ? { boxShadow: customShadow } : undefined}
     >
       {label}

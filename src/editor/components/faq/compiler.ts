@@ -62,7 +62,7 @@ export const generateHTML = (block: BuilderBlock): string => {
         <dl>
           ${col1.map((item, idx) => renderFaqItem(item, idx)).join("")}
         </dl>
-        <dl className="lg:mt-0 mt-4">
+        <dl class="lg:mt-0 mt-4">
           ${col2.map((item, idx) => renderFaqItem(item, idx + col1.length)).join("")}
         </dl>
       </div>
@@ -197,6 +197,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     line-height: 1.4;
     color: ${appearance.headingColor || 'var(--color-fg)'};
     flex: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   #${wrapperId} .faq-chevron-wrapper {
     display: flex;
@@ -243,6 +245,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 0.95rem;
     line-height: 1.625;
     margin: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   
   /* Utilities used in markup */
@@ -263,6 +267,35 @@ export const generateHTML = (block: BuilderBlock): string => {
   #${wrapperId} .gap-x-8 { column-gap: 2rem; }
   #${wrapperId} .gap-y-0 { row-gap: 0; }
   
+  @media (max-width: 767px) {
+    #${wrapperId} {
+      padding-top: 2.5rem !important;
+      padding-bottom: 2.5rem !important;
+    }
+    #${wrapperId} .faq-inner {
+      padding: 0 1rem;
+    }
+    #${wrapperId} .faq-header {
+      margin-bottom: 1.5rem;
+    }
+    #${wrapperId} .faq-heading {
+      font-size: 1.5rem !important;
+    }
+    #${wrapperId} .faq-item {
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    #${wrapperId} .faq-question {
+      font-size: 1rem;
+    }
+    #${wrapperId} .faq-answer-text {
+      font-size: 0.875rem;
+    }
+    #${wrapperId} .mt-12 {
+      margin-top: 1.5rem;
+    }
+  }
+
   @media (min-width: 1024px) {
     #${wrapperId} .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #${wrapperId} .lg\\:mt-0 { margin-top: 0; }

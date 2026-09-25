@@ -3,10 +3,13 @@ import { BuilderBlock } from "@/types/theme";
 import { FAQProps, FAQItem, defaultProps } from "./schema";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 import { isDarkColor } from "../heading/schema";
 
 export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   const isDark = useCanvasDarkMode();
+  const { deviceMode } = useEditorStore();
+  const isMobile = deviceMode === 'mobile';
   const p = { ...defaultProps, ...block.props } as FAQProps;
   const general = p.general;
   const items = p.items || [];
@@ -46,19 +49,19 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     return (
       <div
         key={item.id}
-        className={`w-full min-w-full p-5 sm:p-6 mb-4 border border-black/5 dark:border-white/10 shadow-xs transition-all duration-200 ${cornerClass}`}
+        className={`w-full min-w-full p-3.5 sm:p-5 md:p-6 mb-3 sm:mb-4 border border-black/5 dark:border-white/10 shadow-xs transition-all duration-200 ${cornerClass}`}
         style={{ backgroundColor: itemBg }}
       >
         <dt className="w-full min-w-full">
           <button
             type="button"
-            className="flex w-full min-w-full items-center justify-between text-left gap-4 group cursor-pointer focus:outline-none"
+            className="flex w-full min-w-full items-center justify-between text-left gap-3 group cursor-pointer focus:outline-none"
             style={{ color: effectiveHeadingColor }}
             aria-controls={`faq-${block.id}-${item.id}`}
             aria-expanded={isOpen}
             onClick={() => toggle(item.id)}
           >
-            <span className="text-base sm:text-lg font-bold leading-snug flex-1 min-w-0 text-brand-ink dark:text-brand-ink">{item.question}</span>
+            <span className="text-sm sm:text-base md:text-lg font-bold leading-snug flex-1 min-w-0 break-words text-brand-ink dark:text-brand-ink">{item.question}</span>
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/20 shrink-0 transition-colors">
               <svg
                 className={`h-4 w-4 transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
@@ -74,12 +77,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         </dt>
         <dd
           className={`grid transition-all duration-300 ease-in-out w-full min-w-full ${
-            isOpen ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-black/5 dark:border-white/10' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'
+            isOpen ? 'grid-rows-[1fr] opacity-100 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-black/5 dark:border-white/10' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'
           }`}
           id={`faq-${block.id}-${item.id}`}
         >
           <div className="overflow-hidden">
-            <p className="text-sm sm:text-base leading-relaxed text-brand-body dark:text-neutral-400 w-full" style={{ color: effectiveSubheadingColor }}>
+            <p className="text-xs sm:text-sm md:text-base leading-relaxed break-words text-brand-body dark:text-neutral-400 w-full" style={{ color: effectiveSubheadingColor }}>
               {item.answer}
             </p>
           </div>
@@ -94,7 +97,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       const col1 = items.slice(0, mid);
       const col2 = items.slice(mid);
       return (
-        <div className="w-full min-w-full mx-auto mt-12 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 lg:grid-cols-2">
+        <div className={`w-full min-w-full mx-auto mt-6 sm:mt-12 max-w-7xl grid grid-cols-1 gap-x-8 gap-y-0 ${isMobile ? '' : 'lg:grid-cols-2'}`}>
           <dl className="w-full min-w-full">
             {col1.map(renderFaqItem)}
           </dl>
@@ -106,10 +109,10 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     } else if (general.layoutStyle === "categorized") {
       const categories = Array.from(new Set(items.map(i => i.category || "General")));
       return (
-        <div className="w-full min-w-full mx-auto mt-12 max-w-3xl">
+        <div className="w-full min-w-full mx-auto mt-6 sm:mt-12 max-w-3xl">
           {categories.map((cat, idx) => (
-            <div key={idx} className="mb-10 w-full min-w-full">
-              <h3 className="text-xl font-bold tracking-tight mb-4 w-full" style={{ color: effectiveHeadingColor }}>{cat}</h3>
+            <div key={idx} className="mb-8 sm:mb-10 w-full min-w-full">
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight mb-3 sm:mb-4 w-full" style={{ color: effectiveHeadingColor }}>{cat}</h3>
               <dl className="w-full min-w-full">
                 {items.filter(i => (i.category || "General") === cat).map(renderFaqItem)}
               </dl>
@@ -121,7 +124,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
     
     // Default: accordion (single column centered)
     return (
-      <div className="w-full min-w-full mx-auto mt-12 max-w-3xl">
+      <div className="w-full min-w-full mx-auto mt-6 sm:mt-12 max-w-3xl">
         <dl className="w-full min-w-full">
           {items.map(renderFaqItem)}
         </dl>
@@ -130,8 +133,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
   };
 
   return (
-    <div className={`relative w-full min-w-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: spacing.paddingTop || "4rem", paddingBottom: spacing.paddingBottom || "4rem" }}>
-      <div className="w-full min-w-full max-w-7xl mx-auto px-6 lg:px-8">
+    <div className={`relative w-full min-w-full ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}`} style={{ ...bgStyle, paddingTop: isMobile ? "2.5rem" : (spacing.paddingTop || "4rem"), paddingBottom: isMobile ? "2.5rem" : (spacing.paddingBottom || "4rem") }}>
+      <div className="w-full min-w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {(general.heading || general.subheading) && (
           <div className="w-full min-w-full mx-auto max-w-4xl text-center mb-8">
             {general.heading && (

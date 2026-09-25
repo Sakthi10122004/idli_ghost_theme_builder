@@ -3,15 +3,25 @@ import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const isPrimary = block.props.variant !== 'secondary';
+  const shape = block.props.shape || 'pill';
+
+  let shapeCss = 'border-radius: var(--radius-pill); padding: 0.5rem 1.5rem;';
+  if (shape === 'square') {
+    shapeCss = 'border-radius: 0px; padding: 0.5rem 1.5rem;';
+  } else if (shape === 'rounded') {
+    shapeCss = 'border-radius: var(--radius-md, 8px); padding: 0.5rem 1.5rem;';
+  } else if (shape === 'circle') {
+    shapeCss = 'border-radius: 50%; aspect-ratio: 1 / 1; min-width: 2.5rem; min-height: 2.5rem; padding: 0.5rem; text-align: center;';
+  }
+
   return `<style>
   #btn-${block.id} {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1.5rem;
+    ${shapeCss}
     font-size: 0.75rem;
     font-weight: 600;
-    border-radius: var(--radius-pill);
     text-decoration: none;
     transition: all 0.2s ease;
     ${isPrimary ? `
