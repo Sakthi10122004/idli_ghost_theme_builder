@@ -9,6 +9,13 @@ import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2, ChevronUp, ChevronDown, Plus, Sparkles, Ungroup, BoxSelect, Columns } from "lucide-react";
 import { getBlockTemplate } from "@/editor/components/blockTemplates";
+import { getBackgroundStyle } from "@/editor/components/shared/background";
+
+const SELF_RENDERING_BG_COMPONENTS = new Set([
+  "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
+  "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
+  "cards", "pricing-table", "container", "columns"
+]);
 
 // Sortable Wrapper Component with hover/selection Drag Handle
 function SortableElement({
@@ -790,12 +797,8 @@ export default function Canvas() {
         backgroundColor, 
         paddingTop, 
         paddingBottom,
-        backgroundImage,
         backgroundVideoUrl,
         enableParallax = false,
-        backgroundSize = "cover",
-        backgroundRepeat = "no-repeat",
-        backgroundPosition = "center",
         width,
         contentWidth,
         display,
@@ -839,6 +842,9 @@ export default function Canvas() {
           effectiveBg = `rgba(${r}, ${g}, ${b}, 0.75)`;
         }
       }
+      const blockBgStyle = SELF_RENDERING_BG_COMPONENTS.has(block.type)
+        ? {}
+        : getBackgroundStyle(block.styles, { backgroundColor: resolvedBg });
 
       return (
         <SortableElement
@@ -849,16 +855,11 @@ export default function Canvas() {
           onDelete={handleDelete}
           isGlobal={isGlobal}
           style={{
-            backgroundColor: (block.type === "container" || block.type === "columns") ? undefined : effectiveBg,
+            ...blockBgStyle,
             paddingTop: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingTop) || undefined),
             paddingBottom: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingBottom) || undefined),
             paddingLeft: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingLeft) || undefined),
             paddingRight: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingRight) || undefined),
-            backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
-            backgroundSize: backgroundImage ? (resolveStyle(backgroundSize) || "cover") : undefined,
-            backgroundRepeat: backgroundImage ? (resolveStyle(backgroundRepeat) || "no-repeat") : undefined,
-            backgroundPosition: backgroundImage ? (resolveStyle(backgroundPosition) || "center") : undefined,
-            backgroundAttachment: (backgroundImage && enableParallax) ? "fixed" : undefined,
             clipPath: (backgroundVideoUrl && enableParallax) ? "inset(0px)" : undefined,
             width: resolveStyle(width) || undefined,
             maxWidth: "100%",
@@ -876,6 +877,8 @@ export default function Canvas() {
             color: resolvedText || undefined,
           }}
           className={`builder-block builder-block-${block.type} relative w-full ${
+            block.styles?.backgroundType === "mesh" ? "mesh-glow" : ""
+          } ${
             block.type === "header" || block.type === "footer" || hasShadow || hasHover
               ? "overflow-visible"
               : "overflow-hidden"

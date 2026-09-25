@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { Ungroup, Columns, BoxSelect } from "lucide-react";
 import { SpacingControl } from "../shared/SpacingControl";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 export const SidebarElement = ({
   block,
@@ -17,11 +18,7 @@ export const SidebarElement = ({
 
   const maxWidth = (block.props?.maxWidth as string) || (block.styles?.width as string) || "1200px";
   const alignment = (block.props?.alignment as string) || "center";
-  const paddingX = (block.props?.paddingX as string) || "24px";
-  const paddingY = (block.props?.paddingY as string) || "0px";
   const direction = (block.props?.direction as string) || "column";
-  const gap = (block.props?.gap as string) || "16px";
-  const currentBg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
 
   const widthPresets = [
     { label: "Card (380px)", value: "380px" },
@@ -31,27 +28,6 @@ export const SidebarElement = ({
     { label: "Wide (1200px)", value: "1200px" },
     { label: "Full (100%)", value: "100%" },
   ];
-
-  const padOptions = [
-    { label: "0px", value: "0px" },
-    { label: "16px", value: "16px" },
-    { label: "24px", value: "24px" },
-    { label: "32px", value: "32px" },
-    { label: "48px", value: "48px" },
-  ];
-
-  const bgPresets = [
-    { label: "Transparent", value: "transparent" },
-    { label: "White", value: "#ffffff" },
-    { label: "Soft", value: "#fafafa" },
-    { label: "Muted", value: "#f4f4f5" },
-    { label: "Dark", value: "#171717" },
-  ];
-
-  const handleBgChange = (color: string) => {
-    onChangeStyles?.({ backgroundColor: color });
-    onChangeProps({ backgroundColor: color });
-  };
 
   const handleWidthChange = (val: string) => {
     onChangeProps({ maxWidth: val });
@@ -215,54 +191,20 @@ export const SidebarElement = ({
         />
       </div>
 
-      {/* Background Color */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between items-center">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">
-            Background Color
-          </label>
-          {currentBg && (
-            <button
-              type="button"
-              onClick={() => handleBgChange("")}
-              className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-            >
-              Clear / Transparent
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {bgPresets.map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => handleBgChange(preset.value)}
-              className={`px-2 py-1 rounded-sm text-[10px] font-sans border transition-all flex items-center gap-1 cursor-pointer ${
-                currentBg === preset.value
-                  ? "border-brand-primary ring-1 ring-brand-primary font-semibold text-brand-ink"
-                  : "border-brand-hairline text-brand-body hover:border-brand-hairline-strong bg-white dark:bg-zinc-800"
-              }`}
-            >
-              <span
-                className="w-2.5 h-2.5 rounded-full border border-black/10 inline-block shrink-0"
-                style={{ backgroundColor: preset.value === "transparent" ? "transparent" : preset.value }}
-              />
-              <span>{preset.label}</span>
-            </button>
-          ))}
-          <input
-            type="color"
-            value={
-              typeof currentBg === "string" && currentBg.startsWith("#")
-                ? currentBg
-                : "#ffffff"
-            }
-            onChange={(e) => handleBgChange(e.target.value)}
-            className="w-7 h-7 rounded border border-brand-hairline cursor-pointer p-0 shrink-0"
-            title="Custom Background Color"
-          />
-        </div>
-      </div>
+      <BackgroundControls
+        styles={block.styles}
+        appearance={{ backgroundColor: (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "transparent" }}
+        onChangeStyles={(s) => {
+          onChangeStyles?.(s);
+          if (s.backgroundColor !== undefined) {
+            onChangeProps({ backgroundColor: s.backgroundColor });
+          }
+        }}
+        updateAppearance={(_, v) => {
+          onChangeStyles?.({ backgroundColor: v });
+          onChangeProps({ backgroundColor: v });
+        }}
+      />
 
       <div className="p-2.5 bg-brand-canvas-soft rounded-sm border border-brand-hairline/80 text-[11px] text-brand-mute leading-relaxed">
         Container centers and constrains inner content with custom widths and backgrounds.

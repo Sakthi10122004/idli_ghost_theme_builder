@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { getBackgroundStyle } from "../shared/background";
 
 interface PricingTier {
   name: string;
@@ -21,8 +22,11 @@ export const CanvasElement = ({ block }: {
   const isDark = useCanvasDarkMode();
   const isMobile = deviceMode === "mobile";
   const tiers = block.props.tiers || [];
+  const styles = block.styles || {};
+  const bgStyle = getBackgroundStyle(styles);
+
   return (
-    <div className="pricing-table-block py-8 text-center w-full">
+    <div className={`pricing-table-block py-8 text-center w-full ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}`} style={bgStyle}>
       {block.props.title && <h3 className={`text-sm font-mono uppercase tracking-wider mb-6 ${isDark ? "text-neutral-400" : "text-muted"}`}>{block.props.title}</h3>}
       <div className={`pricing-grid flex ${isMobile ? "flex-col" : "flex-col md:flex-row"} justify-center gap-6 max-w-4xl mx-auto`}>
         {tiers.map((tier: PricingTier, idx: number) => (

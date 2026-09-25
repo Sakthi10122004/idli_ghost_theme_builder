@@ -2,10 +2,12 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveCardsProps, CardItem, CardsProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 export const SidebarElement = ({
   block,
   onChangeProps,
+  onChangeStyles,
 }: {
   block: BuilderBlock;
   onChangeProps: (props: Record<string, unknown>) => void;
@@ -142,6 +144,13 @@ export const SidebarElement = ({
           <option value="minimal">Minimal</option>
         </select>
       </div>
+
+      <BackgroundControls
+        styles={block.styles}
+        appearance={{ backgroundColor: (block.styles?.backgroundColor as string) || "transparent" }}
+        onChangeStyles={(s) => onChangeStyles?.(s)}
+        updateAppearance={(_, v) => onChangeStyles?.({ backgroundColor: v })}
+      />
 
       <div className="border-t border-gray-100 pt-3">
         <label className="text-[11px] font-semibold text-gray-700 block mb-2">Cards List</label>

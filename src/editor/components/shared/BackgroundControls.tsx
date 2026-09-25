@@ -74,7 +74,23 @@ export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, 
 
       {(styles?.backgroundType || "solid") === "solid" && (
         <div className="flex flex-col gap-1.5 mt-2">
-          <FieldLabel>Background Color</FieldLabel>
+          <div className="flex justify-between items-center">
+            <FieldLabel>Background Color</FieldLabel>
+            {(appearance?.backgroundColor || styles?.backgroundColor) && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (updateAppearance) {
+                    updateAppearance("backgroundColor", "transparent");
+                  }
+                  onChangeStyles({ backgroundColor: "transparent" });
+                }}
+                className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
+              >
+                Set Transparent
+              </button>
+            )}
+          </div>
           <div className="flex gap-2 items-center">
             <input
               type="color"

@@ -1,6 +1,6 @@
 import { ThemeDocument, BuilderBlock } from "../../types/theme";
 import { componentRegistry } from "@/editor/components/registry";
-import { toTranslucent } from "@/editor/components/shared/background";
+import { getBackgroundCSS } from "@/editor/components/shared/background";
 import { CASPER_ICON_PARTIALS } from "./casperIcons";
 
 /**
@@ -93,38 +93,27 @@ function getInlineStyles(block: BuilderBlock): string {
   const glassBlur = isLogoCloud ? undefined : resolveStyleValue(styles.backdropBlur);
   const glassEnabled = !!glassBlur && glassBlur !== "none" && glassBlur !== "0px";
 
-  if (styles.backgroundColor) {
-    let val = resolveStyleValue(styles.backgroundColor);
-    if (val === "#ffffff" || val === "#fff") {
-      val = "var(--color-bg)";
-    } else if (val === "#fafafa") {
-      val = "var(--color-canvas-soft, #fafafa)";
-    }
-    if (glassEnabled && val) {
-      val = toTranslucent(val);
-    }
-    if (val) stylePairs.push(`background-color: ${val}`);
-  } else if (glassEnabled) {
-    stylePairs.push(`background-color: rgba(255, 255, 255, 0.75)`);
-  }
-  if (styles.backgroundImage) {
-    const val = resolveStyleValue(styles.backgroundImage);
-    if (val) {
-      stylePairs.push(`background-image: url('${val}')`);
+  const selfRendering = [
+    "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
+    "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
+    "cards", "pricing-table", "container", "columns", "section"
+  ].includes(block.type);
 
-      const size = resolveStyleValue(styles.backgroundSize) || "cover";
-      stylePairs.push(`background-size: ${size}`);
-
-      const repeat = resolveStyleValue(styles.backgroundRepeat) || "no-repeat";
-      stylePairs.push(`background-repeat: ${repeat}`);
-
-      const pos = resolveStyleValue(styles.backgroundPosition) || "center";
-      stylePairs.push(`background-position: ${pos}`);
-
-      const p = resolveStyleValue(styles.enableParallax);
-      if (p === 'true' || styles.enableParallax === true) {
-        stylePairs.push(`background-attachment: fixed`);
+  if (!selfRendering) {
+    const hasCustomBg = Boolean(
+      styles.backgroundColor ||
+      (styles.backgroundType && styles.backgroundType !== "solid") ||
+      styles.backgroundImage ||
+      styles.bgImageUrl
+    );
+    if (hasCustomBg) {
+      const rawBgCss = getBackgroundCSS(styles);
+      if (rawBgCss) {
+        const pairs = rawBgCss.split(";").map((s) => s.trim()).filter(Boolean);
+        stylePairs.push(...pairs);
       }
+    } else if (glassEnabled) {
+      stylePairs.push(`background-color: rgba(255, 255, 255, 0.75)`);
     }
   }
   if (styles.borderRadius) {

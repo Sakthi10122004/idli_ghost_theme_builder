@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { Ungroup } from "lucide-react";
 import { SpacingControl } from "../shared/SpacingControl";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 export const SidebarElement = ({
   block,
@@ -15,16 +16,6 @@ export const SidebarElement = ({
 }) => {
   const { unwrapBlock } = useEditorStore();
   const contentWidth = (block.props?.contentWidth as string) || (block.styles?.contentWidth as string) || "1200px";
-
-  const paddingOptions = [
-    { label: "None", value: "0px" },
-    { label: "Compact", value: "32px" },
-    { label: "Normal", value: "64px" },
-    { label: "Spacious", value: "96px" },
-    { label: "Hero", value: "128px" },
-  ];
-
-  const currentPadding = (block.styles?.paddingTop as string) || "64px";
 
   const widthOptions = [
     { label: "Full Width", value: "100%" },
@@ -89,60 +80,12 @@ export const SidebarElement = ({
         />
       </div>
 
-      {/* Background Color */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between items-center">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">
-            Background Color
-          </label>
-          {block.styles?.backgroundColor && (
-            <button
-              type="button"
-              onClick={() => onChangeStyles({ backgroundColor: "" })}
-              className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-            >
-              Clear / Transparent
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {[
-            { label: "Transparent", value: "transparent" },
-            { label: "White", value: "#ffffff" },
-            { label: "Soft", value: "#fafafa" },
-            { label: "Muted", value: "#f4f4f5" },
-            { label: "Dark", value: "#171717" },
-          ].map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => onChangeStyles({ backgroundColor: preset.value })}
-              className={`px-2 py-1 rounded-sm text-[10px] font-sans border transition-all flex items-center gap-1 cursor-pointer ${
-                block.styles?.backgroundColor === preset.value
-                  ? "border-brand-primary ring-1 ring-brand-primary font-semibold text-brand-ink"
-                  : "border-brand-hairline text-brand-body hover:border-brand-hairline-strong bg-white dark:bg-zinc-800"
-              }`}
-            >
-              <span
-                className="w-2.5 h-2.5 rounded-full border border-black/10 inline-block shrink-0"
-                style={{ backgroundColor: preset.value === "transparent" ? "transparent" : preset.value }}
-              />
-              <span>{preset.label}</span>
-            </button>
-          ))}
-          <input
-            type="color"
-            value={
-              typeof block.styles?.backgroundColor === "string" && block.styles.backgroundColor.startsWith("#")
-                ? block.styles.backgroundColor
-                : "#ffffff"
-            }
-            onChange={(e) => onChangeStyles({ backgroundColor: e.target.value })}
-            className="w-7 h-7 rounded border border-brand-hairline cursor-pointer p-0 shrink-0"
-            title="Custom Background Color"
-          />
-        </div>
-      </div>
+      <BackgroundControls
+        styles={block.styles}
+        appearance={{ backgroundColor: (block.styles?.backgroundColor as string) || "transparent" }}
+        onChangeStyles={(s) => onChangeStyles(s)}
+        updateAppearance={(_, v) => onChangeStyles({ backgroundColor: v })}
+      />
 
       <div className="p-2.5 bg-brand-canvas-soft rounded-sm border border-brand-hairline/80 text-[11px] text-brand-mute leading-relaxed">
         Section serves as a top-level container with custom background and padding.

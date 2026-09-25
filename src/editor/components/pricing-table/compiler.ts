@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { escapeHtml, escapeUrl } from "../shared/escape";
+import { getBackgroundCSS } from "../shared/background";
 
 interface PricingTier {
   name: string;
@@ -13,6 +14,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const tiers: PricingTier[] = Array.isArray(block.props?.tiers) ? block.props.tiers : [];
   const title = block.props?.title as string | undefined;
   const wrapperId = `pricing-${block.id}`;
+  const bgCss = getBackgroundCSS(block.styles);
 
   return `<style>
   #${wrapperId} {
@@ -20,6 +22,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     text-align: center;
     width: 100%;
     box-sizing: border-box;
+    ${bgCss}
   }
   #${wrapperId} .pricing-title {
     font-size: 0.875rem;
@@ -113,7 +116,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-on-primary, #000000) !important;
   }
 </style>
-<div id="${wrapperId}" class="pricing-table-block">
+<div id="${wrapperId}" class="pricing-table-block ${block.styles?.backgroundType === "mesh" ? "mesh-glow" : ""}">
   ${title ? `<h3 class="pricing-title">${escapeHtml(title)}</h3>` : ""}
   <div class="pricing-grid">
     ${tiers.map((tier) => `

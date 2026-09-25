@@ -4,6 +4,27 @@ import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
 import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
 import { SpacingControl } from "@/editor/components/shared/SpacingControl";
+import { BackgroundControls } from "@/editor/components/shared/BackgroundControls";
+
+const HAS_DEDICATED_BG_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "newsletter",
+  "post-grid",
+  "testimonials",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "related-posts",
+  "stats",
+  "team",
+  "section",
+  "container",
+  "columns",
+  "cards",
+  "pricing-table",
+]);
 
 export default function RightSidebar() {
   const {
@@ -28,12 +49,6 @@ export default function RightSidebar() {
       return String((val as { desktop?: unknown }).desktop || "");
     }
     return String(val);
-  };
-
-  const handlePropChange = (key: string, value: unknown) => {
-    if (selectedBlockId) {
-      updateBlockProps(selectedBlockId, { [key]: value });
-    }
   };
 
   const handleStyleChange = (key: string, value: unknown) => {
@@ -427,34 +442,22 @@ export default function RightSidebar() {
                 showHorizontal={true}
               />
             </div>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-sans font-semibold text-brand-body">Background Color</label>
-                    {selectedBlock.styles.backgroundColor && (
-                      <button
-                        onClick={() => handleStyleChange("backgroundColor", "")}
-                        className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-                      >
-                        Set Transparent
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={getInputValue(selectedBlock.styles.backgroundColor) || "#ffffff"}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-12 h-8 border border-brand-hairline rounded-sm focus:outline-none bg-transparent cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Transparent"
-                      value={getInputValue(selectedBlock.styles.backgroundColor)}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
-                    />
-                  </div>
-                </div>
+            {!HAS_DEDICATED_BG_CONTROL.has(selectedBlock.type) && (
+              <BackgroundControls
+                styles={selectedBlock.styles}
+                appearance={{ backgroundColor: (selectedBlock.styles?.backgroundColor as string) || "" }}
+                onChangeStyles={(styles) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, styles);
+                  }
+                }}
+                updateAppearance={(_, v) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, { backgroundColor: v });
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
       ) : (

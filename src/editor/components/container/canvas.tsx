@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { getBackgroundStyle } from "../shared/background";
 
 export const CanvasElement = ({
   block,
@@ -26,8 +27,10 @@ export const CanvasElement = ({
   const marginLeft = alignment === "left" ? "0" : "auto";
   const marginRight = alignment === "right" ? "0" : "auto";
 
-  const bgColor = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || undefined;
-  const hasBg = bgColor && bgColor !== "transparent";
+  const rawBg = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || "";
+  const bgType = block?.styles?.backgroundType || "solid";
+  const hasBg = Boolean((rawBg && rawBg !== "transparent") || (bgType && bgType !== "solid"));
+  const bgStyle = hasBg ? getBackgroundStyle(block?.styles, { backgroundColor: rawBg }) : {};
 
   return (
     <div
@@ -40,7 +43,7 @@ export const CanvasElement = ({
         paddingRight,
         paddingTop,
         paddingBottom,
-        backgroundColor: hasBg ? bgColor : undefined,
+        ...bgStyle,
         display: direction === "row" ? "flex" : undefined,
         flexDirection: direction === "row" ? "row" : undefined,
         flexWrap: direction === "row" ? "wrap" : undefined,

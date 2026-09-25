@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { getBackgroundCSS } from "../shared/background";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
   const cols = Number(block.props?.columnsCount) || 2;
@@ -23,8 +24,10 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
     ? `@media (max-width: 768px) { #cols-${block.id} { grid-template-columns: 1fr !important; } }`
     : "";
 
-  const bg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
-  const hasBg = bg && bg !== "transparent";
+  const rawBg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
+  const bgType = block.styles?.backgroundType || "solid";
+  const hasBg = Boolean((rawBg && rawBg !== "transparent") || (bgType && bgType !== "solid"));
+  const bgCss = hasBg ? getBackgroundCSS(block.styles, { backgroundColor: rawBg }) : "";
   const pt = (block.styles?.paddingTop as string) || (block.props?.padding as string) || "";
   const pb = (block.styles?.paddingBottom as string) || (block.props?.padding as string) || "";
   const pl = (block.styles?.paddingLeft as string) || (block.props?.padding as string) || "";
@@ -35,7 +38,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
     : (hasBg ? "padding: 16px;" : "");
 
   const extraStyles = [
-    hasBg ? `background-color: ${bg};` : "",
+    bgCss,
     paddingStyle,
     hasBg ? "border-radius: 6px;" : "",
   ].filter(Boolean).join(" ");

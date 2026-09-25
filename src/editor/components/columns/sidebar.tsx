@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { SpacingControl } from "../shared/SpacingControl";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 export const SidebarElement = ({
   block,
@@ -178,73 +179,20 @@ export const SidebarElement = ({
         />
       </div>
 
-      {/* Background Color */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between items-center">
-          <label className="text-[11px] font-sans font-semibold text-brand-body">
-            Background Color
-          </label>
-          {(block.styles?.backgroundColor || block.props?.backgroundColor) && (
-            <button
-              type="button"
-              onClick={() => {
-                onChangeStyles?.({ backgroundColor: "" });
-                onChangeProps({ backgroundColor: "" });
-              }}
-              className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-            >
-              Clear / Transparent
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {[
-            { label: "Transparent", value: "transparent" },
-            { label: "White", value: "#ffffff" },
-            { label: "Soft", value: "#fafafa" },
-            { label: "Muted", value: "#f4f4f5" },
-            { label: "Dark", value: "#171717" },
-          ].map((preset) => {
-            const currentBg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
-            return (
-              <button
-                key={preset.value}
-                type="button"
-                onClick={() => {
-                  onChangeStyles?.({ backgroundColor: preset.value });
-                  onChangeProps({ backgroundColor: preset.value });
-                }}
-                className={`px-2 py-1 rounded-sm text-[10px] font-sans border transition-all flex items-center gap-1 cursor-pointer ${
-                  currentBg === preset.value
-                    ? "border-brand-primary ring-1 ring-brand-primary font-semibold text-brand-ink"
-                    : "border-brand-hairline text-brand-body hover:border-brand-hairline-strong bg-white dark:bg-zinc-800"
-                }`}
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full border border-black/10 inline-block shrink-0"
-                  style={{ backgroundColor: preset.value === "transparent" ? "transparent" : preset.value }}
-                />
-                <span>{preset.label}</span>
-              </button>
-            );
-          })}
-          <input
-            type="color"
-            value={
-              typeof (block.styles?.backgroundColor || block.props?.backgroundColor) === "string" &&
-              ((block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string)).startsWith("#")
-                ? ((block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string))
-                : "#ffffff"
-            }
-            onChange={(e) => {
-              onChangeStyles?.({ backgroundColor: e.target.value });
-              onChangeProps({ backgroundColor: e.target.value });
-            }}
-            className="w-7 h-7 rounded border border-brand-hairline cursor-pointer p-0 shrink-0"
-            title="Custom Background Color"
-          />
-        </div>
-      </div>
+      <BackgroundControls
+        styles={block.styles}
+        appearance={{ backgroundColor: (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "transparent" }}
+        onChangeStyles={(s) => {
+          onChangeStyles?.(s);
+          if (s.backgroundColor !== undefined) {
+            onChangeProps({ backgroundColor: s.backgroundColor });
+          }
+        }}
+        updateAppearance={(_, v) => {
+          onChangeStyles?.({ backgroundColor: v });
+          onChangeProps({ backgroundColor: v });
+        }}
+      />
     </div>
   );
 };
