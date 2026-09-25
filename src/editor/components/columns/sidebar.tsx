@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { SpacingControl } from "../shared/SpacingControl";
 
 export const SidebarElement = ({
   block,
@@ -154,43 +155,27 @@ export const SidebarElement = ({
         />
       </div>
 
-      {/* Padding */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-sans font-semibold text-brand-body">
-          Container Padding
-        </label>
-        <div className="grid grid-cols-4 gap-1">
-          {[
-            { label: "None", value: "0px" },
-            { label: "Compact", value: "16px" },
-            { label: "Normal", value: "24px" },
-            { label: "Spacious", value: "32px" },
-          ].map((opt) => {
-            const currentPad = (block.styles?.paddingTop as string) || (block.props?.padding as string) || "0px";
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChangeStyles?.({
-                    paddingTop: opt.value,
-                    paddingBottom: opt.value,
-                    paddingLeft: opt.value,
-                    paddingRight: opt.value,
-                  });
-                  onChangeProps({ padding: opt.value });
-                }}
-                className={`px-1 py-1.5 rounded-sm text-[10px] font-sans border text-center transition-all cursor-pointer ${
-                  currentPad === opt.value
-                    ? "bg-brand-primary text-white border-brand-primary font-bold shadow-xs"
-                    : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Spacing Sliders */}
+      <div className="border-t border-brand-hairline pt-3">
+        <SpacingControl
+          title="Spacing"
+          topValue={(block.styles?.paddingTop as string) || (block.props?.padding as string) || "0px"}
+          bottomValue={(block.styles?.paddingBottom as string) || (block.props?.padding as string) || "0px"}
+          horizontalValue={(block.styles?.paddingLeft as string) || (block.props?.padding as string) || "0px"}
+          onChangeTop={(val) => {
+            onChangeStyles?.({ paddingTop: val });
+            onChangeProps({ padding: val });
+          }}
+          onChangeBottom={(val) => {
+            onChangeStyles?.({ paddingBottom: val });
+            onChangeProps({ padding: val });
+          }}
+          onChangeHorizontal={(val) => {
+            onChangeStyles?.({ paddingLeft: val, paddingRight: val });
+            onChangeProps({ padding: val });
+          }}
+          showHorizontal={true}
+        />
       </div>
 
       {/* Background Color */}

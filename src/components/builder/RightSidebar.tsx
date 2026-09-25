@@ -3,6 +3,7 @@
 import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
 import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
+import { SpacingControl } from "@/editor/components/shared/SpacingControl";
 
 export default function RightSidebar() {
   const {
@@ -383,51 +384,49 @@ export default function RightSidebar() {
               </div>
             )}
 
-            {/* Section/Spacing Styles */}
-            {(selectedBlock.type === "section" || selectedBlock.type === "container" || selectedBlock.type === "columns" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
+            {/* Section Outer / Content Width */}
+            {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
               <>
-                {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
-                  <>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 100%, 1400px"
-                        value={getInputValue(selectedBlock.styles.width)}
-                        onChange={(e) => handleStyleChange("width", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 1200px, 800px"
-                        value={getInputValue(selectedBlock.styles.contentWidth)}
-                        onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      />
-                    </div>
-                  </>
-                )}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Top</label>
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
                   <input
                     type="text"
-                    value={getInputValue(selectedBlock.styles.paddingTop)}
-                    onChange={(e) => handleStyleChange("paddingTop", e.target.value)}
+                    placeholder="e.g. 100%, 1400px"
+                    value={getInputValue(selectedBlock.styles.width)}
+                    onChange={(e) => handleStyleChange("width", e.target.value)}
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Bottom</label>
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
                   <input
                     type="text"
-                    value={getInputValue(selectedBlock.styles.paddingBottom)}
-                    onChange={(e) => handleStyleChange("paddingBottom", e.target.value)}
+                    placeholder="e.g. 1200px, 800px"
+                    value={getInputValue(selectedBlock.styles.contentWidth)}
+                    onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
                 </div>
+              </>
+            )}
+
+            {/* Spacing Controls with live sliders */}
+            <div className="border-t border-brand-hairline pt-3">
+              <SpacingControl
+                title="Spacing"
+                topValue={getInputValue(selectedBlock.styles.paddingTop)}
+                bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
+                leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
+                rightValue={getInputValue(selectedBlock.styles.paddingRight)}
+                onChangeTop={(val) => handleStyleChange("paddingTop", val)}
+                onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
+                onChangeHorizontal={(val) => {
+                  handleStyleChange("paddingLeft", val);
+                  handleStyleChange("paddingRight", val);
+                }}
+                showHorizontal={true}
+              />
+            </div>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <label className="text-[11px] font-sans font-semibold text-brand-body">Background Color</label>
@@ -456,9 +455,6 @@ export default function RightSidebar() {
                     />
                   </div>
                 </div>
-
-              </>
-            )}
           </div>
         </div>
       ) : (

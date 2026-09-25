@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { Ungroup } from "lucide-react";
+import { SpacingControl } from "../shared/SpacingControl";
 
 export const SidebarElement = ({
   block,
@@ -70,60 +71,22 @@ export const SidebarElement = ({
         </select>
       </div>
 
-      {/* Vertical Padding Presets */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-sans font-semibold text-brand-body">
-          Vertical Spacing
-        </label>
-        <div className="grid grid-cols-3 gap-1.5">
-          {paddingOptions.map((opt) => {
-            const isActive = currentPadding === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChangeStyles({
-                    paddingTop: opt.value,
-                    paddingBottom: opt.value,
-                  });
-                  onChangeProps({ verticalPadding: opt.label.toLowerCase() });
-                }}
-                className={`px-2 py-1.5 rounded-sm text-[11px] font-sans font-medium border text-center transition-all ${
-                  isActive
-                    ? "bg-brand-primary text-white border-brand-primary shadow-xs"
-                    : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Custom Padding Input */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 flex flex-col gap-1">
-          <label className="text-[10px] font-mono text-brand-mute uppercase">Padding Top</label>
-          <input
-            type="text"
-            value={(block.styles?.paddingTop as string) || "64px"}
-            onChange={(e) => onChangeStyles({ paddingTop: e.target.value })}
-            placeholder="e.g. 64px"
-            className="w-full px-2.5 py-1 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
-          />
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <label className="text-[10px] font-mono text-brand-mute uppercase">Padding Bottom</label>
-          <input
-            type="text"
-            value={(block.styles?.paddingBottom as string) || "64px"}
-            onChange={(e) => onChangeStyles({ paddingBottom: e.target.value })}
-            placeholder="e.g. 64px"
-            className="w-full px-2.5 py-1 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
-          />
-        </div>
+      {/* Spacing Sliders */}
+      <div className="border-t border-brand-hairline pt-3">
+        <SpacingControl
+          title="Spacing"
+          topValue={(block.styles?.paddingTop as string) || "64px"}
+          bottomValue={(block.styles?.paddingBottom as string) || "64px"}
+          onChangeTop={(val) => {
+            onChangeStyles({ paddingTop: val });
+            onChangeProps({ verticalPadding: val });
+          }}
+          onChangeBottom={(val) => {
+            onChangeStyles({ paddingBottom: val });
+            onChangeProps({ verticalPadding: val });
+          }}
+          showHorizontal={false}
+        />
       </div>
 
       {/* Background Color */}

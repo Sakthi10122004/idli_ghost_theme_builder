@@ -25,11 +25,18 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
 
   const bg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
   const hasBg = bg && bg !== "transparent";
-  const padding = (block.styles?.paddingTop as string) || (block.props?.padding as string) || "";
+  const pt = (block.styles?.paddingTop as string) || (block.props?.padding as string) || "";
+  const pb = (block.styles?.paddingBottom as string) || (block.props?.padding as string) || "";
+  const pl = (block.styles?.paddingLeft as string) || (block.props?.padding as string) || "";
+  const pr = (block.styles?.paddingRight as string) || (block.props?.padding as string) || "";
+
+  const paddingStyle = pt || pb || pl || pr
+    ? `padding-top: ${pt || "0"}; padding-bottom: ${pb || "0"}; padding-left: ${pl || "0"}; padding-right: ${pr || "0"};`
+    : (hasBg ? "padding: 16px;" : "");
 
   const extraStyles = [
     hasBg ? `background-color: ${bg};` : "",
-    padding ? `padding: ${padding};` : (hasBg ? "padding: 16px;" : ""),
+    paddingStyle,
     hasBg ? "border-radius: 6px;" : "",
   ].filter(Boolean).join(" ");
 

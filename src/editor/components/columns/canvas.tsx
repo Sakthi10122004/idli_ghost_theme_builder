@@ -36,8 +36,11 @@ export const CanvasElement = ({
 
   const isMobile = deviceMode === "mobile" && stackOnMobile;
   const bgColor = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || undefined;
-  const hasBg = bgColor && bgColor !== "transparent";
-  const paddingVal = (block?.styles?.paddingTop as string) || (block?.props?.padding as string) || undefined;
+  const hasBg = Boolean(bgColor && bgColor !== "transparent");
+  const pt = (block?.styles?.paddingTop as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
+  const pb = (block?.styles?.paddingBottom as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
+  const pl = (block?.styles?.paddingLeft as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
+  const pr = (block?.styles?.paddingRight as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -61,7 +64,10 @@ export const CanvasElement = ({
           width: "100%",
           boxSizing: "border-box",
           backgroundColor: hasBg ? bgColor : undefined,
-          padding: paddingVal || (hasBg ? "16px" : undefined),
+          paddingTop: pt,
+          paddingBottom: pb,
+          paddingLeft: pl,
+          paddingRight: pr,
         }}
       >
         {renderChildren ? renderChildren() : null}

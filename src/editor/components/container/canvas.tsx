@@ -16,8 +16,10 @@ export const CanvasElement = ({
 
   const maxWidth = (block?.props?.maxWidth as string) || (block?.styles?.width as string) || "1200px";
   const alignment = (block?.props?.alignment as string) || "center";
-  const paddingX = (block?.props?.paddingX as string) || "24px";
-  const paddingY = (block?.props?.paddingY as string) || "0px";
+  const paddingTop = (block?.styles?.paddingTop as string) || (block?.props?.paddingY as string) || "0px";
+  const paddingBottom = (block?.styles?.paddingBottom as string) || (block?.props?.paddingY as string) || "0px";
+  const paddingLeft = (block?.styles?.paddingLeft as string) || (block?.props?.paddingX as string) || "24px";
+  const paddingRight = (block?.styles?.paddingRight as string) || (block?.props?.paddingX as string) || "24px";
   const direction = (block?.props?.direction as string) || "column";
   const gap = (block?.props?.gap as string) || "16px";
 
@@ -34,10 +36,10 @@ export const CanvasElement = ({
         maxWidth,
         marginLeft,
         marginRight,
-        paddingLeft: paddingX,
-        paddingRight: paddingX,
-        paddingTop: paddingY,
-        paddingBottom: paddingY,
+        paddingLeft,
+        paddingRight,
+        paddingTop,
+        paddingBottom,
         backgroundColor: hasBg ? bgColor : undefined,
         display: direction === "row" ? "flex" : undefined,
         flexDirection: direction === "row" ? "row" : undefined,

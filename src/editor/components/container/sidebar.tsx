@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useEditorStore } from "@/store/editorStore";
 import { Ungroup, Columns, BoxSelect } from "lucide-react";
+import { SpacingControl } from "../shared/SpacingControl";
 
 export const SidebarElement = ({
   block,
@@ -191,50 +192,27 @@ export const SidebarElement = ({
         </div>
       </div>
 
-      {/* Horizontal Padding */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-sans font-semibold text-brand-body">
-          Side Padding (Horizontal)
-        </label>
-        <div className="grid grid-cols-5 gap-1">
-          {padOptions.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onChangeProps({ paddingX: opt.value })}
-              className={`px-1 py-1.5 rounded-sm text-[10px] font-mono border text-center transition-all ${
-                paddingX === opt.value
-                  ? "bg-brand-primary text-white border-brand-primary font-bold shadow-xs"
-                  : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Vertical Padding */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-sans font-semibold text-brand-body">
-          Vertical Padding (Top & Bottom)
-        </label>
-        <div className="grid grid-cols-5 gap-1">
-          {padOptions.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onChangeProps({ paddingY: opt.value })}
-              className={`px-1 py-1.5 rounded-sm text-[10px] font-mono border text-center transition-all ${
-                paddingY === opt.value
-                  ? "bg-brand-primary text-white border-brand-primary font-bold shadow-xs"
-                  : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+      {/* Spacing Sliders */}
+      <div className="border-t border-brand-hairline pt-3">
+        <SpacingControl
+          title="Spacing"
+          topValue={(block.styles?.paddingTop as string) || (block.props?.paddingY as string) || "0px"}
+          bottomValue={(block.styles?.paddingBottom as string) || (block.props?.paddingY as string) || "0px"}
+          horizontalValue={(block.styles?.paddingLeft as string) || (block.props?.paddingX as string) || "24px"}
+          onChangeTop={(val) => {
+            onChangeStyles?.({ paddingTop: val });
+            onChangeProps({ paddingY: val });
+          }}
+          onChangeBottom={(val) => {
+            onChangeStyles?.({ paddingBottom: val });
+            onChangeProps({ paddingY: val });
+          }}
+          onChangeHorizontal={(val) => {
+            onChangeStyles?.({ paddingLeft: val, paddingRight: val });
+            onChangeProps({ paddingX: val });
+          }}
+          showHorizontal={true}
+        />
       </div>
 
       {/* Background Color */}

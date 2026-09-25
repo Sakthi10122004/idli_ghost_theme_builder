@@ -808,10 +808,10 @@ export default function Canvas() {
           isGlobal={isGlobal}
           style={{
             backgroundColor: (block.type === "container" || block.type === "columns") ? undefined : effectiveBg,
-            paddingTop: (block.type === 'hero' || block.type === 'columns') ? undefined : (resolveStyle(paddingTop) || undefined),
-            paddingBottom: (block.type === 'hero' || block.type === 'columns') ? undefined : (resolveStyle(paddingBottom) || undefined),
-            paddingLeft: block.type === 'columns' ? undefined : (resolveStyle(block.styles?.paddingLeft) || undefined),
-            paddingRight: block.type === 'columns' ? undefined : (resolveStyle(block.styles?.paddingRight) || undefined),
+            paddingTop: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingTop) || undefined),
+            paddingBottom: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingBottom) || undefined),
+            paddingLeft: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingLeft) || undefined),
+            paddingRight: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingRight) || undefined),
             backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
             backgroundSize: backgroundImage ? (resolveStyle(backgroundSize) || "cover") : undefined,
             backgroundRepeat: backgroundImage ? (resolveStyle(backgroundRepeat) || "no-repeat") : undefined,
