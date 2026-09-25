@@ -92,8 +92,11 @@ html.dark #canvas-preview-frame .logo-cloud-section,
 #canvas-preview-frame.dark .logo-cloud-section,
 html.dark .logo-cloud-section,
 html.dark .gh-head,
+#canvas-preview-frame.dark .gh-head,
 html.dark .gh-head-open .gh-head,
-html.dark .site-footer {
+#canvas-preview-frame.dark .gh-head-open .gh-head,
+html.dark .site-footer,
+#canvas-preview-frame.dark .site-footer {
   background-color: var(--color-canvas) !important;
   color: var(--color-ink) !important;
 }
@@ -116,85 +119,85 @@ html.dark .gh-head .gh-burger svg {
 }
 
 /* Logo Cloud dark mode in canvas */
-html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-heading:not([data-custom-color="true"]) {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .logo-cloud-section .logo-cloud-heading:not([data-custom-color="true"]) {
   color: var(--color-ink) !important;
 }
 
-html.dark #canvas-preview-frame .logo-cloud-section .logo-cloud-subheading:not([data-custom-color="true"]) {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .logo-cloud-section .logo-cloud-subheading:not([data-custom-color="true"]) {
   color: var(--color-mute) !important;
 }
 
-html.dark #canvas-preview-frame .logo-cloud-item img {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .logo-cloud-item img {
   filter: invert(1) brightness(0.95);
 }
 
-html.dark #canvas-preview-frame .logo-cloud-item:hover img {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .logo-cloud-item:hover img {
   filter: invert(1) brightness(1);
 }
 
 /* Heading dark mode adaptation in canvas */
-html.dark #canvas-preview-frame .heading-dark-adaptive,
-html.dark #canvas-preview-frame .heading[style*="color: #000000"],
-html.dark #canvas-preview-frame .heading[style*="color:#000000"],
-html.dark #canvas-preview-frame .heading[style*="color: #171717"],
-html.dark #canvas-preview-frame .heading[style*="color:#171717"],
-html.dark #canvas-preview-frame .heading[style*="color: #0a0a0a"],
-html.dark #canvas-preview-frame .heading[style*="color:#0a0a0a"],
-html.dark #canvas-preview-frame .heading[style*="color: #111111"],
-html.dark #canvas-preview-frame .heading[style*="color:#111111"],
-html.dark #canvas-preview-frame .heading[style*="color: #1a1a1a"],
-html.dark #canvas-preview-frame .heading[style*="color:#1a1a1a"],
-html.dark #canvas-preview-frame .heading[style*="color: rgb(0, 0, 0)"],
-html.dark #canvas-preview-frame .heading[style*="color: rgb(23, 23, 23)"],
-html.dark #canvas-preview-frame .heading[style*="color: black"],
-html.dark #canvas-preview-frame .heading:not([style*="color"]) {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading-dark-adaptive,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: #000000"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color:#000000"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: #171717"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color:#171717"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: #0a0a0a"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color:#0a0a0a"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: #111111"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color:#111111"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: #1a1a1a"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color:#1a1a1a"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: rgb(0, 0, 0)"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: rgb(23, 23, 23)"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading[style*="color: black"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .heading:not([style*="color"]) {
   color: var(--color-ink, #ffffff) !important;
 }
 
 /* Text dark mode adaptation in canvas */
-html.dark #canvas-preview-frame .text-dark-adaptive,
-html.dark #canvas-preview-frame .text-dark-adaptive p,
-html.dark #canvas-preview-frame .text-content.text-dark-adaptive {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .text-dark-adaptive,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .text-dark-adaptive p,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .text-content.text-dark-adaptive {
   color: var(--color-ink, #ffffff) !important;
 }
 
 /* Force hero, header, footer and button blocks to invert properly in dark mode */
-html.dark #canvas-preview-frame .gh-head-btn,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .gh-head-btn,
 html.dark .gh-head .gh-head-btn,
-html.dark #canvas-preview-frame .footer-subscribe-btn,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .footer-subscribe-btn,
 html.dark .site-footer .footer-subscribe-btn,
-html.dark #canvas-preview-frame .hero-btn-primary,
-html.dark #canvas-preview-frame .builder-block-button button:not([class*="secondary"]),
-html.dark #canvas-preview-frame .btn-primary {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .hero-btn-primary,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .builder-block-button button:not([class*="secondary"]),
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .btn-primary {
   background-color: #ffffff !important;
   color: #000000 !important;
 }
 
-html.dark #canvas-preview-frame .hero-btn-secondary,
-html.dark #canvas-preview-frame .builder-block-button button[class*="secondary"],
-html.dark #canvas-preview-frame .btn-secondary {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .hero-btn-secondary,
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .builder-block-button button[class*="secondary"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .btn-secondary {
   background-color: var(--color-canvas) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Native Ghost Share Block in canvas */
-html.dark #canvas-preview-frame .gh-share-pill {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .gh-share-pill {
   background-color: #ffffff !important;
   color: #000000 !important;
 }
-html.dark #canvas-preview-frame .gh-share-outline {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) .gh-share-outline {
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
 }
 
 /* Ensure default body text inside canvas adapts cleanly in dark mode */
-html.dark #canvas-preview-frame [style*="color: #4d4d4d"],
-html.dark #canvas-preview-frame [style*="color: rgb(77, 77, 77)"],
-html.dark #canvas-preview-frame [style*="color:#4d4d4d"],
-html.dark #canvas-preview-frame [style*="color: #666666"],
-html.dark #canvas-preview-frame [style*="color: rgb(102, 102, 102)"],
-html.dark #canvas-preview-frame [style*="color:#666666"] {
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color: #4d4d4d"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color: rgb(77, 77, 77)"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color:#4d4d4d"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color: #666666"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color: rgb(102, 102, 102)"],
+:is(html.dark #canvas-preview-frame, #canvas-preview-frame.dark) [style*="color:#666666"] {
   color: var(--color-body) !important;
 }
 
