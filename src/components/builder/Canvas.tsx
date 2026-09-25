@@ -660,7 +660,7 @@ export default function Canvas() {
     }
   }, [selectedBlockId]);
 
-  const pageSections = themeDoc.pages[activePage]?.sections || [];
+  const pageSections = React.useMemo(() => themeDoc.pages[activePage]?.sections || [], [themeDoc.pages, activePage]);
   const isDark = previewColorMode === "dark";
 
   // Register canvas container as a droppable target zone
@@ -670,6 +670,7 @@ export default function Canvas() {
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const frameRef = React.useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
   const [containerWidth, setContainerWidth] = React.useState<number>(1280);
   const [frameHeight, setFrameHeight] = React.useState<number>(850);
 
@@ -692,18 +693,59 @@ export default function Canvas() {
     return () => ro.disconnect();
   }, []);
 
-  React.useEffect(() => {
+  const measureFrameHeight = React.useCallback(() => {
     if (!frameRef.current) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.height > 0) {
-          setFrameHeight(entry.contentRect.height);
-        }
-      }
-    });
-    ro.observe(frameRef.current);
-    return () => ro.disconnect();
+    const node = frameRef.current;
+    const h = Math.max(
+      node.scrollHeight,
+      node.offsetHeight,
+      850
+    );
+    if (h > 0) {
+      setFrameHeight(Math.round(h));
+    }
   }, []);
+
+  const setCanvasFrameRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
+      frameRef.current = node;
+      setCanvasDropRef(node);
+
+      if (node) {
+        const updateHeight = () => {
+          const h = Math.max(node.scrollHeight, node.offsetHeight, 850);
+          if (h > 0) {
+            setFrameHeight(Math.round(h));
+          }
+        };
+
+        updateHeight();
+
+        const ro = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const entryH = entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;
+            const computedH = Math.max(entryH, node.scrollHeight, node.offsetHeight, 850);
+            if (computedH > 0) {
+              setFrameHeight(Math.round(computedH));
+            }
+          }
+        });
+        ro.observe(node);
+        resizeObserverRef.current = ro;
+      }
+    },
+    [setCanvasDropRef]
+  );
+
+  React.useEffect(() => {
+    measureFrameHeight();
+    const timer = setTimeout(measureFrameHeight, 150);
+    return () => clearTimeout(timer);
+  }, [activePage, deviceMode, pageSections, themeDoc.blocks, measureFrameHeight]);
 
   const targetWidth = deviceMode === "mobile" ? 375 : deviceMode === "tablet" ? 768 : 1280;
   const availableWidth = Math.max(320, containerWidth - 48);
@@ -970,7 +1012,7 @@ export default function Canvas() {
       className={`flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center ${isDark ? "dark" : ""}`}
     >
       <div 
-        className={`relative flex justify-center transition-all duration-200 ${isDark ? "dark" : ""}`}
+        className={`relative flex justify-center items-start transition-all duration-200 ${isDark ? "dark" : ""}`}
         style={{
           width: isScaled ? `${Math.round(targetWidth * scale)}px` : `${targetWidth}px`,
           height: isScaled ? `${Math.round(frameHeight * scale)}px` : "auto",
@@ -979,10 +1021,7 @@ export default function Canvas() {
       >
         <div 
           id="canvas-preview-frame"
-          ref={(node) => {
-            setCanvasDropRef(node);
-            frameRef.current = node;
-          }}
+          ref={setCanvasFrameRef}
           onClick={() => selectBlock(null)}
           style={{
             width: `${targetWidth}px`,
@@ -990,13 +1029,13 @@ export default function Canvas() {
             transform: isScaled ? `scale(${scale})` : undefined,
             transformOrigin: "top center",
           }}
-          className={`relative shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
+          className={`relative shadow-level-5 rounded-md min-h-[850px] h-fit self-start border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
             isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20" : "border-brand-hairline"
           }`}
         >
           {headerBlockId && renderBlock(headerBlockId, true)}
 
-          <div className="flex-1 w-full flex flex-col">
+          <div className="w-full flex flex-col grow min-h-0">
             {pageSections.length > 0 ? (
               <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
                 <InsertionDropSlot
