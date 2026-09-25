@@ -560,7 +560,7 @@ function EmptyContainerDropZone({
           {isOver && activeTemplate ? (
             <span className="font-semibold text-brand-primary">Drop to put {activeTemplate.label} inside</span>
           ) : (
-            "Drop components from left sidebar or click to add"
+            "Drop components from left sidebar"
           )}
         </span>
       </div>

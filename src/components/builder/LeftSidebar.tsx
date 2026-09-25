@@ -19,13 +19,7 @@ import {
 
 import { BLOCK_TEMPLATES, BlockTemplate } from "@/editor/components/blockTemplates";
 
-function DraggableBlockButton({
-  b,
-  onAdd,
-}: {
-  b: BlockTemplate;
-  onAdd: (type: string) => void;
-}) {
+function DraggableBlockButton({ b }: { b: BlockTemplate }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `sidebar-${b.type}`,
   });
@@ -33,30 +27,20 @@ function DraggableBlockButton({
   const Icon = b.icon;
 
   return (
-    <button
-      type="button"
+    <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      onClick={(e) => {
-        if (!isDragging) {
-          e.stopPropagation();
-          onAdd(b.type);
-        }
-      }}
       className={`flex flex-col items-center justify-center p-3 border rounded-sm transition-all text-brand-body hover:text-brand-ink group cursor-grab active:cursor-grabbing shadow-level-2 bg-white select-none touch-none text-center w-full relative ${
         isDragging
           ? "opacity-30 border-dashed border-brand-primary scale-95"
           : "border-brand-hairline hover:border-brand-hairline-strong hover:bg-brand-canvas-soft hover:shadow-level-3"
       }`}
-      title={`Click to put ${b.label} into canvas, or drag to position`}
+      title={`Drag ${b.label} to canvas`}
     >
       <Icon size={16} className="mb-1.5 text-brand-mute group-hover:text-brand-ink transition-transform group-hover:scale-110" />
       <span className="text-[11px] font-medium leading-tight">{b.label}</span>
-      <span className="text-[9px] text-brand-link opacity-0 group-hover:opacity-100 transition-opacity mt-1 font-mono flex items-center gap-0.5 pointer-events-none">
-        <Plus size={8} /> Click to put
-      </span>
-    </button>
+    </div>
   );
 }
 
@@ -270,51 +254,9 @@ export default function LeftSidebar() {
     selectBlock, 
     selectedBlockId, 
     deleteBlock,
-    insertBlockAt,
     isLeftSidebarOpen,
     toggleLeftSidebar
   } = useEditorStore();
-
-  const handleQuickAddBlock = (blockType: string) => {
-    if (blockType === "header" || blockType === "footer") return;
-
-    if (selectedBlockId) {
-      const selBlock = themeDoc.blocks[selectedBlockId];
-
-      // 1. If selected block is a layout container, insert directly INSIDE it
-      if (
-        selBlock &&
-        (selBlock.type === "container" || selBlock.type === "columns" || selBlock.type === "section") &&
-        !(blockType === "section" && selBlock.type === "section")
-      ) {
-        insertBlockAt(blockType, selBlock.childrenIds?.length || 0, selectedBlockId);
-        return;
-      }
-
-      // 2. If selected block is a child inside a container, insert after it inside that container
-      for (const pid of Object.keys(themeDoc.blocks)) {
-        const parent = themeDoc.blocks[pid];
-        if (parent.childrenIds) {
-          const childIdx = parent.childrenIds.indexOf(selectedBlockId);
-          if (childIdx !== -1) {
-            insertBlockAt(blockType, childIdx + 1, pid);
-            return;
-          }
-        }
-      }
-
-      // 3. Otherwise if selected block is a root page section, insert after it
-      const pageSections = themeDoc.pages[activePage]?.sections || [];
-      const selectedIndex = pageSections.indexOf(selectedBlockId);
-      if (selectedIndex !== -1) {
-        insertBlockAt(blockType, selectedIndex + 1);
-        return;
-      }
-    }
-
-    const pageSections = themeDoc.pages[activePage]?.sections || [];
-    insertBlockAt(blockType, pageSections.length);
-  };
 
   const pageSections = themeDoc.pages[activePage]?.sections || [];
   const categories = ["Layout", "Content", "Ghost Core"] as const;
@@ -420,7 +362,7 @@ export default function LeftSidebar() {
               {BLOCK_TEMPLATES
                 .filter((b) => b.category === cat)
                 .map((b) => (
-                  <DraggableBlockButton key={b.type} b={b} onAdd={handleQuickAddBlock} />
+                  <DraggableBlockButton key={b.type} b={b} />
                 ))}
             </div>
           </div>
