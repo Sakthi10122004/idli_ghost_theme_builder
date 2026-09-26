@@ -60,13 +60,20 @@
     #gh-head .gh-head-actions .gh-head-btn { order: 4; }
     #gh-head .gh-head-menu {
       opacity: 0.9;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #gh-head .gh-head-menu::-webkit-scrollbar {
+      display: none;
     }
     #gh-head .gh-head-menu .nav {
       display: inline-flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      white-space: nowrap;
       align-items: center;
       justify-content: flex-start;
-      gap: 28px;
+      gap: 20px;
       list-style: none;
       margin: 0;
       padding: 0;
@@ -75,16 +82,20 @@
   #gh-head .gh-head-menu .nav li {
     margin: 0;
     padding: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   #gh-head .gh-head-menu .nav a {
     color: inherit;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 500;
     opacity: 0.9;
-    padding: 8px 16px;
+    padding: 6px 12px;
     display: inline-block;
     transition: opacity 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   #gh-head .gh-head-menu a:hover,
   #gh-head .gh-search-btn:hover,
@@ -277,7 +288,7 @@
   /* 
    * These rules use doubled-up class selectors to beat Casper's built-in
    * #gh-head specificity on the same elements. The .gh-head class is always
-   * present on the <header style="padding-top: 16px; padding-bottom: 16px; background-color: var(--color-bg)"> alongside the #gh-head id.
+   * present on the <header style="padding-top: 16px; padding-bottom: 16px"> alongside the #gh-head id.
    */
   @media (max-width: 767px) {
     /* -- Closed state: compact 64px bar -- */

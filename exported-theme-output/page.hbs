@@ -16,4 +16,160 @@
     {{content}}
   </div>
 </article>
+<div class="gh-share-wrapper gh-share-align-center" style="padding-top: 16px; padding-bottom: 32px">
+  <a href="#/share" class="gh-share-btn gh-share-md gh-share-pill" title="Share this page">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+    <span>Share this page</span>
+  </a>
+</div>
+{{#if comments}}
+<section class="gh-comments-section">
+  <div class="gh-comments-header">
+    <svg class="gh-comments-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <h3 class="gh-comments-heading">
+      Discussion <span class="gh-comments-count">({{comment_count empty="0" singular="" plural=""}})</span>
+    </h3>
+  </div>
+  {{comments title="" count=false mode="auto"}}
+</section>
+<script>
+(function() {
+  function syncGhostCommentsTheme() {
+    try {
+      var isDark = document.documentElement.classList.contains('dark') || 
+                   (!localStorage.getItem('theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var sec = document.querySelector('.gh-comments-section');
+      if (sec) {
+        sec.style.color = isDark ? 'var(--color-fg, #ffffff)' : 'var(--color-fg, #171717)';
+        sec.classList.toggle('dark', isDark);
+      }
+      var script = document.querySelector('script[data-ghost-comments]');
+      if (script) {
+        script.dataset.colorScheme = isDark ? 'dark' : 'light';
+      }
+    } catch(e) {}
+  }
+  syncGhostCommentsTheme();
+  if (typeof MutationObserver !== 'undefined') {
+    var obs = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].attributeName === 'class') {
+          syncGhostCommentsTheme();
+          break;
+        }
+      }
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (window.matchMedia) {
+    var mql = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mql.addEventListener) {
+      mql.addEventListener('change', syncGhostCommentsTheme);
+    } else if (mql.addListener) {
+      mql.addListener(syncGhostCommentsTheme);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', syncGhostCommentsTheme);
+  window.addEventListener('load', syncGhostCommentsTheme);
+})();
+</script>
+{{/if}}
+<style>
+  #newsletter-page-newsletter-sec {
+    background-color: var(--color-canvas-soft, #fafafa);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: var(--radius-md);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    #newsletter-page-newsletter-sec {
+      flex-direction: column;
+    }
+  }
+  #newsletter-page-newsletter-sec .newsletter-text {
+    flex-grow: 1;
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    width: 100%;
+  }
+  #newsletter-page-newsletter-sec .newsletter-title {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  #newsletter-page-newsletter-sec .newsletter-subtitle {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+  #newsletter-page-newsletter-sec .newsletter-form {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+  }
+  @media (min-width: 768px) {
+    #newsletter-page-newsletter-sec .newsletter-form {
+      width: auto;
+    }
+  }
+  #newsletter-page-newsletter-sec .input-field {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: var(--radius-sm);
+    flex-grow: 1;
+  }
+  #newsletter-page-newsletter-sec .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary, #ffffff);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  #newsletter-page-newsletter-sec .btn-primary:hover {
+    opacity: 0.85;
+  }
+  html.dark #newsletter-page-newsletter-sec {
+    border-color: rgba(255,255,255,0.1);
+  }
+  html.dark #newsletter-page-newsletter-sec .input-field {
+    background-color: var(--color-canvas-soft, #1a1a1a);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--color-fg, #ffffff);
+  }
+  html.dark #newsletter-page-newsletter-sec .newsletter-title {
+    color: var(--color-fg, #ffffff);
+  }
+</style>
+<div id="newsletter-page-newsletter-sec" class="newsletter-block" style="padding-top: 64px; padding-bottom: 64px">
+  <div class="newsletter-text">
+    <h3 class="newsletter-title">Subscribe to our publication</h3>
+    <p class="newsletter-subtitle">Get the latest articles and design insights delivered directly to your inbox.</p>
+  </div>
+  <form class="newsletter-form">
+    <input type="email" placeholder="you@example.com" required class="input-field" />
+    <button type="submit" class="btn-primary shrink-0">Subscribe</button>
+  </form>
+</div>
 {{/post}}
