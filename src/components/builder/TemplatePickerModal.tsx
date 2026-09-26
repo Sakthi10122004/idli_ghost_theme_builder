@@ -10,15 +10,19 @@ export default function TemplatePickerModal({
   onClose: () => void 
 }) {
   const { activePage, applyPageTemplate } = useEditorStore();
+  const [pendingTemplate, setPendingTemplate] = React.useState<{ id: string; name: string } | null>(null);
+
+  const handleClose = () => {
+    setPendingTemplate(null);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
-  const handleApply = (templateId: string) => {
-    const confirm = window.confirm(
-      `Are you sure you want to apply this template? It will replace all existing content on the "${activePage}" page (excluding the Header and Footer). This action can be undone.`
-    );
-    if (confirm) {
-      applyPageTemplate(activePage, templateId);
+  const handleConfirmApply = () => {
+    if (pendingTemplate) {
+      applyPageTemplate(activePage, pendingTemplate.id);
+      setPendingTemplate(null);
       onClose();
     }
   };
@@ -29,7 +33,7 @@ export default function TemplatePickerModal({
         <div className="p-4 border-b border-brand-hairline flex items-center justify-between">
           <h2 className="font-semibold text-brand-ink">Choose a Layout Template</h2>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-brand-mute hover:text-brand-ink transition-colors p-1"
             title="Close"
           >
@@ -40,34 +44,65 @@ export default function TemplatePickerModal({
           </button>
         </div>
         
-        <div className="p-4 flex flex-col gap-3 overflow-y-auto max-h-[60vh]">
-          <p className="text-sm text-brand-mute mb-2">
-            Applying a template to <strong className="text-brand-ink">{activePage}</strong> will overwrite its current sections. Your global header and footer will be preserved.
-          </p>
-          
-          {PAGE_TEMPLATES.map((tpl) => (
-            <div 
-              key={tpl.id}
-              className="border border-brand-hairline p-4 rounded-md hover:border-brand-primary hover:shadow-sm transition-all cursor-pointer group flex flex-col gap-1"
-              onClick={() => handleApply(tpl.id)}
-            >
-              <h3 className="font-medium text-brand-ink group-hover:text-brand-primary transition-colors">
-                {tpl.name}
-              </h3>
-              <p className="text-sm text-brand-mute">
-                {tpl.description}
+        {pendingTemplate ? (
+          <div className="p-6 flex flex-col gap-4">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-amber-900">Confirm Layout Replacement</span>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Are you sure you want to apply <strong className="font-semibold">{pendingTemplate.name}</strong>? It will replace all existing content sections on the <code className="bg-amber-100 px-1 py-0.5 rounded text-[11px] font-mono">{activePage}</code> page. Your global Header and Footer will be preserved.
               </p>
             </div>
-          ))}
-        </div>
+            <p className="text-xs text-brand-mute">
+              Tip: You can always undo this action with <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px] font-mono font-semibold">Ctrl+Z</kbd> / <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px] font-mono font-semibold">Cmd+Z</kbd>.
+            </p>
+          </div>
+        ) : (
+          <div className="p-4 flex flex-col gap-3 overflow-y-auto max-h-[60vh]">
+            <p className="text-sm text-brand-mute mb-2">
+              Applying a template to <strong className="text-brand-ink">{activePage}</strong> will overwrite its current sections. Your global header and footer will be preserved.
+            </p>
+            
+            {PAGE_TEMPLATES.map((tpl) => (
+              <div 
+                key={tpl.id}
+                className="border border-brand-hairline p-4 rounded-md hover:border-brand-primary hover:shadow-sm transition-all cursor-pointer group flex flex-col gap-1"
+                onClick={() => setPendingTemplate({ id: tpl.id, name: tpl.name })}
+              >
+                <h3 className="font-medium text-brand-ink group-hover:text-brand-primary transition-colors">
+                  {tpl.name}
+                </h3>
+                <p className="text-sm text-brand-mute">
+                  {tpl.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
         
-        <div className="p-4 border-t border-brand-hairline bg-brand-canvas-soft flex justify-end">
-          <button 
-            onClick={onClose}
-            className="px-4 py-2 bg-white border border-brand-hairline rounded-sm text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
+        <div className="p-4 border-t border-brand-hairline bg-brand-canvas-soft flex justify-end gap-2">
+          {pendingTemplate ? (
+            <>
+              <button 
+                onClick={() => setPendingTemplate(null)}
+                className="px-4 py-1.5 bg-white border border-brand-hairline rounded-md text-xs font-medium text-brand-body hover:text-brand-ink hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Back
+              </button>
+              <button 
+                onClick={handleConfirmApply}
+                className="px-4 py-1.5 bg-brand-primary text-white rounded-md text-xs font-medium hover:bg-neutral-800 transition-colors cursor-pointer shadow-xs"
+              >
+                Apply Layout
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={handleClose}
+              className="px-4 py-1.5 bg-white border border-brand-hairline rounded-md text-xs font-medium text-brand-body hover:text-brand-ink hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
     </div>

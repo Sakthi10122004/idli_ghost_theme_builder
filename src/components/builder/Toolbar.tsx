@@ -29,6 +29,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import TemplatePickerModal from "./TemplatePickerModal";
+import CustomTemplateModal from "./CustomTemplateModal";
 
 interface GscanFailure {
   ref?: string;
@@ -52,6 +53,14 @@ interface ValidationReport {
 
 export default function Toolbar() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [customTemplateModal, setCustomTemplateModal] = useState<{
+    isOpen: boolean;
+    mode: "create" | "duplicate";
+    initialValue?: string;
+  }>({
+    isOpen: false,
+    mode: "create",
+  });
   
   // Gscan Validation State
   const [isExporting, setIsExporting] = useState(false);
@@ -217,17 +226,22 @@ export default function Toolbar() {
   const customPageSlugs = allPageKeys.filter(slug => !defaultPageSlugs.includes(slug));
 
   const handleCreatePage = () => {
-    const name = prompt("Enter a name/slug for the custom template (e.g. landing-pricing):");
-    if (name && name.trim()) {
-      createCustomPage(name);
-    }
+    setCustomTemplateModal({
+      isOpen: true,
+      mode: "create",
+      initialValue: "",
+    });
   };
 
   const handleDuplicatePage = () => {
-    const name = prompt("Enter a name/slug for the duplicated template:", `${activePage}-copy`);
-    if (name && name.trim()) {
-      duplicateCustomPage(activePage, name);
-    }
+    const defaultCopySlug = activePage.startsWith("custom-")
+      ? `${activePage.replace(/^custom-/, "")}-copy`
+      : `${activePage}-copy`;
+    setCustomTemplateModal({
+      isOpen: true,
+      mode: "duplicate",
+      initialValue: defaultCopySlug,
+    });
   };
 
   return (
@@ -532,6 +546,24 @@ export default function Toolbar() {
         isOpen={showTemplateModal} 
         onClose={() => setShowTemplateModal(false)} 
       />
+
+      {customTemplateModal.isOpen && (
+        <CustomTemplateModal
+          isOpen={customTemplateModal.isOpen}
+          mode={customTemplateModal.mode}
+          initialValue={customTemplateModal.initialValue}
+          sourcePage={activePage}
+          existingSlugs={allPageKeys}
+          onClose={() => setCustomTemplateModal((prev) => ({ ...prev, isOpen: false }))}
+          onSubmit={(name) => {
+            if (customTemplateModal.mode === "duplicate") {
+              duplicateCustomPage(activePage, name);
+            } else {
+              createCustomPage(name);
+            }
+          }}
+        />
+      )}
 
       {showValidationModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
