@@ -79,10 +79,11 @@ interface FilterRule { field: "tag" | "author" | "featured"; value: string; }
 
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
-  const p = block.props || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p = (block.props || {}) as any;
   const general = p.general || {};
   const filter = p.filter || { rules: [] as FilterRule[], combinator: "all" };
   const postCard = p.postCard || {};
@@ -91,7 +92,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   const spacing = p.spacing || {};
   const advanced = p.advanced || {};
 
-  const updateCategory = (category: string, key: string, value: any) => {
+  const updateCategory = (category: string, key: string, value: unknown) => {
     onChangeProps({
       ...p,
       [category]: {
@@ -99,6 +100,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         [key]: value,
       },
     });
+    if (category === "spacing" && onChangeStyles) {
+      onChangeStyles({ [key]: value });
+    }
   };
 
   const updateFilterRules = (rules: FilterRule[]) => updateCategory("filter", "rules", rules);
@@ -144,7 +148,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           </select>
           {source === "routes" && (
             <span className="text-[10px] text-brand-mute">
-              Shows whatever this page's routing shows. Count is controlled by
+              Shows whatever this page&apos;s routing shows. Count is controlled by
               Theme Settings → Posts Per Page, not by this block.
             </span>
           )}
@@ -165,7 +169,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               placeholder="e.g. design"
             />
             <span className="text-[10px] text-brand-mute">
-              Enter the tag's slug exactly as it appears in Ghost Admin (lowercase,
+              Enter the tag&apos;s slug exactly as it appears in Ghost Admin (lowercase,
               hyphenated) — only posts with this tag will show here.
             </span>
           </div>

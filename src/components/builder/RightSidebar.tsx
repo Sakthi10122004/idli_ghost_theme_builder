@@ -26,6 +26,22 @@ const HAS_DEDICATED_BG_CONTROL = new Set([
   "pricing-table",
 ]);
 
+const HAS_DEDICATED_SPACING_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "section",
+  "container",
+  "columns",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "post-grid",
+  "stats",
+  "team",
+  "testimonials",
+]);
+
 export default function RightSidebar() {
   const {
     selectedBlockId,
@@ -426,22 +442,24 @@ export default function RightSidebar() {
             )}
 
             {/* Spacing Controls with live sliders */}
-            <div className="border-t border-brand-hairline pt-3">
-              <SpacingControl
-                title="Spacing"
-                topValue={getInputValue(selectedBlock.styles.paddingTop)}
-                bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
-                leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
-                rightValue={getInputValue(selectedBlock.styles.paddingRight)}
-                onChangeTop={(val) => handleStyleChange("paddingTop", val)}
-                onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
-                onChangeHorizontal={(val) => {
-                  handleStyleChange("paddingLeft", val);
-                  handleStyleChange("paddingRight", val);
-                }}
-                showHorizontal={true}
-              />
-            </div>
+            {!HAS_DEDICATED_SPACING_CONTROL.has(selectedBlock.type) && (
+              <div className="border-t border-brand-hairline pt-3">
+                <SpacingControl
+                  title="Spacing"
+                  topValue={getInputValue(selectedBlock.styles.paddingTop)}
+                  bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
+                  leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
+                  rightValue={getInputValue(selectedBlock.styles.paddingRight)}
+                  onChangeTop={(val) => handleStyleChange("paddingTop", val)}
+                  onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
+                  onChangeHorizontal={(val) => {
+                    handleStyleChange("paddingLeft", val);
+                    handleStyleChange("paddingRight", val);
+                  }}
+                  showHorizontal={true}
+                />
+              </div>
+            )}
             {!HAS_DEDICATED_BG_CONTROL.has(selectedBlock.type) && (
               <BackgroundControls
                 styles={selectedBlock.styles}
