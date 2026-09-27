@@ -29,7 +29,7 @@ export default function TemplatePickerModal({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm" style={{ zIndex: 9999 }}>
-      <div className="bg-white w-[500px] max-w-full rounded-lg shadow-xl overflow-hidden flex flex-col">
+      <div role="dialog" aria-modal="true" className="bg-white w-[500px] max-w-full rounded-lg shadow-xl overflow-hidden flex flex-col">
         <div className="p-4 border-b border-brand-hairline flex items-center justify-between">
           <h2 className="font-semibold text-brand-ink">Choose a Layout Template</h2>
           <button 
@@ -90,7 +90,7 @@ export default function TemplatePickerModal({
               </button>
               <button 
                 onClick={handleConfirmApply}
-                className="px-4 py-1.5 bg-brand-primary text-white rounded-md text-xs font-medium hover:bg-neutral-800 transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-1.5 bg-brand-primary text-brand-on-primary rounded-md text-xs font-medium hover:opacity-90 transition-colors cursor-pointer shadow-xs"
               >
                 Apply Layout
               </button>

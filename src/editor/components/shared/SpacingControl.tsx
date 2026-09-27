@@ -95,7 +95,7 @@ export function SpacingSliderItem({
           onChange={handleSliderChange}
           className="spacing-range-slider w-full"
           style={{
-            background: `linear-gradient(to right, #171717 ${pct}%, #e4e4e7 ${pct}%)`,
+            background: `linear-gradient(to right, var(--color-brand-primary, #171717) ${pct}%, var(--color-brand-hairline-strong, #e4e4e7) ${pct}%)`,
           }}
         />
       </div>

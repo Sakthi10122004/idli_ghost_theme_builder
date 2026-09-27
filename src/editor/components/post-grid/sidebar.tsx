@@ -17,7 +17,7 @@ const SegmentedControl = ({ options, value, onChange }: {
   value: string;
   onChange: (v: string) => void;
 }) => (
-  <div className="flex bg-gray-100 p-0.5 rounded-md border border-gray-200/50">
+  <div className="flex bg-brand-canvas-soft p-0.5 rounded-md border border-brand-hairline">
     {options.map(opt => (
       <button
         key={opt.value}
@@ -26,8 +26,8 @@ const SegmentedControl = ({ options, value, onChange }: {
         onClick={() => onChange(opt.value)}
         className={`flex-1 flex justify-center items-center py-1 px-3 text-[11px] font-medium rounded-sm transition-all ${
           opt.disabled ? 'text-gray-300 cursor-not-allowed'
-          : value === opt.value ? 'bg-white text-gray-900 shadow-sm'
-          : 'text-gray-500 hover:text-gray-700'
+          : value === opt.value ? 'bg-brand-canvas text-brand-ink shadow-xs font-semibold'
+          : 'text-brand-mute hover:text-brand-ink'
         }`}
       >
         {opt.label}
@@ -41,9 +41,9 @@ const SegmentedControl = ({ options, value, onChange }: {
 // made for Post Grid specifically — worth knowing this creates a real inconsistency
 // with the rest of the app's design-token system, not a neutral styling choice.
 const ColorPicker = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
-  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-[12px] font-medium text-gray-800">{label}</span>
-    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+  <div className="flex items-center justify-between gap-3 bg-brand-canvas p-2 border-b border-brand-hairline last:border-b-0">
+    <span className="text-[12px] font-medium text-brand-ink">{label}</span>
+    <div className="flex items-center gap-1.5 bg-brand-canvas-soft border border-brand-hairline rounded px-1.5 py-1">
       <input
         type="color"
         value={value}
@@ -54,14 +54,14 @@ const ColorPicker = ({ label, value, onChange }: { label: string; value: string;
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-16 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+        className="w-16 text-[10px] font-mono text-brand-body bg-transparent outline-none uppercase"
       />
     </div>
   </div>
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[12px] font-bold text-gray-900 tracking-tight">{children}</span>
+  <span className="text-[12px] font-bold text-brand-ink tracking-tight">{children}</span>
 );
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
@@ -207,9 +207,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         )}
 
         {source === "custom" && (
-          <div className="flex flex-col gap-2 border border-gray-100 rounded-lg p-3 bg-white shadow-sm">
+          <div className="flex flex-col gap-2 border border-brand-hairline rounded-lg p-3 bg-brand-canvas shadow-xs">
             <div className="flex justify-between items-center">
-              <span className="text-[11px] font-semibold text-gray-800">Filter rules</span>
+              <span className="text-[11px] font-semibold text-brand-ink">Filter rules</span>
               <SegmentedControl
                 value={filter.combinator || "all"}
                 onChange={(v) => updateCategory("filter", "combinator", v)}
@@ -222,7 +222,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 <select
                   value={rule.field}
                   onChange={(e) => updateRule(idx, { field: e.target.value as FilterRule["field"] })}
-                  className="flex-shrink-0 px-2 py-1 border border-gray-200 rounded text-[11px]"
+                  className="flex-shrink-0 px-2 py-1 border border-brand-hairline rounded text-[11px] bg-brand-canvas-soft text-brand-ink"
                 >
                   <option value="tag">Tag</option>
                   <option value="author">Author</option>
@@ -233,12 +233,12 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                   value={rule.value}
                   onChange={(e) => updateRule(idx, { value: e.target.value })}
                   placeholder={rule.field === "featured" ? "true" : "slug"}
-                  className="flex-1 px-2 py-1 border border-gray-200 rounded text-[11px]"
+                  className="flex-1 px-2 py-1 border border-brand-hairline rounded text-[11px] bg-brand-canvas-soft text-brand-ink"
                 />
                 <button
                   type="button"
                   onClick={() => removeRule(idx)}
-                  className="text-gray-400 hover:text-red-500 text-[13px] px-1"
+                  className="text-brand-mute hover:text-red-500 text-[13px] px-1"
                   aria-label="Remove rule"
                 >
                   ×
@@ -300,9 +300,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* POST CARD */}
-      <div className="flex flex-col gap-2 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-5">
         <SectionLabel>Post Card</SectionLabel>
-        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+        <div className="flex flex-col border border-brand-hairline rounded-lg overflow-hidden shadow-xs">
           {([
             ["showFeatureImage", "Feature Image", true],
             ["showPrimaryTag", "Primary Tag", true],
@@ -311,8 +311,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             ["showPublishDate", "Publish Date", false],
             ["showExcerpt", "Excerpt", true],
           ] as [string, string, boolean][]).map(([key, label, def]) => (
-            <div key={key} className="flex justify-between items-center p-3 bg-white border-b border-gray-100 last:border-b-0">
-              <span className="text-[12px] font-medium text-gray-800">{label}</span>
+            <div key={key} className="flex justify-between items-center p-3 bg-brand-canvas border-b border-brand-hairline last:border-b-0">
+              <span className="text-[12px] font-medium text-brand-ink">{label}</span>
               <Switch
                 checked={postCard[key] ?? def}
                 onChange={(c) => updateCategory("postCard", key, c)}
@@ -323,7 +323,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* BUTTON */}
-      <div className="flex flex-col gap-2 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-5">
         <SectionLabel>Button</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Label</FieldLabel>
@@ -353,9 +353,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
 
       {/* COLORS — open picker (intentional exception, see note above the
           ColorPicker component definition) */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Colors</SectionLabel>
-        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm mt-1">
+        <div className="flex flex-col border border-brand-hairline rounded-lg overflow-hidden shadow-xs mt-1">
           <ColorPicker
             label="Text Color"
             value={appearance.textColor || "#111827"}
@@ -370,7 +370,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* LAYOUT (width) */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Layout</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Section Width</FieldLabel>
@@ -388,7 +388,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* SPACING */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Spacing</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
@@ -423,7 +423,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* ADVANCED */}
-      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-1.5 border-t border-brand-hairline pt-5">
         <SectionLabel>Advanced</SectionLabel>
         <FieldLabel>HTML Anchor</FieldLabel>
         <TextInput

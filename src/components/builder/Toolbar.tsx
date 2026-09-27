@@ -250,7 +250,7 @@ export default function Toolbar() {
 
   return (
     <>
-      <header className="h-[64px] border-b border-brand-hairline bg-white px-6 flex items-center justify-between shrink-0 select-none shadow-level-1 z-10">
+      <header className="builder-toolbar h-[64px] border-b border-brand-hairline bg-brand-canvas text-brand-ink px-6 flex items-center justify-between shrink-0 select-none shadow-level-1 z-10">
       {/* Brand Logo & Name */}
       <div className="flex items-center gap-3">
         <Link 
@@ -264,7 +264,7 @@ export default function Toolbar() {
         <div className="h-4 w-px bg-brand-hairline hidden sm:block" />
         <Link href="/" className="flex items-center gap-2 group" title="Ghost Theme Builder Home">
           <div className="w-8 h-8 bg-brand-primary flex items-center justify-center rounded-sm transition-transform group-hover:scale-105">
-            <span className="text-white font-mono font-semibold text-sm">G</span>
+            <span className="text-brand-on-primary font-mono font-semibold text-sm">G</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -321,7 +321,7 @@ export default function Toolbar() {
         <div className="flex items-center gap-1.5 ml-2 border-l border-brand-hairline pl-2">
           <button
             onClick={() => setShowTemplateModal(true)}
-            className="flex items-center gap-1.5 px-2 py-1 bg-brand-canvas-soft border border-brand-hairline rounded-sm text-xs font-medium hover:bg-gray-100 text-brand-ink transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1 bg-brand-canvas-soft border border-brand-hairline rounded-sm text-xs font-medium hover:bg-brand-canvas-soft-2 text-brand-ink transition-colors"
             title="Choose a layout template for the current page"
           >
             <LayoutTemplate size={13} />
@@ -396,7 +396,7 @@ export default function Toolbar() {
           </button>
           <button
             onClick={toggleCodeMode}
-            className={`p-1.5 rounded-xs transition-colors ${isCodeMode ? "bg-[#171717] text-white font-semibold" : "text-zinc-400 hover:text-white"}`}
+            className={`p-1.5 rounded-xs transition-colors ${isCodeMode ? "bg-brand-canvas-soft-2 text-brand-ink font-semibold" : "text-brand-mute hover:text-brand-ink"}`}
             title="Code view"
           >
             <Code size={16} />
@@ -449,7 +449,7 @@ export default function Toolbar() {
           <button 
             disabled={isSaving}
             onClick={() => saveTheme()}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-semibold hover:bg-brand-canvas-soft text-brand-ink transition-all shadow-level-2 bg-white"
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-semibold hover:bg-brand-canvas-soft text-brand-ink transition-all shadow-level-2 bg-brand-canvas cursor-pointer"
             title="Manual Save to Database"
           >
             {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
@@ -457,7 +457,7 @@ export default function Toolbar() {
           </button>
 
           <button 
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-sm text-xs font-semibold hover:bg-black transition-all shadow-level-3"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-brand-on-primary rounded-sm text-xs font-semibold hover:opacity-90 transition-all shadow-level-3 cursor-pointer"
             onClick={async () => {
               const zip = new JSZip();
 
@@ -578,7 +578,7 @@ export default function Toolbar() {
 
       {showValidationModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
-          <div className="bg-white rounded-xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" style={{ width: '600px', maxWidth: '90vw' }}>
+          <div role="dialog" aria-modal="true" className="bg-white rounded-xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" style={{ width: '600px', maxWidth: '90vw' }}>
             <div className={`flex justify-between items-center px-6 py-4 border-b border-gray-100 ${validationReport?.score?.level === 'error' ? 'bg-red-50/50' : validationReport?.score?.level === 'warning' ? 'bg-yellow-50/50' : 'bg-green-50/50'}`}>
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${validationReport?.score?.level === 'error' ? 'bg-red-100 text-red-600' : validationReport?.score?.level === 'warning' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>

@@ -160,7 +160,7 @@ export default function CustomTemplateModal({
             <button
               type="submit"
               disabled={!value.trim() || !!error}
-              className="px-4 py-1.5 bg-brand-primary text-white rounded-md text-xs font-medium hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
+              className="px-4 py-1.5 bg-brand-primary text-brand-on-primary rounded-md text-xs font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
             >
               {mode === "duplicate" ? "Duplicate Template" : "Create Template"}
             </button>

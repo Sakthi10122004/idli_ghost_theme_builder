@@ -31,13 +31,13 @@ const FieldLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[12px] font-bold text-gray-900 tracking-tight">{children}</span>
+  <span className="text-[12px] font-bold text-brand-ink tracking-tight">{children}</span>
 );
 
 export const BackgroundControls: React.FC<BackgroundControlsProps> = ({ styles, appearance, onChangeStyles, updateAppearance, showBackdropBlur }) => {
   return (
     <>
-      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-1.5 border-t border-brand-hairline pt-5">
         <SectionLabel>Background</SectionLabel>
         
         <FieldLabel>Background Type</FieldLabel>

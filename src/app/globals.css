@@ -69,16 +69,58 @@
 }
 
 /* Chrome surfaces in app dark mode (Toolbar, LeftSidebar, RightSidebar) */
-.app-dark header,
-.app-dark aside {
+.app-dark .builder-toolbar,
+.app-dark aside:not(#canvas-preview-frame *) {
   background-color: #121214 !important;
   border-color: #27272a !important;
   color: #f4f4f5;
 }
 
+/* Sidebar text and controls contrast in app dark mode */
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-9"],
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-8"],
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-7"] {
+  color: #f4f4f5 !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-6"],
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-5"] {
+  color: #a1a1aa !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) [class*="text-gray-4"] {
+  color: #71717a !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) .bg-white {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+  color: #f4f4f5 !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) .bg-gray-50,
+.app-dark aside:not(#canvas-preview-frame *) .bg-gray-100,
+.app-dark aside:not(#canvas-preview-frame *) .bg-gray-200 {
+  background-color: #222226 !important;
+  border-color: #2e2e33 !important;
+  color: #f4f4f5 !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) [class*="border-gray-"] {
+  border-color: #27272a !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) [class*="divide-gray-"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: #27272a !important;
+}
+
+.app-dark aside:not(#canvas-preview-frame *) input[type="color"] {
+  background-color: transparent !important;
+  border: none !important;
+}
+
 /* Draggable template block cards in app dark mode */
-.app-dark aside [data-block-template="true"],
-.app-dark aside .bg-white {
+.app-dark aside:not(#canvas-preview-frame *) [data-block-template="true"] {
   background-color: #18181b !important;
   border-color: #27272a !important;
   color: #f4f4f5 !important;
@@ -104,6 +146,24 @@
 .app-dark [role="dialog"] .bg-white {
   background-color: #121214 !important;
   border-color: #27272a !important;
+  color: #f4f4f5 !important;
+}
+
+.app-dark [role="dialog"] [class*="text-gray-9"],
+.app-dark [role="dialog"] [class*="text-gray-8"],
+.app-dark [role="dialog"] [class*="text-gray-7"] {
+  color: #f4f4f5 !important;
+}
+
+.app-dark [role="dialog"] [class*="text-gray-6"],
+.app-dark [role="dialog"] [class*="text-gray-5"] {
+  color: #a1a1aa !important;
+}
+
+.app-dark [role="dialog"] .bg-gray-50,
+.app-dark [role="dialog"] .bg-gray-100 {
+  background-color: #1e1e24 !important;
+  border-color: #2e2e33 !important;
   color: #f4f4f5 !important;
 }
 
@@ -139,6 +199,11 @@
 
   background-color: #ffffff !important;
   color: #171717 !important;
+}
+
+#canvas-preview-frame:not(.dark) header:not([style*="background"]) {
+  background-color: var(--color-canvas, #ffffff);
+  color: var(--color-ink, #171717);
 }
 
 #canvas-preview-frame.dark,

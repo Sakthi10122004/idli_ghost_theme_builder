@@ -75,7 +75,7 @@ export default function RightSidebar() {
 
   if (!isRightSidebarOpen) {
     return (
-      <aside className="w-[44px] border-l border-brand-hairline bg-white flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+      <aside className="builder-right-sidebar w-[44px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
         <button
           onClick={() => toggleRightSidebar(true)}
           className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
@@ -98,7 +98,7 @@ export default function RightSidebar() {
   }
 
   return (
-    <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
+    <aside className="builder-right-sidebar w-[300px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
       {selectedBlock ? (
         <div className="p-4 flex flex-col gap-6">
           {/* Header */}
@@ -300,7 +300,7 @@ export default function RightSidebar() {
                       key={align}
                       onClick={() => handleStyleChange("textAlign", align)}
                       className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${getInputValue(selectedBlock.styles.textAlign) === align
-                        ? "bg-white text-brand-ink shadow-level-2 font-semibold"
+                        ? "bg-brand-canvas text-brand-ink shadow-level-2 font-semibold"
                         : "text-brand-mute hover:text-brand-ink"
                         }`}
                     >
