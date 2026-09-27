@@ -47,6 +47,10 @@ export default function Builder() {
   }, [toggleLeftSidebar, toggleRightSidebar]);
 
   useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.remove("dark");
+    }
+
     queueMicrotask(() => {
       setIsHydrated(true);
     });

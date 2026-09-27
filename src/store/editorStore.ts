@@ -903,13 +903,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   togglePreviewColorMode: () => set((state) => {
     const next = state.previewColorMode === "dark" ? "light" : "dark";
     if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", next === "dark");
+      document.documentElement.classList.remove("dark");
     }
     return { previewColorMode: next };
   }),
   setPreviewColorMode: (mode) => set(() => {
     if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", mode === "dark");
+      document.documentElement.classList.remove("dark");
     }
     return { previewColorMode: mode };
   }),

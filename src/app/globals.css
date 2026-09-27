@@ -48,11 +48,8 @@
   --gradient-ship-end: #f9cb28;
 }
 
-.dark,
-:root.dark,
-html.dark,
-html.dark #canvas-preview-frame,
 #canvas-preview-frame.dark,
+html.dark:not(:has(#canvas-preview-frame)),
 html.dark body:not(:has(#canvas-preview-frame)) {
   --color-primary: #ffffff;
   --color-on-primary: #000000;
@@ -62,11 +59,22 @@ html.dark body:not(:has(#canvas-preview-frame)) {
   --color-hairline: #333333;
   --color-hairline-strong: #555555;
   --color-canvas: #111111;
-  --color-canvas-soft: #000000;
-  --color-canvas-soft-2: #222222;
+  --color-canvas-soft: #18181b;
+  --color-canvas-soft-2: #27272a;
   --color-bg: var(--color-canvas);
   --color-fg: var(--color-ink);
   --color-muted: var(--color-mute);
+
+  --color-brand-primary: var(--color-primary);
+  --color-brand-on-primary: var(--color-on-primary);
+  --color-brand-ink: var(--color-ink);
+  --color-brand-body: var(--color-body);
+  --color-brand-mute: var(--color-mute);
+  --color-brand-hairline: var(--color-hairline);
+  --color-brand-hairline-strong: var(--color-hairline-strong);
+  --color-brand-canvas: var(--color-canvas);
+  --color-brand-canvas-soft: var(--color-canvas-soft);
+  --color-brand-canvas-soft-2: var(--color-canvas-soft-2);
 }
 
 /* Exported Theme Body */
@@ -113,10 +121,10 @@ html.dark .gh-head-open .gh-head-actions {
 }
 
 /* Hamburger menu button and SVGs in dark mode */
-html.dark .gh-burger,
-html.dark .gh-head .gh-burger,
-html.dark .gh-burger svg,
-html.dark .gh-head .gh-burger svg {
+:is(#canvas-preview-frame.dark, html.dark) .gh-burger,
+:is(#canvas-preview-frame.dark, html.dark) .gh-head .gh-burger,
+:is(#canvas-preview-frame.dark, html.dark) .gh-burger svg,
+:is(#canvas-preview-frame.dark, html.dark) .gh-head .gh-burger svg {
   color: var(--color-ink, #ffffff) !important;
   stroke: var(--color-ink, #ffffff) !important;
 }
@@ -204,10 +212,25 @@ html.dark .site-footer .footer-subscribe-btn,
   color: var(--color-body) !important;
 }
 
-html.dark .icon-moon { display: none !important; }
-html.dark .icon-sun { display: block !important; }
-html:not(.dark) .icon-sun { display: none !important; }
-html:not(.dark) .icon-moon { display: block !important; }
+#canvas-preview-frame.dark .icon-moon,
+html.dark:not(:has(#canvas-preview-frame)) .icon-moon {
+  display: none !important;
+}
+
+#canvas-preview-frame.dark .icon-sun,
+html.dark:not(:has(#canvas-preview-frame)) .icon-sun {
+  display: block !important;
+}
+
+#canvas-preview-frame:not(.dark) .icon-sun,
+html:not(.dark):not(:has(#canvas-preview-frame)) .icon-sun {
+  display: none !important;
+}
+
+#canvas-preview-frame:not(.dark) .icon-moon,
+html:not(.dark):not(:has(#canvas-preview-frame)) .icon-moon {
+  display: block !important;
+}
 
 /* Logo Cloud marquee animation & masks */
 @keyframes marquee-scroll {

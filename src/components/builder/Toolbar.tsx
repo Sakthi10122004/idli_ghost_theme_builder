@@ -14,6 +14,8 @@ import {
   Download,
   Eye,
   EyeOff,
+  Sun,
+  Moon,
   Code,
   HelpCircle,
   Plus,
@@ -82,6 +84,8 @@ export default function Toolbar() {
     document: themeDoc,
     isPreviewMode,
     togglePreviewMode,
+    previewColorMode,
+    togglePreviewColorMode,
     isCodeMode,
     toggleCodeMode,
     toggleShortcutsHelp,
@@ -382,6 +386,13 @@ export default function Toolbar() {
             title={isPreviewMode ? "Edit Mode" : "Preview Mode"}
           >
             {isPreviewMode ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+          <button
+            onClick={togglePreviewColorMode}
+            className={`p-1.5 rounded-xs transition-colors ${previewColorMode === "dark" ? "bg-brand-canvas-soft-2 text-brand-ink font-semibold" : "text-brand-mute hover:text-brand-ink"}`}
+            title={previewColorMode === "dark" ? "Theme: Dark Mode (Click for Light)" : "Theme: Light Mode (Click for Dark)"}
+          >
+            {previewColorMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <button
             onClick={toggleCodeMode}

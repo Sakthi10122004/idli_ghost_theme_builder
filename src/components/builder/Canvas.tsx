@@ -237,7 +237,7 @@ function SortableElement({
       {isSidebarDragOver && (
         <div className="absolute -bottom-1 left-0 w-full z-40 flex items-center justify-center pointer-events-none">
           <div className="w-full h-1 bg-brand-primary rounded-full shadow-md ring-4 ring-brand-primary/20" />
-          <div className="absolute px-3 py-0.5 bg-brand-primary text-white text-[10px] font-semibold rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap">
+          <div className="absolute px-3 py-0.5 bg-neutral-900 text-white text-[10px] font-semibold rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap">
             <Plus size={10} strokeWidth={3} />
             <span>Put after this section</span>
           </div>
@@ -251,7 +251,7 @@ function SortableElement({
         <>
           {/* Floating Grip handle shown on hover OR selection */}
           {!isPreviewMode && !isGlobal && (
-            <div className={`absolute -top-6 left-0 bg-brand-primary text-white text-[9px] font-mono px-2 py-0.5 rounded-t-sm flex items-center gap-1.5 z-20 transition-all select-none pointer-events-auto ${
+            <div className={`absolute -top-6 left-0 bg-neutral-900 text-white text-[9px] font-mono px-2 py-0.5 rounded-t-sm flex items-center gap-1.5 z-20 transition-all select-none pointer-events-auto ${
               isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
             }`}>
               <span 
@@ -1012,10 +1012,10 @@ export default function Canvas() {
   return (
     <div 
       ref={containerRef}
-      className={`flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center ${isDark ? "dark" : ""}`}
+      className="flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center"
     >
       <div 
-        className={`relative flex justify-center items-start transition-all duration-200 ${isDark ? "dark" : ""}`}
+        className="relative flex justify-center items-start transition-all duration-200"
         style={{
           width: isScaled ? `${Math.round(targetWidth * scale)}px` : `${targetWidth}px`,
           height: isScaled ? `${Math.round(frameHeight * scale)}px` : "auto",
