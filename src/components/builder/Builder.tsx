@@ -21,6 +21,8 @@ export default function Builder() {
     setActiveThemeId,
     toggleLeftSidebar,
     toggleRightSidebar,
+    appThemeMode,
+    setAppThemeMode,
   } = useEditorStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,6 +52,13 @@ export default function Builder() {
     if (typeof document !== "undefined") {
       document.documentElement.classList.remove("dark");
     }
+
+    try {
+      const storedAppTheme = localStorage.getItem("t4gc_app_theme_mode");
+      if (storedAppTheme === "dark" || storedAppTheme === "light") {
+        setAppThemeMode(storedAppTheme);
+      }
+    } catch {}
 
     queueMicrotask(() => {
       setIsHydrated(true);
@@ -113,9 +122,11 @@ export default function Builder() {
     return <AuthPortal onAuthSuccess={handleAuthSuccess} />;
   }
 
+  const isAppDark = appThemeMode === "dark";
+
   return (
     <DndWrapper>
-      <div className="flex flex-col h-screen w-screen overflow-hidden bg-brand-canvas-soft select-none font-sans">
+      <div className={`builder-app flex flex-col h-screen w-screen overflow-hidden ${isAppDark ? "app-dark bg-[#09090b] text-[#f4f4f5]" : "app-light bg-brand-canvas-soft text-[#171717]"} select-none font-sans`}>
         <Toolbar />
         <div className="flex flex-1 overflow-hidden min-h-0 w-full relative">
           {!isPreviewMode && <LeftSidebar />}

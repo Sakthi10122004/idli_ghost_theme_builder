@@ -400,6 +400,10 @@ interface EditorState {
   togglePreviewColorMode: () => void;
   setPreviewColorMode: (mode: "light" | "dark") => void;
 
+  appThemeMode: "light" | "dark";
+  toggleAppThemeMode: () => void;
+  setAppThemeMode: (mode: "light" | "dark") => void;
+
   isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
   toggleLeftSidebar: (open?: boolean) => void;
@@ -912,6 +916,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       document.documentElement.classList.remove("dark");
     }
     return { previewColorMode: mode };
+  }),
+
+  appThemeMode: "light",
+  toggleAppThemeMode: () => set((state) => {
+    const next = state.appThemeMode === "dark" ? "light" : "dark";
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("t4gc_app_theme_mode", next);
+      } catch {}
+    }
+    return { appThemeMode: next };
+  }),
+  setAppThemeMode: (mode) => set(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("t4gc_app_theme_mode", mode);
+      } catch {}
+    }
+    return { appThemeMode: mode };
   }),
 
   isLeftSidebarOpen: true,
