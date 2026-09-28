@@ -41,7 +41,7 @@ export const defaultProps: Partial<FAQProps> = {
   items: DEFAULT_FAQS,
   appearance: {
     backgroundColor: "var(--color-bg)",
-    itemBgColor: "#f8fafc",
+    itemBgColor: "var(--color-canvas-soft, #f8fafc)",
   },
   spacing: { paddingTop: "4rem", paddingBottom: "4rem" },
   advanced: { htmlAnchor: "faq" },

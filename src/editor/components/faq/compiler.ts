@@ -2,6 +2,7 @@ import { BuilderBlock } from "@/types/theme";
 import { FAQProps, defaultProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
 import { escapeHtml } from "../shared/escape";
+import { isDarkColor } from "../heading/schema";
 
 export const generateHTML = (block: BuilderBlock): string => {
   const p = { ...defaultProps, ...block.props } as FAQProps;
@@ -15,6 +16,9 @@ export const generateHTML = (block: BuilderBlock): string => {
   const wrapperId = p.advanced?.htmlAnchor || `faq-${block.id}`;
   const cornerRadius = (general.itemCornerStyle || "rounded") === "rectangle" ? "0px" : "0.75rem";
   const itemBg = appearance?.itemBgColor || "var(--color-canvas-soft, #f8fafc)";
+  const darkItemBg = (appearance?.itemBgColor && isDarkColor(appearance.itemBgColor))
+    ? appearance.itemBgColor
+    : "var(--color-canvas-soft, #1a1a1a)";
   
   const renderFaqItem = (item: FAQProps["items"][number], idx: number) => {
     const isFirst = idx === 0;
@@ -301,7 +305,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     #${wrapperId} .lg\\:mt-0 { margin-top: 0; }
   }
   html.dark #${wrapperId} .faq-item {
-    background-color: var(--color-canvas-soft, #1a1a1a);
+    background-color: ${darkItemBg};
     border-color: rgba(255, 255, 255, 0.08);
   }
   html.dark #${wrapperId} .faq-chevron-wrapper {

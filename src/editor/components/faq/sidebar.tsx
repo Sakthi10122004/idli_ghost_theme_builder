@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { FAQProps, FAQItem, defaultProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
   <button
@@ -45,6 +46,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   onChangeProps: (props: Record<string, unknown>) => void;
   onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
+  const isDark = useCanvasDarkMode();
   const p = { ...defaultProps, ...block.props } as FAQProps;
   const general = p.general;
   const items = p.items || [];
@@ -165,16 +167,20 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <div className="flex gap-2 items-center">
             <input
               type="color"
-              value={p.appearance.itemBgColor || "#f8fafc"}
+              value={
+                p.appearance?.itemBgColor?.startsWith("#") && p.appearance.itemBgColor.length === 7
+                  ? p.appearance.itemBgColor
+                  : (isDark ? "#18181b" : "#f8fafc")
+              }
               onChange={(e) => onChangeProps({ appearance: { ...p.appearance, itemBgColor: e.target.value } })}
               className="w-7 h-7 rounded border border-brand-hairline cursor-pointer p-0.5 bg-transparent"
             />
             <input
               type="text"
-              value={p.appearance.itemBgColor || "#f8fafc"}
+              value={p.appearance?.itemBgColor || ""}
               onChange={(e) => onChangeProps({ appearance: { ...p.appearance, itemBgColor: e.target.value } })}
-              className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              placeholder="#f8fafc"
+              className="flex-1 px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft text-brand-ink"
+              placeholder={isDark ? "var(--color-canvas-soft, #18181b)" : "#f8fafc"}
             />
           </div>
         </div>
