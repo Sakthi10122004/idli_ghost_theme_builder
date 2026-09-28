@@ -220,6 +220,18 @@ ghost-theme-builder/
 - **Strict Typing**: Write type-safe TypeScript code without `any`.
 - **Ghost Validation**: Ensure any exported Handlebars changes preserve balanced blocks (`{{#...}}` / `{{/...}}`) and pass `gscan` validation rules.
 - **Reference Docs**:
+  - [`CONTRIBUTING.md`](./CONTRIBUTING.md) - Step-by-step guide on forking, branching, and creating Pull Requests.
   - [`AGENTS.md`](./AGENTS.md) - AI agent rules and conventions.
   - [`ARCHITECTURE.md`](./ARCHITECTURE.md) - Deep-dive into AST nodes and compilation.
   - [`DESIGN.md`](./DESIGN.md) - Design system guidelines and color tokens.
+
+---
+
+## Contributing
+
+We welcome community contributions! Please read our [**Contributing & Pull Request Guide**](./CONTRIBUTING.md) for detailed instructions on:
+1. Forking and setting up the local development environment
+2. Branching and commit conventions
+3. Pre-flight verification checklist (`typecheck`, `lint`, and export tests)
+4. Opening and formatting a proper Pull Request
+
