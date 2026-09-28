@@ -18,7 +18,7 @@ export function CanvasElement({ block, onClick }: {
   const document = useEditorStore(state => state.document);
   const deviceMode = useEditorStore(state => state.deviceMode);
   const isMobile = deviceMode === 'mobile';
-  const isDark = useCanvasDarkMode();
+  useCanvasDarkMode();
 
   const headerBlock = Object.values(document.blocks).find(b => b.type === "header");
   const headerAppearance = headerBlock?.props?.appearance || {};
@@ -168,7 +168,7 @@ export function CanvasElement({ block, onClick }: {
             <p className="opacity-80 mb-6">Get the latest posts delivered right to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-[400px] mx-auto">
               <input type="email" placeholder="Your email address" className="flex-1 px-4 py-3 rounded-md outline-none text-brand-ink bg-brand-canvas border border-brand-hairline" readOnly />
-              <button className="footer-subscribe-btn px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || 'var(--ghost-accent-color, var(--color-primary))', color: p.colors?.buttonTextColor || (isDark ? 'var(--color-on-primary, #000000)' : '#ffffff') }}>Subscribe</button>
+              <button className="footer-subscribe-btn px-6 py-3 font-bold rounded-md" style={{ backgroundColor: p.colors?.buttonBgColor || 'var(--ghost-accent-color, var(--color-accent, #0070f3))', color: p.colors?.buttonTextColor || '#ffffff' }}>Subscribe</button>
             </div>
           </div>
         )}

@@ -92,8 +92,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     margin-top: 1.5rem;
     display: block;
     text-align: center;
-    background-color: var(--color-primary, #171717);
-    color: var(--color-on-primary, #ffffff) !important;
+    background-color: var(--ghost-accent-color, var(--color-accent));
+    color: #ffffff !important;
     text-decoration: none;
     padding: 0.625rem 1rem;
     border-radius: var(--radius-pill, 9999px);
@@ -112,8 +112,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-fg, #ffffff);
   }
   html.dark #${wrapperId} .tier-btn {
-    background-color: var(--color-primary, #ffffff);
-    color: var(--color-on-primary, #000000) !important;
+    background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+    color: #ffffff !important;
   }
 </style>
 <div id="${wrapperId}" class="pricing-table-block ${block.styles?.backgroundType === "mesh" ? "mesh-glow" : ""}">
@@ -125,7 +125,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
         <span class="tier-name">${escapeHtml(tier.name)}</span>
         <span class="tier-price">${escapeHtml(tier.price)}</span>
         <div class="tier-features">
-          ${(tier.features || []).map((f) => `<span>✓ ${escapeHtml(f)}</span>`).join("\n          ")}
+          ${(tier.features || []).map((f) => `<span><span style="color: var(--ghost-accent-color, var(--color-accent)); font-weight: bold; margin-right: 0.25rem;">✓</span> ${escapeHtml(f)}</span>`).join("\n          ")}
         </div>
       </div>
       <a href="${tier.href ? escapeUrl(tier.href) : "#"}" class="tier-btn">${escapeHtml(tier.buttonLabel || "Choose Plan")}</a>

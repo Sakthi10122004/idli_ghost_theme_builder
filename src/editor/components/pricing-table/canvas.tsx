@@ -37,10 +37,18 @@ export const CanvasElement = ({ block }: {
               <span className={`tier-name text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? "text-neutral-400" : "text-muted"}`}>{tier.name}</span>
               <span className={`tier-price block text-3xl font-bold mt-2 ${isDark ? "text-white" : "text-brand-ink"}`}>{tier.price}</span>
               <div className={`tier-features flex flex-col gap-1 mt-4 text-xs ${isDark ? "text-neutral-400" : "text-brand-mute"}`}>
-                {(tier.features || []).map((f: string, fIdx: number) => <span key={fIdx}>✓ {f}</span>)}
+                {(tier.features || []).map((f: string, fIdx: number) => (
+                  <span key={fIdx}>
+                    <span style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }} className="font-bold mr-1">✓</span>
+                    {f}
+                  </span>
+                ))}
               </div>
             </div>
-            <button className={`${isDark ? "bg-white text-black" : "bg-brand-primary text-brand-on-primary"} hover:opacity-90 px-4 py-2 rounded-pill text-xs font-semibold shadow-level-3`}>
+            <button 
+              style={{ backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))", color: "#ffffff" }}
+              className="hover:opacity-90 px-4 py-2 rounded-pill text-xs font-semibold shadow-level-3 cursor-pointer"
+            >
               {tier.buttonLabel || "Choose Plan"}
             </button>
           </div>

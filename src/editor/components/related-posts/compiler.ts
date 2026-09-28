@@ -435,7 +435,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
-    color: var(--color-link, #0070f3);
+    color: var(--ghost-accent-color, var(--color-accent));
     margin-bottom: 0.25rem;
     display: inline-block;
   }
@@ -754,7 +754,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .gh-related-read-more {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #059669;
+    color: var(--ghost-accent-color, var(--color-accent));
     margin-top: 0.25rem;
   }
   #${wrapperId} .gh-related-date {
@@ -839,7 +839,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     font-family: var(--font-mono, monospace);
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--color-link, #0070f3);
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   #${wrapperId} .editorial-info h5 {
     font-size: 0.8125rem;

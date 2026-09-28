@@ -106,9 +106,8 @@ export const CanvasElement = ({
               <div className="p-6 flex flex-col flex-1">
                 {card.tag && (
                   <span
-                    className={`text-[10px] font-mono uppercase tracking-wider font-semibold mb-2 ${
-                      isDark ? "text-blue-400" : "text-brand-primary"
-                    }`}
+                    className="text-[10px] font-mono uppercase tracking-wider font-semibold mb-2"
+                    style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
                   >
                     {card.tag}
                   </span>
@@ -129,9 +128,8 @@ export const CanvasElement = ({
                 </p>
                 {card.linkText && (
                   <span
-                    className={`text-xs font-semibold mt-auto inline-flex items-center gap-1 ${
-                      isDark ? "text-white" : "text-brand-primary"
-                    }`}
+                    className="text-xs font-semibold mt-auto inline-flex items-center gap-1"
+                    style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
                   >
                     {card.linkText} &rarr;
                   </span>

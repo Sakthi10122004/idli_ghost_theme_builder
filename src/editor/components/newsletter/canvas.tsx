@@ -63,7 +63,10 @@ export const CanvasElement = ({ block }: {
             disabled
             className="flex-1 px-3 py-2 border border-brand-hairline rounded-sm text-xs font-sans bg-white dark:bg-neutral-900 text-brand-ink focus:outline-none cursor-not-allowed"
           />
-          <button className="bg-brand-primary text-brand-on-primary hover:opacity-90 px-4 rounded-sm text-xs font-semibold shrink-0 cursor-pointer shadow-level-3">
+          <button 
+            style={{ backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))", color: "#ffffff" }}
+            className="hover:opacity-90 px-4 rounded-sm text-xs font-semibold shrink-0 cursor-pointer shadow-level-3"
+          >
             {buttonLabel || "Subscribe"}
           </button>
         </div>

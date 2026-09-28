@@ -11,7 +11,6 @@ export const CanvasElement = ({ block }: {
 }) => {
   const isDark = useCanvasDarkMode();
   const { label, variant, shape = "pill" } = block.props;
-  const isAccent = variant === "accent";
   const isSecondary = variant === "secondary";
   const customShadow = block.styles?.boxShadow;
   const hasCustomShadow = customShadow !== undefined;
@@ -29,19 +28,15 @@ export const CanvasElement = ({ block }: {
 
   const paddingClass = shape === "circle" ? "" : "px-5 py-2";
 
-  const buttonStyles = isAccent
-    ? `text-white hover:opacity-90 ${shadowClass}`
-    : isSecondary
-      ? isDark
-        ? `bg-neutral-900 text-white border border-neutral-700 hover:bg-neutral-800 ${shadowClass}`
-        : `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
-      : isDark
-        ? `bg-white text-neutral-900 hover:bg-neutral-100 ${shadowClass}`
-        : `bg-brand-primary text-brand-on-primary hover:opacity-90 ${shadowClass}`;
+  const buttonStyles = isSecondary
+    ? isDark
+      ? `bg-neutral-900 text-white border border-neutral-700 hover:bg-neutral-800 ${shadowClass}`
+      : `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
+    : `text-white hover:opacity-90 ${shadowClass}`;
 
   const buttonStyle: React.CSSProperties = {
     ...(customShadow && customShadow !== "none" ? { boxShadow: customShadow } : {}),
-    ...(isAccent ? { backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" } : {}),
+    ...(!isSecondary ? { backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" } : {}),
   };
 
   return (

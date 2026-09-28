@@ -20,6 +20,8 @@
   --color-link: #0070f3;
   --color-link-deep: #0761d1;
   --color-link-bg-soft: #d3e5ff;
+  --color-accent: #0070f3;
+  --ghost-accent-color: var(--color-accent);
   
   --color-success: #0070f3;
   --color-error: #ee0000;

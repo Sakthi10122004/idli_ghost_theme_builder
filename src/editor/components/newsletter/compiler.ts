@@ -139,8 +139,8 @@ export const compileToHbs = (block: BuilderBlock) => {
     font-size: 0.75rem;
     font-weight: 600;
     border-radius: var(--radius-pill);
-    background-color: var(--color-primary);
-    color: var(--color-on-primary, #ffffff);
+    background-color: var(--ghost-accent-color, var(--color-accent));
+    color: #ffffff;
     text-decoration: none;
     border: none;
     cursor: pointer;
@@ -148,6 +148,10 @@ export const compileToHbs = (block: BuilderBlock) => {
   }
   #newsletter-${block.id} .btn-primary:hover {
     opacity: 0.85;
+  }
+  #newsletter-${block.id} .input-field:focus {
+    border-color: var(--ghost-accent-color, var(--color-accent));
+    outline: 2px solid var(--ghost-accent-color, var(--color-accent));
   }
   html.dark #newsletter-${block.id} {
     border-color: rgba(255,255,255,0.1);

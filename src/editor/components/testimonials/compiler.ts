@@ -467,15 +467,15 @@ export const compileToHbs = (block: BuilderBlock) => {
       border: 1px solid var(--color-hairline, #e4e4e7);
     }
     #${uid} .gh-card-featured {
-      border: 2px solid var(--color-fg, #18181b);
+      border: 2px solid var(--ghost-accent-color, var(--color-accent));
       box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     }
     #${uid} .gh-featured-pill {
       position: absolute;
       top: -11px;
       right: 16px;
-      background: var(--color-primary, #18181b);
-      color: var(--color-on-primary, #ffffff);
+      background: var(--ghost-accent-color, var(--color-accent));
+      color: #ffffff;
       font-size: 10px;
       font-family: monospace;
       font-weight: 600;

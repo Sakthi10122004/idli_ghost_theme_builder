@@ -19,9 +19,9 @@ export const compileToHbs = (block: BuilderBlock): string => {
   {{/if}}
   <div class="author-meta" style="font-size: 0.8125rem; color: var(--color-muted, #666); display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; align-items: center;">
     {{#if location}}<span>📍 {{location}}</span>{{/if}}
-    {{#if website}}<a href="{{website}}" target="_blank" rel="noopener" style="color: var(--color-primary);">🔗 Website</a>{{/if}}
-    {{#if twitter}}<a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Twitter</a>{{/if}}
-    {{#if facebook}}<a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Facebook</a>{{/if}}
+    {{#if website}}<a href="{{website}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">🔗 Website</a>{{/if}}
+    {{#if twitter}}<a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">Twitter</a>{{/if}}
+    {{#if facebook}}<a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">Facebook</a>{{/if}}
     <span style="font-family: monospace; background: var(--color-bg, #fafafa); border: 1px solid var(--color-hairline, #ebebeb); padding: 0.2rem 0.5rem; border-radius: 4px;">{{plural count.posts empty="0 posts" singular="% post" plural="% posts"}}</span>
   </div>
 </header>

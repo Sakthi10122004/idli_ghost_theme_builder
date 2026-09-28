@@ -156,7 +156,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-primary, #171717);
+    color: var(--ghost-accent-color, var(--color-accent));
     margin-bottom: 0.5rem;
   }
   #${wrapperId} .card-title {
@@ -179,7 +179,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .card-link {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--color-primary, #171717);
+    color: var(--ghost-accent-color, var(--color-accent));
     text-decoration: none;
     transition: opacity 0.15s;
     margin-top: auto;
@@ -206,7 +206,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-muted, #a3a3a3);
   }
   html.dark #${wrapperId} .card-link {
-    color: var(--color-primary, #ffffff);
+    color: var(--ghost-accent-color, var(--color-accent));
   }
 </style>
 <div id="${wrapperId}" class="cards-section ${styles.backgroundType === "mesh" ? "mesh-glow" : ""}">

@@ -29,13 +29,10 @@ export const compileToHbs = (block: BuilderBlock) => {
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
-    ${isAccent ? `
+    ${isAccent || isPrimary ? `
     background-color: var(--ghost-accent-color, var(--color-accent));
     color: #ffffff;
     border: 1px solid transparent;
-    ` : isPrimary ? `
-    background-color: var(--color-primary);
-    color: var(--color-on-primary, #ffffff);
     ` : `
     background-color: var(--color-bg);
     color: var(--color-fg);
@@ -44,18 +41,16 @@ export const compileToHbs = (block: BuilderBlock) => {
   }
   #btn-${block.id}:hover {
     ${isAccent || isPrimary ? `
-    opacity: 0.85;
+    opacity: 0.88;
     ` : `
     background-color: rgba(0,0,0,0.02);
     `}
   }
   html.dark #btn-${block.id} {
-    ${isAccent ? `
+    ${isAccent || isPrimary ? `
     background-color: var(--ghost-accent-color, var(--color-accent));
     color: #ffffff;
-    ` : isPrimary ? `
-    background-color: var(--color-primary);
-    color: var(--color-on-primary, #000000);
+    border-color: transparent;
     ` : `
     background-color: var(--color-bg);
     color: var(--color-fg);

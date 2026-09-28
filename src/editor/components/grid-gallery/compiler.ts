@@ -705,7 +705,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .gallery-list-cta {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--color-link, #0070f3);
+    color: var(--ghost-accent-color, var(--color-accent));
     font-family: var(--gh-font-body, inherit);
   }
 
@@ -784,7 +784,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${wrapperId} .gallery-bento-cta {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #059669;
+    color: var(--ghost-accent-color, var(--color-accent));
     font-family: var(--gh-font-body, inherit);
   }
 

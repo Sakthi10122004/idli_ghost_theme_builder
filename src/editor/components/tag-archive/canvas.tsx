@@ -19,7 +19,10 @@ export const CanvasElement = ({
   if (isBanner) {
     return (
       <header className="tag-header w-full text-center py-12 px-4 max-w-2xl mx-auto border-b border-brand-hairline">
-        <span className="text-[11px] font-mono uppercase tracking-wider text-blue-600 font-bold block mb-2">
+        <span
+          className="text-[11px] font-mono uppercase tracking-wider font-bold block mb-2"
+          style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+        >
           Topic Archive
         </span>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-ink mb-3">

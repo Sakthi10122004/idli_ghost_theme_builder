@@ -73,7 +73,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
         <div
           className={`w-28 h-28 mx-auto flex items-center justify-center bg-brand-canvas-soft-2 border border-brand-hairline ${shapeClass} overflow-hidden shadow-level-1 shrink-0`}
         >
-          <span className="text-xl font-mono font-bold text-brand-primary">{initials}</span>
+          <span
+            className="text-xl font-mono font-bold"
+            style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+          >
+            {initials}
+          </span>
         </div>
       );
     }
@@ -189,8 +194,8 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
 
                 {member.role && (
                   <p
-                    className="text-xs font-medium font-mono uppercase tracking-wider text-brand-primary/80 mt-1"
-                    style={{ color: appearance?.roleColor || "var(--color-primary)" }}
+                    className="text-xs font-medium font-mono uppercase tracking-wider mt-1"
+                    style={{ color: appearance?.roleColor || "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
                   >
                     {member.role}
                   </p>

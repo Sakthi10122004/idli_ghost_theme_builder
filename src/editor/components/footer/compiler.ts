@@ -156,7 +156,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
         <p style="opacity: 0.8; margin-bottom: 24px;">Get the latest posts delivered right to your inbox.</p>
         <form data-members-form="subscribe" style="display: flex; flex-direction: column; gap: 8px; max-width: 400px; margin: 0 auto;">
           <input data-members-email type="email" required placeholder="Your email address" style="flex: 1; padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); outline: none; color: var(--color-fg); background-color: var(--color-bg);">
-          <button type="submit" class="footer-subscribe-btn" style="padding: 12px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; background-color: ${colors.buttonBgColor || 'var(--color-primary, #000000)'}; color: ${colors.buttonTextColor || 'var(--color-on-primary, #ffffff)'}; transition: opacity 0.2s;">Subscribe</button>
+          <button type="submit" class="footer-subscribe-btn" style="padding: 12px 24px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; background-color: ${colors.buttonBgColor || 'var(--ghost-accent-color, var(--color-accent))'}; color: ${colors.buttonTextColor || '#ffffff'}; transition: opacity 0.2s;">Subscribe</button>
         </form>
       </div>
       ` : ''}
@@ -380,8 +380,8 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     color: var(--color-fg) !important;
   }
   html.dark #${htmlAnchor} .footer-subscribe-btn {
-    background-color: var(--color-primary) !important;
-    color: var(--color-on-primary) !important;
+    background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+    color: #ffffff !important;
   }
   #${htmlAnchor} .footer-inner {
     margin: 0 auto;

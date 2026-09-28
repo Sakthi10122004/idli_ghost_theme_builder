@@ -3,12 +3,12 @@ import { BuilderBlock } from "@/types/theme";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
-export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
+export const CanvasElement = ({ block }: {
   block: BuilderBlock;
-  isSelected: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  onDelete: (e: React.MouseEvent) => void;
-  renderChildren: () => React.ReactNode;
+  isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
+  renderChildren?: () => React.ReactNode;
 }) => {
   const p = block.props || {};
   const general = p.general || {};
@@ -97,7 +97,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
               )}
               <div className="p-8 flex flex-col gap-3 flex-grow">
                 {showPrimaryTag && (
-                  <span className="text-xs font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--color-mute)" }}>
+                  <span className="text-xs font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}>
                     {featurePost.category}
                   </span>
                 )}
@@ -121,7 +121,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
                   )}
                   <div className="p-4 flex flex-col justify-center gap-1.5 flex-grow">
                     {showPrimaryTag && (
-                      <span className="text-[9px] font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--color-mute)" }}>
+                      <span className="text-[9px] font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}>
                         {post.category}
                       </span>
                     )}
@@ -152,7 +152,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
               )}
               <div className="post-card-content p-5 flex flex-col gap-2 flex-grow">
                 {showPrimaryTag && (
-                  <span className="post-tag text-[10px] font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--color-mute)" }}>
+                  <span className="post-tag text-[10px] font-mono uppercase tracking-wider font-semibold" style={{ color: appearance.accentColor || "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}>
                     {post.category}
                   </span>
                 )}
@@ -172,7 +172,7 @@ export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChil
               href={button.url || "#"} 
               className="inline-block px-6 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
               style={{
-                backgroundColor: appearance.accentColor || "var(--color-primary)",
+                backgroundColor: appearance.accentColor || "var(--ghost-accent-color, var(--color-accent, #0070f3))",
                 color: "#ffffff"
               }}
             >

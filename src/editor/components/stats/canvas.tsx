@@ -75,7 +75,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
       );
     } else if (general.layoutStyle === "accent-cards") {
       return (
-        <div key={stat.id || idx} className="bg-white/40 dark:bg-neutral-900/40 backdrop-blur-sm rounded-r-xl shadow-xs border-y border-r border-gray-100 dark:border-white/10 p-8 flex flex-col items-start border-l-4" style={{ borderLeftColor: "var(--color-primary, #171717)" }}>
+        <div key={stat.id || idx} className="bg-white/40 dark:bg-neutral-900/40 backdrop-blur-sm rounded-r-xl shadow-xs border-y border-r border-gray-100 dark:border-white/10 p-8 flex flex-col items-start border-l-4" style={{ borderLeftColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}>
           {(stat.iconType === 'image' && stat.imageUrl) ? (
             <div className="w-10 h-10 flex items-center justify-center rounded-lg mb-4 overflow-hidden">
               <img src={resolveAsset(stat.imageUrl)} alt={stat.label} className="w-full h-full object-cover" />
@@ -83,7 +83,7 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
           ) : stat.icon ? (
             <div 
               className="w-10 h-10 flex items-center justify-center rounded-lg mb-4 [&_svg]:w-5 [&_svg]:h-5" 
-              style={{ backgroundColor: "var(--color-primary-light, #e0f2fe)", color: "var(--color-primary)" }}
+              style={{ backgroundColor: "rgba(0, 112, 243, 0.12)", color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
               dangerouslySetInnerHTML={{ __html: stat.icon }}
             />
           ) : null}

@@ -9,7 +9,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   if (isBanner) {
     return `{{#tag}}
 <header class="tag-header" style="text-align: center; padding: 4rem 1rem 2.5rem 1rem; max-width: 800px; margin: 0 auto;">
-  <span style="font-size: 0.75rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-primary, #171717); font-weight: 700; display: block; margin-bottom: 0.5rem;">Topic Archive</span>
+  <span style="font-size: 0.75rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ghost-accent-color, var(--color-accent)); font-weight: 700; display: block; margin-bottom: 0.5rem;">Topic Archive</span>
   <h1 class="tag-title" style="font-size: 2.75rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em;">{{name}}</h1>
   {{#if description}}
   <p class="tag-description" style="font-size: 1.125rem; line-height: 1.6; color: var(--color-muted, #666); max-width: 600px; margin: 0 auto 1.25rem auto;">{{description}}</p>

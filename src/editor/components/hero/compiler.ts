@@ -161,8 +161,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   #${uid} .hero-eyebrow {
     display: inline-block;
     padding: 0.25rem 0.75rem;
-    background-color: ${(showCover || textColor) ? 'rgba(255, 255, 255, 0.15)' : 'rgba(59, 130, 246, 0.15)'};
-    color: ${textColor ? textColor : (showCover ? '#ffffff' : '#3b82f6')};
+    background-color: ${(showCover || textColor) ? 'rgba(255, 255, 255, 0.15)' : 'color-mix(in srgb, var(--ghost-accent-color, #0070f3) 15%, transparent)'};
+    color: ${textColor ? textColor : (showCover ? '#ffffff' : 'var(--ghost-accent-color, #0070f3)')};
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -207,8 +207,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     cursor: pointer;
   }
   #${uid} .hero-btn-primary {
-    background-color: ${p.buttonBgColor || 'var(--color-primary, #171717)'};
-    color: ${p.buttonTextColor || 'var(--color-on-primary, #ffffff)'};
+    background-color: ${p.buttonBgColor || 'var(--ghost-accent-color, var(--color-accent))'};
+    color: ${p.buttonTextColor || '#ffffff'};
     border: 1px solid transparent;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
@@ -237,8 +237,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     ${!textColor && !showCover ? 'color: var(--color-fg, #ffffff);' : ''}
   }
   html.dark #${uid} .hero-btn-primary {
-    background-color: ${p.buttonBgColor && p.buttonBgColor !== '#171717' ? p.buttonBgColor : 'var(--color-primary, #ffffff)'};
-    color: ${p.buttonTextColor && p.buttonTextColor !== '#ffffff' ? p.buttonTextColor : 'var(--color-on-primary, #000000)'};
+    background-color: ${p.buttonBgColor && p.buttonBgColor !== '#171717' ? p.buttonBgColor : 'var(--ghost-accent-color, var(--color-accent))'};
+    color: ${p.buttonTextColor && p.buttonTextColor !== '#ffffff' ? p.buttonTextColor : '#ffffff'};
   }
   html.dark #${uid} .hero-btn-secondary {
     border-color: rgba(255,255,255,0.2);

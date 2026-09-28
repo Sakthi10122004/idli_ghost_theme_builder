@@ -4,11 +4,8 @@ import { TestimonialItem } from "./schema";
 import { useEditorStore } from "@/store/editorStore";
 import { 
   Star, 
-  Tag, 
-  ExternalLink, 
   Globe, 
-  Sparkles, 
-  Zap
+  Sparkles 
 } from "lucide-react";
 
 import { getBackgroundStyle } from "@/editor/components/shared/background";
@@ -16,24 +13,18 @@ import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
 export const CanvasElement = ({
   block,
-  isSelected,
-  onClick,
-  onDelete,
-  renderChildren,
 }: {
   block: BuilderBlock;
-  isSelected: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  onDelete: (e: React.MouseEvent) => void;
-  renderChildren: () => React.ReactNode;
+  isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
+  renderChildren?: () => React.ReactNode;
 }) => {
   const isDark = useCanvasDarkMode();
   const deviceMode = useEditorStore((state) => state.deviceMode);
   const props = block.props || {};
   const items: TestimonialItem[] = props.items || [];
   const useDynamicData = props.useDynamicData !== false;
-  const dynamicTag = props.dynamicTag || "testimonial";
-  const dynamicLimit = props.dynamicLimit ? Math.max(1, Number(props.dynamicLimit)) : 100;
   const configuredLayout = props.layout || "grid-3";
   const cardStyle = props.cardStyle || "bordered";
   const showSectionHeader = props.showSectionHeader !== false;
@@ -44,7 +35,6 @@ export const CanvasElement = ({
   const showRoleCompany = props.showRoleCompany !== false;
   const showDate = props.showDate !== false;
   const showLocation = props.showLocation !== false;
-  const showProductUsed = props.showProductUsed !== false;
   const showSocialLink = props.showSocialLink !== false;
 
   // Responsive device mode layout handling
@@ -129,7 +119,7 @@ export const CanvasElement = ({
     };
   };
 
-  const getCardItemStyle = (itemCount: number): React.CSSProperties => {
+  const getCardItemStyle = (_itemCount?: number): React.CSSProperties => {
     return {
       width: "100%",
       boxSizing: "border-box",
@@ -300,8 +290,11 @@ export const CanvasElement = ({
               >
                 {/* Featured Badge */}
                 {item.featured && (
-                  <div className="absolute -top-3 right-4 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-[10px] font-mono font-medium px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 z-20">
-                    <Sparkles className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                  <div
+                    className="absolute -top-3 right-4 text-white text-[10px] font-mono font-medium px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 z-20"
+                    style={{ backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
                     Featured
                   </div>
                 )}

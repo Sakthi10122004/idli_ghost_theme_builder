@@ -40,12 +40,18 @@ export const CanvasElement = ({
             </span>
           )}
           {p.website && (
-            <span className="flex items-center gap-1 text-brand-primary">
+            <span
+              className="flex items-center gap-1"
+              style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+            >
               <Globe size={12} /> {p.website.replace(/^https?:\/\//, "")}
             </span>
           )}
           {p.twitter && (
-            <span className="flex items-center gap-1 text-blue-500 font-mono text-[11px]">
+            <span
+              className="flex items-center gap-1 font-mono text-[11px]"
+              style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+            >
               𝕏 {p.twitter}
             </span>
           )}

@@ -213,7 +213,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 1.25rem;
     font-weight: 700;
     font-family: monospace;
-    color: var(--color-primary, #171717);
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   #${wrapperId} .team-info {
     margin-top: 1rem;
@@ -235,7 +235,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: ${appearance?.roleColor || "var(--color-primary, #171717)"};
+    color: ${appearance?.roleColor || "var(--ghost-accent-color, var(--color-accent))"};
     margin-bottom: 0;
   }
   #${wrapperId} .team-bio {

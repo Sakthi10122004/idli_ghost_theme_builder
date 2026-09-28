@@ -34,12 +34,18 @@ export const CanvasElement = ({
         {(p.showTag || p.showFeaturedFlag) && (
           <div className="flex items-center justify-center gap-2 mb-4">
             {p.showFeaturedFlag && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-brand-primary text-white">
+              <span
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-white"
+                style={{ backgroundColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+              >
                 Featured
               </span>
             )}
             {p.showTag && (
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-600 hover:underline cursor-pointer">
+              <span
+                className="text-xs font-mono font-semibold uppercase tracking-wider hover:underline cursor-pointer"
+                style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+              >
                 Design Systems
               </span>
             )}
@@ -122,7 +128,10 @@ export const CanvasElement = ({
           Ghost Handlebars templates provide a declarative contract between content creators and theme developers. Through helpers like <code className="font-mono text-xs bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-ink">{"{{#foreach}}"}</code>, <code className="font-mono text-xs bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-ink">{"{{content}}"}</code>, and <code className="font-mono text-xs bg-brand-canvas-soft border border-brand-hairline px-1.5 py-0.5 rounded text-brand-ink">{"{{#get}}"}</code>, the browser renders pristine semantic markup without client-side hydration delays.
         </p>
 
-        <blockquote className="border-l-4 border-brand-primary pl-4 py-1 italic text-brand-ink my-6 font-serif text-base sm:text-lg">
+        <blockquote
+          className="border-l-4 pl-4 py-1 italic text-brand-ink my-6 font-serif text-base sm:text-lg"
+          style={{ borderLeftColor: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+        >
           &ldquo;Typography is the foundation of readability. A great reading experience disappears into the background, letting ideas shine through.&rdquo;
         </blockquote>
 

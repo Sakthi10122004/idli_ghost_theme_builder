@@ -322,7 +322,7 @@ ${defaultIconHtml}
     border-top: 1px solid rgba(0,0,0,0.05);
     border-right: 1px solid rgba(0,0,0,0.05);
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    border-left: 4px solid var(--color-primary, #171717);
+    border-left: 4px solid var(--ghost-accent-color, var(--color-accent));
     padding: 2rem;
     align-items: flex-start;
     text-align: left;
@@ -335,8 +335,8 @@ ${defaultIconHtml}
     justify-content: center;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
-    background-color: var(--color-primary-light, #e0f2fe);
-    color: var(--color-primary);
+    background-color: color-mix(in srgb, var(--ghost-accent-color, var(--color-accent)) 15%, transparent);
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   #${wrapperId} .stats-item.accent-card .stats-icon svg {
     width: 1.25rem;
@@ -405,6 +405,7 @@ ${defaultIconHtml}
   html.dark #${wrapperId} .stats-item.accent-card {
     background-color: rgba(255, 255, 255, 0.04);
     border-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--ghost-accent-color, var(--color-accent));
   }
   html.dark #${wrapperId} .stats-grid.divider,
   html.dark #${wrapperId} .stats-item.divider-cell {

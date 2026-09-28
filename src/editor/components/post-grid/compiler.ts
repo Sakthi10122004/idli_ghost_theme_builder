@@ -181,12 +181,17 @@ export const compileToHbs = (block: BuilderBlock) => {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
-    color: ${appearance.accentColor || "var(--color-primary)"};
+    color: ${appearance.accentColor || "var(--ghost-accent-color, var(--color-accent))"};
     margin-bottom: 0.5rem;
   }
   #${wrapperId} .gh-post-card-title {
     font-family: var(--font-heading);
     margin: 0 0 0.5rem 0;
+    transition: color 0.15s ease;
+  }
+  #${wrapperId} .gh-post-card:hover .gh-post-card-title,
+  #${wrapperId} .magazine-list-item:hover .gh-post-card-title {
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   #${wrapperId} .gh-post-card-title-feature {
     font-size: 1.75rem;

@@ -17,8 +17,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const palette = {
     bg: appearance.backgroundColor || "var(--color-bg, #ffffff)",
     text: appearance.textColor || "var(--color-fg, #171717)",
-    buttonBg: appearance.buttonBgColor || "var(--color-primary, #171717)",
-    buttonText: appearance.buttonTextColor || "var(--color-on-primary, #ffffff)",
+    buttonBg: appearance.buttonBgColor || "var(--ghost-accent-color, var(--color-accent))",
+    buttonText: appearance.buttonTextColor || "#ffffff",
   };
 
   const glassEnabled = !!styles.backdropBlur && styles.backdropBlur !== "none";

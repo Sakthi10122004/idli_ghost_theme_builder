@@ -352,6 +352,10 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: var(--color-primary);
   text-decoration: none;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--ghost-accent-color, var(--color-accent));
 }
 ul.nav, ul.nav-secondary {
   list-style: none;
@@ -518,8 +522,8 @@ html.dark .text-dark-adaptive p {
 }
 
 html.dark .btn-primary {
-  background-color: var(--color-primary) !important;
-  color: var(--color-on-primary) !important;
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+  color: #ffffff !important;
 }
 
 html.dark .btn-secondary {
@@ -880,9 +884,15 @@ html.dark .gh-comments-count {
 }
 
 .gh-content a {
+  color: var(--ghost-accent-color, var(--color-accent));
   text-decoration: underline;
+  text-decoration-color: var(--ghost-accent-color, var(--color-accent));
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+.gh-content a:hover {
+  opacity: 0.8;
 }
 
 .gh-content ul, .gh-content ol {
@@ -893,7 +903,7 @@ html.dark .gh-comments-count {
 .gh-content blockquote {
   margin: 1.5em 0;
   padding: 0 1.5em;
-  border-left: 3px solid var(--color-primary);
+  border-left: 3px solid var(--ghost-accent-color, var(--color-accent));
   font-style: italic;
 }
 
@@ -1104,12 +1114,12 @@ html.dark .gh-comments-count {
   font-weight: bold;
   text-decoration: none;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--ghost-accent-color, var(--color-accent));
   color: #fff;
   transition: opacity 0.2s;
 }
 .gh-content .kg-btn-accent {
-  background: var(--color-accent);
+  background: var(--ghost-accent-color, var(--color-accent));
   color: #fff;
 }
 .gh-content .kg-btn:hover {
@@ -1336,15 +1346,19 @@ html.dark .hover-effect-glow:hover {
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
-.article-tag a {
+.article-tag,
+.article-tag a,
+a.article-tag {
   font-size: 0.8125rem;
   font-family: var(--font-mono, monospace);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-primary);
+  color: var(--ghost-accent-color, var(--color-accent)) !important;
+  text-decoration: none;
 }
-.article-featured-badge {
+.article-featured-badge,
+.article-featured-flag {
   font-size: 0.6875rem;
   font-family: var(--font-mono, monospace);
   font-weight: 700;
@@ -1352,8 +1366,8 @@ html.dark .hover-effect-glow:hover {
   letter-spacing: 0.05em;
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-pill, 9999px);
-  background-color: var(--color-primary);
-  color: #ffffff;
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+  color: #ffffff !important;
 }
 .article-title {
   font-family: var(--font-heading);
@@ -1770,12 +1784,14 @@ html.dark .divider-hairline {
   cursor: pointer;
   line-height: 1.25;
 }
-.btn-primary {
-  background-color: var(--color-primary, #171717);
+.btn-primary,
+.btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
   color: #ffffff !important;
   border: 1px solid transparent;
 }
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-accent:hover {
   opacity: 0.88;
 }
 .btn-secondary {
@@ -1786,25 +1802,37 @@ html.dark .divider-hairline {
 .btn-secondary:hover {
   background-color: rgba(0, 0, 0, 0.03);
 }
-html.dark .btn-primary {
-  background-color: var(--color-primary) !important;
-  color: var(--color-on-primary) !important;
+html.dark .btn-primary,
+html.dark .btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+  color: #ffffff !important;
 }
 html.dark .btn-secondary {
   color: var(--color-fg) !important;
   border-color: var(--color-hairline, #333333) !important;
 }
-.btn-accent {
-  background-color: var(--ghost-accent-color, var(--color-accent));
-  color: #ffffff !important;
-  border: 1px solid transparent;
-}
-.btn-accent:hover {
-  opacity: 0.88;
-}
-html.dark .btn-accent {
+
+/* Ghost Native Action & Subscribe Buttons */
+.gh-head-btn,
+.gh-btn,
+.gh-button {
   background-color: var(--ghost-accent-color, var(--color-accent)) !important;
   color: #ffffff !important;
+  transition: opacity 0.15s ease;
+}
+.gh-head-btn:hover,
+.gh-btn:hover,
+.gh-button:hover {
+  opacity: 0.88;
+}
+
+/* Global Form Focus Rings */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--ghost-accent-color, var(--color-accent)) !important;
+  outline-offset: 1px;
+  border-color: var(--ghost-accent-color, var(--color-accent)) !important;
 }
 
 /* 9. Page Detail & Single Article Content */

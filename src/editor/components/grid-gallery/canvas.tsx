@@ -335,7 +335,12 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
                     {item.alt && item.caption && item.alt !== item.caption && (
                       <span className="text-xs text-brand-mute leading-snug line-clamp-2">{item.alt}</span>
                     )}
-                    <span className="text-[10px] font-mono text-brand-link font-semibold">View Image →</span>
+                    <span
+                      className="text-[10px] font-mono font-semibold"
+                      style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+                    >
+                      View Image &rarr;
+                    </span>
                   </div>
                 </div>
               );
@@ -370,8 +375,11 @@ export const CanvasElement = ({ block }: { block: BuilderBlock }) => {
                     {item.alt && item.caption && item.alt !== item.caption && (
                       <span className="text-[11px] text-brand-mute leading-relaxed line-clamp-3">{item.alt}</span>
                     )}
-                    <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
-                      View Full Image →
+                    <span
+                      className="text-xs font-semibold flex items-center gap-1"
+                      style={{ color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
+                    >
+                      View Full Image &rarr;
                     </span>
                   </div>
                 </div>

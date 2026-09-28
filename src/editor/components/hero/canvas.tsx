@@ -25,7 +25,7 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   const p = block.props || {};
-  const isDark = useCanvasDarkMode();
+  useCanvasDarkMode();
   const isCarousel = !!p.enableCarousel;
   const useSiteData = p.useSiteData ?? false;
   const useCoverImageAsBackground = p.useCoverImageAsBackground ?? true;
@@ -201,10 +201,10 @@ export const CanvasElement = ({ block }: {
                 style={{
                   backgroundColor: p.buttonBgColor
                     ? p.buttonBgColor
-                    : "var(--color-primary, #171717)",
+                    : "var(--ghost-accent-color, var(--color-accent, #0070f3))",
                   color: p.buttonTextColor
                     ? p.buttonTextColor
-                    : (isDark ? "var(--color-on-primary, #000000)" : "#ffffff")
+                    : "#ffffff"
                 }}
               >
                 {isDynamic ? (p.buttonLabel || "Read Article") : (current.buttonLabel || p.buttonLabel || "Learn More")}
@@ -330,7 +330,7 @@ export const CanvasElement = ({ block }: {
                   ? "bg-white/10 text-white"
                   : "bg-brand-link-bg-soft text-brand-link dark:bg-white/10 dark:text-brand-ink"
               }`}
-              style={applyCustomColor ? { color: textColor || "#ffffff" } : {}}
+              style={applyCustomColor ? { color: textColor || "#ffffff" } : { color: "var(--ghost-accent-color, var(--color-accent, #0070f3))" }}
             >
               {eyebrowText}
             </span>
@@ -347,10 +347,10 @@ export const CanvasElement = ({ block }: {
               style={{
                 backgroundColor: p.buttonBgColor
                   ? p.buttonBgColor
-                  : "var(--color-primary, #171717)",
+                  : "var(--ghost-accent-color, var(--color-accent, #0070f3))",
                 color: p.buttonTextColor
                   ? p.buttonTextColor
-                  : (isDark ? "var(--color-on-primary, #000000)" : "#ffffff")
+                  : "#ffffff"
               }}
             >
               {buttonLabel || "Start Reading"}

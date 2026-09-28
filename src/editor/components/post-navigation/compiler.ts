@@ -332,7 +332,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-fg, #171717);
   }
   #${wrapperId} .gh-post-nav-large-link:hover .gh-post-nav-title {
-    color: var(--color-primary, #0070f3);
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   html.dark #${wrapperId} .gh-post-nav-large-link:hover .gh-post-nav-label {
     color: #ffffff;
