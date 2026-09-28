@@ -337,14 +337,14 @@ export function getSkeletonCss(doc?: ThemeDocument): string {
 }
 body {
   margin: 0;
-  font-family: var(--font-body);
+  font-family: var(--gh-font-body, var(--font-body));
   background-color: var(--color-bg);
   color: var(--color-fg);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+  font-family: var(--gh-font-heading, var(--font-heading));
   margin-top: 0;
   margin-bottom: 0.5em;
   color: var(--color-fg);
@@ -393,10 +393,10 @@ ul.nav, ul.nav-secondary {
 
 /* 2. Design Tokens */
 :root {
-  --font-heading: ${fontHeading};
-  --font-body: ${fontBody};
-  --gh-font-heading: var(--font-heading);
-  --gh-font-body: var(--font-body);
+  --gh-font-heading: ${fontHeading};
+  --gh-font-body: ${fontBody};
+  --font-heading: var(--gh-font-heading);
+  --font-body: var(--gh-font-body);
   --color-bg: ${colorBackground};
   --color-fg: ${colorForeground};
   --color-primary: ${colorPrimary};
@@ -1370,7 +1370,7 @@ a.article-tag {
   color: #ffffff !important;
 }
 .article-title {
-  font-family: var(--font-heading);
+  font-family: var(--gh-font-heading, var(--font-heading));
   font-size: 2.75rem;
   font-weight: 700;
   line-height: 1.15;
@@ -1668,8 +1668,46 @@ html.dark .divider-hairline {
 }
 
 /* 6. Typography Scale & Heading Hierarchy */
+h1, h2, h3, h4, h5, h6,
+.heading,
+.font-heading,
+.site-title,
+.gh-site-title,
+.hero-title,
+.hero-heading,
+.post-title,
+.article-title,
+.page-title,
+.gh-post-card-title,
+.faq-heading,
+.faq-question,
+.pricing-plan-title,
+.pricing-tier-name,
+.pricing-price,
+.tier-price,
+.newsletter-title,
+.newsletter-heading,
+.stats-number,
+.stats-value,
+.stats-heading,
+.team-name,
+.card-title,
+.tag-title,
+.author-name,
+.author-card-name,
+.gh-tag-header-title,
+.gh-testimonials-title,
+.gh-content h1,
+.gh-content h2,
+.gh-content h3,
+.gh-content h4,
+.gh-content h5,
+.gh-content h6 {
+  font-family: var(--gh-font-heading, var(--font-heading)) !important;
+}
+
 .heading {
-  font-family: var(--font-heading);
+  font-family: var(--gh-font-heading, var(--font-heading));
   line-height: 1.2;
   color: var(--color-fg);
   margin-top: 0;
@@ -1691,8 +1729,36 @@ html.dark .divider-hairline {
 }
 
 /* 7. Text Variants & Prose Utilities */
+body,
+p,
+li,
+a,
+button,
+input,
+textarea,
+select,
+.text-content,
+.font-body,
+.gh-content,
+.gh-content p,
+.gh-content li,
+.faq-answer-text,
+.hero-subtitle,
+.newsletter-description,
+.pricing-feature-item,
+.card-desc,
+.post-excerpt,
+.article-excerpt,
+.testimonial-quote,
+.gh-testimonials-subtitle,
+.gh-testimonials-quote,
+.author-bio,
+.author-card-bio {
+  font-family: var(--gh-font-body, var(--font-body));
+}
+
 .text-content {
-  font-family: var(--font-body);
+  font-family: var(--gh-font-body, var(--font-body));
   color: var(--color-fg);
   line-height: 1.6;
 }
@@ -1761,6 +1827,9 @@ html.dark .divider-hairline {
 .font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
 .font-extrabold { font-weight: 800; }
+.font-heading { font-family: var(--gh-font-heading, var(--font-heading)) !important; }
+.font-body { font-family: var(--gh-font-body, var(--font-body)) !important; }
+.font-sans { font-family: var(--gh-font-body, var(--font-body), system-ui, -apple-system, sans-serif); }
 .font-mono { font-family: var(--font-mono, monospace); }
 .uppercase { text-transform: uppercase; }
 .tracking-tight { letter-spacing: -0.025em; }

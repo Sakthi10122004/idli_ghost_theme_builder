@@ -83,7 +83,7 @@ export const compileToHbs = (block: BuilderBlock) => {
   return `<style>
   #${wrapperId} .post-grid-title {
     font-size: 2rem;
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--color-fg);
@@ -185,7 +185,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     margin-bottom: 0.5rem;
   }
   #${wrapperId} .gh-post-card-title {
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     margin: 0 0 0.5rem 0;
     transition: color 0.15s ease;
   }
@@ -202,6 +202,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     line-height: 1.3;
   }
   #${wrapperId} .gh-post-card-excerpt {
+    font-family: var(--gh-font-body, var(--font-body));
     font-size: 0.95rem;
     opacity: 0.8;
     margin: 0 0 1.5rem 0;

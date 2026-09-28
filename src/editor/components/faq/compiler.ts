@@ -165,13 +165,16 @@ export const generateHTML = (block: BuilderBlock): string => {
     padding: 0 1.5rem;
   }
   #${wrapperId} .faq-heading {
+    font-family: var(--gh-font-heading, var(--font-heading));
     color: ${appearance.headingColor || 'var(--color-fg)'};
     margin: 0;
   }
   #${wrapperId} .faq-subheading {
+    font-family: var(--gh-font-body, var(--font-body));
     color: ${appearance.subheadingColor || 'var(--color-mute)'};
   }
   #${wrapperId} .faq-category-title {
+    font-family: var(--gh-font-heading, var(--font-heading));
     color: ${appearance.headingColor || 'var(--color-fg)'};
   }
   #${wrapperId} .faq-item {
@@ -196,6 +199,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     gap: 1rem;
   }
   #${wrapperId} .faq-question {
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-weight: 700;
     font-size: 1.125rem;
     line-height: 1.4;
@@ -245,6 +249,7 @@ export const generateHTML = (block: BuilderBlock): string => {
     overflow: hidden;
   }
   #${wrapperId} .faq-answer-text {
+    font-family: var(--gh-font-body, var(--font-body));
     color: ${appearance.subheadingColor || 'var(--color-mute)'};
     font-size: 0.95rem;
     line-height: 1.625;

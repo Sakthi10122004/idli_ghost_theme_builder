@@ -101,12 +101,13 @@ export const compileToHbs = (block: BuilderBlock) => {
     width: ${textWidth};
   }
   #newsletter-${block.id} .newsletter-title {
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-size: 1.125rem;
     font-weight: bold;
     margin: 0;
   }
   #newsletter-${block.id} .newsletter-subtitle {
+    font-family: var(--gh-font-body, var(--font-body));
     font-size: 0.75rem;
     color: var(--color-muted);
     margin: 0;

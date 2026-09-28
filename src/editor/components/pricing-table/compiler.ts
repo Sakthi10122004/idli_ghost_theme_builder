@@ -73,6 +73,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     font-weight: 600;
   }
   #${wrapperId} .tier-price {
+    font-family: var(--gh-font-heading, var(--font-heading));
     display: block;
     font-size: 2rem;
     font-weight: 700;
@@ -81,6 +82,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     line-height: 1.2;
   }
   #${wrapperId} .tier-features {
+    font-family: var(--gh-font-body, var(--font-body));
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

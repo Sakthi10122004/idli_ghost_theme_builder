@@ -13,9 +13,9 @@
   {{/if}}
   <div class="author-meta" style="font-size: 0.8125rem; color: var(--color-muted, #666); display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; align-items: center;">
     {{#if location}}<span>📍 {{location}}</span>{{/if}}
-    {{#if website}}<a href="{{website}}" target="_blank" rel="noopener" style="color: var(--color-primary);">🔗 Website</a>{{/if}}
-    {{#if twitter}}<a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Twitter</a>{{/if}}
-    {{#if facebook}}<a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" style="color: var(--color-primary);">Facebook</a>{{/if}}
+    {{#if website}}<a href="{{website}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">🔗 Website</a>{{/if}}
+    {{#if twitter}}<a href="{{social_url type="twitter"}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">Twitter</a>{{/if}}
+    {{#if facebook}}<a href="{{social_url type="facebook"}}" target="_blank" rel="noopener" style="color: var(--ghost-accent-color, var(--color-accent));">Facebook</a>{{/if}}
     <span style="font-family: monospace; background: var(--color-bg, #fafafa); border: 1px solid var(--color-hairline, #ebebeb); padding: 0.2rem 0.5rem; border-radius: 4px;">{{plural count.posts empty="0 posts" singular="% post" plural="% posts"}}</span>
   </div>
 </header>
@@ -23,7 +23,7 @@
 <style>
   #post-grid-post-grid-sec .post-grid-title {
     font-size: 2rem;
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--color-fg);
@@ -121,12 +121,17 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
-    color: var(--color-primary);
+    color: var(--ghost-accent-color, var(--color-accent));
     margin-bottom: 0.5rem;
   }
   #post-grid-post-grid-sec .gh-post-card-title {
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     margin: 0 0 0.5rem 0;
+    transition: color 0.15s ease;
+  }
+  #post-grid-post-grid-sec .gh-post-card:hover .gh-post-card-title,
+  #post-grid-post-grid-sec .magazine-list-item:hover .gh-post-card-title {
+    color: var(--ghost-accent-color, var(--color-accent));
   }
   #post-grid-post-grid-sec .gh-post-card-title-feature {
     font-size: 1.75rem;
@@ -137,6 +142,7 @@
     line-height: 1.3;
   }
   #post-grid-post-grid-sec .gh-post-card-excerpt {
+    font-family: var(--gh-font-body, var(--font-body));
     font-size: 0.95rem;
     opacity: 0.8;
     margin: 0 0 1.5rem 0;

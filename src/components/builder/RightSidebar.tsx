@@ -516,9 +516,14 @@ export default function RightSidebar() {
                 disabled
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Global Typography</label>
-              <span className="text-xs text-brand-body font-mono font-medium">Geist Sans & Geist Mono</span>
+            <div className="flex flex-col gap-1.5 p-2.5 rounded-md border border-brand-hairline bg-brand-canvas-soft">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Typography</label>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">Ghost Admin</span>
+              </div>
+              <p className="text-[11px] text-brand-body leading-relaxed">
+                Heading font & Body font are configured in <strong>Ghost Admin &rarr; Settings &rarr; Design & branding &rarr; Typography</strong>.
+              </p>
             </div>
           </div>
 

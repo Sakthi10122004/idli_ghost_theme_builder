@@ -171,6 +171,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     margin-bottom: 0.5rem;
   }
   #${uid} .hero-title {
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
     font-weight: 700;
     margin: 0;
@@ -179,6 +180,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: inherit;
   }
   #${uid} .hero-subtitle {
+    font-family: var(--gh-font-body, var(--font-body));
     font-size: clamp(1rem, 1.25vw + 0.25rem, 1.25rem);
     color: inherit;
     opacity: 0.8;

@@ -1009,6 +1009,14 @@ export default function Canvas() {
     return false;
   };
 
+  const fontHeading =
+    themeDoc.settings?.designTokens?.typography?.headingFont ||
+    themeDoc.settings?.fontFamily ||
+    "'Geist', 'Inter', sans-serif";
+  const fontBody =
+    themeDoc.settings?.designTokens?.typography?.bodyFont ||
+    themeDoc.settings?.fontFamily ||
+    "'Geist', 'Inter', sans-serif";
   const accentColor =
     themeDoc.settings?.accentColor ||
     themeDoc.settings?.designTokens?.colors?.accent ||
@@ -1036,9 +1044,14 @@ export default function Canvas() {
             minWidth: `${targetWidth}px`,
             transform: isScaled ? `scale(${scale})` : undefined,
             transformOrigin: "top center",
+            ["--gh-font-heading" as string]: fontHeading,
+            ["--gh-font-body" as string]: fontBody,
+            ["--font-heading" as string]: "var(--gh-font-heading)",
+            ["--font-body" as string]: "var(--gh-font-body)",
             ["--ghost-accent-color" as string]: accentColor,
             ["--color-accent" as string]: accentColor,
             ["--color-link" as string]: accentColor,
+            fontFamily: "var(--gh-font-body, var(--font-body))",
           }}
           className={`relative shadow-level-5 rounded-md min-h-[850px] h-fit self-start border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
             isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20" : "border-brand-hairline"

@@ -205,9 +205,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
 
   #${htmlAnchor} .gh-head-brand {
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-weight: 700;
     font-size: 24px;
     white-space: nowrap;
+  }
+  #${htmlAnchor} .gh-site-title {
+    font-family: var(--gh-font-heading, var(--font-heading));
   }
   #${htmlAnchor} .gh-head-inner {
     padding: 0 4vmin;

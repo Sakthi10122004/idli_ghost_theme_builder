@@ -41,7 +41,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     border: 1px solid var(--color-hairline, #ebebeb);
   }
   #${wrapperId} .gh-tag-header-title {
-    font-family: var(--font-heading);
+    font-family: var(--gh-font-heading, var(--font-heading));
     font-size: 2.75rem;
     font-weight: 700;
     margin: 0 0 0.75rem 0;
@@ -49,6 +49,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-fg, #171717);
   }
   #${wrapperId} .gh-tag-header-description {
+    font-family: var(--gh-font-body, var(--font-body));
     font-size: 1.125rem;
     line-height: 1.6;
     color: var(--color-muted, #737373);
