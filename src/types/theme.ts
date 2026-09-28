@@ -33,6 +33,7 @@ export interface ThemeSettings {
   containerWidth: number;
   fontFamily: string;
   primaryColor: string;
+  accentColor?: string;
   designTokens: DesignTokens;
 }
 
@@ -45,6 +46,7 @@ export interface ResponsiveStyleValue<T> {
 export interface BuilderBlock {
   id: string;
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props: Record<string, any>;
   styles: {
     paddingTop?: ResponsiveStyleValue<string> | string;
@@ -54,6 +56,7 @@ export interface BuilderBlock {
     textAlign?: ResponsiveStyleValue<'left' | 'center' | 'right'> | string;
     backgroundColor?: string;
     textColor?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   // Supporting nested children blocks (e.g. Columns holding Column containers)

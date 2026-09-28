@@ -327,7 +327,7 @@ export function getSkeletonCss(doc?: ThemeDocument): string {
   const colorForeground = tokens?.colors?.foreground || '#171717';
   const colorPrimary = tokens?.colors?.primary || settings?.primaryColor || '#171717';
   const colorMuted = tokens?.colors?.muted || '#4d4d4d';
-  const colorAccent = tokens?.colors?.accent || '#3b82f6';
+  const colorAccent = settings?.accentColor || tokens?.colors?.accent || '#0070f3';
   const containerWidthVal = settings?.containerWidth ? `${settings.containerWidth}px` : '1200px';
 
   return `
@@ -398,7 +398,9 @@ ul.nav, ul.nav-secondary {
   --color-primary: ${colorPrimary};
   --color-muted: ${colorMuted};
   --color-mute: var(--color-muted);
-  --color-accent: ${colorAccent};
+  --ghost-accent-color: ${colorAccent};
+  --color-accent: var(--ghost-accent-color, ${colorAccent});
+  --color-link: var(--color-accent);
   --color-canvas: var(--color-bg);
   --color-ink: var(--color-fg);
   --color-hairline: #ebebeb;
@@ -760,11 +762,53 @@ html.dark .gh-share-btn.gh-share-icon-only {
   box-sizing: border-box;
   color: #171717;
   color-scheme: light;
+  background: transparent !important;
+  background-color: transparent !important;
 }
+
+#ghost-comments-root {
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: light;
+}
+
+.gh-comments-section iframe,
+#ghost-comments-root iframe,
+iframe[data-frame="comments"],
+iframe[title="comments-frame"] {
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: light;
+  border: none;
+}
+
 html.dark .gh-comments-section,
 .gh-comments-section.dark {
   color: #ffffff !important;
-  color-scheme: dark;
+  color-scheme: dark !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark #ghost-comments-root,
+#ghost-comments-root.dark {
+  color: #ffffff !important;
+  color-scheme: dark !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark .gh-comments-section iframe,
+html.dark #ghost-comments-root iframe,
+html.dark iframe[data-frame="comments"],
+html.dark iframe[title="comments-frame"],
+.gh-comments-section.dark iframe,
+#ghost-comments-root.dark iframe {
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: dark !important;
 }
 .gh-comments-header {
   display: flex;
@@ -1750,6 +1794,18 @@ html.dark .btn-secondary {
   color: var(--color-fg) !important;
   border-color: var(--color-hairline, #333333) !important;
 }
+.btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent));
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+.btn-accent:hover {
+  opacity: 0.88;
+}
+html.dark .btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+  color: #ffffff !important;
+}
 
 /* 9. Page Detail & Single Article Content */
 .post-full-content {
@@ -1883,6 +1939,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     files[iconPath] = iconContent;
   }
 
+  const colorAccent =
+    doc.settings?.accentColor ||
+    doc.settings?.designTokens?.colors?.accent ||
+    "#0070f3";
+
   // 3. Generate default.hbs wrapper page
   files["default.hbs"] = `
 <!DOCTYPE html>
@@ -1892,6 +1953,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{meta_title}}</title>
   <link rel="stylesheet" type="text/css" href="{{asset "built/screen.css"}}" />
+  <style>
+    :root {
+      --ghost-accent-color: {{#if @site.accent_color}}{{@site.accent_color}}{{else}}${colorAccent}{{/if}};
+    }
+  </style>
   {{ghost_head}}
 </head>
 <body class="{{body_class}}">

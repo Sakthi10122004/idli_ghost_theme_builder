@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{meta_title}}</title>
   <link rel="stylesheet" type="text/css" href="{{asset "built/screen.css"}}" />
+  <style>
+    :root {
+      --ghost-accent-color: {{#if @site.accent_color}}{{@site.accent_color}}{{else}}#0070f3{{/if}};
+    }
+  </style>
   {{ghost_head}}
 </head>
 <body class="{{body_class}}">

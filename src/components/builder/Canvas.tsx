@@ -1009,6 +1009,11 @@ export default function Canvas() {
     return false;
   };
 
+  const accentColor =
+    themeDoc.settings?.accentColor ||
+    themeDoc.settings?.designTokens?.colors?.accent ||
+    "#0070f3";
+
   return (
     <div 
       ref={containerRef}
@@ -1031,6 +1036,9 @@ export default function Canvas() {
             minWidth: `${targetWidth}px`,
             transform: isScaled ? `scale(${scale})` : undefined,
             transformOrigin: "top center",
+            ["--ghost-accent-color" as string]: accentColor,
+            ["--color-accent" as string]: accentColor,
+            ["--color-link" as string]: accentColor,
           }}
           className={`relative shadow-level-5 rounded-md min-h-[850px] h-fit self-start border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
             isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20" : "border-brand-hairline"

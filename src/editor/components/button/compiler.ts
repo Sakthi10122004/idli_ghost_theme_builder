@@ -2,7 +2,10 @@ import { BuilderBlock } from "@/types/theme";
 import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
-  const isPrimary = block.props.variant !== 'secondary';
+  const variant = block.props.variant || 'primary';
+  const isAccent = variant === 'accent';
+  const isSecondary = variant === 'secondary';
+  const isPrimary = !isAccent && !isSecondary;
   const shape = block.props.shape || 'pill';
 
   let shapeCss = 'border-radius: var(--radius-pill); padding: 0.5rem 1.5rem;';
@@ -14,6 +17,8 @@ export const compileToHbs = (block: BuilderBlock) => {
     shapeCss = 'border-radius: 50%; aspect-ratio: 1 / 1; min-width: 2.5rem; min-height: 2.5rem; padding: 0.5rem; text-align: center;';
   }
 
+  const btnClass = isAccent ? 'btn btn-accent' : isSecondary ? 'btn btn-secondary' : 'btn btn-primary';
+
   return `<style>
   #btn-${block.id} {
     display: inline-flex;
@@ -24,7 +29,11 @@ export const compileToHbs = (block: BuilderBlock) => {
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
-    ${isPrimary ? `
+    ${isAccent ? `
+    background-color: var(--ghost-accent-color, var(--color-accent));
+    color: #ffffff;
+    border: 1px solid transparent;
+    ` : isPrimary ? `
     background-color: var(--color-primary);
     color: var(--color-on-primary, #ffffff);
     ` : `
@@ -34,14 +43,17 @@ export const compileToHbs = (block: BuilderBlock) => {
     `}
   }
   #btn-${block.id}:hover {
-    ${isPrimary ? `
+    ${isAccent || isPrimary ? `
     opacity: 0.85;
     ` : `
     background-color: rgba(0,0,0,0.02);
     `}
   }
   html.dark #btn-${block.id} {
-    ${isPrimary ? `
+    ${isAccent ? `
+    background-color: var(--ghost-accent-color, var(--color-accent));
+    color: #ffffff;
+    ` : isPrimary ? `
     background-color: var(--color-primary);
     color: var(--color-on-primary, #000000);
     ` : `
@@ -51,5 +63,5 @@ export const compileToHbs = (block: BuilderBlock) => {
     `}
   }
 </style>
-<a id="btn-${block.id}" href="${escapeUrl(block.props.href)}" class="btn">${escapeHtml(block.props.label || 'Click Here')}</a>`;
+<a id="btn-${block.id}" href="${escapeUrl(block.props.href)}" class="${btnClass}">${escapeHtml(block.props.label || 'Click Here')}</a>`;
 };

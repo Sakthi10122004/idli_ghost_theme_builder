@@ -1,10 +1,10 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 
-export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
+export const SidebarElement = ({ block, onChangeProps }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
   return (
     <>
@@ -35,6 +35,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         >
           <option value="primary">Primary (Black)</option>
           <option value="secondary">Secondary (White)</option>
+          <option value="accent">Accent (Ghost Brand Color)</option>
         </select>
       </div>
       <div className="flex flex-col gap-1.5">
