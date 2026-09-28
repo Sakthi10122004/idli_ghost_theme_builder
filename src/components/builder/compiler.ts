@@ -327,7 +327,7 @@ export function getSkeletonCss(doc?: ThemeDocument): string {
   const colorForeground = tokens?.colors?.foreground || '#171717';
   const colorPrimary = tokens?.colors?.primary || settings?.primaryColor || '#171717';
   const colorMuted = tokens?.colors?.muted || '#4d4d4d';
-  const colorAccent = tokens?.colors?.accent || '#3b82f6';
+  const colorAccent = settings?.accentColor || tokens?.colors?.accent || '#0070f3';
   const containerWidthVal = settings?.containerWidth ? `${settings.containerWidth}px` : '1200px';
 
   return `
@@ -398,7 +398,9 @@ ul.nav, ul.nav-secondary {
   --color-primary: ${colorPrimary};
   --color-muted: ${colorMuted};
   --color-mute: var(--color-muted);
-  --color-accent: ${colorAccent};
+  --ghost-accent-color: ${colorAccent};
+  --color-accent: var(--ghost-accent-color, ${colorAccent});
+  --color-link: var(--color-accent);
   --color-canvas: var(--color-bg);
   --color-ink: var(--color-fg);
   --color-hairline: #ebebeb;
@@ -1792,6 +1794,18 @@ html.dark .btn-secondary {
   color: var(--color-fg) !important;
   border-color: var(--color-hairline, #333333) !important;
 }
+.btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent));
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+.btn-accent:hover {
+  opacity: 0.88;
+}
+html.dark .btn-accent {
+  background-color: var(--ghost-accent-color, var(--color-accent)) !important;
+  color: #ffffff !important;
+}
 
 /* 9. Page Detail & Single Article Content */
 .post-full-content {
@@ -1951,6 +1965,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     files[iconPath] = iconContent;
   }
 
+  const colorAccent =
+    doc.settings?.accentColor ||
+    doc.settings?.designTokens?.colors?.accent ||
+    "#0070f3";
+
   // 3. Generate default.hbs wrapper page
   files["default.hbs"] = `
 <!DOCTYPE html>
@@ -1960,6 +1979,11 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{meta_title}}</title>
   <link rel="stylesheet" type="text/css" href="{{asset "built/screen.css"}}" />
+  <style>
+    :root {
+      --ghost-accent-color: {{#if @site.accent_color}}{{@site.accent_color}}{{else}}${colorAccent}{{/if}};
+    }
+  </style>
   {{ghost_head}}
 </head>
 <body class="{{body_class}}">

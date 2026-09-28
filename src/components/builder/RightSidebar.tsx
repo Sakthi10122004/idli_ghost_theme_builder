@@ -2,9 +2,18 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
-import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
+import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns, Palette, Sparkles } from "lucide-react";
 import { SpacingControl } from "@/editor/components/shared/SpacingControl";
 import { BackgroundControls } from "@/editor/components/shared/BackgroundControls";
+
+const GHOST_ACCENT_PRESETS = [
+  { name: "Ghost Pink", value: "#FF1A75" },
+  { name: "Electric Blue", value: "#0070F3" },
+  { name: "Emerald", value: "#10B981" },
+  { name: "Vivid Violet", value: "#8B5CF6" },
+  { name: "Sunset Amber", value: "#F59E0B" },
+  { name: "Deep Jet", value: "#15171A" },
+];
 
 const HAS_DEDICATED_BG_CONTROL = new Set([
   "header",
@@ -54,6 +63,7 @@ export default function RightSidebar() {
     makeAdjacent,
     isRightSidebarOpen,
     toggleRightSidebar,
+    setAccentColor,
   } = useEditorStore();
 
   const selectedBlock = selectedBlockId ? themeDoc.blocks[selectedBlockId] : null;
@@ -516,11 +526,106 @@ export default function RightSidebar() {
                 disabled
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Primary Color</label>
-              <div className="flex gap-2 items-center">
-                <span className="w-5 h-5 rounded-full border border-brand-hairline-strong bg-brand-primary"></span>
-                <span className="font-mono text-xs text-brand-body">#171717</span>
+            {/* Site Accent Color (Ghost @site.accent_color) */}
+            <div className="flex flex-col gap-2.5 p-3 bg-brand-canvas-soft border border-brand-hairline rounded-md">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-sans font-semibold text-brand-body flex items-center gap-1.5">
+                  <Palette size={13} className="text-brand-mute" />
+                  Site Accent Color
+                </label>
+                <span className="font-mono text-[10px] text-brand-mute">@site.accent_color</span>
+              </div>
+              <p className="text-[11px] text-brand-mute leading-relaxed">
+                Controls the primary branding color across buttons, membership portal, comments, tag accents, and link hovers.
+              </p>
+
+              {/* Preset Swatches */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                {GHOST_ACCENT_PRESETS.map((preset) => {
+                  const currentAccent =
+                    themeDoc.settings?.accentColor ||
+                    themeDoc.settings?.designTokens?.colors?.accent ||
+                    "#0070f3";
+                  const isSelected = currentAccent.toLowerCase() === preset.value.toLowerCase();
+                  return (
+                    <button
+                      key={preset.value}
+                      onClick={() => setAccentColor(preset.value)}
+                      title={`${preset.name} (${preset.value})`}
+                      type="button"
+                      className={`w-6 h-6 rounded-full border transition-transform flex items-center justify-center cursor-pointer ${
+                        isSelected ? "scale-110 ring-2 ring-brand-primary ring-offset-1 border-white" : "border-black/10 hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: preset.value }}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Custom Color Input & Picker */}
+              <div className="flex items-center gap-2 pt-1">
+                <label
+                  htmlFor="accent-color-picker"
+                  className="w-7 h-7 rounded border border-brand-hairline shrink-0 cursor-pointer overflow-hidden shadow-xs relative"
+                  style={{
+                    backgroundColor:
+                      themeDoc.settings?.accentColor ||
+                      themeDoc.settings?.designTokens?.colors?.accent ||
+                      "#0070f3",
+                  }}
+                  title="Choose custom accent color"
+                >
+                  <input
+                    id="accent-color-picker"
+                    type="color"
+                    value={(() => {
+                      const val =
+                        themeDoc.settings?.accentColor ||
+                        themeDoc.settings?.designTokens?.colors?.accent ||
+                        "#0070f3";
+                      return val.startsWith("#") && val.length === 7 ? val : "#0070f3";
+                    })()}
+                    onChange={(e) => setAccentColor(e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                </label>
+                <input
+                  type="text"
+                  value={
+                    themeDoc.settings?.accentColor ||
+                    themeDoc.settings?.designTokens?.colors?.accent ||
+                    "#0070f3"
+                  }
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  placeholder="#0070f3"
+                  className="flex-1 px-2.5 py-1 text-xs font-mono border border-brand-hairline rounded-sm bg-brand-canvas text-brand-ink focus:outline-none"
+                />
+              </div>
+
+              {/* Mini Preview */}
+              <div className="mt-1.5 pt-2 border-t border-brand-hairline flex items-center justify-between">
+                <span className="text-[10px] text-brand-mute">Button Preview</span>
+                <span
+                  className="px-3 py-1 rounded-full text-[10px] font-semibold text-white shadow-xs transition-colors"
+                  style={{
+                    backgroundColor:
+                      themeDoc.settings?.accentColor ||
+                      themeDoc.settings?.designTokens?.colors?.accent ||
+                      "#0070f3",
+                  }}
+                >
+                  Subscribe
+                </span>
+              </div>
+            </div>
+
+            {/* Ghost Admin Integration Callout */}
+            <div className="bg-purple-500/10 border border-purple-500/20 text-brand-ink rounded-md p-2.5 flex items-start gap-2">
+              <Sparkles size={14} className="text-purple-500 shrink-0 mt-0.5" />
+              <div className="text-[11px] leading-snug">
+                <strong className="font-semibold block mb-0.5 text-brand-ink">Ghost Admin Integration</strong>
+                When this theme is installed in Ghost CMS, publishers can change this color live in{" "}
+                <code className="text-[10px] font-mono bg-purple-500/15 px-1 py-0.5 rounded">Settings → Design &amp; branding</code>.
               </div>
             </div>
             <div className="flex flex-col gap-1.5">

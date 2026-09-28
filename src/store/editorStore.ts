@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ThemeDocument, BuilderBlock, ThemePages } from "../types/theme";
+import { ThemeDocument, BuilderBlock, ThemePages, ThemeSettings } from "../types/theme";
 
 export function generateId(prefix: string = "block"): string {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
@@ -74,6 +74,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     containerWidth: 1200,
     fontFamily: "Geist",
     primaryColor: "#171717",
+    accentColor: "#0070f3",
     designTokens: DEFAULT_DESIGN_TOKENS,
   },
   layouts: {
@@ -422,6 +423,8 @@ interface EditorState {
   loadTheme: () => Promise<void>;
   saveTheme: () => Promise<void>;
   setUserId: (userId: string) => void;
+  updateThemeSettings: (settings: Partial<ThemeSettings>) => void;
+  setAccentColor: (accentColor: string) => void;
   
   createCustomPage: (slug: string) => void;
   duplicateCustomPage: (pageKey: string, newTitle: string) => void;
@@ -1531,6 +1534,33 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       document: { ...state.document, assets: newAssets }
     };
   }),
+
+  updateThemeSettings: (settingsUpdate) => set((state) => {
+    const historyUpdate = saveToHistory(state);
+    const currentSettings = state.document.settings;
+    const newSettings = { ...currentSettings, ...settingsUpdate };
+    if (settingsUpdate.accentColor) {
+      newSettings.designTokens = {
+        ...newSettings.designTokens,
+        colors: {
+          ...newSettings.designTokens.colors,
+          accent: settingsUpdate.accentColor,
+        },
+      };
+    }
+    setTimeout(() => triggerAutosave(get), 0);
+    return {
+      ...historyUpdate,
+      document: {
+        ...state.document,
+        settings: newSettings,
+      },
+    };
+  }),
+
+  setAccentColor: (accentColor) => {
+    get().updateThemeSettings({ accentColor });
+  },
 
   updateBlockStyles: (blockId, styles) => set((state) => {
     if (!state.document.blocks[blockId]) return {};
