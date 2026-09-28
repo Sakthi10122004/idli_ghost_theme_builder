@@ -760,11 +760,53 @@ html.dark .gh-share-btn.gh-share-icon-only {
   box-sizing: border-box;
   color: #171717;
   color-scheme: light;
+  background: transparent !important;
+  background-color: transparent !important;
 }
+
+#ghost-comments-root {
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: light;
+}
+
+.gh-comments-section iframe,
+#ghost-comments-root iframe,
+iframe[data-frame="comments"],
+iframe[title="comments-frame"] {
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: light;
+  border: none;
+}
+
 html.dark .gh-comments-section,
 .gh-comments-section.dark {
   color: #ffffff !important;
-  color-scheme: dark;
+  color-scheme: dark !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark #ghost-comments-root,
+#ghost-comments-root.dark {
+  color: #ffffff !important;
+  color-scheme: dark !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark .gh-comments-section iframe,
+html.dark #ghost-comments-root iframe,
+html.dark iframe[data-frame="comments"],
+html.dark iframe[title="comments-frame"],
+.gh-comments-section.dark iframe,
+#ghost-comments-root.dark iframe {
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: dark !important;
 }
 .gh-comments-header {
   display: flex;
