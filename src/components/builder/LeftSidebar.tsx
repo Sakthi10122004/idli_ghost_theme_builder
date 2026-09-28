@@ -31,7 +31,7 @@ function DraggableBlockButton({ b }: { b: BlockTemplate }) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`flex flex-col items-center justify-center p-3 border rounded-sm transition-all text-brand-body hover:text-brand-ink group cursor-grab active:cursor-grabbing shadow-level-2 bg-white select-none touch-none text-center w-full relative ${
+      className={`flex flex-col items-center justify-center p-3 border rounded-sm transition-all text-brand-body hover:text-brand-ink group cursor-grab active:cursor-grabbing shadow-level-2 bg-brand-canvas select-none touch-none text-center w-full relative ${
         isDragging
           ? "opacity-30 border-dashed border-brand-primary scale-95"
           : "border-brand-hairline hover:border-brand-hairline-strong hover:bg-brand-canvas-soft hover:shadow-level-3"
@@ -276,7 +276,7 @@ export default function LeftSidebar() {
 
   if (!isLeftSidebarOpen) {
     return (
-      <aside className="w-[48px] border-r border-brand-hairline bg-white flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+      <aside className="builder-left-sidebar w-[48px] border-r border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
         <button
           onClick={() => toggleLeftSidebar(true)}
           className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
@@ -304,7 +304,7 @@ export default function LeftSidebar() {
   }
 
   return (
-    <aside className="w-[280px] border-r border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 transition-all duration-200">
+    <aside className="builder-left-sidebar w-[280px] border-r border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col shrink-0 select-none shadow-level-1 transition-all duration-200">
       {/* Block List Panel */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 border-b border-brand-hairline">
         {/* Global Layout (Header / Footer) */}
@@ -329,7 +329,7 @@ export default function LeftSidebar() {
               className={`flex items-center gap-1.5 p-2 border rounded-sm transition-all text-xs font-medium cursor-pointer ${
                 selectedBlockId === themeDoc.layouts?.header
                   ? "bg-brand-canvas-soft-2 border-brand-primary text-brand-primary font-semibold shadow-xs"
-                  : "bg-white border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+                  : "bg-brand-canvas border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
               }`}
             >
               <Menu size={13} className="text-brand-mute shrink-0" />
@@ -341,7 +341,7 @@ export default function LeftSidebar() {
               className={`flex items-center gap-1.5 p-2 border rounded-sm transition-all text-xs font-medium cursor-pointer ${
                 selectedBlockId === themeDoc.layouts?.footer
                   ? "bg-brand-canvas-soft-2 border-brand-primary text-brand-primary font-semibold shadow-xs"
-                  : "bg-white border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
+                  : "bg-brand-canvas border-brand-hairline text-brand-body hover:text-brand-ink hover:bg-brand-canvas-soft"
               }`}
             >
               <Menu size={13} className="text-brand-mute shrink-0" />

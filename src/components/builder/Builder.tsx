@@ -13,12 +13,53 @@ import React, { useEffect, useState } from "react";
 import AuthPortal from "./AuthPortal";
 
 export default function Builder() {
-  const { isPreviewMode, setUserId, loadTheme, setDocument, setActiveThemeId } = useEditorStore();
+  const { 
+    isPreviewMode, 
+    setUserId, 
+    loadTheme, 
+    setDocument, 
+    setActiveThemeId,
+    toggleLeftSidebar,
+    toggleRightSidebar,
+    appThemeMode,
+    setAppThemeMode,
+  } = useEditorStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
+  // Responsive sidebar auto-collapse for smaller viewports (tablets and small laptops)
   useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 1024) {
+        toggleLeftSidebar(false);
+        toggleRightSidebar(false);
+      } else if (width < 1280) {
+        const state = useEditorStore.getState();
+        if (state.selectedBlockId) {
+          toggleLeftSidebar(false);
+        }
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [toggleLeftSidebar, toggleRightSidebar]);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.remove("dark");
+    }
+
+    try {
+      const storedAppTheme = localStorage.getItem("t4gc_app_theme_mode");
+      if (storedAppTheme === "dark" || storedAppTheme === "light") {
+        setAppThemeMode(storedAppTheme);
+      }
+    } catch {}
+
     queueMicrotask(() => {
       setIsHydrated(true);
     });
@@ -81,9 +122,11 @@ export default function Builder() {
     return <AuthPortal onAuthSuccess={handleAuthSuccess} />;
   }
 
+  const isAppDark = appThemeMode === "dark";
+
   return (
     <DndWrapper>
-      <div className="flex flex-col h-screen w-screen overflow-hidden bg-brand-canvas-soft select-none font-sans">
+      <div className={`builder-app flex flex-col h-screen w-screen overflow-hidden ${isAppDark ? "app-dark bg-[#09090b] text-[#f4f4f5]" : "app-light bg-brand-canvas-soft text-[#171717]"} select-none font-sans`}>
         <Toolbar />
         <div className="flex flex-1 overflow-hidden min-h-0 w-full relative">
           {!isPreviewMode && <LeftSidebar />}

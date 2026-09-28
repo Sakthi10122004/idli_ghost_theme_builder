@@ -37,6 +37,19 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           <option value="secondary">Secondary (White)</option>
         </select>
       </div>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-sans font-semibold text-brand-body">Shape</label>
+        <select
+          value={block.props.shape || "pill"}
+          onChange={(e) => onChangeProps({ shape: e.target.value })}
+          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+        >
+          <option value="pill">Pill (Default)</option>
+          <option value="rounded">Rounded</option>
+          <option value="square">Square</option>
+          <option value="circle">Circle</option>
+        </select>
+      </div>
     </>
   );
 };

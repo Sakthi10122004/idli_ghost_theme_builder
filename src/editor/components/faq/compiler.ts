@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { FAQProps, defaultProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml } from "../shared/escape";
 
 export const generateHTML = (block: BuilderBlock): string => {
   const p = { ...defaultProps, ...block.props } as FAQProps;
@@ -15,19 +16,22 @@ export const generateHTML = (block: BuilderBlock): string => {
   const cornerRadius = (general.itemCornerStyle || "rounded") === "rectangle" ? "0px" : "0.75rem";
   const itemBg = appearance?.itemBgColor || "var(--color-canvas-soft, #f8fafc)";
   
-  const renderFaqItem = (item: any, idx: number) => {
+  const renderFaqItem = (item: FAQProps["items"][number], idx: number) => {
     const isFirst = idx === 0;
+    const safeItemId = escapeHtml(item.id || idx);
+    const questionText = escapeHtml(item.question || "");
+    const answerText = escapeHtml(item.answer || "");
     return `
       <div class="faq-item">
         <dt>
           <button
             type="button"
             class="faq-button"
-            aria-controls="faq-content-${block.id}-${item.id}"
+            aria-controls="faq-content-${block.id}-${safeItemId}"
             aria-expanded="${isFirst ? 'true' : 'false'}"
-            data-faq-id="${item.id}"
+            data-faq-id="${safeItemId}"
           >
-            <span class="faq-question">${item.question}</span>
+            <span class="faq-question">${questionText}</span>
             <span class="faq-chevron-wrapper">
               <svg class="faq-chevron" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -37,10 +41,10 @@ export const generateHTML = (block: BuilderBlock): string => {
         </dt>
         <dd 
           class="faq-answer-wrapper ${isFirst ? 'is-open' : ''}" 
-          id="faq-content-${block.id}-${item.id}"
+          id="faq-content-${block.id}-${safeItemId}"
         >
           <div class="faq-answer-inner">
-            <p class="faq-answer-text">${item.answer}</p>
+            <p class="faq-answer-text">${answerText}</p>
           </div>
         </dd>
       </div>
@@ -58,7 +62,7 @@ export const generateHTML = (block: BuilderBlock): string => {
         <dl>
           ${col1.map((item, idx) => renderFaqItem(item, idx)).join("")}
         </dl>
-        <dl className="lg:mt-0 mt-4">
+        <dl class="lg:mt-0 mt-4">
           ${col2.map((item, idx) => renderFaqItem(item, idx + col1.length)).join("")}
         </dl>
       </div>
@@ -70,9 +74,10 @@ export const generateHTML = (block: BuilderBlock): string => {
       <div class="faq-categorized mx-auto mt-12 max-w-3xl">
         ${categories.map((cat) => {
           const catItems = items.filter(i => (i.category || "General") === cat);
+          const safeCat = escapeHtml(cat);
           const catHtml = `
             <div class="faq-category mb-10">
-              <h3 class="faq-category-title text-xl font-bold tracking-tight mb-4">${cat}</h3>
+              <h3 class="faq-category-title text-xl font-bold tracking-tight mb-4">${safeCat}</h3>
               <dl>
                 ${catItems.map((item) => {
                   const html = renderFaqItem(item, globalIndex);
@@ -99,8 +104,8 @@ export const generateHTML = (block: BuilderBlock): string => {
 
   const headingHtml = (general.heading || general.subheading) ? `
     <div class="faq-header mx-auto max-w-4xl text-center mb-8">
-      ${general.heading ? `<h2 class="faq-heading text-3xl font-bold tracking-tight sm:text-4xl">${general.heading}</h2>` : ''}
-      ${general.subheading ? `<p class="faq-subheading mt-4 text-base leading-7">${general.subheading}</p>` : ''}
+      ${general.heading ? `<h2 class="faq-heading text-3xl font-bold tracking-tight sm:text-4xl">${escapeHtml(general.heading)}</h2>` : ''}
+      ${general.subheading ? `<p class="faq-subheading mt-4 text-base leading-7">${escapeHtml(general.subheading)}</p>` : ''}
     </div>
   ` : '';
 
@@ -192,6 +197,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     line-height: 1.4;
     color: ${appearance.headingColor || 'var(--color-fg)'};
     flex: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   #${wrapperId} .faq-chevron-wrapper {
     display: flex;
@@ -238,6 +245,8 @@ export const generateHTML = (block: BuilderBlock): string => {
     font-size: 0.95rem;
     line-height: 1.625;
     margin: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   
   /* Utilities used in markup */
@@ -258,6 +267,35 @@ export const generateHTML = (block: BuilderBlock): string => {
   #${wrapperId} .gap-x-8 { column-gap: 2rem; }
   #${wrapperId} .gap-y-0 { row-gap: 0; }
   
+  @media (max-width: 767px) {
+    #${wrapperId} {
+      padding-top: 2.5rem !important;
+      padding-bottom: 2.5rem !important;
+    }
+    #${wrapperId} .faq-inner {
+      padding: 0 1rem;
+    }
+    #${wrapperId} .faq-header {
+      margin-bottom: 1.5rem;
+    }
+    #${wrapperId} .faq-heading {
+      font-size: 1.5rem !important;
+    }
+    #${wrapperId} .faq-item {
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    #${wrapperId} .faq-question {
+      font-size: 1rem;
+    }
+    #${wrapperId} .faq-answer-text {
+      font-size: 0.875rem;
+    }
+    #${wrapperId} .mt-12 {
+      margin-top: 1.5rem;
+    }
+  }
+
   @media (min-width: 1024px) {
     #${wrapperId} .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #${wrapperId} .lg\\:mt-0 { margin-top: 0; }

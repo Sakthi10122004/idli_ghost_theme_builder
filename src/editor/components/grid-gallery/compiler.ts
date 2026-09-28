@@ -6,6 +6,7 @@ import {
   DEFAULT_GALLERY_ITEMS,
 } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = { ...defaultProps, ...block.props } as GridGalleryProps;
@@ -39,15 +40,15 @@ export const compileToHbs = (block: BuilderBlock): string => {
       const path = src.replace("asset://", "");
       return `{{asset "${path}"}}`;
     }
-    return src || "";
+    return escapeUrl(src);
   };
 
   // Manual item: static image box with caption overlay
   const renderManualItem = (item: GalleryItem, extraClass = "gallery-item") => {
     const src = resolveHbsSrc(item.url);
-    const altText = item.alt || item.caption || "Gallery Image";
+    const altText = escapeHtml(item.alt || item.caption || "Gallery Image");
     const captionHtml = item.caption
-      ? `<div class="gallery-caption-overlay"><span class="gallery-caption-title">${item.caption}</span></div>`
+      ? `<div class="gallery-caption-overlay"><span class="gallery-caption-title">${escapeHtml(item.caption)}</span></div>`
       : "";
 
     return `
@@ -91,8 +92,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     general.heading || general.subheading
       ? `
     <div class="gallery-header">
-      ${general.heading ? `<h2 class="gallery-heading">${general.heading}</h2>` : ""}
-      ${general.subheading ? `<p class="gallery-subheading">${general.subheading}</p>` : ""}
+      ${general.heading ? `<h2 class="gallery-heading">${escapeHtml(general.heading)}</h2>` : ""}
+      ${general.subheading ? `<p class="gallery-subheading">${escapeHtml(general.subheading)}</p>` : ""}
     </div>
   `
       : "";
@@ -230,8 +231,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     } else {
       const listItems = items.map((item) => {
         const src = resolveHbsSrc(item.url);
-        const caption = item.caption || item.alt || "Gallery Image";
-        const altText = item.alt || item.caption || "Gallery Image";
+        const caption = escapeHtml(item.caption || item.alt || "Gallery Image");
+        const altText = escapeHtml(item.alt || item.caption || "Gallery Image");
         return `
         <div class="gallery-list-item">
           <div class="gallery-list-thumb">
@@ -277,8 +278,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
     } else {
       const bentoItems = items.map((item, idx) => {
         const src = resolveHbsSrc(item.url);
-        const caption = item.caption || item.alt || "Gallery Image";
-        const altText = item.alt || item.caption || "Gallery Image";
+        const caption = escapeHtml(item.caption || item.alt || "Gallery Image");
+        const altText = escapeHtml(item.alt || item.caption || "Gallery Image");
         const isLarge = idx % 3 === 0;
         return `
         <div class="gallery-bento-card${isLarge ? " gallery-bento-card-large" : ""}">
@@ -322,10 +323,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
       </div>
     {{/get}}`;
     } else {
-      const collageItems = items.map((item, idx) => {
+      const collageItems = items.map((item) => {
         const src = resolveHbsSrc(item.url);
-        const caption = item.caption || item.alt || "";
-        const altText = item.alt || item.caption || "Gallery Image";
+        const caption = item.caption ? escapeHtml(item.caption) : "";
+        const altText = escapeHtml(item.alt || item.caption || "Gallery Image");
         return `
         <div class="gallery-collage-item">
           <div class="gallery-collage-link">

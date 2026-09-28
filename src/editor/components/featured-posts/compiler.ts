@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const p = block.props || {};
@@ -1057,8 +1058,8 @@ export const compileToHbs = (block: BuilderBlock) => {
 <div id="${wrapperId}" class="featured-posts-container kg-width-full">
   ${(heading || description) ? `
   <div class="featured-posts-header">
-    ${heading ? `<h2 class="featured-posts-title">${heading}</h2>` : ''}
-    ${description ? `<p class="featured-posts-description">${description}</p>` : ''}
+    ${heading ? `<h2 class="featured-posts-title">${escapeHtml(heading)}</h2>` : ''}
+    ${description ? `<p class="featured-posts-description">${escapeHtml(description)}</p>` : ''}
   </div>` : ''}
   ${layoutMarkup}
 </div>`;

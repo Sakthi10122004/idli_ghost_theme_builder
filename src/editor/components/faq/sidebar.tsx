@@ -1,6 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
-import { FAQProps, defaultProps } from "./schema";
+import { FAQProps, FAQItem, defaultProps } from "./schema";
 import { RepeatableList } from "../shared/RepeatableList";
 import { BackgroundControls } from "../shared/BackgroundControls";
 
@@ -42,8 +42,8 @@ const SegmentedControl = ({ options, value, onChange }: {
 
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
   const p = { ...defaultProps, ...block.props } as FAQProps;
   const general = p.general;
@@ -53,7 +53,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
     onChangeProps({ general: { ...general, ...patch } });
   };
 
-  const renderFaqItem = (item: any, update: (patch: any) => void) => (
+  const renderFaqItem = (item: FAQItem, update: (patch: Partial<FAQItem>) => void) => (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1 w-full">
         <label className="text-[10px] font-semibold text-gray-500">Question</label>
@@ -123,7 +123,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               { label: "Categorized", value: "categorized" }
             ]}
             value={general.layoutStyle}
-            onChange={(v: any) => updateGeneral({ layoutStyle: v })}
+            onChange={(v) => updateGeneral({ layoutStyle: v as FAQProps['general']['layoutStyle'] })}
           />
         </div>
 
@@ -135,7 +135,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               { label: "Rectangle", value: "rectangle" }
             ]}
             value={general.itemCornerStyle || "rounded"}
-            onChange={(v: any) => updateGeneral({ itemCornerStyle: v })}
+            onChange={(v) => updateGeneral({ itemCornerStyle: v as FAQProps['general']['itemCornerStyle'] })}
           />
         </div>
 
@@ -197,7 +197,10 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <input 
               type="text" 
               value={p.spacing.paddingTop || ""} 
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })}
+              onChange={(e) => {
+                onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } });
+                onChangeStyles?.({ paddingTop: e.target.value });
+              }}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
@@ -206,7 +209,10 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             <input 
               type="text" 
               value={p.spacing.paddingBottom || ""} 
-              onChange={(e) => onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })}
+              onChange={(e) => {
+                onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } });
+                onChangeStyles?.({ paddingBottom: e.target.value });
+              }}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>

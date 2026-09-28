@@ -37,7 +37,7 @@ export const CanvasElement = ({
   const configuredLayout = props.layout || "grid-3";
   const cardStyle = props.cardStyle || "bordered";
   const showSectionHeader = props.showSectionHeader !== false;
-  const textColor = props.textColor || "";
+  const textColor = props.textColor || (isDark ? "var(--color-ink, #ffffff)" : "");
 
   const showStars = props.showStars !== false;
   const showPhotos = props.showPhotos !== false;
@@ -158,17 +158,25 @@ export const CanvasElement = ({
     let styleClass = "";
     switch (cardStyle) {
       case "soft":
-        styleClass = "bg-neutral-100/90 dark:bg-neutral-800/70 border border-neutral-200/80 dark:border-neutral-700/80 shadow-xs";
+        styleClass = isDark
+          ? "bg-neutral-800/80 border border-neutral-700/80 shadow-xs text-neutral-100"
+          : "bg-neutral-100/90 border border-neutral-200/80 shadow-xs";
         break;
       case "minimal":
-        styleClass = "bg-transparent border border-neutral-200/70 dark:border-neutral-800/80 shadow-none hover:bg-neutral-50/60 dark:hover:bg-neutral-900/40";
+        styleClass = isDark
+          ? "bg-transparent border border-neutral-800/80 shadow-none hover:bg-neutral-900/40 text-neutral-100"
+          : "bg-transparent border border-neutral-200/70 shadow-none hover:bg-neutral-50/60";
         break;
       case "elevated":
-        styleClass = "bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-lg shadow-neutral-200/50 dark:shadow-black/50";
+        styleClass = isDark
+          ? "bg-neutral-900 border border-neutral-800 shadow-lg shadow-black/50 text-neutral-100"
+          : "bg-white border border-neutral-100 shadow-lg shadow-neutral-200/50";
         break;
       case "bordered":
       default:
-        styleClass = "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xs";
+        styleClass = isDark
+          ? "bg-neutral-900 border border-neutral-800 shadow-xs text-neutral-100"
+          : "bg-white border border-neutral-200 shadow-xs";
         break;
     }
 

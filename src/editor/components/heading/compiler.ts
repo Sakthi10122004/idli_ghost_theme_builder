@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { HeadingProps, resolveHeadingProps, isDarkColor } from "./schema";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (
   block: BuilderBlock,
@@ -38,7 +39,7 @@ export const compileToHbs = (
   // 1. Custom Heading
   if (p.headingType === "custom") {
     const textContent = p.text || "Heading Text";
-    return `<h${level} class="${tagClass}"${styleAttr}>${textContent}</h${level}>`;
+    return `<h${level} class="${tagClass}"${styleAttr}>${escapeHtml(textContent)}</h${level}>`;
   }
 
   // 2. Dynamic Heading
@@ -49,10 +50,10 @@ export const compileToHbs = (
     dynamicTag = "{{@site.description}}";
   } else if (p.dynamicSource === "tag_name") {
     const fallback = p.fallbackText || "Tag Archive";
-    return `{{#if tag.name}}<h${level} class="${tagClass}"${styleAttr}>{{tag.name}}</h${level}>{{else}}<h${level} class="${tagClass}"${styleAttr}>${fallback}</h${level}>{{/if}}`;
+    return `{{#if tag.name}}<h${level} class="${tagClass}"${styleAttr}>{{tag.name}}</h${level}>{{else}}<h${level} class="${tagClass}"${styleAttr}>${escapeHtml(fallback)}</h${level}>{{/if}}`;
   } else if (p.dynamicSource === "author_name") {
     const fallback = p.fallbackText || "Author Profile";
-    return `{{#if author.name}}<h${level} class="${tagClass}"${styleAttr}>{{author.name}}</h${level}>{{else}}<h${level} class="${tagClass}"${styleAttr}>${fallback}</h${level}>{{/if}}`;
+    return `{{#if author.name}}<h${level} class="${tagClass}"${styleAttr}>{{author.name}}</h${level}>{{else}}<h${level} class="${tagClass}"${styleAttr}>${escapeHtml(fallback)}</h${level}>{{/if}}`;
   }
 
   // For post/page title on page.hbs context, respect Ghost's page title gating rule

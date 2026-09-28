@@ -2,6 +2,7 @@ import { BuilderBlock } from "@/types/theme";
 import { getBackgroundCSS } from "../shared/background";
 import { WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./schema";
 import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPageContext: boolean, blocks?: Record<string, BuilderBlock>) => {
   const p = block.props;
@@ -63,7 +64,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     const userUrl = customUrls[platform]?.trim();
     
     if (userUrl) {
-      return `<a href="${userUrl}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+      return `<a href="${escapeUrl(userUrl)}" target="_blank" rel="noopener" aria-label="${escapeHtml(label)}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
           {{> "${partial}"}}
         </a>`;
     }
@@ -93,7 +94,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
     }
 
     const defaultUrl = DEFAULT_PLATFORM_URLS[platform] || "#";
-    return `<a href="${defaultUrl}" target="_blank" rel="noopener" aria-label="${label}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+    return `<a href="${escapeUrl(defaultUrl)}" target="_blank" rel="noopener" aria-label="${escapeHtml(label)}" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
         {{> "${partial}"}}
       </a>`;
   }).filter(Boolean).join("\n      ");
@@ -128,7 +129,7 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string, isPa
         </div>
         ${general.showSecondaryNav !== false ? `
         <div class="footer-nav-column">
-          <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">${general.secondaryNavTitle || 'More'}</h4>
+          <h4 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.6;">${escapeHtml(general.secondaryNavTitle || 'More')}</h4>
           {{#if @site.secondary_navigation}}
             {{navigation type="secondary"}}
           {{else}}

@@ -478,9 +478,10 @@ export const SidebarElement = ({
             <input
               type="text"
               value={p.spacing?.paddingTop || "4rem"}
-              onChange={(e) =>
-                onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } })
-              }
+              onChange={(e) => {
+                onChangeProps({ spacing: { ...p.spacing, paddingTop: e.target.value } });
+                onChangeStyles?.({ paddingTop: e.target.value });
+              }}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>
@@ -489,9 +490,10 @@ export const SidebarElement = ({
             <input
               type="text"
               value={p.spacing?.paddingBottom || "4rem"}
-              onChange={(e) =>
-                onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } })
-              }
+              onChange={(e) => {
+                onChangeProps({ spacing: { ...p.spacing, paddingBottom: e.target.value } });
+                onChangeStyles?.({ paddingBottom: e.target.value });
+              }}
               className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none"
             />
           </div>

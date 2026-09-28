@@ -1,4 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
+import { escapeHtml, escapeUrl } from "../shared/escape";
+import { getBackgroundCSS } from "../shared/background";
 
 interface PricingTier {
   name: string;
@@ -12,6 +14,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const tiers: PricingTier[] = Array.isArray(block.props?.tiers) ? block.props.tiers : [];
   const title = block.props?.title as string | undefined;
   const wrapperId = `pricing-${block.id}`;
+  const bgCss = getBackgroundCSS(block.styles);
 
   return `<style>
   #${wrapperId} {
@@ -19,6 +22,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     text-align: center;
     width: 100%;
     box-sizing: border-box;
+    ${bgCss}
   }
   #${wrapperId} .pricing-title {
     font-size: 0.875rem;
@@ -112,19 +116,19 @@ export const compileToHbs = (block: BuilderBlock): string => {
     color: var(--color-on-primary, #000000) !important;
   }
 </style>
-<div id="${wrapperId}" class="pricing-table-block">
-  ${title ? `<h3 class="pricing-title">${title}</h3>` : ""}
+<div id="${wrapperId}" class="pricing-table-block ${block.styles?.backgroundType === "mesh" ? "mesh-glow" : ""}">
+  ${title ? `<h3 class="pricing-title">${escapeHtml(title)}</h3>` : ""}
   <div class="pricing-grid">
     ${tiers.map((tier) => `
     <div class="pricing-tier">
       <div>
-        <span class="tier-name">${tier.name}</span>
-        <span class="tier-price">${tier.price}</span>
+        <span class="tier-name">${escapeHtml(tier.name)}</span>
+        <span class="tier-price">${escapeHtml(tier.price)}</span>
         <div class="tier-features">
-          ${(tier.features || []).map((f) => `<span>✓ ${f}</span>`).join("\n          ")}
+          ${(tier.features || []).map((f) => `<span>✓ ${escapeHtml(f)}</span>`).join("\n          ")}
         </div>
       </div>
-      <a href="${tier.href || "#"}" class="tier-btn">${tier.buttonLabel || "Choose Plan"}</a>
+      <a href="${tier.href ? escapeUrl(tier.href) : "#"}" class="tier-btn">${escapeHtml(tier.buttonLabel || "Choose Plan")}</a>
     </div>`).join("\n    ")}
   </div>
 </div>`;

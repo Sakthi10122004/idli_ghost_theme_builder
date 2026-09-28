@@ -4,6 +4,43 @@ import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
 import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
 import { SpacingControl } from "@/editor/components/shared/SpacingControl";
+import { BackgroundControls } from "@/editor/components/shared/BackgroundControls";
+
+const HAS_DEDICATED_BG_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "newsletter",
+  "post-grid",
+  "testimonials",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "related-posts",
+  "stats",
+  "team",
+  "section",
+  "container",
+  "columns",
+  "cards",
+  "pricing-table",
+]);
+
+const HAS_DEDICATED_SPACING_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "section",
+  "container",
+  "columns",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "post-grid",
+  "stats",
+  "team",
+  "testimonials",
+]);
 
 export default function RightSidebar() {
   const {
@@ -30,12 +67,6 @@ export default function RightSidebar() {
     return String(val);
   };
 
-  const handlePropChange = (key: string, value: unknown) => {
-    if (selectedBlockId) {
-      updateBlockProps(selectedBlockId, { [key]: value });
-    }
-  };
-
   const handleStyleChange = (key: string, value: unknown) => {
     if (selectedBlockId) {
       updateBlockStyles(selectedBlockId, { [key]: value });
@@ -44,7 +75,7 @@ export default function RightSidebar() {
 
   if (!isRightSidebarOpen) {
     return (
-      <aside className="w-[44px] border-l border-brand-hairline bg-white flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+      <aside className="builder-right-sidebar w-[44px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
         <button
           onClick={() => toggleRightSidebar(true)}
           className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
@@ -67,7 +98,7 @@ export default function RightSidebar() {
   }
 
   return (
-    <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
+    <aside className="builder-right-sidebar w-[300px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
       {selectedBlock ? (
         <div className="p-4 flex flex-col gap-6">
           {/* Header */}
@@ -269,7 +300,7 @@ export default function RightSidebar() {
                       key={align}
                       onClick={() => handleStyleChange("textAlign", align)}
                       className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${getInputValue(selectedBlock.styles.textAlign) === align
-                        ? "bg-white text-brand-ink shadow-level-2 font-semibold"
+                        ? "bg-brand-canvas text-brand-ink shadow-level-2 font-semibold"
                         : "text-brand-mute hover:text-brand-ink"
                         }`}
                     >
@@ -411,50 +442,40 @@ export default function RightSidebar() {
             )}
 
             {/* Spacing Controls with live sliders */}
-            <div className="border-t border-brand-hairline pt-3">
-              <SpacingControl
-                title="Spacing"
-                topValue={getInputValue(selectedBlock.styles.paddingTop)}
-                bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
-                leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
-                rightValue={getInputValue(selectedBlock.styles.paddingRight)}
-                onChangeTop={(val) => handleStyleChange("paddingTop", val)}
-                onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
-                onChangeHorizontal={(val) => {
-                  handleStyleChange("paddingLeft", val);
-                  handleStyleChange("paddingRight", val);
+            {!HAS_DEDICATED_SPACING_CONTROL.has(selectedBlock.type) && (
+              <div className="border-t border-brand-hairline pt-3">
+                <SpacingControl
+                  title="Spacing"
+                  topValue={getInputValue(selectedBlock.styles.paddingTop)}
+                  bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
+                  leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
+                  rightValue={getInputValue(selectedBlock.styles.paddingRight)}
+                  onChangeTop={(val) => handleStyleChange("paddingTop", val)}
+                  onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
+                  onChangeHorizontal={(val) => {
+                    handleStyleChange("paddingLeft", val);
+                    handleStyleChange("paddingRight", val);
+                  }}
+                  showHorizontal={true}
+                />
+              </div>
+            )}
+            {!HAS_DEDICATED_BG_CONTROL.has(selectedBlock.type) && (
+              <BackgroundControls
+                styles={selectedBlock.styles}
+                appearance={{ backgroundColor: (selectedBlock.styles?.backgroundColor as string) || "" }}
+                onChangeStyles={(styles) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, styles);
+                  }
                 }}
-                showHorizontal={true}
+                updateAppearance={(_, v) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, { backgroundColor: v });
+                  }
+                }}
               />
-            </div>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-sans font-semibold text-brand-body">Background Color</label>
-                    {selectedBlock.styles.backgroundColor && (
-                      <button
-                        onClick={() => handleStyleChange("backgroundColor", "")}
-                        className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-                      >
-                        Set Transparent
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={getInputValue(selectedBlock.styles.backgroundColor) || "#ffffff"}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-12 h-8 border border-brand-hairline rounded-sm focus:outline-none bg-transparent cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Transparent"
-                      value={getInputValue(selectedBlock.styles.backgroundColor)}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
-                    />
-                  </div>
-                </div>
+            )}
           </div>
         </div>
       ) : (

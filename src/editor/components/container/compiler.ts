@@ -1,4 +1,5 @@
 import { BuilderBlock } from "@/types/theme";
+import { getBackgroundCSS } from "../shared/background";
 
 export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
   const maxWidth = (block.props?.maxWidth as string) || (block.styles?.width as string) || "var(--container-width, 1200px)";
@@ -8,13 +9,15 @@ export const compileToHbs = (block: BuilderBlock, compiledChildren: string) => {
   const paddingBottom = (block.styles?.paddingBottom as string) || (block.props?.paddingY as string) || "0px";
   const paddingLeft = (block.styles?.paddingLeft as string) || (block.props?.paddingX as string) || "clamp(1rem, 4vw, 2.5rem)";
   const paddingRight = (block.styles?.paddingRight as string) || (block.props?.paddingX as string) || "clamp(1rem, 4vw, 2.5rem)";
-  const bg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
-  const bgStyle = bg && bg !== "transparent" ? ` background-color: ${bg}; border-radius: 6px;` : "";
+  const rawBg = (block.styles?.backgroundColor as string) || (block.props?.backgroundColor as string) || "";
+  const bgType = block.styles?.backgroundType || "solid";
+  const hasBg = (rawBg && rawBg !== "transparent") || (bgType && bgType !== "solid");
+  const bgCss = hasBg ? ` ${getBackgroundCSS(block.styles, { backgroundColor: rawBg })} border-radius: 6px;` : "";
   const direction = (block.props?.direction as string) || "column";
   const gap = (block.props?.gap as string) || "16px";
   const flexStyle = direction === "row" ? ` display: flex; flex-direction: row; flex-wrap: wrap; gap: ${gap}; align-items: flex-start;` : "";
 
-  return `<div class="container-inner" style="max-width: ${maxWidth}; margin: ${margin}; padding-left: ${paddingLeft}; padding-right: ${paddingRight}; padding-top: ${paddingTop}; padding-bottom: ${paddingBottom};${bgStyle}${flexStyle}">
+  return `<div class="container-inner" style="max-width: ${maxWidth}; margin: ${margin}; padding-left: ${paddingLeft}; padding-right: ${paddingRight}; padding-top: ${paddingTop}; padding-bottom: ${paddingBottom};${bgCss}${flexStyle}">
   ${compiledChildren}
 </div>`;
 };

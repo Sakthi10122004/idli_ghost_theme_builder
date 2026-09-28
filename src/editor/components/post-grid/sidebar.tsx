@@ -1,5 +1,6 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
 const Switch = ({ checked, onChange }: { checked: boolean; onChange: (c: boolean) => void }) => (
   <button
@@ -16,7 +17,7 @@ const SegmentedControl = ({ options, value, onChange }: {
   value: string;
   onChange: (v: string) => void;
 }) => (
-  <div className="flex bg-gray-100 p-0.5 rounded-md border border-gray-200/50">
+  <div className="flex bg-brand-canvas-soft p-0.5 rounded-md border border-brand-hairline">
     {options.map(opt => (
       <button
         key={opt.value}
@@ -25,8 +26,8 @@ const SegmentedControl = ({ options, value, onChange }: {
         onClick={() => onChange(opt.value)}
         className={`flex-1 flex justify-center items-center py-1 px-3 text-[11px] font-medium rounded-sm transition-all ${
           opt.disabled ? 'text-gray-300 cursor-not-allowed'
-          : value === opt.value ? 'bg-white text-gray-900 shadow-sm'
-          : 'text-gray-500 hover:text-gray-700'
+          : value === opt.value ? 'bg-brand-canvas text-brand-ink shadow-xs font-semibold'
+          : 'text-brand-mute hover:text-brand-ink'
         }`}
       >
         {opt.label}
@@ -40,9 +41,9 @@ const SegmentedControl = ({ options, value, onChange }: {
 // made for Post Grid specifically — worth knowing this creates a real inconsistency
 // with the rest of the app's design-token system, not a neutral styling choice.
 const ColorPicker = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
-  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-[12px] font-medium text-gray-800">{label}</span>
-    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+  <div className="flex items-center justify-between gap-3 bg-brand-canvas p-2 border-b border-brand-hairline last:border-b-0">
+    <span className="text-[12px] font-medium text-brand-ink">{label}</span>
+    <div className="flex items-center gap-1.5 bg-brand-canvas-soft border border-brand-hairline rounded px-1.5 py-1">
       <input
         type="color"
         value={value}
@@ -53,14 +54,14 @@ const ColorPicker = ({ label, value, onChange }: { label: string; value: string;
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-16 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+        className="w-16 text-[10px] font-mono text-brand-body bg-transparent outline-none uppercase"
       />
     </div>
   </div>
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[12px] font-bold text-gray-900 tracking-tight">{children}</span>
+  <span className="text-[12px] font-bold text-brand-ink tracking-tight">{children}</span>
 );
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
@@ -78,10 +79,11 @@ interface FilterRule { field: "tag" | "author" | "featured"; value: string; }
 
 export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles?: (styles: Record<string, any>) => void;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
 }) => {
-  const p = block.props || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p = (block.props || {}) as any;
   const general = p.general || {};
   const filter = p.filter || { rules: [] as FilterRule[], combinator: "all" };
   const postCard = p.postCard || {};
@@ -90,7 +92,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
   const spacing = p.spacing || {};
   const advanced = p.advanced || {};
 
-  const updateCategory = (category: string, key: string, value: any) => {
+  const updateCategory = (category: string, key: string, value: unknown) => {
     onChangeProps({
       ...p,
       [category]: {
@@ -98,6 +100,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         [key]: value,
       },
     });
+    if (category === "spacing" && onChangeStyles) {
+      onChangeStyles({ [key]: value });
+    }
   };
 
   const updateFilterRules = (rules: FilterRule[]) => updateCategory("filter", "rules", rules);
@@ -143,7 +148,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
           </select>
           {source === "routes" && (
             <span className="text-[10px] text-brand-mute">
-              Shows whatever this page's routing shows. Count is controlled by
+              Shows whatever this page&apos;s routing shows. Count is controlled by
               Theme Settings → Posts Per Page, not by this block.
             </span>
           )}
@@ -164,7 +169,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
               placeholder="e.g. design"
             />
             <span className="text-[10px] text-brand-mute">
-              Enter the tag's slug exactly as it appears in Ghost Admin (lowercase,
+              Enter the tag&apos;s slug exactly as it appears in Ghost Admin (lowercase,
               hyphenated) — only posts with this tag will show here.
             </span>
           </div>
@@ -202,9 +207,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
         )}
 
         {source === "custom" && (
-          <div className="flex flex-col gap-2 border border-gray-100 rounded-lg p-3 bg-white shadow-sm">
+          <div className="flex flex-col gap-2 border border-brand-hairline rounded-lg p-3 bg-brand-canvas shadow-xs">
             <div className="flex justify-between items-center">
-              <span className="text-[11px] font-semibold text-gray-800">Filter rules</span>
+              <span className="text-[11px] font-semibold text-brand-ink">Filter rules</span>
               <SegmentedControl
                 value={filter.combinator || "all"}
                 onChange={(v) => updateCategory("filter", "combinator", v)}
@@ -217,7 +222,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 <select
                   value={rule.field}
                   onChange={(e) => updateRule(idx, { field: e.target.value as FilterRule["field"] })}
-                  className="flex-shrink-0 px-2 py-1 border border-gray-200 rounded text-[11px]"
+                  className="flex-shrink-0 px-2 py-1 border border-brand-hairline rounded text-[11px] bg-brand-canvas-soft text-brand-ink"
                 >
                   <option value="tag">Tag</option>
                   <option value="author">Author</option>
@@ -228,12 +233,12 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                   value={rule.value}
                   onChange={(e) => updateRule(idx, { value: e.target.value })}
                   placeholder={rule.field === "featured" ? "true" : "slug"}
-                  className="flex-1 px-2 py-1 border border-gray-200 rounded text-[11px]"
+                  className="flex-1 px-2 py-1 border border-brand-hairline rounded text-[11px] bg-brand-canvas-soft text-brand-ink"
                 />
                 <button
                   type="button"
                   onClick={() => removeRule(idx)}
-                  className="text-gray-400 hover:text-red-500 text-[13px] px-1"
+                  className="text-brand-mute hover:text-red-500 text-[13px] px-1"
                   aria-label="Remove rule"
                 >
                   ×
@@ -295,9 +300,9 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* POST CARD */}
-      <div className="flex flex-col gap-2 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-5">
         <SectionLabel>Post Card</SectionLabel>
-        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+        <div className="flex flex-col border border-brand-hairline rounded-lg overflow-hidden shadow-xs">
           {([
             ["showFeatureImage", "Feature Image", true],
             ["showPrimaryTag", "Primary Tag", true],
@@ -306,8 +311,8 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             ["showPublishDate", "Publish Date", false],
             ["showExcerpt", "Excerpt", true],
           ] as [string, string, boolean][]).map(([key, label, def]) => (
-            <div key={key} className="flex justify-between items-center p-3 bg-white border-b border-gray-100 last:border-b-0">
-              <span className="text-[12px] font-medium text-gray-800">{label}</span>
+            <div key={key} className="flex justify-between items-center p-3 bg-brand-canvas border-b border-brand-hairline last:border-b-0">
+              <span className="text-[12px] font-medium text-brand-ink">{label}</span>
               <Switch
                 checked={postCard[key] ?? def}
                 onChange={(c) => updateCategory("postCard", key, c)}
@@ -318,7 +323,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* BUTTON */}
-      <div className="flex flex-col gap-2 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-5">
         <SectionLabel>Button</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Label</FieldLabel>
@@ -339,143 +344,18 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* BACKGROUND */}
-      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
-        <SectionLabel>Background</SectionLabel>
-        
-        <FieldLabel>Background Type</FieldLabel>
-        <select
-          value={block.styles?.backgroundType || "solid"}
-          onChange={(e) => onChangeStyles && onChangeStyles({ backgroundType: e.target.value })}
-          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-        >
-          <option value="solid">Solid Color</option>
-          <option value="linear">Linear Gradient</option>
-          <option value="radial">Radial Gradient</option>
-          <option value="mesh">Mesh Gradient</option>
-          <option value="pattern">Pattern</option>
-          <option value="image">Image URL</option>
-        </select>
-      </div>
-
-      {(block.styles?.backgroundType || "solid") === "solid" && (
-        <div className="flex flex-col gap-1.5 mt-2">
-          <FieldLabel>Background Color</FieldLabel>
-          <div className="flex gap-2 items-center">
-            <input
-              type="color"
-              value={appearance.backgroundColor || "#ffffff"}
-              onChange={(e) => updateCategory("appearance", "backgroundColor", e.target.value)}
-              className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0"
-            />
-            <input
-              type="text"
-              value={appearance.backgroundColor || "#ffffff"}
-              onChange={(e) => updateCategory("appearance", "backgroundColor", e.target.value)}
-              className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-            />
-          </div>
-        </div>
-      )}
-
-      {block.styles?.backgroundType === "linear" && (
-        <div className="flex flex-col gap-2 mt-2">
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Gradient Colors</FieldLabel>
-            <div className="flex gap-2">
-              <input type="color" value={block.styles?.gradientColor1 || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="color" value={block.styles?.gradientColor2 || "#333333"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <FieldLabel>Angle (deg)</FieldLabel>
-              <span className="text-[10px] text-brand-muted">{block.styles?.gradientAngle || 90}°</span>
-            </div>
-            <input type="range" min="0" max="360" value={block.styles?.gradientAngle || 90} onChange={(e) => onChangeStyles && onChangeStyles({ gradientAngle: parseInt(e.target.value) })} className="w-full accent-brand-primary" />
-          </div>
-        </div>
-      )}
-
-      {block.styles?.backgroundType === "radial" && (
-        <div className="flex flex-col gap-2 mt-2">
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Gradient Colors</FieldLabel>
-            <div className="flex gap-2">
-              <input type="color" value={block.styles?.gradientColor1 || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="color" value={block.styles?.gradientColor2 || "#333333"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Position</FieldLabel>
-            <select value={block.styles?.gradientPosition || "center"} onChange={(e) => onChangeStyles && onChangeStyles({ gradientPosition: e.target.value })} className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft">
-              <option value="center">Center</option>
-              <option value="top left">Top Left</option>
-              <option value="top right">Top Right</option>
-              <option value="bottom left">Bottom Left</option>
-              <option value="bottom right">Bottom Right</option>
-              <option value="top">Top</option>
-              <option value="bottom">Bottom</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-      {block.styles?.backgroundType === "mesh" && (
-        <div className="flex flex-col gap-1.5 mt-2">
-          <FieldLabel>Mesh Colors</FieldLabel>
-          <div className="flex gap-2">
-            <input type="color" value={block.styles?.meshColor1 || "#ff0080"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor1: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-            <input type="color" value={block.styles?.meshColor2 || "#7928ca"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor2: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-            <input type="color" value={block.styles?.meshColor3 || "#0070f3"} onChange={(e) => onChangeStyles && onChangeStyles({ meshColor3: e.target.value })} className="w-8 h-8 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-          </div>
-        </div>
-      )}
-
-      {block.styles?.backgroundType === "pattern" && (
-        <div className="flex flex-col gap-2 mt-2">
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Pattern Type</FieldLabel>
-            <select value={block.styles?.patternType || "dots"} onChange={(e) => onChangeStyles && onChangeStyles({ patternType: e.target.value })} className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft">
-              <option value="dots">Dots</option>
-              <option value="lines">Diagonal Lines</option>
-              <option value="noise">Noise / Grain</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Pattern Base Color</FieldLabel>
-            <div className="flex gap-2 items-center">
-              <input type="color" value={block.styles?.patternColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-              <input type="text" value={block.styles?.patternColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ patternColor: e.target.value })} className="flex-1 px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {block.styles?.backgroundType === "image" && (
-        <div className="flex flex-col gap-2 mt-2">
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Image URL</FieldLabel>
-            <TextInput value={block.styles?.bgImageUrl || ""} onChange={(e) => onChangeStyles && onChangeStyles({ bgImageUrl: e.target.value })} placeholder="https://example.com/image.jpg" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Overlay Color</FieldLabel>
-            <input type="color" value={block.styles?.bgOverlayColor || "#000000"} onChange={(e) => onChangeStyles && onChangeStyles({ bgOverlayColor: e.target.value })} className="w-6 h-6 rounded-sm cursor-pointer border border-brand-hairline p-0" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <FieldLabel>Overlay Opacity</FieldLabel>
-              <span className="text-[10px] text-brand-muted">{Math.round((block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.5) * 100)}%</span>
-            </div>
-            <input type="range" min="0" max="1" step="0.05" value={block.styles?.bgOverlayOpacity !== undefined ? block.styles.bgOverlayOpacity : 0.5} onChange={(e) => onChangeStyles && onChangeStyles({ bgOverlayOpacity: parseFloat(e.target.value) })} className="w-full accent-brand-primary" />
-          </div>
-        </div>
-      )}
+      <BackgroundControls
+        styles={block.styles}
+        appearance={appearance}
+        onChangeStyles={(s) => onChangeStyles && onChangeStyles(s)}
+        updateAppearance={(k, v) => updateCategory("appearance", k, v)}
+      />
 
       {/* COLORS — open picker (intentional exception, see note above the
           ColorPicker component definition) */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Colors</SectionLabel>
-        <div className="flex flex-col border border-gray-100 rounded-lg overflow-hidden shadow-sm mt-1">
+        <div className="flex flex-col border border-brand-hairline rounded-lg overflow-hidden shadow-xs mt-1">
           <ColorPicker
             label="Text Color"
             value={appearance.textColor || "#111827"}
@@ -490,7 +370,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* LAYOUT (width) */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Layout</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Section Width</FieldLabel>
@@ -508,7 +388,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* SPACING */}
-      <div className="flex flex-col gap-3 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-5">
         <SectionLabel>Spacing</SectionLabel>
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
@@ -543,7 +423,7 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
       </div>
 
       {/* ADVANCED */}
-      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5">
+      <div className="flex flex-col gap-1.5 border-t border-brand-hairline pt-5">
         <SectionLabel>Advanced</SectionLabel>
         <FieldLabel>HTML Anchor</FieldLabel>
         <TextInput

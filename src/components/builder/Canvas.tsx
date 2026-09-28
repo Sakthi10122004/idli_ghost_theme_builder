@@ -9,6 +9,13 @@ import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2, ChevronUp, ChevronDown, Plus, Sparkles, Ungroup, BoxSelect, Columns } from "lucide-react";
 import { getBlockTemplate } from "@/editor/components/blockTemplates";
+import { getBackgroundStyle } from "@/editor/components/shared/background";
+
+const SELF_RENDERING_BG_COMPONENTS = new Set([
+  "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
+  "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
+  "cards", "pricing-table", "container", "columns"
+]);
 
 // Sortable Wrapper Component with hover/selection Drag Handle
 function SortableElement({
@@ -230,7 +237,7 @@ function SortableElement({
       {isSidebarDragOver && (
         <div className="absolute -bottom-1 left-0 w-full z-40 flex items-center justify-center pointer-events-none">
           <div className="w-full h-1 bg-brand-primary rounded-full shadow-md ring-4 ring-brand-primary/20" />
-          <div className="absolute px-3 py-0.5 bg-brand-primary text-white text-[10px] font-semibold rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap">
+          <div className="absolute px-3 py-0.5 bg-neutral-900 text-white text-[10px] font-semibold rounded-full shadow-lg flex items-center gap-1 whitespace-nowrap">
             <Plus size={10} strokeWidth={3} />
             <span>Put after this section</span>
           </div>
@@ -244,7 +251,7 @@ function SortableElement({
         <>
           {/* Floating Grip handle shown on hover OR selection */}
           {!isPreviewMode && !isGlobal && (
-            <div className={`absolute -top-6 left-0 bg-brand-primary text-white text-[9px] font-mono px-2 py-0.5 rounded-t-sm flex items-center gap-1.5 z-20 transition-all select-none pointer-events-auto ${
+            <div className={`absolute -top-6 left-0 bg-neutral-900 text-white text-[9px] font-mono px-2 py-0.5 rounded-t-sm flex items-center gap-1.5 z-20 transition-all select-none pointer-events-auto ${
               isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
             }`}>
               <span 
@@ -660,7 +667,7 @@ export default function Canvas() {
     }
   }, [selectedBlockId]);
 
-  const pageSections = themeDoc.pages[activePage]?.sections || [];
+  const pageSections = React.useMemo(() => themeDoc.pages[activePage]?.sections || [], [themeDoc.pages, activePage]);
   const isDark = previewColorMode === "dark";
 
   // Register canvas container as a droppable target zone
@@ -670,6 +677,7 @@ export default function Canvas() {
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const frameRef = React.useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
   const [containerWidth, setContainerWidth] = React.useState<number>(1280);
   const [frameHeight, setFrameHeight] = React.useState<number>(850);
 
@@ -692,18 +700,59 @@ export default function Canvas() {
     return () => ro.disconnect();
   }, []);
 
-  React.useEffect(() => {
+  const measureFrameHeight = React.useCallback(() => {
     if (!frameRef.current) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.height > 0) {
-          setFrameHeight(entry.contentRect.height);
-        }
-      }
-    });
-    ro.observe(frameRef.current);
-    return () => ro.disconnect();
+    const node = frameRef.current;
+    const h = Math.max(
+      node.scrollHeight,
+      node.offsetHeight,
+      850
+    );
+    if (h > 0) {
+      setFrameHeight(Math.round(h));
+    }
   }, []);
+
+  const setCanvasFrameRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
+      frameRef.current = node;
+      setCanvasDropRef(node);
+
+      if (node) {
+        const updateHeight = () => {
+          const h = Math.max(node.scrollHeight, node.offsetHeight, 850);
+          if (h > 0) {
+            setFrameHeight(Math.round(h));
+          }
+        };
+
+        updateHeight();
+
+        const ro = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const entryH = entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;
+            const computedH = Math.max(entryH, node.scrollHeight, node.offsetHeight, 850);
+            if (computedH > 0) {
+              setFrameHeight(Math.round(computedH));
+            }
+          }
+        });
+        ro.observe(node);
+        resizeObserverRef.current = ro;
+      }
+    },
+    [setCanvasDropRef]
+  );
+
+  React.useEffect(() => {
+    measureFrameHeight();
+    const timer = setTimeout(measureFrameHeight, 150);
+    return () => clearTimeout(timer);
+  }, [activePage, deviceMode, pageSections, themeDoc.blocks, measureFrameHeight]);
 
   const targetWidth = deviceMode === "mobile" ? 375 : deviceMode === "tablet" ? 768 : 1280;
   const availableWidth = Math.max(320, containerWidth - 48);
@@ -748,12 +797,8 @@ export default function Canvas() {
         backgroundColor, 
         paddingTop, 
         paddingBottom,
-        backgroundImage,
         backgroundVideoUrl,
         enableParallax = false,
-        backgroundSize = "cover",
-        backgroundRepeat = "no-repeat",
-        backgroundPosition = "center",
         width,
         contentWidth,
         display,
@@ -797,6 +842,9 @@ export default function Canvas() {
           effectiveBg = `rgba(${r}, ${g}, ${b}, 0.75)`;
         }
       }
+      const blockBgStyle = SELF_RENDERING_BG_COMPONENTS.has(block.type)
+        ? {}
+        : getBackgroundStyle(block.styles, { backgroundColor: resolvedBg });
 
       return (
         <SortableElement
@@ -807,16 +855,11 @@ export default function Canvas() {
           onDelete={handleDelete}
           isGlobal={isGlobal}
           style={{
-            backgroundColor: (block.type === "container" || block.type === "columns") ? undefined : effectiveBg,
+            ...blockBgStyle,
             paddingTop: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingTop) || undefined),
             paddingBottom: (block.type === 'hero' || block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(paddingBottom) || undefined),
             paddingLeft: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingLeft) || undefined),
             paddingRight: (block.type === 'columns' || block.type === 'container') ? undefined : (resolveStyle(block.styles?.paddingRight) || undefined),
-            backgroundImage: backgroundImage ? `url('${resolveStyle(backgroundImage)}')` : undefined,
-            backgroundSize: backgroundImage ? (resolveStyle(backgroundSize) || "cover") : undefined,
-            backgroundRepeat: backgroundImage ? (resolveStyle(backgroundRepeat) || "no-repeat") : undefined,
-            backgroundPosition: backgroundImage ? (resolveStyle(backgroundPosition) || "center") : undefined,
-            backgroundAttachment: (backgroundImage && enableParallax) ? "fixed" : undefined,
             clipPath: (backgroundVideoUrl && enableParallax) ? "inset(0px)" : undefined,
             width: resolveStyle(width) || undefined,
             maxWidth: "100%",
@@ -834,6 +877,8 @@ export default function Canvas() {
             color: resolvedText || undefined,
           }}
           className={`builder-block builder-block-${block.type} relative w-full ${
+            block.styles?.backgroundType === "mesh" ? "mesh-glow" : ""
+          } ${
             block.type === "header" || block.type === "footer" || hasShadow || hasHover
               ? "overflow-visible"
               : "overflow-hidden"
@@ -970,7 +1015,7 @@ export default function Canvas() {
       className="flex-1 bg-brand-canvas-soft overflow-auto p-4 sm:p-8 mesh-glow select-none relative flex flex-col items-center"
     >
       <div 
-        className="relative flex justify-center transition-all duration-200"
+        className="relative flex justify-center items-start transition-all duration-200"
         style={{
           width: isScaled ? `${Math.round(targetWidth * scale)}px` : `${targetWidth}px`,
           height: isScaled ? `${Math.round(frameHeight * scale)}px` : "auto",
@@ -979,10 +1024,7 @@ export default function Canvas() {
       >
         <div 
           id="canvas-preview-frame"
-          ref={(node) => {
-            setCanvasDropRef(node);
-            frameRef.current = node;
-          }}
+          ref={setCanvasFrameRef}
           onClick={() => selectBlock(null)}
           style={{
             width: `${targetWidth}px`,
@@ -990,13 +1032,13 @@ export default function Canvas() {
             transform: isScaled ? `scale(${scale})` : undefined,
             transformOrigin: "top center",
           }}
-          className={`relative shadow-level-5 rounded-md min-h-[850px] border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
+          className={`relative shadow-level-5 rounded-md min-h-[850px] h-fit self-start border overflow-visible transition-shadow duration-300 flex flex-col ${isDark ? "dark bg-[var(--color-canvas)] text-[var(--color-ink)]" : "bg-white"} ${
             isCanvasOver ? "border-brand-primary ring-2 ring-brand-primary/20" : "border-brand-hairline"
           }`}
         >
           {headerBlockId && renderBlock(headerBlockId, true)}
 
-          <div className="flex-1 w-full flex flex-col">
+          <div className="w-full flex flex-col grow min-h-0">
             {pageSections.length > 0 ? (
               <SortableContext items={pageSections} strategy={verticalListSortingStrategy}>
                 <InsertionDropSlot

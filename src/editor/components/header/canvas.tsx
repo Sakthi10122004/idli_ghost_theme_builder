@@ -508,7 +508,7 @@ export const CanvasElement = ({ block }: {
             e.stopPropagation();
             setOpenDropdownIdx(isOpen ? null : idx);
           }}
-          className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2 flex items-center gap-1.5 bg-transparent border-none text-inherit font-inherit text-[1.15rem] leading-normal"
+          className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap shrink-0 px-3 py-1.5 flex items-center gap-1.5 bg-transparent border-none text-inherit font-inherit text-[1.0625rem] leading-normal"
           style={{ color: "inherit", background: "none" }}
         >
           <span>{item.label}</span>
@@ -560,7 +560,7 @@ export const CanvasElement = ({ block }: {
 
     if (!hasChildren) {
       return (
-        <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap px-4 py-2">
+        <span key={idx} className="cursor-pointer hover:opacity-100 transition-opacity whitespace-nowrap shrink-0 px-3 py-1.5 text-[1.0625rem]">
           {item.label}
         </span>
       );
@@ -573,7 +573,7 @@ export const CanvasElement = ({ block }: {
    * Renders the desktop navigation links with dropdown support.
    */
   const renderDesktopNav = (justify: string = "center") => (
-    <nav className={`flex items-center gap-7 text-[1.15rem] font-medium opacity-90 overflow-visible ${justify === "center" ? "justify-center" : "justify-start"
+    <nav className={`flex items-center gap-5 flex-nowrap whitespace-nowrap text-[1.0625rem] font-medium opacity-90 overflow-visible shrink-0 ${justify === "center" ? "justify-center" : "justify-start"
       }`}>
       {items.map((item: HeaderNavItem, idx: number) => renderDesktopNavItem(item, idx))}
     </nav>
@@ -631,7 +631,7 @@ export const CanvasElement = ({ block }: {
             /* ============ STACKED DESKTOP ============ */
             <div className="flex flex-col items-center gap-4 text-center w-full">
               {renderLogo()}
-              <nav className="flex flex-wrap justify-center items-center gap-8 text-[1.15rem] font-medium opacity-90" style={{ overflow: "visible" }}>
+              <nav className="flex flex-nowrap justify-center items-center gap-6 text-[1.0625rem] font-medium opacity-90 whitespace-nowrap overflow-visible">
                 {items.map((item: HeaderNavItem, idx: number) => renderDesktopNavItem(item, idx))}
               </nav>
               {renderActions()}
@@ -653,10 +653,10 @@ export const CanvasElement = ({ block }: {
             </div>
           ) : (
             /* ============ LOGO LEFT DESKTOP (default) ============ */
-            <div className="flex items-center justify-between w-full gap-8">
-              <div className="flex items-center gap-8 min-w-0">
+            <div className="flex items-center justify-between w-full gap-6">
+              <div className="flex items-center gap-6 min-w-0 flex-1 overflow-visible">
                 {renderLogo()}
-                {renderDesktopNav()}
+                {renderDesktopNav("start")}
               </div>
 
               <div className="shrink-0">

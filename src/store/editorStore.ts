@@ -83,7 +83,7 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
   pages: {
     home: { sections: ["header-sec-1", "hero-sec-1", "featured-posts-sec", "post-grid-sec", "newsletter-sec", "footer-sec-3"] },
     post: { sections: ["header-sec-1", "post-content-sec", "post-author-sec", "post-nav-sec", "related-posts-sec", "comments-sec", "footer-sec-3"] },
-    page: { sections: ["header-sec-1", "page-content-sec", "footer-sec-3"] },
+    page: { sections: ["header-sec-1", "page-content-sec", "page-share-sec", "page-comments-sec", "page-newsletter-sec", "footer-sec-3"] },
     author: { sections: ["header-sec-1", "author-profile-sec", "post-grid-sec", "footer-sec-3"] },
     tag: { sections: ["header-sec-1", "tag-header-sec", "post-grid-sec", "footer-sec-3"] },
     error: { sections: ["header-sec-1", "error-main-sec", "footer-sec-3"] },
@@ -268,8 +268,49 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
     "page-content-sec": {
       id: "page-content-sec",
       type: "page-detail",
-      props: {},
+      props: {
+        showTitle: true,
+      },
       styles: {},
+    },
+    "page-share-sec": {
+      id: "page-share-sec",
+      type: "share",
+      props: {
+        buttonText: "Share this page",
+        showIcon: true,
+        variant: "pill",
+        alignment: "center",
+      },
+      styles: {
+        paddingTop: "16px",
+        paddingBottom: "32px",
+      },
+    },
+    "page-comments-sec": {
+      id: "page-comments-sec",
+      type: "comments",
+      props: {
+        heading: "Discussion",
+        showCount: true,
+      },
+      styles: {},
+    },
+    "page-newsletter-sec": {
+      id: "page-newsletter-sec",
+      type: "newsletter",
+      props: {
+        title: "Subscribe to our publication",
+        subtitle: "Get the latest articles and design insights delivered directly to your inbox.",
+        buttonLabel: "Subscribe",
+        placeholder: "you@example.com",
+      },
+      styles: {
+        backgroundColor: "var(--color-canvas-soft, #fafafa)",
+        paddingTop: "64px",
+        paddingBottom: "64px",
+        layout: "center",
+      },
     },
 
     // Author Archive Blocks
@@ -358,6 +399,10 @@ interface EditorState {
   previewColorMode: "light" | "dark";
   togglePreviewColorMode: () => void;
   setPreviewColorMode: (mode: "light" | "dark") => void;
+
+  appThemeMode: "light" | "dark";
+  toggleAppThemeMode: () => void;
+  setAppThemeMode: (mode: "light" | "dark") => void;
 
   isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
@@ -744,6 +789,27 @@ export function migrateThemeDocument(doc: ThemeDocument): ThemeDocument {
     }
   }
 
+  // Page migration: ensure default page components (page-detail, share, comments, newsletter)
+  if (!newPages.page || !newPages.page.sections || newPages.page.sections.length === 0) {
+    newPages.page = {
+      sections: ["page-content-sec", "page-share-sec", "page-comments-sec", "page-newsletter-sec"],
+    };
+  } else {
+    const pageTypes = newPages.page.sections.map((sid) => newBlocks[sid]?.type);
+    if (!pageTypes.includes("page-detail") && !newPages.page.sections.includes("page-content-sec")) {
+      newPages.page.sections.unshift("page-content-sec");
+    }
+    if (!pageTypes.includes("share") && !newPages.page.sections.includes("page-share-sec")) {
+      newPages.page.sections.push("page-share-sec");
+    }
+    if (!pageTypes.includes("comments") && !newPages.page.sections.includes("page-comments-sec")) {
+      newPages.page.sections.push("page-comments-sec");
+    }
+    if (!pageTypes.includes("newsletter") && !newPages.page.sections.includes("page-newsletter-sec")) {
+      newPages.page.sections.push("page-newsletter-sec");
+    }
+  }
+
   // Error page migration
   if (!newPages.error || !newPages.error.sections || newPages.error.sections.length === 0) {
     newPages.error = { sections: [...INITIAL_THEME_DOCUMENT.pages.error.sections] };
@@ -841,15 +907,34 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   togglePreviewColorMode: () => set((state) => {
     const next = state.previewColorMode === "dark" ? "light" : "dark";
     if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", next === "dark");
+      document.documentElement.classList.remove("dark");
     }
     return { previewColorMode: next };
   }),
   setPreviewColorMode: (mode) => set(() => {
     if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", mode === "dark");
+      document.documentElement.classList.remove("dark");
     }
     return { previewColorMode: mode };
+  }),
+
+  appThemeMode: "light",
+  toggleAppThemeMode: () => set((state) => {
+    const next = state.appThemeMode === "dark" ? "light" : "dark";
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("t4gc_app_theme_mode", next);
+      } catch {}
+    }
+    return { appThemeMode: next };
+  }),
+  setAppThemeMode: (mode) => set(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("t4gc_app_theme_mode", mode);
+      } catch {}
+    }
+    return { appThemeMode: mode };
   }),
 
   isLeftSidebarOpen: true,

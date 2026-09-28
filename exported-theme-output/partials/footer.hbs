@@ -1,15 +1,19 @@
 
 <style>
-  #site-footer {
-    background-color: #ffffff;
-    color: #1a1a1a;
-    padding-top: 64px;
-    padding-bottom: 64px;
-    padding-left: 24px;
-    padding-right: 24px;
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+  #site-footer,
+  footer#site-footer,
+  .site-footer#site-footer {
+    width: 100% !important;
+    background-color: var(--color-bg);
+    color: var(--color-fg) !important;
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
     
   }
   #site-footer a {
@@ -126,65 +130,74 @@
   }
 
   html.dark #site-footer {
-    background-color: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--color-bg) !important;
+    color: var(--color-fg) !important;
   }
   html.dark #site-footer .footer-subscribe-btn {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
   }
   #site-footer .footer-inner {
     margin: 0 auto;
-    max-width: 1200px;
+    max-width: 1024px;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
   }
   #site-footer .footer-bottom {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 20px;
-    text-align: center;
+    justify-content: space-between;
+    gap: 24px;
     width: 100%;
     box-sizing: border-box;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  #site-footer .footer-copyright {
+    opacity: 0.7;
+    font-size: 0.875rem;
+    text-align: left;
+    flex-shrink: 0;
   }
   #site-footer .footer-actions {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    box-sizing: border-box;
+    justify-content: flex-end;
+    gap: 24px;
   }
-  @media (min-width: 768px) {
+  @media (max-width: 767px) {
     #site-footer .footer-bottom {
-      flex-direction: row !important;
-      justify-content: space-between !important;
-      text-align: left !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      gap: 20px !important;
+    }
+    #site-footer .footer-copyright {
+      text-align: center !important;
+      width: 100% !important;
     }
     #site-footer .footer-actions {
-      flex-direction: row !important;
-      justify-content: flex-end !important;
-      width: auto !important;
-    }
-    #site-footer .footer-secondary-nav,
-    #site-footer .footer-secondary-nav .nav,
-    #site-footer .footer-bottom ul.nav,
-    #site-footer .footer-bottom ul.nav-secondary {
-      justify-content: flex-end;
+      justify-content: center !important;
+      width: 100% !important;
     }
   }
 </style>
 <footer 
   id="site-footer" 
   class="site-footer section-width-full "
- style="padding-top: 64px; padding-bottom: 64px; background-color: #ffffff">
-  <div class="gh-container footer-inner content-width-standard align-center">
+  style="width: 100%; background-color: var(--color-bg); color: var(--color-fg); padding-top: 40px; padding-bottom: 40px; padding-left: 24px; padding-right: 24px; max-width: 100%; margin-left: auto; margin-right: auto; box-sizing: border-box"
+>
+  <div class="gh-container footer-inner content-width-standard align-center" style="margin: 0 auto; max-width: 1024px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px;">
     
-      <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center;">
-        
-        <div class="footer-actions" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; align-items: center;">
+      <div class="footer-bottom" style="width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; font-size: 0.875rem; line-height: 1.5; box-sizing: border-box;">
+        <div class="footer-copyright" style="opacity: 0.7; text-align: left; flex-shrink: 0; font-size: 0.875rem;">© 2026 Ghost Theme Builder. Published with Ghost.</div>
+        <div class="footer-actions" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 24px;">
           
           <nav class="footer-secondary-nav" aria-label="Secondary Navigation">
             {{#if @site.secondary_navigation}}
@@ -199,6 +212,33 @@
           </nav>
           
           
+    <div class="footer-social-links" style="display: flex; flex-wrap: wrap; gap: 14px 16px; align-items: center; justify-content: center; max-width: 100%;">
+      {{#if @site.facebook}}
+        <a href="{{@site.facebook}}" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/facebook"}}
+        </a>
+      {{else}}
+        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/facebook"}}
+        </a>
+      {{/if}}
+      {{#if @site.twitter}}
+        <a href="{{@site.twitter}}" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/x"}}
+        </a>
+      {{else}}
+        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+          {{> "icons/x"}}
+        </a>
+      {{/if}}
+      <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+        {{> "icons/instagram"}}
+      </a>
+      <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" style="color: inherit; opacity: 0.8; transition: opacity 0.2s;">
+        {{> "icons/linkedin"}}
+      </a>
+    </div>
+  
         </div>
       </div>
     

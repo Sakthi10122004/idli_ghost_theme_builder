@@ -289,7 +289,11 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             max="12"
             step="0.5"
             value={parseFloat(spacing.paddingTop || "4")}
-            onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingTop: `${e.target.value}rem` } })}
+            onChange={(e) => {
+              const val = `${e.target.value}rem`;
+              onChangeProps({ spacing: { ...spacing, paddingTop: val } });
+              onChangeStyles?.({ paddingTop: val });
+            }}
             className="w-full accent-blue-600"
           />
         </div>
@@ -306,7 +310,11 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
             max="12"
             step="0.5"
             value={parseFloat(spacing.paddingBottom || "4")}
-            onChange={(e) => onChangeProps({ spacing: { ...spacing, paddingBottom: `${e.target.value}rem` } })}
+            onChange={(e) => {
+              const val = `${e.target.value}rem`;
+              onChangeProps({ spacing: { ...spacing, paddingBottom: val } });
+              onChangeStyles?.({ paddingBottom: val });
+            }}
             className="w-full accent-blue-600"
           />
         </div>

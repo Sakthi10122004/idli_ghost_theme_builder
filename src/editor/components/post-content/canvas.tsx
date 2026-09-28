@@ -99,11 +99,12 @@ export const CanvasElement = ({
 
       {/* Feature Image */}
       {p.showFeatureImage && (
-        <figure className="max-w-4xl mx-auto mb-10 overflow-hidden rounded-md border border-brand-hairline shadow-level-1">
+        <figure className="max-w-4xl mx-auto mb-10 overflow-hidden rounded-md border border-brand-hairline shadow-level-1 bg-brand-canvas-soft">
           <img
             src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&h=630&q=80"
             alt="Feature hero banner"
-            className="w-full h-auto object-cover max-h-[500px]"
+            className="w-full h-auto object-cover max-h-[500px] aspect-[1200/630]"
+            loading="eager"
           />
           <figcaption className="p-2 text-center text-[11px] font-mono text-brand-mute bg-brand-canvas-soft border-t border-brand-hairline">
             Architecture and layout modeling for production publication ecosystems.

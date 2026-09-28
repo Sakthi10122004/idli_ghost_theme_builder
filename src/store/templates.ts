@@ -231,6 +231,65 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
     },
   },
   {
+    id: "standard-page",
+    name: "Standard Page Stack",
+    description: "Complete static page layout with title, content, social share, comments, and newsletter signup.",
+    generateBlocks: () => {
+      const contentId = generateId("page-detail");
+      const shareId = generateId("share");
+      const commentsId = generateId("comments");
+      const newsletterId = generateId("newsletter");
+
+      return {
+        sections: [contentId, shareId, commentsId, newsletterId],
+        blocks: {
+          [contentId]: {
+            id: contentId,
+            type: "page-detail",
+            props: { showTitle: true },
+            styles: {},
+          },
+          [shareId]: {
+            id: shareId,
+            type: "share",
+            props: {
+              buttonText: "Share this page",
+              showIcon: true,
+              variant: "pill",
+              alignment: "center",
+            },
+            styles: {
+              paddingTop: "24px",
+              paddingBottom: "32px",
+            },
+          },
+          [commentsId]: {
+            id: commentsId,
+            type: "comments",
+            props: { heading: "Discussion", showCount: true },
+            styles: {},
+          },
+          [newsletterId]: {
+            id: newsletterId,
+            type: "newsletter",
+            props: {
+              title: "Subscribe to our publication",
+              subtitle: "Get the latest articles and design insights delivered directly to your inbox.",
+              buttonLabel: "Subscribe",
+              placeholder: "you@example.com",
+            },
+            styles: {
+              backgroundColor: "var(--color-canvas-soft, #fafafa)",
+              paddingTop: "64px",
+              paddingBottom: "64px",
+              layout: "center",
+            },
+          },
+        },
+      };
+    },
+  },
+  {
     id: "archive-with-feed",
     name: "Archive Banner with Feed",
     description: "Single tag or author header with ambient posts feed.",

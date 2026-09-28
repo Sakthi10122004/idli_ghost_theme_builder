@@ -1,6 +1,7 @@
 import { BuilderBlock } from "@/types/theme";
 import { StatsProps, StatItem, defaultProps } from "./schema";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 function resolveStyleValue(val: unknown, fallback: string = ""): string {
   if (!val) return fallback;
@@ -19,7 +20,7 @@ function resolveHbsAsset(url?: string): string {
     const rel = url.replace(/^asset:\/\/(assets\/)?/, "");
     return `{{asset "${rel}"}}`;
   }
-  return url;
+  return escapeUrl(url);
 }
 
 const COLS_CLASS: Record<number, string> = {
@@ -44,17 +45,17 @@ export const generateHTML = (block: BuilderBlock): string => {
 
   const renderStat = (stat: StatItem, idx: number) => {
     const num = idx + 1;
-    const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${stat.value || ""}{{/if}}`;
-    const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${stat.label || ""}{{/if}}`;
+    const valueHbs = `{{#if @custom.stat_${num}_value}}{{@custom.stat_${num}_value}}{{else}}${escapeHtml(stat.value || "")}{{/if}}`;
+    const labelHbs = `{{#if @custom.stat_${num}_label}}{{@custom.stat_${num}_label}}{{else}}${escapeHtml(stat.label || "")}{{/if}}`;
 
     const defaultIconHtml = (stat.iconType === 'image' && stat.imageUrl) 
-      ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${stat.label}" /></div>` 
+      ? `<div class="stats-icon image"><img src="${resolveHbsAsset(stat.imageUrl)}" alt="${escapeHtml(stat.label || "")}" /></div>` 
       : stat.icon 
         ? `<div class="stats-icon">${stat.icon}</div>` 
         : '';
         
     const iconHbs = `{{#if @custom.stat_${num}_icon}}
-<div class="stats-icon image"><img src="{{@custom.stat_${num}_icon}}" alt="${stat.label}" /></div>
+<div class="stats-icon image"><img src="{{@custom.stat_${num}_icon}}" alt="${escapeHtml(stat.label || "")}" /></div>
 {{else}}
 ${defaultIconHtml}
 {{/if}}`;
@@ -116,12 +117,12 @@ ${defaultIconHtml}
       {{#if @custom.stats_heading}}
         <h2 class="stats-heading">{{@custom.stats_heading}}</h2>
       {{else}}
-        ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
+        ${general.heading ? `<h2 class="stats-heading">${escapeHtml(general.heading)}</h2>` : ''}
       {{/if}}
       {{#if @custom.stats_subheading}}
         <p class="stats-subheading">{{@custom.stats_subheading}}</p>
       {{else}}
-        ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+        ${general.subheading ? `<p class="stats-subheading">${escapeHtml(general.subheading)}</p>` : ''}
       {{/if}}
     </div>
   ` : `
@@ -421,12 +422,12 @@ ${defaultIconHtml}
           {{#if @custom.stats_heading}}
             <h2 class="stats-heading">{{@custom.stats_heading}}</h2>
           {{else}}
-            ${general.heading ? `<h2 class="stats-heading">${general.heading}</h2>` : ''}
+            ${general.heading ? `<h2 class="stats-heading">${escapeHtml(general.heading)}</h2>` : ''}
           {{/if}}
           {{#if @custom.stats_subheading}}
             <p class="stats-subheading">{{@custom.stats_subheading}}</p>
           {{else}}
-            ${general.subheading ? `<p class="stats-subheading">${general.subheading}</p>` : ''}
+            ${general.subheading ? `<p class="stats-subheading">${escapeHtml(general.subheading)}</p>` : ''}
           {{/if}}
         </div>
         <div class="stats-split-grid">

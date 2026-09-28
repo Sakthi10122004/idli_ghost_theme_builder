@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 import { useEditorStore } from "@/store/editorStore";
+import { getBackgroundStyle } from "../shared/background";
 
 export const CanvasElement = ({
   block,
@@ -35,8 +36,10 @@ export const CanvasElement = ({
   }
 
   const isMobile = deviceMode === "mobile" && stackOnMobile;
-  const bgColor = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || undefined;
-  const hasBg = Boolean(bgColor && bgColor !== "transparent");
+  const rawBg = (block?.styles?.backgroundColor as string) || (block?.props?.backgroundColor as string) || "";
+  const bgType = block?.styles?.backgroundType || "solid";
+  const hasBg = Boolean((rawBg && rawBg !== "transparent") || (bgType && bgType !== "solid"));
+  const bgStyle = hasBg ? getBackgroundStyle(block?.styles, { backgroundColor: rawBg }) : {};
   const pt = (block?.styles?.paddingTop as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
   const pb = (block?.styles?.paddingBottom as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
   const pl = (block?.styles?.paddingLeft as string) || (block?.props?.padding as string) || (hasBg ? "16px" : undefined);
@@ -63,7 +66,7 @@ export const CanvasElement = ({
           alignItems,
           width: "100%",
           boxSizing: "border-box",
-          backgroundColor: hasBg ? bgColor : undefined,
+          ...bgStyle,
           paddingTop: pt,
           paddingBottom: pb,
           paddingLeft: pl,

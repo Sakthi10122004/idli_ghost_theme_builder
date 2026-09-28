@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { resolveTagArchiveProps } from "./schema";
+import { escapeHtml } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = resolveTagArchiveProps(block.props);
@@ -69,7 +70,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
 </style>
 <div id="tags-${block.id}">
-  <h3 class="tag-archive-title">${p.title || "Topics"}</h3>
+  <h3 class="tag-archive-title">${escapeHtml(p.title || "Topics")}</h3>
   <div class="tag-grid">
     {{#get "tags" limit="100"}}
       {{#foreach tags}}

@@ -13,7 +13,7 @@ const SegmentedControl = ({
   value: string;
   onChange: (v: string) => void;
 }) => (
-  <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-md border border-gray-200/50">
+  <div className="grid grid-cols-3 gap-1 bg-brand-canvas-soft p-1 rounded-md border border-brand-hairline">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -21,8 +21,8 @@ const SegmentedControl = ({
         onClick={() => onChange(opt.value)}
         className={`flex justify-center items-center py-1.5 px-1 text-[10px] font-medium rounded-sm transition-all text-center leading-tight ${
           value === opt.value
-            ? "bg-white text-gray-900 shadow-sm font-semibold"
-            : "text-gray-500 hover:text-gray-700"
+            ? "bg-brand-canvas text-brand-ink shadow-xs font-semibold"
+            : "text-brand-mute hover:text-brand-ink"
         }`}
       >
         {opt.label}
@@ -40,9 +40,9 @@ const ColorPicker = ({
   value: string;
   onChange: (v: string) => void;
 }) => (
-  <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-[11px] font-medium text-gray-800">{label}</span>
-    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+  <div className="flex items-center justify-between gap-3 bg-brand-canvas p-2 border-b border-brand-hairline last:border-b-0">
+    <span className="text-[11px] font-medium text-brand-ink">{label}</span>
+    <div className="flex items-center gap-1.5 bg-brand-canvas-soft border border-brand-hairline rounded px-1.5 py-1">
       <input
         type="color"
         value={value || "#171717"}
@@ -53,7 +53,7 @@ const ColorPicker = ({
         type="text"
         value={value || "#171717"}
         onChange={(e) => onChange(e.target.value)}
-        className="w-16 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+        className="w-16 text-[10px] font-mono text-brand-body bg-transparent outline-none uppercase"
       />
     </div>
   </div>
@@ -206,7 +206,7 @@ export const SidebarElement = ({
       {/* Text Colors */}
       <div className="flex flex-col gap-1 border-t border-brand-hairline pt-3 mt-1">
         <span className="text-[10px] uppercase font-bold text-brand-ink mb-1">Text Colors</span>
-        <div className="rounded-md border border-brand-hairline overflow-hidden divide-y divide-gray-100">
+        <div className="rounded-md border border-brand-hairline overflow-hidden divide-y divide-brand-hairline">
           <ColorPicker
             label="Section Heading Color"
             value={p.headingColor || "#171717"}

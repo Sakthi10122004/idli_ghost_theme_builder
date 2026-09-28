@@ -1,5 +1,6 @@
 import { BuilderBlock } from "@/types/theme";
 import { getBackgroundCSS } from "../shared/background";
+import { escapeHtml, escapeUrl } from "../shared/escape";
 
 export const compileToHbs = (block: BuilderBlock) => {
   const p = block.props || {};
@@ -13,7 +14,6 @@ export const compileToHbs = (block: BuilderBlock) => {
   const spacing = p.spacing || {};
 
   const limit = general.limit || 3;
-  const columns = general.columns || 3;
   const layoutStyle = general.layoutStyle || "grid";
 
   const bgCss = getBackgroundCSS(styles, appearance);
@@ -232,7 +232,7 @@ export const compileToHbs = (block: BuilderBlock) => {
 </style>
 <div id="${wrapperId}" class="post-feed-wrapper outer ${styles.backgroundType === 'mesh' ? 'mesh-glow' : ''}" style="${bgCss} padding-top: ${spacing.paddingTop || '4rem'}; padding-bottom: ${spacing.paddingBottom || '4rem'};">
   <div class="inner" style="max-width: ${appearance.sectionWidth === 'wide' ? '1200px' : appearance.sectionWidth === 'narrow' ? '800px' : '100%'}">
-    ${p.title ? `<h2 class="post-grid-title">${p.title}</h2>` : ''}
+    ${p.title ? `<h2 class="post-grid-title">${escapeHtml(p.title)}</h2>` : ''}
     ${getHelperStart}
     <div class="post-grid-inner-container">
       ${isMagazine ? `
@@ -265,7 +265,7 @@ export const compileToHbs = (block: BuilderBlock) => {
     ${getHelperEnd}
     ${button.label ? `
     <div class="post-grid-button-wrapper">
-      <a href="${button.url || "#"}" class="post-grid-button">${button.label}</a>
+      <a href="${escapeUrl(button.url)}" class="post-grid-button">${escapeHtml(button.label)}</a>
     </div>
     ` : ''}
   </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveRelatedPostsProps } from "./schema";
@@ -13,7 +14,7 @@ export const CanvasElement = ({
   onDelete?: (e: React.MouseEvent) => void;
   renderChildren?: () => React.ReactNode;
 }) => {
-  useCanvasDarkMode();
+  const isDark = useCanvasDarkMode();
   const p = resolveRelatedPostsProps(block.props);
   const bgStyle = getBackgroundStyle(block.styles, p.appearance);
   const isMesh = block.styles?.backgroundType === "mesh";
@@ -97,10 +98,10 @@ export const CanvasElement = ({
   const featured = mockPosts[0];
   const secondaries = mockPosts.slice(1);
 
-  const headingColor = p.headingColor || "#171717";
-  const descriptionColor = p.descriptionColor || "#666666";
-  const cardTitleColor = p.cardTitleColor || "#171717";
-  const cardTextColor = p.cardTextColor || "#4d4d4d";
+  const headingColor = p.headingColor || (isDark ? "#ffffff" : "#171717");
+  const descriptionColor = p.descriptionColor || (isDark ? "#a1a1a1" : "#666666");
+  const cardTitleColor = p.cardTitleColor || (isDark ? "#ffffff" : "#171717");
+  const cardTextColor = p.cardTextColor || (isDark ? "#a1a1a1" : "#4d4d4d");
   const layout = p.layout || "grid";
   const autoScroll = p.autoScroll || false;
 

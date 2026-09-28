@@ -10,7 +10,7 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   const isDark = useCanvasDarkMode();
-  const { label, variant } = block.props;
+  const { label, variant, shape = "pill" } = block.props;
   const isSecondary = variant === "secondary";
   const customShadow = block.styles?.boxShadow;
   const hasCustomShadow = customShadow !== undefined;
@@ -18,13 +18,27 @@ export const CanvasElement = ({ block }: {
     ? ""
     : (isSecondary ? "shadow-level-2" : "shadow-level-3");
 
+  const shapeClass = shape === "square"
+    ? "rounded-none"
+    : shape === "rounded"
+      ? "rounded-md"
+      : shape === "circle"
+        ? "rounded-full aspect-square min-w-[2.5rem] min-h-[2.5rem] p-2 inline-flex items-center justify-center text-center"
+        : "rounded-pill";
+
+  const paddingClass = shape === "circle" ? "" : "px-5 py-2";
+
   const buttonStyles = isSecondary
-    ? `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
-    : `bg-brand-primary text-brand-on-primary hover:opacity-90 ${shadowClass}`;
+    ? isDark
+      ? `bg-neutral-900 text-white border border-neutral-700 hover:bg-neutral-800 ${shadowClass}`
+      : `bg-brand-canvas text-brand-ink ${shadowClass} border border-brand-hairline hover:bg-brand-canvas-soft`
+    : isDark
+      ? `bg-white text-neutral-900 hover:bg-neutral-100 ${shadowClass}`
+      : `bg-brand-primary text-brand-on-primary hover:opacity-90 ${shadowClass}`;
 
   return (
     <button
-      className={`${buttonStyles} px-5 py-2 text-xs font-semibold tracking-tight select-none cursor-pointer rounded-pill transition-colors`}
+      className={`${buttonStyles} ${shapeClass} ${paddingClass} text-xs font-semibold tracking-tight select-none cursor-pointer transition-colors`}
       style={customShadow && customShadow !== "none" ? { boxShadow: customShadow } : undefined}
     >
       {label}
