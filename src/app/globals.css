@@ -415,6 +415,29 @@ html:not(.dark):not(:has(#canvas-preview-frame)) .icon-moon {
   display: none;
 }
 
+/* Ambient Mesh and Card Animations */
+@keyframes mesh-float {
+  0%, 100% {
+    transform: translate(-50%, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -18px) scale(1.04);
+  }
+}
+
+.animate-mesh-float {
+  animation: mesh-float 14s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.03); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 7s ease-in-out infinite;
+}
+
 @theme {
   --color-brand-primary: var(--color-primary);
   --color-brand-on-primary: var(--color-on-primary);
