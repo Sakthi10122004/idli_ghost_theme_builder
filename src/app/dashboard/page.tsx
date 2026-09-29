@@ -99,16 +99,97 @@ const CURATED_PRESETS = [
   },
 ];
 
-// Deterministic default theme for initial render (matches on server and client)
+function createStarterThemeDoc(
+  name: string,
+  author: string,
+  description: string,
+  themeId: string,
+  primaryColor: string,
+  fontFamily: "Geist" | "Lora" | "Geist Mono" = "Geist"
+): ThemeDocument {
+  const baseDoc: ThemeDocument = JSON.parse(JSON.stringify(INITIAL_THEME_DOCUMENT));
+  baseDoc.metadata = {
+    name,
+    author,
+    version: "1.0.0",
+    description,
+    themeId,
+  };
+  if (baseDoc.settings) {
+    baseDoc.settings.primaryColor = primaryColor;
+    baseDoc.settings.accentColor = primaryColor;
+    baseDoc.settings.fontFamily = fontFamily;
+    if (baseDoc.settings.designTokens?.typography) {
+      if (fontFamily === "Lora") {
+        baseDoc.settings.designTokens.typography.headingFont = "Lora, Georgia, serif";
+      } else if (fontFamily === "Geist Mono") {
+        baseDoc.settings.designTokens.typography.headingFont = "Geist Mono, JetBrains Mono, monospace";
+      } else {
+        baseDoc.settings.designTokens.typography.headingFont = "Geist, Inter, sans-serif";
+      }
+    }
+  }
+  if (baseDoc.blocks && baseDoc.blocks["header-sec-1"]) {
+    baseDoc.blocks["header-sec-1"].props = {
+      ...baseDoc.blocks["header-sec-1"].props,
+      general: {
+        ...baseDoc.blocks["header-sec-1"].props?.general,
+        siteTitle: name,
+      },
+    };
+  }
+  return baseDoc;
+}
+
+// Deterministic default starter themes (Apex Minimal, Editorial Gazette, Geist Tech Log)
 const DEFAULT_INITIAL_THEMES: ThemeProject[] = [
   {
     id: "theme-primary",
-    name: "My Ghost Theme",
-    author: "Ghost Creator",
+    name: "Apex Minimal",
+    author: "Alex Rivera",
     version: "1.0.0",
-    description: "A clean, modern Ghost publication theme",
+    description: "Minimalist black-and-ink aesthetics with clean typography, subtle shadows, and 100/100 Lighthouse score.",
     updatedAt: "Just now",
-    document: INITIAL_THEME_DOCUMENT,
+    document: createStarterThemeDoc(
+      "Apex Minimal",
+      "Alex Rivera",
+      "Minimalist black-and-ink aesthetics with clean typography, subtle shadows, and 100/100 Lighthouse score.",
+      "theme-primary",
+      "#0070f3",
+      "Geist"
+    ),
+  },
+  {
+    id: "theme-editorial",
+    name: "Editorial Gazette",
+    author: "Sarah Jenkins",
+    version: "1.0.0",
+    description: "Bold serif headlines, multi-column article grids, author bio cards, and curated recommendations.",
+    updatedAt: "Just now",
+    document: createStarterThemeDoc(
+      "Editorial Gazette",
+      "Sarah Jenkins",
+      "Bold serif headlines, multi-column article grids, author bio cards, and curated recommendations.",
+      "theme-editorial",
+      "#ff0080",
+      "Lora"
+    ),
+  },
+  {
+    id: "theme-technical",
+    name: "Geist Tech Log",
+    author: "Dev Team",
+    version: "1.0.0",
+    description: "Monospace accents, code block containers, and automated dark mode contrast cascading.",
+    updatedAt: "Just now",
+    document: createStarterThemeDoc(
+      "Geist Tech Log",
+      "Dev Team",
+      "Monospace accents, code block containers, and automated dark mode contrast cascading.",
+      "theme-technical",
+      "#10b981",
+      "Geist Mono"
+    ),
   },
 ];
 
@@ -168,10 +249,27 @@ export default function DashboardPage() {
       if (stored) {
         const parsed: ThemeProject[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const migratedParsed = parsed.map((t) => ({
+          let migratedParsed = parsed.map((t) => ({
             ...t,
             document: unwrapStandaloneSections(t.document),
           }));
+
+          // Ensure 3 default starter themes are present if user only has 1 theme or lacks starter themes
+          const isSeeded = localStorage.getItem("ghost_initial_starter_themes_v2_seeded");
+          if (!isSeeded && migratedParsed.length === 1) {
+            const existingIds = new Set(migratedParsed.map((t) => t.id));
+            const existingNames = new Set(migratedParsed.map((t) => t.name.toLowerCase()));
+            const missing = DEFAULT_INITIAL_THEMES.filter(
+              (t) => !existingIds.has(t.id) && !existingNames.has(t.name.toLowerCase())
+            );
+            if (missing.length > 0) {
+              migratedParsed = [...migratedParsed, ...missing];
+            }
+            try {
+              localStorage.setItem("ghost_initial_starter_themes_v2_seeded", "true");
+            } catch {}
+          }
+
           const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
           const activeProj = (storedActiveId ? migratedParsed.find((t) => t.id === storedActiveId) : null) || migratedParsed[0];
 
@@ -189,6 +287,9 @@ export default function DashboardPage() {
       } else {
         localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(DEFAULT_INITIAL_THEMES));
         localStorage.setItem(STORAGE_ACTIVE_ID_KEY, DEFAULT_INITIAL_THEMES[0].id);
+        try {
+          localStorage.setItem("ghost_initial_starter_themes_v2_seeded", "true");
+        } catch {}
       }
       startTransition(() => {
         setHasLoadedFromStorage(true);
@@ -227,7 +328,7 @@ export default function DashboardPage() {
                   } catch {}
                 } else if (
                   updated.length === 0 ||
-                  (updated.length === 1 && updated[0].id === "theme-primary" && updated[0].name === "My Ghost Theme")
+                  (updated.length === 1 && updated[0].id === "theme-primary" && (updated[0].name === "My Ghost Theme" || updated[0].name === "Apex Minimal" || updated[0].name === "Untitled Theme"))
                 ) {
                   const cloudThemeId = dbThemeId || "theme-primary";
                   updated[0] = {
