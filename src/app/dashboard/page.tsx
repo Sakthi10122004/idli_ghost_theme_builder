@@ -99,32 +99,32 @@ const CURATED_PRESETS = [
   },
 ];
 
+// Deterministic default theme for initial render (matches on server and client)
+const DEFAULT_INITIAL_THEMES: ThemeProject[] = [
+  {
+    id: "theme-primary",
+    name: "My Ghost Theme",
+    author: "Ghost Creator",
+    version: "1.0.0",
+    description: "A clean, modern Ghost publication theme",
+    updatedAt: "Just now",
+    document: INITIAL_THEME_DOCUMENT,
+  },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const { 
     document: themeDoc, 
-    setDocument, 
+    setDocument,
     activeThemeId, 
     setActiveThemeId,
     userId,
-    setUserId,
   } = useEditorStore();
 
-  // Deterministic default theme for initial render
-  const defaultInitialThemes: ThemeProject[] = useMemo(() => [
-    {
-      id: "theme-primary",
-      name: themeDoc.metadata?.name || "Untitled Theme",
-      author: themeDoc.metadata?.author || "Ghost Creator",
-      version: themeDoc.metadata?.version || "1.0.0",
-      description: themeDoc.metadata?.description || "A clean, modern Ghost publication theme",
-      updatedAt: "Just now",
-      document: themeDoc,
-    },
-  ], [themeDoc]);
-
-  const [themes, setThemes] = useState<ThemeProject[]>(defaultInitialThemes);
+  const [themes, setThemes] = useState<ThemeProject[]>(DEFAULT_INITIAL_THEMES);
   const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
+  const hasInitializedRef = React.useRef(false);
 
   // View & Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -156,8 +156,13 @@ export default function DashboardPage() {
   const [editVersion, setEditVersion] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
-  // Load themes from localStorage & cloud database after client hydration mount
+  // Load themes from localStorage & cloud database strictly once on client mount
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
+    const { setActiveThemeId, setDocument, setUserId } = useEditorStore.getState();
+
     try {
       const stored = localStorage.getItem(STORAGE_THEMES_KEY) || localStorage.getItem("ghost_user_themes_v1");
       if (stored) {
@@ -182,8 +187,8 @@ export default function DashboardPage() {
           } catch {}
         }
       } else {
-        localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(defaultInitialThemes));
-        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, defaultInitialThemes[0].id);
+        localStorage.setItem(STORAGE_THEMES_KEY, JSON.stringify(DEFAULT_INITIAL_THEMES));
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, DEFAULT_INITIAL_THEMES[0].id);
       }
       startTransition(() => {
         setHasLoadedFromStorage(true);
@@ -255,7 +260,7 @@ export default function DashboardPage() {
         setHasLoadedFromStorage(true);
       });
     }
-  }, [defaultInitialThemes, setActiveThemeId, setDocument, setUserId]);
+  }, []);
 
   // Synchronize themes list changes into localStorage once loaded
   useEffect(() => {
