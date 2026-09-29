@@ -438,6 +438,24 @@ html:not(.dark):not(:has(#canvas-preview-frame)) .icon-moon {
   animation: pulse-subtle 7s ease-in-out infinite;
 }
 
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
 @theme {
   --color-brand-primary: var(--color-primary);
   --color-brand-on-primary: var(--color-on-primary);
