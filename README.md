@@ -47,7 +47,7 @@ Every component follows a modular 4-file architecture (`schema.ts`, `canvas.tsx`
 | **Layout & Structure** | `section`, `container`, `columns`, `spacer`, `divider` |
 | **Ghost Core** | `header`, `footer`, `post-content`, `page-detail`, `post-grid`, `featured-posts`, `related-posts`, `post-navigation`, `author-profile`, `tag-header`, `tag-archive`, `comments`, `share`, `error-view` |
 | **Content & Media** | `heading`, `text`, `button`, `image`, `video-player`, `cards`, `grid-gallery`, `logo-cloud` |
-| **Engagement & Conversion** | `hero`, `newsletter`, `pricing-table`, `faq`, `stats`, `team`, `testimonials` |
+| **Engagement & Conversion** | `hero`, `newsletter`, `faq`, `stats`, `team`, `testimonials` |
 
 ---
 

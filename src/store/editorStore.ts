@@ -23,7 +23,6 @@ export const STANDALONE_SECTION_TYPES = new Set([
   "testimonials",
   "faq",
   "stats",
-  "pricing-table",
   "newsletter",
   "grid-gallery",
   "comments",

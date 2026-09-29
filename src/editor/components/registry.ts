@@ -79,11 +79,6 @@ import * as testimonialsCanvas from "./testimonials/canvas";
 import * as testimonialsSidebar from "./testimonials/sidebar";
 import * as testimonialsCompiler from "./testimonials/compiler";
 
-import * as pricingTable from "./pricing-table/schema";
-import * as pricingTableCanvas from "./pricing-table/canvas";
-import * as pricingTableSidebar from "./pricing-table/sidebar";
-import * as pricingTableCompiler from "./pricing-table/compiler";
-
 import * as gridGallery from "./grid-gallery/schema";
 import * as gridGalleryCanvas from "./grid-gallery/canvas";
 import * as gridGallerySidebar from "./grid-gallery/sidebar";
@@ -187,7 +182,6 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "tag-header": { type: "tag-header", ...tagHeader, ...tagHeaderCanvas, ...tagHeaderSidebar, ...tagHeaderCompiler },
   faq: { type: "faq", ...faq, ...faqCanvas, ...faqSidebar, ...faqCompiler },
   testimonials: { type: "testimonials", ...testimonials, ...testimonialsCanvas, ...testimonialsSidebar, ...testimonialsCompiler },
-  "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
   "grid-gallery": { type: "grid-gallery", ...gridGallery, ...gridGalleryCanvas, ...gridGallerySidebar, ...gridGalleryCompiler },
   "video-player": { type: "video-player", ...videoPlayer, ...videoPlayerCanvas, ...videoPlayerSidebar, ...videoPlayerCompiler },
   "post-grid": { type: "post-grid", ...postGrid, ...postGridCanvas, ...postGridSidebar, ...postGridCompiler },

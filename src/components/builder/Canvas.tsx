@@ -14,7 +14,7 @@ import { getBackgroundStyle } from "@/editor/components/shared/background";
 const SELF_RENDERING_BG_COMPONENTS = new Set([
   "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
   "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
-  "cards", "pricing-table", "container", "columns"
+  "cards", "container", "columns"
 ]);
 
 // Sortable Wrapper Component with hover/selection Drag Handle

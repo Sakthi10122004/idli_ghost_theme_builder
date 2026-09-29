@@ -23,7 +23,6 @@ const HAS_DEDICATED_BG_CONTROL = new Set([
   "container",
   "columns",
   "cards",
-  "pricing-table",
 ]);
 
 const HAS_DEDICATED_SPACING_CONTROL = new Set([

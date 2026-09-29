@@ -96,7 +96,7 @@ function getInlineStyles(block: BuilderBlock): string {
   const selfRendering = [
     "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
     "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
-    "cards", "pricing-table", "container", "columns", "section"
+    "cards", "container", "columns", "section"
   ].includes(block.type);
 
   if (!selfRendering) {
@@ -498,7 +498,6 @@ html.dark .testimonials,
 html.dark .testimonials-section,
 html.dark .pricing,
 html.dark .pricing-section,
-html.dark .pricing-table,
 html.dark .newsletter,
 html.dark .newsletter-section,
 html.dark .newsletter-block,
