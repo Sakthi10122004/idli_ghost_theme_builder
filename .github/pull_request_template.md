@@ -18,6 +18,6 @@
 <!-- Please verify and check all that apply -->
 - [ ] `npm run typecheck` passed (0 errors)
 - [ ] `npm run lint` passed (0 errors)
-- [ ] `npm run test:components` passed (34/34 verified)
+- [ ] `npm run test:components` passed (33/33 verified)
 - [ ] `npx tsx export-test.ts` passed (clean theme export & balanced Handlebars)
 - [ ] Verified manually in Desktop, Tablet, and Mobile preview modes

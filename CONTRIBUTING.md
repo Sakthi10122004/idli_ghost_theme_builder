@@ -135,7 +135,7 @@ npm run typecheck
 # 2. Lint: Must pass with 0 errors
 npm run lint
 
-# 3. Component Registration: Verifies all 34 blocks are structurally complete
+# 3. Component Registration: Verifies all 33 blocks are structurally complete
 npm run test:components
 
 # 4. Theme Export & Handlebars Validation: Compiles full theme package
@@ -217,7 +217,7 @@ Why is this change required? What issue does it solve? (e.g. `Fixes #123`)
 ## Pre-Flight Verification
 - [ ] `npm run typecheck` passed (0 errors)
 - [ ] `npm run lint` passed (0 errors)
-- [ ] `npm run test:components` passed (34/34 verified)
+- [ ] `npm run test:components` passed (33/33 verified)
 - [ ] `npx tsx export-test.ts` passed (clean theme export & balanced Handlebars)
 - [ ] Verified manually in Desktop, Tablet, and Mobile preview modes
 ```

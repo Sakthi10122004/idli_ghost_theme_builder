@@ -38,7 +38,7 @@ A powerful, visual drag-and-drop theme builder for the [Ghost CMS](https://ghost
 
 ---
 
-## Component Library (34 Modular Blocks)
+## Component Library (33 Modular Blocks)
 
 Every component follows a modular 4-file architecture (`schema.ts`, `canvas.tsx`, `sidebar.tsx`, `compiler.ts`) and is registered in the central block registry:
 
@@ -131,7 +131,7 @@ ghost-theme-builder/
 │   │       ├── compiler.ts          # Master Ghost Handlebars & CSS compiler engine
 │   │       └── ...modals            # CustomTemplateModal, TemplatePickerModal, etc.
 │   ├── editor/
-│   │   └── components/              # 34 Modular Component Definitions
+│   │   └── components/              # 33 Modular Component Definitions
 │   │       ├── <component-name>/
 │   │       │   ├── schema.ts        # Zod props/style schema and defaults
 │   │       │   ├── canvas.tsx       # Live React canvas preview component
