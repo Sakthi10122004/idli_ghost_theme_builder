@@ -273,10 +273,18 @@ a:hover { color: var(--ghost-accent-color); }`,
     return 'Inter, system-ui, -apple-system, sans-serif';
   };
 
-  const getRadiusClass = (r: "none" | "md" | "pill") => {
+  // For buttons, inputs, badges, and inline pills
+  const getElementRadiusClass = (r: "none" | "md" | "pill") => {
     if (r === "none") return "rounded-none";
     if (r === "pill") return "rounded-full";
     return "rounded-md";
+  };
+
+  // For cards, article boxes, and containers (avoids clipping text/layouts into ovals)
+  const getCardRadiusClass = (r: "none" | "md" | "pill") => {
+    if (r === "none") return "rounded-none";
+    if (r === "pill") return "rounded-2xl";
+    return "rounded-lg";
   };
 
   return (
@@ -569,8 +577,12 @@ a:hover { color: var(--ghost-accent-color); }`,
                       ? "bg-[#111111] border-neutral-800 text-white" 
                       : "bg-white border-brand-hairline text-brand-ink"
                   } ${
-                    activeDevice === "mobile" ? "w-[360px]" : activeDevice === "tablet" ? "w-[680px]" : "w-full max-w-[940px]"
-                  } ${getRadiusClass(heroBorderRadius)}`}
+                    activeDevice === "mobile" 
+                      ? "w-[360px] max-w-full rounded-2xl" 
+                      : activeDevice === "tablet" 
+                        ? "w-[680px] max-w-full rounded-xl" 
+                        : "w-full max-w-[940px] rounded-xl"
+                  }`}
                   style={{ fontFamily: getMockFontFamily() }}
                 >
                   {/* Mock Site Header */}
@@ -590,7 +602,7 @@ a:hover { color: var(--ghost-accent-color); }`,
                     <div className="flex items-center gap-2">
                       <span 
                         style={{ backgroundColor: accentColor }}
-                        className={`px-3 py-1 text-white text-[11px] font-semibold hover:opacity-90 transition-all cursor-pointer whitespace-nowrap shadow-xs ${getRadiusClass(heroBorderRadius)}`}
+                        className={`px-3 py-1 text-white text-[11px] font-semibold hover:opacity-90 transition-all cursor-pointer whitespace-nowrap shadow-xs ${getElementRadiusClass(heroBorderRadius)}`}
                       >
                         Subscribe
                       </span>
@@ -644,14 +656,14 @@ a:hover { color: var(--ghost-accent-color); }`,
                   }`}>
                     <div className={`p-4 border transition-all ${
                       mockThemeMode === "dark" ? "bg-[#18181b] border-neutral-800" : "bg-brand-canvas-soft border-brand-hairline"
-                    } ${getRadiusClass(heroBorderRadius)}`}>
+                    } ${getCardRadiusClass(heroBorderRadius)}`}>
                       <span className="text-[10px] font-mono uppercase font-semibold" style={{ color: accentColor }}>Architecture</span>
                       <h4 className="font-semibold text-xs mt-1">Decoupled presentation with AST compiler</h4>
                       <p className={`text-[11px] mt-1 line-clamp-2 ${mockThemeMode === "dark" ? "text-neutral-400" : "text-brand-mute"}`}>Instant static page loads without client-side hydration delays.</p>
                     </div>
                     <div className={`p-4 border transition-all ${
                       mockThemeMode === "dark" ? "bg-[#18181b] border-neutral-800" : "bg-brand-canvas-soft border-brand-hairline"
-                    } ${getRadiusClass(heroBorderRadius)}`}>
+                    } ${getCardRadiusClass(heroBorderRadius)}`}>
                       <span className="text-[10px] font-mono uppercase font-semibold" style={{ color: accentColor }}>Performance</span>
                       <h4 className="font-semibold text-xs mt-1">100/100 Lighthouse on Ghost Cloud</h4>
                       <p className={`text-[11px] mt-1 line-clamp-2 ${mockThemeMode === "dark" ? "text-neutral-400" : "text-brand-mute"}`}>Minified screen.css, responsive image srcsets, and native Casper assets.</p>
@@ -662,7 +674,7 @@ a:hover { color: var(--ghost-accent-color); }`,
                   {showNewsletterBlock && (
                     <div className={`mx-4 sm:mx-6 mb-6 p-6 border text-center space-y-3 transition-all animate-in fade-in-50 duration-200 ${
                       mockThemeMode === "dark" ? "bg-[#18181b] border-neutral-800" : "bg-blue-50/50 border-blue-100"
-                    } ${getRadiusClass(heroBorderRadius)}`}>
+                    } ${getCardRadiusClass(heroBorderRadius)}`}>
                       <h4 className="font-bold text-sm">Subscribe to Apex Journal</h4>
                       <p className="text-xs text-brand-mute max-w-sm mx-auto">Get essays on architecture delivered directly to your inbox.</p>
                       <div className="flex items-center justify-center gap-2 max-w-xs mx-auto pt-1">
@@ -672,11 +684,11 @@ a:hover { color: var(--ghost-accent-color); }`,
                           readOnly
                           className={`w-full px-3 py-1.5 text-xs border ${
                             mockThemeMode === "dark" ? "bg-neutral-900 border-neutral-700 text-white" : "bg-white border-brand-hairline"
-                          } ${getRadiusClass(heroBorderRadius)}`}
+                          } ${getElementRadiusClass(heroBorderRadius)}`}
                         />
                         <button
                           style={{ backgroundColor: accentColor }}
-                          className={`px-4 py-1.5 text-white font-semibold text-xs shadow-xs ${getRadiusClass(heroBorderRadius)}`}
+                          className={`px-4 py-1.5 text-white font-semibold text-xs shadow-xs ${getElementRadiusClass(heroBorderRadius)}`}
                         >
                           Join
                         </button>
@@ -688,7 +700,7 @@ a:hover { color: var(--ghost-accent-color); }`,
                   {showCommentsBlock && (
                     <div className={`mx-4 sm:mx-6 mb-6 p-4 border space-y-2 transition-all animate-in fade-in-50 duration-200 ${
                       mockThemeMode === "dark" ? "bg-[#18181b] border-neutral-800" : "bg-brand-canvas-soft border-brand-hairline"
-                    } ${getRadiusClass(heroBorderRadius)}`}>
+                    } ${getCardRadiusClass(heroBorderRadius)}`}>
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold flex items-center gap-1.5">
                           <MessageSquare size={13} style={{ color: accentColor }} />
@@ -696,7 +708,7 @@ a:hover { color: var(--ghost-accent-color); }`,
                         </span>
                         <span className="text-[10px] text-brand-mute font-mono">Ghost Native UI</span>
                       </div>
-                      <div className="p-3 bg-white/5 border border-white/10 rounded text-[11px] space-y-1">
+                      <div className={`p-3 bg-white/5 border border-white/10 text-[11px] space-y-1 ${getCardRadiusClass(heroBorderRadius)}`}>
                         <span className="font-semibold block text-[10px]">Elena Rostova</span>
                         <p className="text-brand-mute">The inverted CSS variable hierarchy makes Ghost typography completely seamless.</p>
                       </div>
@@ -830,7 +842,7 @@ a:hover { color: var(--ghost-accent-color); }`,
             {/* Target Live Card */}
             <div className={`p-4 border transition-all duration-300 ${
               labIsDark ? "bg-[#121214] border-neutral-800 text-white" : "bg-brand-canvas-soft border-brand-hairline text-brand-ink"
-            } ${getRadiusClass(labRadius)}`}>
+            } ${getCardRadiusClass(labRadius)}`}>
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold" style={{ color: labAccent }}>Ghost Accent Token</span>
                 <span className="font-mono text-[10px] text-brand-mute">@site.accent_color</span>
@@ -838,7 +850,7 @@ a:hover { color: var(--ghost-accent-color); }`,
               <p className="text-xs pt-1.5 line-clamp-2">This card immediately reflects your chosen border-radius and color variables.</p>
               <button 
                 style={{ backgroundColor: labAccent }}
-                className={`w-full mt-3 py-1.5 text-white font-semibold text-xs shadow-xs hover:opacity-90 transition-all ${getRadiusClass(labRadius)}`}
+                className={`w-full mt-3 py-1.5 text-white font-semibold text-xs shadow-xs hover:opacity-90 transition-all ${getElementRadiusClass(labRadius)}`}
               >
                 Dynamic Action Button
               </button>
