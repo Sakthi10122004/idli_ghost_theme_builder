@@ -71,6 +71,7 @@ ${defaultIconHtml}
     } else if (general.layoutStyle === "bordered") {
       return `
         <div class="stats-item bordered">
+          ${iconHbs}
           <dd class="stats-value">${valueHbs}</dd>
           <dt class="stats-label">${labelHbs}</dt>
         </div>
@@ -86,6 +87,7 @@ ${defaultIconHtml}
     } else if (general.layoutStyle === "divider-grid") {
       return `
         <div class="stats-item divider-cell">
+          ${iconHbs}
           <dt class="stats-label">${labelHbs}</dt>
           <dd class="stats-value">${valueHbs}</dd>
         </div>
@@ -95,6 +97,7 @@ ${defaultIconHtml}
     // Default "row" and "split"
     return `
       <div class="stats-item row">
+        ${iconHbs}
         <dt class="stats-label">${labelHbs}</dt>
         <dd class="stats-value">${valueHbs}</dd>
       </div>

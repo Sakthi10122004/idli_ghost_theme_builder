@@ -18,7 +18,7 @@
     "bcryptjs": "^2.4.3",
     "bunyan": "^1.8.15",
     "clsx": "^2.1.1",
-    "gscan": "^6.4.2",
+    "gscan": "^6.6.1",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "lucide-react": "^1.33.0",

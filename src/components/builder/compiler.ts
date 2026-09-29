@@ -2010,32 +2010,6 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   }
 
-  const pkgConfig: Record<string, unknown> = {
-    posts_per_page: 5,
-    card_assets: true
-  };
-  if (Object.keys(customConfig).length > 0) {
-    pkgConfig.custom = customConfig;
-  }
-
-  // 1. Generate package.json definition
-  files["package.json"] = JSON.stringify({
-    name: doc.metadata.name.toLowerCase().replace(/\s+/g, "-"),
-    description: doc.metadata.description || "Visual theme compiled from AST builder",
-    version: doc.metadata.version || "1.0.0",
-    engines: {
-      ghost: ">=4.0.0"
-    },
-    keywords: [
-      "ghost-theme"
-    ],
-    config: pkgConfig,
-    author: {
-      name: doc.metadata.author,
-      email: "support@example.com"
-    }
-  }, null, 2);
-
   // 2. Extract global partials
   let headerCompiled = "";
   let footerCompiled = "";
@@ -2172,16 +2146,43 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
 </article>
 `;
 
-  // 7. Inject bundled assets
-  if (doc.assets) {
-    Object.entries(doc.assets).forEach(([path, dataUri]) => {
-      // Strip 'data:image/png;base64,' prefix
-      const base64Data = dataUri.split(',')[1];
-      if (base64Data) {
-        files[path] = base64Data;
-      }
-    });
+  // 8. Generate package.json definition (filtering customConfig to only settings actually used in templates)
+  const allHbsContent = Object.entries(files)
+    .filter(([path]) => path.endsWith('.hbs'))
+    .map(([, content]) => content)
+    .join('\n');
+
+  const filteredCustomConfig: Record<string, Record<string, unknown>> = {};
+  for (const [key, config] of Object.entries(customConfig)) {
+    if (allHbsContent.includes(`@custom.${key}`)) {
+      filteredCustomConfig[key] = config;
+    }
   }
+
+  const pkgConfig: Record<string, unknown> = {
+    posts_per_page: 5,
+    card_assets: true
+  };
+  if (Object.keys(filteredCustomConfig).length > 0) {
+    pkgConfig.custom = filteredCustomConfig;
+  }
+
+  files["package.json"] = JSON.stringify({
+    name: doc.metadata.name.toLowerCase().replace(/\s+/g, "-"),
+    description: doc.metadata.description || "Visual theme compiled from AST builder",
+    version: doc.metadata.version || "1.0.0",
+    engines: {
+      ghost: ">=4.0.0"
+    },
+    keywords: [
+      "ghost-theme"
+    ],
+    config: pkgConfig,
+    author: {
+      name: doc.metadata.author,
+      email: "support@example.com"
+    }
+  }, null, 2);
 
   return files;
 }
