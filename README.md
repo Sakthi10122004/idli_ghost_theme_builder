@@ -169,8 +169,8 @@ ghost-theme-builder/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/sakthi-t4gc/t4gc_theme_builder.git
-   cd t4gc_theme_builder/ghost-theme-builder
+   git clone https://github.com/Idlistack/ghost-theme-builder.git
+   cd ghost-theme-builder
    ```
 
 2. **Install dependencies**:

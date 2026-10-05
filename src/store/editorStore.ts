@@ -925,7 +925,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const next = state.appThemeMode === "dark" ? "light" : "dark";
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("t4gc_app_theme_mode", next);
+        localStorage.setItem("idli_app_theme_mode", next);
       } catch {}
     }
     return { appThemeMode: next };
@@ -933,7 +933,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setAppThemeMode: (mode) => set(() => {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("t4gc_app_theme_mode", mode);
+        localStorage.setItem("idli_app_theme_mode", mode);
       } catch {}
     }
     return { appThemeMode: mode };

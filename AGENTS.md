@@ -5,22 +5,24 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 ## Tech Stack & Architecture
 
 - **Next.js (App Router)**: Located in `src/app/`. Use client components where interactivity is needed, and keep routing clean.
-- **Tailwind CSS**: Conforms to the design system in `docs/DESIGN.md`. Ensure custom classes/styles are defined in `tailwind.config.ts` or `src/app/globals.css`.
-- **Zustand**: Local state store in `src/store/editorStore.ts` for visual editor actions.
+- **Tailwind CSS**: Conforms to the design system in `docs/DESIGN.md`. Custom tokens, fonts, and theme styles are defined in `src/app/globals.css` using `@theme`.
+- **Zustand**: Local state store in `src/store/editorStore.ts` for visual editor actions and live canvas sync.
 - **Zod**: Validation schemas inside `src/editor/schema/`.
-- **Ghost theme structures**: Compiled from the visual editor AST into handlebars (`.hbs`), CSS, and metadata, then packaged.
+- **Ghost theme structures**: Compiled from the visual editor AST into handlebars (`.hbs`), minified CSS, and metadata, then packaged into deployable `.zip` archives.
 
 ## Component & Template Structures
 
-- **Page Templates**: Dynamic page templates created inside the visual editor must have a slug-based routing representation (e.g. `custom-[slug].hbs` / page templates list key) and should be initialized with default header, content, and footer block IDs.
-- **Layout Containers (Columns, Sections, Containers)**:
-  - `columns` block must serve as a flex container (row layout by default, wraps on smaller screens) capable of containing child nodes.
-  - `spacer` blocks must support custom heights editable via properties.
-  - `divider` blocks must conform to the 1px hairline rule style.
-- **Ghost Core Widgets**:
-  - `author-profile`: Needs custom properties for author bio name and description.
-  - `tag-archive`: Captures and displays clean metadata capsules.
-  - `post-detail`: A mock screen rendering headings, tags, details, reading time, and placeholder paragraphs to represent article previews.
+- **Page Templates**: Dynamic page templates created inside the visual editor have a slug-based routing representation (`custom-[slug].hbs` or default templates like `index.hbs`, `post.hbs`, `page.hbs`, `author.hbs`, `tag.hbs`) and are initialized with default header, content, and footer block IDs.
+- **Layout Containers**:
+  - `section`: Top-level horizontal container supporting full-bleed backgrounds (solid, gradient, pattern, image overlay) and responsive padding.
+  - `container`: Constrains layout width (`max-w-*`) and centers content with responsive horizontal gutters.
+  - `columns`: Flex container (row layout by default, wraps on smaller screens) capable of containing child nodes.
+  - `spacer`: Supports custom responsive heights editable via sidebar properties.
+  - `divider`: Conforms to the 1px hairline rule style.
+- **Component Categorization**:
+  - **Layout**: `section`, `container`, `columns`, `spacer`, `divider`.
+  - **Content**: `heading`, `text`, `button`, `image`, `video-player`, `grid-gallery`, `cards`, `faq`, `testimonials`, `stats`, `logo-cloud`, `team`, `share`.
+  - **Ghost Core**: `header`, `footer`, `post-content`, `post-grid`, `post-navigation`, `featured-posts`, `related-posts`, `author-profile`, `tag-header`, `tag-archive`, `newsletter`, `comments`, `error-view`, `page-detail`.
 
 ## Ghost Compiler & Validation Rules
 
@@ -31,7 +33,7 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
   - Direct queries (like `{{#get "tags"}}`) must specify a safe maximum limit (e.g. `limit="100"` instead of `"all"`).
   - Theme assets (`assets/css/screen.css`) must be automatically minified (stripping whitespace and comments) during compilation.
   - **Dynamic Navigation Integration**: The compiler must output a dedicated `partials/navigation.hbs` template containing the `{{#foreach navigation}}` loop differentiating primary and secondary navigation via `{{#if isSecondary}}`, and the compiled header and footer layouts must render dynamic lists using Ghost's native `{{navigation}}` and `{{navigation type="secondary"}}` helpers, ensuring absolute compatibility with Ghost backend menu settings.
-  - **Casper Template Asset Bundling**: The theme export pipeline must inject required locales (`locales/en.json`) and core icons from `/casper-template/manifest.json` into the generated ZIP to ensure 100% clean passes in `gscan` validation.
+  - **Casper Template Asset Bundling**: The theme export pipeline must inject required locales (`locales/en.json`) and core icons from `public/casper-template/manifest.json` into the generated ZIP to ensure 100% clean passes in `gscan` validation.
 
 ## Editor Lifecycle & State Rules
 
@@ -52,9 +54,7 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 - **Central Registry & Palette**: Register all modular components in:
   1. `src/editor/components/registry.ts`: To expose them dynamically to the Canvas, compiler, RightSidebar, and editor stores.
   2. `src/components/builder/LeftSidebar.tsx`: In `blocksList` with appropriate category (`Layout`, `Content`, or `Ghost Core`), label, and Lucide icon for drag-and-drop insertion.
-
-
-
+- **Verification Script**: Always run `npm run test:components` to verify that every registered component possesses all 4 requisite files (`schema.ts`, `canvas.tsx`, `sidebar.tsx`, `compiler.ts`).
 
 ## UI Styling Guidelines (from docs/DESIGN.md)
 
@@ -74,11 +74,17 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 4. **Shadows**:
    - Use stacked multi-offset shadows instead of a single heavy drop-shadow.
 
-## Coding Rules
+## Verification & Coding Rules
 
 - Write clean, type-safe TypeScript code. No `any`.
 - Keep compiler logic completely independent from the UI and React.
-- Always run `npm run typecheck` and `npm run lint` before completing tasks.
+- Always execute the verification suite before committing:
+  - `npm run typecheck`: TypeScript type check across entire project.
+  - `npm run lint`: ESLint static analysis.
+  - `npm run test:components`: Validates all modular block implementations against the registry.
+  - `npm run test:export`: Validates theme file generation pipeline.
+  - `npm run test:compilation`: Validates AST Handlebars and CSS compiler outputs.
+  - `npm run build`: Production Next.js build.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

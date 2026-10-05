@@ -54,7 +54,7 @@ export default function Builder() {
     }
 
     try {
-      const storedAppTheme = localStorage.getItem("t4gc_app_theme_mode");
+      const storedAppTheme = localStorage.getItem("idli_app_theme_mode") || localStorage.getItem("t4gc_app_theme_mode");
       if (storedAppTheme === "dark" || storedAppTheme === "light") {
         setAppThemeMode(storedAppTheme);
       }

@@ -31,26 +31,26 @@ Before getting started, make sure you have the following installed on your machi
 
 ### Step 1: Fork the Repository
 1. Navigate to the main repository on GitHub:
-   [https://github.com/sakthi-t4gc/t4gc_theme_builder](https://github.com/sakthi-t4gc/t4gc_theme_builder)
+   [https://github.com/Idlistack/ghost-theme-builder](https://github.com/Idlistack/ghost-theme-builder)
 2. Click the **Fork** button in the top-right corner of the page.
 3. Choose your personal GitHub account as the destination.
 
 ### Step 2: Clone Your Fork Locally
 Clone your newly created fork to your local machine:
 ```bash
-git clone https://github.com/<your-username>/t4gc_theme_builder.git
-cd t4gc_theme_builder/ghost-theme-builder
+git clone https://github.com/<your-username>/ghost-theme-builder.git
+cd ghost-theme-builder
 ```
 
 ### Step 3: Configure Upstream Remote
 Keep your local clone synchronized with the original repository by adding an `upstream` remote:
 ```bash
-git remote add upstream https://github.com/sakthi-t4gc/t4gc_theme_builder.git
+git remote add upstream https://github.com/Idlistack/ghost-theme-builder.git
 git remote -v
 ```
 You should see:
-- `origin`: pointing to your personal fork (`<your-username>/t4gc_theme_builder`)
-- `upstream`: pointing to the official repository (`sakthi-t4gc/t4gc_theme_builder`)
+- `origin`: pointing to your personal fork (`<your-username>/ghost-theme-builder`)
+- `upstream`: pointing to the official repository (`Idlistack/ghost-theme-builder`)
 
 ### Step 4: Install Dependencies & Setup Database
 ```bash
@@ -186,9 +186,9 @@ git push -u origin feat/your-feature-name
 *(If you rebased an already pushed branch, use `git push --force-with-lease origin feat/your-feature-name`)*.
 
 ### Step 3: Open the Pull Request on GitHub
-1. Go to your fork on GitHub: `https://github.com/<your-username>/t4gc_theme_builder`.
+1. Go to your fork on GitHub: `https://github.com/<your-username>/ghost-theme-builder`.
 2. A banner will typically appear saying: **"feat/your-feature-name had recent pushes"** &rarr; click **Compare & pull request**.
-3. Ensure the base repository is `sakthi-t4gc/t4gc_theme_builder` with base branch `main`.
+3. Ensure the base repository is `Idlistack/ghost-theme-builder` with base branch `main`.
 4. Fill out the Pull Request title and description using the template below.
 
 ---

@@ -77,8 +77,8 @@ The codebase has undergone full pre-flight verification prior to this release:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Sakthi10122004/idli_ghost_theme_builder.git
-cd idli_ghost_theme_builder/ghost-theme-builder
+git clone https://github.com/Idlistack/ghost-theme-builder.git
+cd ghost-theme-builder
 
 # Install project dependencies
 npm install
