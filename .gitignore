@@ -44,3 +44,11 @@ npm-debug.log
 yarn-error.log
 .docusaurus/
 dist/
+
+# compiler and test outputs
+output.*
+test-output.*
+compiled-output.*
+exported-theme-output/
+scratch/
+test-theme.zip

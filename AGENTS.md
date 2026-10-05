@@ -5,7 +5,7 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 ## Tech Stack & Architecture
 
 - **Next.js (App Router)**: Located in `src/app/`. Use client components where interactivity is needed, and keep routing clean.
-- **Tailwind CSS**: Conforms to the design system in `DESIGN.md`. Ensure custom classes/styles are defined in `tailwind.config.ts` or `src/app/globals.css`.
+- **Tailwind CSS**: Conforms to the design system in `docs/DESIGN.md`. Ensure custom classes/styles are defined in `tailwind.config.ts` or `src/app/globals.css`.
 - **Zustand**: Local state store in `src/store/editorStore.ts` for visual editor actions.
 - **Zod**: Validation schemas inside `src/editor/schema/`.
 - **Ghost theme structures**: Compiled from the visual editor AST into handlebars (`.hbs`), CSS, and metadata, then packaged.
@@ -56,7 +56,7 @@ You are an AI assistant working on the Visual Ghost Theme Builder project. Follo
 
 
 
-## UI Styling Guidelines (from DESIGN.md)
+## UI Styling Guidelines (from docs/DESIGN.md)
 
 1. **Colors**:
    - Primary/Ink: `#171717` (Used for primary CTAs and body text).

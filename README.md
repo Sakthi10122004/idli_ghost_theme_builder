@@ -147,8 +147,12 @@ ghost-theme-builder/
 │   └── types/                       # Shared TypeScript interface definitions
 │       └── theme.ts                 # ThemeDocument AST and styling types
 ├── AGENTS.md                        # Coding standards and AI agent directives
-├── ARCHITECTURE.md                  # High-level architecture documentation
-├── DESIGN.md                        # Design system tokens and UI styling rules
+├── docs/                            # Comprehensive project documentation
+│   ├── ARCHITECTURE.md              # High-level architecture and AST documentation
+│   ├── DESIGN.md                    # Design system tokens and UI styling rules
+│   ├── ROADMAP.md                   # Feature roadmap and release milestones
+│   ├── CONTRIBUTING.md              # Forking, setup, and PR contribution guide
+│   └── RELEASE_NOTES_v0.0.1.md      # Official v0.0.1 pre-release notes
 ├── package.json
 └── tsconfig.json
 ```
@@ -198,7 +202,9 @@ ghost-theme-builder/
 | `npm run start` | Starts the production Next.js server |
 | `npm run typecheck` | Validates TypeScript types across the entire project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint 9 to ensure strict code quality and syntax compliance |
-| `npx tsx export-test.ts` | Runs the full theme compilation pipeline and verifies all exported `.hbs` and `.css` files |
+| `npm run test:components` | Verifies all 33 modular components implement schema, canvas, sidebar, and compiler |
+| `npm run test:export` | Runs the full theme compilation pipeline and verifies all exported `.hbs` and `.css` files |
+| `npm run test:compilation` | Tests template scoping, author/tag loops, and Handlebars structures |
 
 ---
 
@@ -220,16 +226,18 @@ ghost-theme-builder/
 - **Strict Typing**: Write type-safe TypeScript code without `any`.
 - **Ghost Validation**: Ensure any exported Handlebars changes preserve balanced blocks (`{{#...}}` / `{{/...}}`) and pass `gscan` validation rules.
 - **Reference Docs**:
-  - [`CONTRIBUTING.md`](./CONTRIBUTING.md) - Step-by-step guide on forking, branching, and creating Pull Requests.
+  - [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md) - Step-by-step guide on forking, branching, and creating Pull Requests.
   - [`AGENTS.md`](./AGENTS.md) - AI agent rules and conventions.
-  - [`ARCHITECTURE.md`](./ARCHITECTURE.md) - Deep-dive into AST nodes and compilation.
-  - [`DESIGN.md`](./DESIGN.md) - Design system guidelines and color tokens.
+  - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) - Deep-dive into AST nodes and compilation.
+  - [`docs/DESIGN.md`](./docs/DESIGN.md) - Design system guidelines and color tokens.
+  - [`docs/ROADMAP.md`](./docs/ROADMAP.md) - Development roadmap and milestones.
+  - [`docs/RELEASE_NOTES_v0.0.1.md`](./docs/RELEASE_NOTES_v0.0.1.md) - Official v0.0.1 pre-release notes.
 
 ---
 
 ## Contributing
 
-We welcome community contributions! Please read our [**Contributing & Pull Request Guide**](./CONTRIBUTING.md) for detailed instructions on:
+We welcome community contributions! Please read our [**Contributing & Pull Request Guide**](./docs/CONTRIBUTING.md) for detailed instructions on:
 1. Forking and setting up the local development environment
 2. Branching and commit conventions
 3. Pre-flight verification checklist (`typecheck`, `lint`, and export tests)

@@ -1,10 +1,10 @@
 blank_issues_enabled: true
 contact_links:
   - name: "📖 Documentation & Architecture"
-    url: "https://github.com/Sakthi10122004/idli_ghost_theme_builder/blob/main/ARCHITECTURE.md"
+    url: "https://github.com/Sakthi10122004/idli_ghost_theme_builder/blob/main/docs/ARCHITECTURE.md"
     about: "Read about the visual builder architecture, AST data flow, and compiler pipeline."
   - name: "🤝 Contributing Guide"
-    url: "https://github.com/Sakthi10122004/idli_ghost_theme_builder/blob/main/CONTRIBUTING.md"
+    url: "https://github.com/Sakthi10122004/idli_ghost_theme_builder/blob/main/docs/CONTRIBUTING.md"
     about: "Instructions for setting up the local dev environment, verification checklists, and opening PRs."
   - name: "👻 Official Ghost Theme Documentation"
     url: "https://ghost.org/docs/themes/"

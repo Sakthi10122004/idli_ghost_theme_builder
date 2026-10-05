@@ -19,5 +19,5 @@
 - [ ] `npm run typecheck` passed (0 errors)
 - [ ] `npm run lint` passed (0 errors)
 - [ ] `npm run test:components` passed (33/33 verified)
-- [ ] `npx tsx export-test.ts` passed (clean theme export & balanced Handlebars)
+- [ ] `npm run test:export` passed (clean theme export & balanced Handlebars)
 - [ ] Verified manually in Desktop, Tablet, and Mobile preview modes
