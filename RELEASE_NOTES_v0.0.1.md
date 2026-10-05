@@ -1,81 +1,105 @@
-# Release v0.0.1: Initial Beta Release of Idli Ghost Theme Builder
+# Idli Ghost Theme Builder — Version 0.0.1 (Pre-release)
 
-We are thrilled to announce **v0.0.1**, the first official beta release of **Idli Ghost Theme Builder** — a modern, visual drag-and-drop theme builder for the [Ghost CMS](https://ghost.org/) publishing platform.
+## Overview
 
-Built with **Next.js (App Router)**, **React 19**, **Tailwind CSS v4**, and **Zustand**, Idli empowers creators, agencies, and developers to visually craft production-ready Ghost themes with real-time responsive previews and compile them into 100% `gscan`-compliant Handlebars (`.hbs`), minified CSS, and packaged `.zip` archives.
+The Idli team is pleased to announce the first official pre-release of **Idli Ghost Theme Builder (v0.0.1)**. 
 
----
+Idli Ghost Theme Builder is a specialized, visual drag-and-drop theme development environment engineered specifically for the [Ghost CMS](https://ghost.org/) publishing platform. Built on Next.js (App Router), React 19, Tailwind CSS v4, and Zustand, Idli allows developers, agencies, and publication teams to visually design responsive Ghost publication themes with live canvas previews and compile them into standards-compliant Handlebars (`.hbs`), minified production stylesheets, and ready-to-deploy `.zip` theme archives.
 
-## 🚀 Key Highlights
-
-### 🎨 Visual Drag-and-Drop Canvas
-- **Fluid Layout Reordering**: Powered by `@dnd-kit`, supporting intuitive insertion and reordering of sections, containers, and blocks.
-- **Responsive Viewport Previews**: Instantly switch between **Desktop (1280px)**, **Tablet (768px)**, and **Mobile (375px)** viewports with auto-fit canvas scaling.
-- **Decoupled Theme Modes**: Independent App Theme (Light/Dark for the editor chrome) and Ghost Theme (Light/Dark for the active theme preview).
-- **Undo / Redo & Autosave**: Full state history stack with debounced local storage persistence and database sync.
-- **Custom Page Templates**: Built-in template manager generating slug-based `custom-[slug].hbs` templates with real-time duplicate detection.
-
-### 👻 Deep Ghost CMS Native Integration
-- **Ghost Admin Accent Color (`@site.accent_color`)**: Theme styles dynamically cascade your publication's brand accent color across primary buttons, links, hover states, blockquotes, badges, and focus rings.
-- **Ghost Admin Typography Synchronization**: Inverted `:root` token architecture (`--gh-font-heading` and `--gh-font-body`) ensures fonts selected in Ghost Admin instantly cascade across headings and body text without rebuilding.
-- **Dynamic Navigation Integration**: Dedicated `partials/navigation.hbs` template rendering Ghost's native `{{navigation}}` and `{{navigation type="secondary"}}` helpers.
-- **Native Comments Integration**: Seamless integration with `@tryghost/comments-ui` via `{{comments}}`, featuring transparent background adaptation and light/dark theme synchronization.
-- **Ghost Content Contexts**: Full support for `@page.show_title_and_feature_image`, post excerpts, feature images, authors, tags, reading times, and member access gating.
-
-### 📦 Theme Compiler & Packaging Engine
-- **AST to Handlebars Translation**: Parses the visual document AST into semantic, clean Handlebars templates (`index.hbs`, `post.hbs`, `page.hbs`, `tag.hbs`, `author.hbs`, `default.hbs`, etc.).
-- **Automated CSS Minification**: Theme stylesheets (`assets/css/screen.css`) are automatically stripped of comments and whitespace during compilation.
-- **100% `gscan` Validation**: Bundles Casper template baseline assets, manifest metadata, required locales (`locales/en.json`), and package configurations (`card_assets: true`, `keywords: ["ghost-theme"]`) to achieve flawless passes in Ghost's official validator.
-- **One-Click ZIP Export**: Packages templates, minified assets, and configuration into a ready-to-upload Ghost theme `.zip` archive.
-
-### 🧩 33 Production-Ready Modular Blocks
-Every block follows a strict 4-file modular architecture (`schema.ts`, `canvas.tsx`, `sidebar.tsx`, `compiler.ts`):
-- **Layout & Structure**: `section`, `container`, `columns`, `spacer`, `divider`
-- **Ghost Core**: `header`, `footer`, `post-content`, `page-detail`, `post-grid`, `featured-posts`, `related-posts`, `post-navigation`, `author-profile`, `tag-header`, `tag-archive`, `comments`, `share`, `error-view`
-- **Content & Media**: `heading`, `text`, `button`, `image`, `video-player`, `cards`, `grid-gallery`, `logo-cloud`
-- **Engagement & Conversion**: `hero`, `newsletter`, `faq`, `stats`, `team`, `testimonials`
-
-### 🌈 Universal Multi-Mode Background Engine
-Six distinct background modes available across sections and containers:
-1. **Solid Color** (with alpha transparency slider)
-2. **Linear Gradients** (with degree rotation slider)
-3. **Radial Gradients**
-4. **Mesh Gradients** (with ambient atmospheric glow effects)
-5. **Repeat SVG Patterns** (dots, grid, waves, diagonal lines)
-6. **Image Overlays** (with customizable overlay color and opacity)
-
-### 📊 Theme Dashboard & Starter Presets
-- Elevated dashboard with atmospheric mesh glow, live quick-look modal, and dual grid/list views.
-- Includes 3 starter presets:
-  - **Apex Minimal** — High-contrast typography with clean editorial whitespace.
-  - **Editorial Gazette** — Traditional publication layout with serif headings and multi-column feeds.
-  - **Geist Tech Log** — Developer-centric dark theme with monospace eyebrows and accent glow cards.
+This release represents the initial public pre-release baseline, establishing the core visual editing workspace, a 33-block modular component registry, native Ghost CMS design token synchronization, and a certified `gscan`-compatible theme compilation pipeline.
 
 ---
 
-## 🛠️ Local Development & Quick Start
+## Technical Architecture & Core Capabilities
+
+### 1. Visual Drag-and-Drop Workspace
+- **Layout Manipulation Engine**: Integrates `@dnd-kit` to provide deterministic drag-and-drop reordering and hierarchical nesting across sections, containers, and column layouts.
+- **Multi-Device Responsive Previews**: Provides viewport controls for Desktop (1280px), Tablet (768px), and Mobile (375px) with responsive auto-fit scaling.
+- **Decoupled Theme Architecture**: Separates the builder UI chrome theme (`appThemeMode`: Light/Dark) from the active Ghost theme preview frame (`previewColorMode`: Light/Dark).
+- **State Management & History Stack**: Backed by a Zustand state store featuring granular undo/redo history, debounced local persistence, and SQLite/Prisma synchronization.
+- **Dynamic Template Creation**: Supports creating and duplicating slug-based custom templates (`custom-[slug].hbs`) with real-time route collision and duplicate detection.
+
+### 2. Native Ghost CMS Integration
+- **Ghost Brand Accent Color (`@site.accent_color`)**: Theme styles dynamically cascade the publication's brand accent color configured in Ghost Admin across primary actions, links, blockquotes, badges, and focus rings.
+- **Dynamic Typography Cascading**: Utilizes an inverted `:root` token architecture (`--gh-font-heading` and `--gh-font-body`) to ensure fonts selected in Ghost Admin instantly reflect across headings and body copy without requiring theme recompilation.
+- **Native Navigation Menus**: Emits a dedicated `partials/navigation.hbs` template rendering Ghost's native `{{navigation}}` and `{{navigation type="secondary"}}` helpers.
+- **Ghost Comments Integration**: Integrates directly with `@tryghost/comments-ui` via the native `{{comments}}` helper, including transparent background adaptation and light/dark theme synchronization.
+- **Content Context Compatibility**: Supports Ghost publication contexts, including `@page.show_title_and_feature_image`, post excerpts, feature image alignment utility classes (`.kg-width-wide`, `.kg-width-full`), author bios, tags, reading times, and member access gating.
+
+### 3. Theme Compilation & Packaging Pipeline
+- **AST to Handlebars Translation**: Parses the visual document AST (`ThemeDocument`) into clean, semantic Handlebars templates (`index.hbs`, `post.hbs`, `page.hbs`, `tag.hbs`, `author.hbs`, `default.hbs`, and custom templates).
+- **Automated Asset Minification**: Theme stylesheets (`assets/css/screen.css`) are automatically stripped of comments and redundant whitespace during compilation.
+- **Certified `gscan` Validation**: Injects Casper template baseline assets, manifest metadata, required locales (`locales/en.json`), and package configurations (`card_assets: true`, `keywords: ["ghost-theme"]`) to guarantee 100% clean passes in Ghost's official validation tool.
+- **In-Memory ZIP Generation**: Packages templates, compiled assets, and configuration into a ready-to-upload Ghost theme `.zip` archive via `JSZip`.
+
+### 4. Modular Component Library (33 Blocks)
+Every builder block implements a 4-file modular architecture (`schema.ts`, `canvas.tsx`, `sidebar.tsx`, `compiler.ts`) registered in the central component registry:
+- **Layout & Structure**: Section, Container, Columns, Spacer, Divider
+- **Ghost Core**: Header, Footer, Post Content, Page Detail, Post Grid, Featured Posts, Related Posts, Post Navigation, Author Profile, Tag Header, Tag Archive, Comments, Share, Error View
+- **Content & Media**: Heading, Text, Button, Image, Video Player, Cards, Grid Gallery, Logo Cloud
+- **Engagement & Conversion**: Hero, Newsletter, FAQ, Stats, Team, Testimonials
+
+### 5. Universal Background Engine
+Sections and containers support six distinct rendering modes:
+- Solid Color with alpha transparency configuration
+- Linear Gradients with degree rotation controls
+- Radial Gradients
+- Mesh Gradients with atmospheric glow rendering
+- SVG Repeat Patterns (dots, grid, waves, diagonal lines)
+- Image Overlays with customizable overlay tint and opacity
+
+### 6. Theme Dashboard & Starter Presets
+- Centralized management dashboard with live theme quick-look preview and dual grid/list view modes.
+- Includes three curated starter presets:
+  - **Apex Minimal**: High-contrast typography with clean editorial whitespace.
+  - **Editorial Gazette**: Multi-column editorial magazine layout with serif headings.
+  - **Geist Tech Log**: Monospace technical publication theme with dark mode optimization.
+
+---
+
+## Quality Assurance & Verification
+
+The codebase has undergone full pre-flight verification prior to this release:
+- TypeScript static analysis: `npm run typecheck` passed (0 errors).
+- Component registry verification: `npm run test:components` passed (33/33 modular blocks verified).
+- Gscan theme compliance: Verified clean pass against Ghost theme specification standards.
+
+---
+
+## Installation & Local Development
+
+### System Requirements
+- Node.js: `v18.18.0` or higher (`v20+ LTS` recommended)
+- npm: `v9.0.0` or higher
+- Git: Latest version
+
+### Setup Instructions
 
 ```bash
 # Clone the repository
 git clone https://github.com/Sakthi10122004/idli_ghost_theme_builder.git
 cd idli_ghost_theme_builder/ghost-theme-builder
 
-# Install dependencies
+# Install project dependencies
 npm install
 
-# Initialize database
+# Initialize database schema
 npx prisma generate
 npx prisma db push
 
-# Start local development server
+# Start development server
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to open the builder.
+The application will be accessible at `http://localhost:3000`.
 
 ---
 
-## 🔍 Pre-Flight Verification Passed
-- `npm run typecheck` (0 errors)
-- `npm run test:components` (33/33 modular blocks verified)
-- `gscan` compatibility: 100% clean passes on exported ZIP archives
+## Pre-release Notice & Feedback
+
+This is an official pre-release intended for testing, development, and community feedback. While the compiled themes meet all Ghost validation standards, users are encouraged to test exported themes in staging environments prior to production deployment.
+
+To report issues or propose enhancements, please use the structured issue templates in the repository:
+- Bug Reports: Submit via GitHub Issues under Bug Report.
+- Feature Requests: Submit via GitHub Issues under Feature Request.
+- Component Proposals: Submit via GitHub Issues under New Component Proposal.
