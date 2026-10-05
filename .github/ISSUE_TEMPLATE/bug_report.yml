@@ -1,0 +1,150 @@
+name: "🐛 Bug Report"
+description: Report a bug, broken component, or unexpected behavior in Idli Ghost Theme Builder
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please search existing issues to see if your problem has already been reported.
+
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Affected Subsystem / Area
+      description: Which part of the theme builder is affected?
+      options:
+        - "Visual Canvas & Drag-and-Drop (@dnd-kit)"
+        - "Block / Component Library (33 Modular Blocks)"
+        - "Right Sidebar (Inspector & Style Controls)"
+        - "Left Sidebar (Palette, Page Templates, Navigation)"
+        - "Theme Compiler & Handlebars Codegen (.hbs)"
+        - "Ghost CMS Integration & gscan Validation"
+        - "Theme Export & Packaging (.zip)"
+        - "Undo / Redo & Autosave / State Store"
+        - "Universal Background Engine & Spacing"
+        - "Local Dev Setup & Database (Prisma/SQLite)"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: component_type
+    attributes:
+      label: Component / Block Type (if applicable)
+      description: If the bug is specific to a modular block, provide its type name (e.g. columns, container, newsletter, post-content, hero, header).
+      placeholder: "e.g. container, columns, header"
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "When dragging a container inside a column on mobile preview mode..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Provide clear, sequential steps to reproduce the behavior.
+      value: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. Observe error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: "The container should adapt its width responsively without overflowing the column."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually occurred instead.
+      placeholder: "The container breaks the layout and causes a horizontal scrollbar."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs, Console Output, or Generated Code
+      description: Paste any browser console errors, compiler output, or gscan validation logs.
+      render: shell
+      placeholder: "Paste console logs, terminal output, or Handlebars snippet here..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: visual_evidence
+    attributes:
+      label: Screenshots or Screen Recordings
+      description: Drag and drop screenshots or screen recordings showing the issue (especially helpful for visual canvas bugs).
+      placeholder: "Drop images or videos here..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Which operating system are you running?
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & Version
+      description: e.g. Chrome 128, Firefox 130, Safari 17
+      placeholder: "e.g. Chrome 128.0"
+    validations:
+      required: false
+
+  - type: input
+    id: node_version
+    attributes:
+      label: Node.js & npm Version
+      description: Run `node -v && npm -v` in your terminal.
+      placeholder: "e.g. Node v20.11.0 / npm 10.2.4"
+    validations:
+      required: false
+
+  - type: input
+    id: ghost_version
+    attributes:
+      label: Ghost CMS Version (if testing exported theme)
+      description: If this issue involves an exported theme running in Ghost CMS, specify the Ghost version.
+      placeholder: "e.g. Ghost 5.89.0"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Validation Checklist
+      description: Please verify before submitting.
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate.
+          required: true
+        - label: I have verified this behavior on the latest main branch.
+          required: false
+        - label: I have provided all relevant logs, steps, and context needed to reproduce.
+          required: true

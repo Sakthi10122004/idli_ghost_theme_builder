@@ -1,0 +1,97 @@
+name: "🧩 New Component / Block Proposal"
+description: Propose a new modular builder block for the theme builder palette
+title: "[Component]: "
+labels: ["component", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        All components in Idli Ghost Theme Builder follow a strict 4-file modular architecture (`schema.ts`, `canvas.tsx`, `sidebar.tsx`, `compiler.ts`) and must be registered in the central registry. Use this template to propose a new block!
+
+  - type: input
+    id: component_name
+    attributes:
+      label: Proposed Component Type Name
+      description: kebab-case identifier for the block (e.g. pricing-table, audio-player, timeline, author-list).
+      placeholder: "e.g. pricing-table"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Palette Category
+      description: Which palette category in LeftSidebar should this block belong to?
+      options:
+        - "Layout & Structure (Containers, grids, spacing)"
+        - "Ghost Core (Ghost CMS dynamic data and helpers)"
+        - "Content & Media (Headings, media, rich content)"
+        - "Engagement & Conversion (Newsletters, CTAs, forms)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Component Purpose & Use Case
+      description: What does this component render and why is it valuable for Ghost publication themes?
+      placeholder: "Allows publications to showcase subscription tiers or pricing packages with CTA buttons..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema_props
+    attributes:
+      label: Configurable Properties (Props & Styles)
+      description: What configurable properties should be editable in the RightSidebar inspector?
+      placeholder: |
+        - Title (string)
+        - Price amount & interval (string)
+        - Feature checklist items (array of strings)
+        - Primary CTA button link & text
+        - Card highlight / badge toggle
+    validations:
+      required: true
+
+  - type: textarea
+    id: ghost_codegen
+    attributes:
+      label: Ghost Handlebars Codegen (compiler.ts)
+      description: What Handlebars markup should `compiler.ts` emit? Does it use Ghost helpers ({{#foreach @site.tiers}}, {{#get "tags"}}, etc.)?
+      render: handlebars
+      placeholder: |
+        <div class="gh-pricing-table">
+          {{#foreach @site.tiers}}
+            ...
+          {{/foreach}}
+        </div>
+    validations:
+      required: true
+
+  - type: textarea
+    id: responsive_design
+    attributes:
+      label: Responsive Layout & Mobile Behavior
+      description: How should the component adapt across Desktop (1280px), Tablet (768px), and Mobile (375px)?
+      placeholder: "3 columns on desktop, stacks vertically on mobile..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Visual References or Design Mockups
+      description: Attach screenshots, Figma links, or inspirational examples.
+      placeholder: "Drop images or mockups here..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: architecture_acknowledgement
+    attributes:
+      label: Architecture Acknowledgement
+      options:
+        - label: I understand that modular components must implement `schema.ts`, `canvas.tsx`, `sidebar.tsx`, and `compiler.ts` and pass `npm run test:components`.
+          required: true
+        - label: I am willing to contribute the PR for this component.
+          required: false

@@ -1,0 +1,82 @@
+name: "💡 Feature Request"
+description: Suggest an idea, enhancement, or new capability for Idli Ghost Theme Builder
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make **Idli Ghost Theme Builder** better? Please fill out the form below.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: Which domain does this feature primarily target?
+      options:
+        - "Visual Canvas & Viewport Previews"
+        - "Block & Component Library"
+        - "Right Sidebar / Style & Property Controls"
+        - "Theme Compiler & Handlebars Codegen"
+        - "Ghost CMS Integration (@site, @page, navigation, comments)"
+        - "Background Engine & Design Tokens"
+        - "Theme Packaging & Export Pipeline"
+        - "Template & Page Management"
+        - "Developer Experience & Tooling"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement or Motivation
+      description: Is your feature request related to a specific limitation or pain point?
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution & User Experience
+      description: Describe the desired feature, UX behavior, or settings controls in detail.
+      placeholder: "Add an option in the RightSidebar to allow..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: ghost_compatibility
+    attributes:
+      label: Ghost CMS & Compiler Considerations
+      description: Does this feature require specific Ghost Handlebars helpers (e.g. {{#get}}, {{navigation}}, {{comments}}), CSS variables (--gh-font-*), or gscan rules?
+      placeholder: "The compiler should emit {{#foreach navigation}} inside partials/navigation.hbs..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: A clear and concise description of any alternative solutions, workarounds, or features you've considered.
+      placeholder: "I tried using a custom HTML embed block, but..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups, Wireframes, or Visual Examples
+      description: Attach screenshots, diagrams, or UI mockups illustrating the proposed feature.
+      placeholder: "Drop images or mockups here..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution
+      description: Are you interested in contributing?
+      options:
+        - label: I would be willing to submit a pull request implementing this feature!
+          required: false
