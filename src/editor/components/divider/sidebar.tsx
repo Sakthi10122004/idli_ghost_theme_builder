@@ -16,6 +16,11 @@ export const SidebarElement = ({
   const margin = (block.props?.margin as string) || "32px";
   const color = (block.props?.color as string) || "#ebebeb";
 
+  // Alignment only has a visible effect when the divider width is less than 100%.
+  // When width === "100%", the <hr> spans the full container so left/center/right
+  // all look identical — disable the control and show a hint to the user.
+  const alignmentDisabled = width === "100%";
+
   const styleOptions = [
     { label: "Solid", value: "solid" },
     { label: "Dashed", value: "dashed" },
@@ -44,6 +49,16 @@ export const SidebarElement = ({
     { label: "Muted", value: "#999999" },
     { label: "Dark", value: "#171717" },
   ];
+
+  // When switching back to 100% width, reset alignment to center
+  // because left/right would be stored but invisible — avoid confusion.
+  const handleWidthChange = (newWidth: string) => {
+    if (newWidth === "100%") {
+      onChangeProps({ width: newWidth, alignment: "center" });
+    } else {
+      onChangeProps({ width: newWidth });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,7 +118,7 @@ export const SidebarElement = ({
             <button
               key={opt.value}
               type="button"
-              onClick={() => onChangeProps({ width: opt.value })}
+              onClick={() => handleWidthChange(opt.value)}
               className={`px-2 py-1.5 rounded-sm text-xs font-mono font-medium border text-center transition-all ${
                 width === opt.value
                   ? "bg-brand-primary text-white border-brand-primary shadow-xs"
@@ -116,19 +131,30 @@ export const SidebarElement = ({
         </div>
       </div>
 
-      {/* Alignment */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-sans font-semibold text-brand-body">
-          Alignment
-        </label>
+      {/* Alignment — disabled when width is 100% because the line fills the full
+          container and positioning has no visual effect */}
+      <div className={`flex flex-col gap-1.5 ${alignmentDisabled ? "opacity-40" : ""}`}>
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] font-sans font-semibold text-brand-body">
+            Alignment
+          </label>
+          {alignmentDisabled && (
+            <span className="text-[10px] font-sans text-brand-body italic leading-none">
+              Requires width &lt; 100%
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-3 gap-1.5">
           {(["left", "center", "right"] as const).map((align) => (
             <button
               key={align}
               type="button"
-              onClick={() => onChangeProps({ alignment: align })}
+              disabled={alignmentDisabled}
+              onClick={() => !alignmentDisabled && onChangeProps({ alignment: align })}
               className={`px-2 py-1.5 rounded-sm text-xs font-sans font-medium border text-center capitalize transition-all ${
-                alignment === align
+                alignmentDisabled
+                  ? "cursor-not-allowed bg-brand-surface border-brand-hairline text-brand-body"
+                  : alignment === align
                   ? "bg-brand-primary text-white border-brand-primary shadow-xs"
                   : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
               }`}
