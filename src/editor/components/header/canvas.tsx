@@ -57,6 +57,17 @@ export const CanvasElement = ({ block }: {
   const [openDropdownIdx, setOpenDropdownIdx] = useState<number | null>(null);
   const [mobileAccordionIdx, setMobileAccordionIdx] = useState<number | null>(null);
   const { deviceMode, document: doc, togglePreviewColorMode } = useEditorStore();
+  // Asset map: resolves asset:// URIs to their stored base64 data URIs for canvas preview
+  const assets = useEditorStore((state) => state.document.assets) || {};
+  const resolveAsset = (url?: string): string => {
+    if (!url) return "";
+    if (url.startsWith("asset://")) {
+      const path = url.replace("asset://", "");
+      // Store key may be stored with or without the "assets/" prefix
+      return assets[path] || assets[`assets/${path}`] || url;
+    }
+    return url;
+  };
   const isDark = useCanvasDarkMode();
 
   const siteTitle = (general.siteTitle && general.siteTitle !== "My Ghost Theme")
@@ -471,12 +482,14 @@ export const CanvasElement = ({ block }: {
     }
 
     const activeLogo = (isDark && general.darkLogoUrl) ? general.darkLogoUrl : general.logoUrl;
+    // Resolve asset:// protocol to actual base64 data URI so the canvas <img> can display it
+    const resolvedLogoSrc = resolveAsset(activeLogo);
 
     if (activeLogo) {
       return (
         <div className="flex items-center gap-2 shrink-0">
           <img
-            src={activeLogo}
+            src={resolvedLogoSrc}
             alt={siteTitle}
             style={{ maxHeight: `${logoSize}px`, width: "auto" }}
             className="object-contain"
