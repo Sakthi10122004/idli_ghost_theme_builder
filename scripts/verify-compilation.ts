@@ -1,5 +1,6 @@
 import { INITIAL_THEME_DOCUMENT } from "../src/store/editorStore";
 import { generateThemeFiles } from "../src/components/builder/compiler";
+import { compileToHbs as compileHeaderToHbs } from "../src/editor/components/header/compiler";
 
 async function verify() {
   console.log("Compiling INITIAL_THEME_DOCUMENT...");
@@ -52,6 +53,23 @@ async function verify() {
     console.log(`  [${passed ? "PASS" : "FAIL"}] post.hbs contains '${check}'`);
     if (!passed) throw new Error(`post.hbs failed check: ${check}`);
   }
+
+  const headerBlock = INITIAL_THEME_DOCUMENT.blocks["header-sec-1"];
+  const headerWithLogo = compileHeaderToHbs({
+    ...headerBlock,
+    props: {
+      ...headerBlock.props,
+      general: {
+        ...headerBlock.props.general,
+        logoUrl: "assets/images/header/logo.png",
+      },
+    },
+  });
+  const logoAndTitleRenderTogether =
+    headerWithLogo.includes('src="assets/images/header/logo.png"') &&
+    headerWithLogo.includes('<span class="gh-site-title">{{@site.title}}</span>');
+  console.log(`\n  [${logoAndTitleRenderTogether ? "PASS" : "FAIL"}] header logo and site title render together`);
+  if (!logoAndTitleRenderTogether) throw new Error("Header logo and site title must render together");
 
   // Verify author.hbs scoping
   const authorHbs = files["author.hbs"];

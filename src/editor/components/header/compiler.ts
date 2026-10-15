@@ -50,14 +50,15 @@ export const compileToHbs = (block: BuilderBlock): string => {
     <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
-          <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
         {{else}}
           ${general.logoUrl ? `
-          <img src="${escapeUrl(general.logoUrl)}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
-          ` : `<span class="gh-site-title">{{@site.title}}</span>`}
+          <img src="${escapeUrl(general.logoUrl)}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          ` : ""}
         {{/if}}
+        <span class="gh-site-title">{{@site.title}}</span>
       </a>
       <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px;">
         ${general.showSearch !== false ? `<button class="gh-search-btn gh-mobile-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${searchSvg}</button>` : ""}

@@ -474,7 +474,7 @@ export const CanvasElement = ({ block }: {
   };
 
   /**
-   * Renders the logo section: renders uploaded logo image or site title text matching Ghost {{#if @site.logo}}...{{else}}{{@site.title}}{{/if}}.
+   * Renders the uploaded logo image alongside the site title.
    */
   const renderLogo = () => {
     if (general.showLogo === false) {
@@ -485,21 +485,16 @@ export const CanvasElement = ({ block }: {
     // Resolve asset:// protocol to actual base64 data URI so the canvas <img> can display it
     const resolvedLogoSrc = resolveAsset(activeLogo);
 
-    if (activeLogo) {
-      return (
-        <div className="flex items-center gap-2 shrink-0">
+    return (
+      <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0 select-none">
+        {activeLogo && (
           <img
             src={resolvedLogoSrc}
-            alt={siteTitle}
+            alt=""
             style={{ maxHeight: `${logoSize}px`, width: "auto" }}
             className="object-contain"
           />
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-2 font-bold tracking-tight text-2xl shrink-0 select-none">
+        )}
         <span className="gh-site-title leading-none">{siteTitle}</span>
       </div>
     );
