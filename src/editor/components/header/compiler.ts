@@ -117,6 +117,8 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const subscribeText = general.subscribeText?.trim() || "Subscribe";
   const showSubscribe = general.showSubscribe !== false;
 
+  const signInText = general.signInText?.trim() || "Sign in";
+
   const actionsHtml = `
     <div class="gh-head-actions">
       ${general.showSearch !== false ? `
@@ -135,7 +137,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       {{#if @site.members_enabled}}
         {{#unless @member}}
           ${general.showSignIn !== false ? `
-          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${escapeHtml(general.signInText || "Sign in")}</a>` : ""}
+          <a class="gh-head-link" href="#/portal/signin" data-portal="signin" style="font-size: 17px; font-weight: 500; color: inherit; text-decoration: none; opacity: 0.9; padding: 0 4px; white-space: nowrap;">${escapeHtml(signInText)}</a>` : ""}
           ${showSubscribe ? `
           <a class="gh-head-btn gh-btn" href="#/portal/signup" data-portal="signup" style="background-color: ${palette.buttonBg}; color: ${palette.buttonText}; padding: 10px 24px; border-radius: 9999px; font-size: 17px; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: opacity 0.15s; border: none; opacity: 0.95;">${escapeHtml(subscribeText)}</a>` : ""}
         {{else}}

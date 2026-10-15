@@ -231,6 +231,8 @@ export const CanvasElement = ({ block }: {
     const subscribeText = general.subscribeText?.trim() || "Subscribe";
     const showSubscribeButton = general.showSubscribe !== false;
 
+    const signInText = general.signInText?.trim() || "Sign in";
+
     const primaryAction = isMember ? (
       <button
         type="button"
@@ -286,7 +288,7 @@ export const CanvasElement = ({ block }: {
           }}
           className="text-[1.0625rem] font-medium opacity-90 hover:opacity-100 hover:underline whitespace-nowrap px-1"
         >
-          {general.signInText || "Sign in"}
+          {signInText}
         </button>
       )
     );

@@ -264,10 +264,15 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Sign In Text</label>
                 <input 
                   type="text" 
-                  value={g.signInText || "Sign in"}
+                  value={g.signInText ?? "Sign in"}
                   onChange={(e) => updateCategory("general", "signInText", e.target.value)}
+                  onBlur={(e) => {
+                    if (!e.target.value.trim()) {
+                      updateCategory("general", "signInText", "Sign in");
+                    }
+                  }}
                   className="w-full px-2 py-1.5 text-[12px] border border-gray-200 rounded focus:border-blue-400 focus:outline-none"
-                  placeholder="Button Text"
+                  placeholder="Sign in"
                 />
               </div>
             )}
