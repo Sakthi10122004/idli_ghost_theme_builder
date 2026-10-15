@@ -29,22 +29,39 @@ export const CanvasElement = ({ block }: {
   const showFeatureImage = postCard.showFeatureImage ?? true;
   const showPrimaryTag = postCard.showPrimaryTag ?? true;
   const showExcerpt = postCard.showExcerpt ?? true;
+  const showAuthorName = postCard.showAuthorName ?? false;
+  const showAuthorImage = postCard.showAuthorImage ?? false;
+  const showPublishDate = postCard.showPublishDate ?? false;
 
   const mockPosts = [
-    { id: 1, title: "Building custom Ghost themes with Next.js", excerpt: "Learn how to establish an elegant AST rendering architecture for your static publication sites.", date: "August 20, 2026", readingTime: "4 min read", category: "Engineering", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" },
-    { id: 2, title: "Design languages that scale: Geist case study", excerpt: "How stark typography, 1px borders, and mesh gradients define developer branding aesthetics.", date: "August 18, 2026", readingTime: "6 min read", category: "Design", image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" },
-    { id: 3, title: "Deploying modern edge stacks to global nodes", excerpt: "Optimizing startup speeds, resource footprints, and layout rendering algorithms.", date: "August 15, 2026", readingTime: "3 min read", category: "DevOps", image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80" },
-    { id: 4, title: "Scaling PostgreSQL for real-time analytics", excerpt: "A deep dive into indexing strategies and query optimization for high-throughput systems.", date: "August 12, 2026", readingTime: "8 min read", category: "Database", image: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=600&q=80" },
-    { id: 5, title: "Mastering state machines in React", excerpt: "Moving beyond simple booleans to robust, predictable UI states using XState.", date: "August 10, 2026", readingTime: "5 min read", category: "Frontend", image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80" },
-    { id: 6, title: "The future of edge computing", excerpt: "Why the next generation of web applications will execute closer to the user than ever before.", date: "August 05, 2026", readingTime: "7 min read", category: "Architecture", image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80" }
+    { id: 1, title: "Building custom Ghost themes with Next.js", excerpt: "Learn how to establish an elegant AST rendering architecture for your static publication sites.", date: "August 20, 2026", readingTime: "4 min read", category: "Engineering", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80", authorName: "Alex Morgan", authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80" },
+    { id: 2, title: "Design languages that scale: Geist case study", excerpt: "How stark typography, 1px borders, and mesh gradients define developer branding aesthetics.", date: "August 18, 2026", readingTime: "6 min read", category: "Design", image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80", authorName: "Jamie Chen", authorImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" },
+    { id: 3, title: "Deploying modern edge stacks to global nodes", excerpt: "Optimizing startup speeds, resource footprints, and layout rendering algorithms.", date: "August 15, 2026", readingTime: "3 min read", category: "DevOps", image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80", authorName: "Taylor Reed", authorImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=80&h=80&q=80" },
+    { id: 4, title: "Scaling PostgreSQL for real-time analytics", excerpt: "A deep dive into indexing strategies and query optimization for high-throughput systems.", date: "August 12, 2026", readingTime: "8 min read", category: "Database", image: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=600&q=80", authorName: "Jordan Lee", authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80" },
+    { id: 5, title: "Mastering state machines in React", excerpt: "Moving beyond simple booleans to robust, predictable UI states using XState.", date: "August 10, 2026", readingTime: "5 min read", category: "Frontend", image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80", authorName: "Sam Rivera", authorImage: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=80&h=80&q=80" },
+    { id: 6, title: "The future of edge computing", excerpt: "Why the next generation of web applications will execute closer to the user than ever before.", date: "August 05, 2026", readingTime: "7 min read", category: "Architecture", image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80", authorName: "Casey Park", authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80" }
   ];
+
+  const renderPostMeta = (post: (typeof mockPosts)[number]) => {
+    if (!showAuthorName && !showAuthorImage && !showPublishDate) return null;
+
+    return (
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] opacity-75">
+        {showAuthorImage && post.authorImage && (
+          <img src={post.authorImage} alt={post.authorName} className="w-6 h-6 rounded-full object-cover shrink-0" />
+        )}
+        {showAuthorName && <span className="font-medium">{post.authorName}</span>}
+        {showPublishDate && <time>{post.date}</time>}
+      </div>
+    );
+  };
 
   let displayPosts = [...mockPosts];
   
   if (general.source === "tag" && general.tag) {
     displayPosts = displayPosts.filter(p => p.category.toLowerCase() === general.tag.toLowerCase());
     if (displayPosts.length === 0) {
-      displayPosts = [{ id: 99, title: `No mock posts match tag '${general.tag}'`, excerpt: "Try 'design', 'engineering', or 'devops' to see mock data.", date: "Now", readingTime: "0 min read", category: general.tag, image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" }];
+      displayPosts = [{ id: 99, title: `No mock posts match tag '${general.tag}'`, excerpt: "Try 'design', 'engineering', or 'devops' to see mock data.", date: "Now", readingTime: "0 min read", category: general.tag, image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80", authorName: "Ghost Author", authorImage: "" }];
     }
   } else if (general.source === "custom" && p.filter?.rules?.length > 0) {
     const rules = p.filter.rules as { field: string; value: string }[];
@@ -59,7 +76,7 @@ export const CanvasElement = ({ block }: {
     });
 
     if (displayPosts.length === 0) {
-      displayPosts = [{ id: 99, title: `No mock posts match your custom filter`, excerpt: "Try tagging rules with 'design', 'engineering', or 'devops'.", date: "Now", readingTime: "0 min read", category: "Filtered", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" }];
+      displayPosts = [{ id: 99, title: `No mock posts match your custom filter`, excerpt: "Try tagging rules with 'design', 'engineering', or 'devops'.", date: "Now", readingTime: "0 min read", category: "Filtered", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80", authorName: "Ghost Author", authorImage: "" }];
     }
   }
 
@@ -102,6 +119,7 @@ export const CanvasElement = ({ block }: {
                   </span>
                 )}
                 <h3 className="text-2xl font-bold leading-tight">{featurePost.title}</h3>
+                {renderPostMeta(featurePost)}
                 {showExcerpt && (
                   <p className="text-sm leading-relaxed opacity-80 mt-2">{featurePost.excerpt}</p>
                 )}
@@ -126,6 +144,7 @@ export const CanvasElement = ({ block }: {
                       </span>
                     )}
                     <h3 className="text-sm font-semibold leading-snug">{post.title}</h3>
+                    {renderPostMeta(post)}
                     {showExcerpt && (
                       <p className="text-xs leading-relaxed opacity-80 line-clamp-2">{post.excerpt}</p>
                     )}
@@ -157,6 +176,7 @@ export const CanvasElement = ({ block }: {
                   </span>
                 )}
                 <h3 className="post-title text-sm font-semibold">{post.title}</h3>
+                {renderPostMeta(post)}
                 {showExcerpt && (
                   <p className="post-excerpt text-xs leading-relaxed opacity-80">{post.excerpt}</p>
                 )}

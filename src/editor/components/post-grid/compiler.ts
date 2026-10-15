@@ -22,6 +22,9 @@ export const compileToHbs = (block: BuilderBlock) => {
   const showFeatureImage = postCard.showFeatureImage ?? true;
   const showPrimaryTag = postCard.showPrimaryTag ?? true;
   const showExcerpt = postCard.showExcerpt ?? true;
+  const showAuthorName = postCard.showAuthorName ?? false;
+  const showAuthorImage = postCard.showAuthorImage ?? false;
+  const showPublishDate = postCard.showPublishDate ?? false;
 
   const source = general.source || "routes";
   let getHelperStart = "";
@@ -73,6 +76,13 @@ export const compileToHbs = (block: BuilderBlock) => {
         {{/if}}
         ` : ''}
         <h3 class="gh-post-card-title ${isFeature ? 'gh-post-card-title-feature' : 'gh-post-card-title-list'}">{{title}}</h3>
+        ${showAuthorName || showAuthorImage || showPublishDate ? `
+        <div class="gh-post-card-meta">
+          ${showAuthorImage ? `{{#if primary_author.profile_image}}<img class="gh-post-card-author-image" src="{{img_url primary_author.profile_image size="xs"}}" alt="{{primary_author.name}}" loading="lazy" />{{/if}}` : ''}
+          ${showAuthorName ? `{{#if primary_author}}<span class="gh-post-card-author-name">{{primary_author.name}}</span>{{/if}}` : ''}
+          ${showPublishDate ? `<time datetime="{{date published_at format="YYYY-MM-DD"}}">{{date published_at format="MMM D, YYYY"}}</time>` : ''}
+        </div>
+        ` : ''}
         ${showExcerpt ? `
         <p class="gh-post-card-excerpt ${!isFeature ? 'gh-post-card-excerpt-list' : ''}">{{excerpt words="${isFeature ? '40' : '20'}"}}</p>
         ` : ''}
@@ -200,6 +210,25 @@ export const compileToHbs = (block: BuilderBlock) => {
   #${wrapperId} .gh-post-card-title-list {
     font-size: 1.125rem;
     line-height: 1.3;
+  }
+  #${wrapperId} .gh-post-card-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.75;
+  }
+  #${wrapperId} .gh-post-card-author-image {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  #${wrapperId} .gh-post-card-author-name {
+    font-weight: 600;
   }
   #${wrapperId} .gh-post-card-excerpt {
     font-family: var(--gh-font-body, var(--font-body));
