@@ -1,23 +1,63 @@
-## Summary
-<!-- Provide a clear, concise 2-3 sentence overview of what this PR accomplishes. -->
+## 📝 Summary
 
-## Motivation & Context
-<!-- Why is this change required? What issue does it solve? (e.g., Fixes #123) -->
+<!-- In 2–3 sentences, what does this PR do and why? -->
 
-## Detailed Changes
-<!-- Bulleted list of technical changes made in this PR -->
-- 
+**Closes** #<!-- issue number -->
 
-## Visual Parity & Screenshots (if applicable)
-<!-- Attach screenshots or screen recordings showing before/after in both light and dark mode -->
-| Light Mode | Dark Mode |
-| :---: | :---: |
-| | |
+## 🏷️ Type of change
 
-## Pre-Flight Verification
-<!-- Please verify and check all that apply -->
-- [ ] `npm run typecheck` passed (0 errors)
-- [ ] `npm run lint` passed (0 errors)
-- [ ] `npm run test:components` passed (33/33 verified)
-- [ ] `npm run test:export` passed (clean theme export & balanced Handlebars)
-- [ ] Verified manually in Desktop, Tablet, and Mobile preview modes
+- [ ] 🐛 Bug fix
+- [ ] ✨ New feature
+- [ ] 🧩 New or updated block / component
+- [ ] ⚙️ Compiler / theme export change
+- [ ] 🎨 UI / styling
+- [ ] ♻️ Refactor (no behaviour change)
+- [ ] 📚 Docs / tooling
+- [ ] 💥 Breaking change (existing saved themes or exports affected)
+
+## 🔍 What changed
+
+<!--
+List the key changes, e.g.
+- Added `newsletter` members-form attributes in `newsletter/compiler.ts`
+- Fixed off-by-one in `moveBlock` when dragging down
+-->
+
+## 📸 Screenshots
+
+<!--
+Required for any visual change. Delete this section if not applicable.
+Show before/after; include dark mode and mobile if relevant.
+
+| Before | After |
+| :----: | :---: |
+| img    | img   |
+-->
+
+## ✅ Checklist
+
+**Verification**
+
+- [ ] `npm run typecheck`
+- [ ] `npm run lint`
+- [ ] `npm run test:components`
+- [ ] `npm run test:export`
+- [ ] `npm run test:compilation`
+- [ ] `npm run build`
+- [ ] `npm audit` — no new high or critical vulnerabilities _(required if dependencies changed)_
+
+**Ghost theme output** _(compiler / component changes only)_
+
+- [ ] Exported ZIP passes gscan in the builder
+- [ ] User input is escaped (`escapeHtml` / `escapeUrl`), no raw values in HBS, CSS or JS
+- [ ] Responsive style values are resolved (no `[object Object]`)
+
+**Editor**
+
+- [ ] Tested in Desktop, Tablet and Mobile preview modes
+- [ ] Tested in light and dark mode
+- [ ] New blocks registered in `registry.ts` and `blockTemplates.ts`
+
+## 💬 Notes for reviewers
+
+<!-- Anything reviewers should focus on, known limitations, or follow-ups. Delete if none. -->
