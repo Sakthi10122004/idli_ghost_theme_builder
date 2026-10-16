@@ -414,30 +414,112 @@ export default function RightSidebar() {
               </div>
             )}
 
-            {/* Section Outer / Content Width */}
-            {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
+            {/* Dimensions & Sizing Controls for all modular elements */}
+            {selectedBlock.type !== "header" && selectedBlock.type !== "footer" && (
+              <div className="flex flex-col gap-3 border-t border-brand-hairline pt-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Element Width</label>
+                  <div className="flex items-center gap-1">
+                    {(["Auto", "50%", "75%", "100%"] as const).map((preset) => {
+                      const curVal = getInputValue(selectedBlock.styles.width) || "";
+                      const isAuto = preset === "Auto" && !curVal;
+                      const isActive = isAuto || curVal === preset;
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => handleStyleChange("width", preset === "Auto" ? "" : preset)}
+                          className={`px-1.5 py-0.5 text-[10px] font-mono rounded cursor-pointer transition-colors ${
+                            isActive
+                              ? "bg-brand-primary text-white font-bold"
+                              : "bg-brand-canvas-soft border border-brand-hairline text-brand-mute hover:text-brand-ink"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="e.g. 100%, 1400px"
-                    value={getInputValue(selectedBlock.styles.width)}
+                    placeholder="e.g. 100%, 640px, auto"
+                    value={getInputValue(selectedBlock.styles.width) || ""}
                     onChange={(e) => handleStyleChange("width", e.target.value)}
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
+                  {getInputValue(selectedBlock.styles.width) && (
+                    <button
+                      type="button"
+                      onClick={() => handleStyleChange("width", "")}
+                      className="text-[10px] text-brand-mute hover:text-brand-ink px-2 py-1.5 border border-brand-hairline rounded-sm bg-brand-canvas cursor-pointer whitespace-nowrap"
+                      title="Reset width to Auto"
+                    >
+                      Reset
+                    </button>
+                  )}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Width</label>
+
+                {/* Element Height */}
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-sans font-semibold text-brand-body">Element Height</label>
+                  <div className="flex items-center gap-1">
+                    {(["Auto", "240px", "400px"] as const).map((preset) => {
+                      const curVal = getInputValue(selectedBlock.styles.height) || "";
+                      const isAuto = preset === "Auto" && !curVal;
+                      const isActive = isAuto || curVal === preset;
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => handleStyleChange("height", preset === "Auto" ? "" : preset)}
+                          className={`px-1.5 py-0.5 text-[10px] font-mono rounded cursor-pointer transition-colors ${
+                            isActive
+                              ? "bg-brand-primary text-white font-bold"
+                              : "bg-brand-canvas-soft border border-brand-hairline text-brand-mute hover:text-brand-ink"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="e.g. 1200px, 800px"
-                    value={getInputValue(selectedBlock.styles.contentWidth)}
-                    onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
+                    placeholder="e.g. auto, 300px, 100vh"
+                    value={getInputValue(selectedBlock.styles.height) || ""}
+                    onChange={(e) => handleStyleChange("height", e.target.value)}
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
+                  {getInputValue(selectedBlock.styles.height) && (
+                    <button
+                      type="button"
+                      onClick={() => handleStyleChange("height", "")}
+                      className="text-[10px] text-brand-mute hover:text-brand-ink px-2 py-1.5 border border-brand-hairline rounded-sm bg-brand-canvas cursor-pointer whitespace-nowrap"
+                      title="Reset height to Auto"
+                    >
+                      Reset
+                    </button>
+                  )}
                 </div>
-              </>
+
+                {/* Section Specific Content Width */}
+                {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
+                  <div className="flex flex-col gap-1.5 pt-1">
+                    <label className="text-[11px] font-sans font-semibold text-brand-body">Inner Content Max Width</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 1200px, 800px"
+                      value={getInputValue(selectedBlock.styles.contentWidth)}
+                      onChange={(e) => handleStyleChange("contentWidth", e.target.value)}
+                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                    />
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Spacing Controls with live sliders */}

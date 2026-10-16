@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEditorStore } from "@/store/editorStore";
 import { BuilderBlock } from "@/types/theme";
+import { isHeaderOrFooterBlock as hasHeaderOrFooterDescendant } from "@/editor/utils/blockTraversal";
 import { componentRegistry } from "@/editor/components/registry";
 import React from "react";
 import { useSortable, SortableContext, verticalListSortingStrategy, rectSortingStrategy } from "@dnd-kit/sortable";
@@ -120,6 +121,13 @@ function SortableElement({
   const isGlassActive = !isLogoCloud && !!resolvedBlur && resolvedBlur !== "none" && resolvedBlur !== "0px";
 
   const resolvedWidth = block.styles.width ? resolveStyleLocal(block.styles.width) : undefined;
+  const resolvedHeight = block.styles.height ? resolveStyleLocal(block.styles.height) : undefined;
+  const [resizeInfo, setResizeInfo] = React.useState<{
+    isResizing: boolean;
+    width: number;
+    height: number;
+    direction: string;
+  } | null>(null);
   const blockAlign = (block.props?.alignment as string) || (block.styles?.textAlign as string) || "center";
   const resolveMarginLeft = () => {
     if (blockAlign === "left") return "0";
@@ -144,6 +152,7 @@ function SortableElement({
     WebkitBackdropFilter: isGlassActive ? `blur(${resolvedBlur})` : undefined,
     opacity: isDragging ? 0.3 : (opacity ? parseFloat(resolveStyleLocal(opacity) || "1") : undefined),
     width: resolvedWidth,
+    height: resolvedHeight,
     maxWidth: "100%",
     marginLeft: resolveMarginLeft(),
     marginRight: resolveMarginRight(),
@@ -170,10 +179,13 @@ function SortableElement({
           ? "outline-2 outline-brand-primary outline-offset-1 ring-2 ring-white/50"
           : "hover:outline-1 hover:outline-brand-hairline-strong hover:outline-offset-1";
 
-  const handleResizeStart = (e: React.MouseEvent, direction: 'width' | 'innerWidth' | 'height') => {
+  const handleResizeStart = (
+    e: React.MouseEvent,
+    direction: 'e' | 'w' | 's' | 'se' | 'sw' | 'ne' | 'nw' | 'innerWidth'
+  ) => {
     e.stopPropagation();
     e.preventDefault();
-    const parentEl = e.currentTarget.parentElement;
+    const parentEl = document.getElementById("block-" + block.id) || e.currentTarget.parentElement;
     if (!parentEl) return;
 
     const rect = parentEl.getBoundingClientRect();
@@ -186,38 +198,70 @@ function SortableElement({
     const innerContainerEl = parentEl.querySelector('.container-width');
     const startInnerWidth = innerContainerEl ? innerContainerEl.getBoundingClientRect().width : 1200;
 
+    setResizeInfo({
+      isResizing: true,
+      width: Math.round(startWidth),
+      height: Math.round(startHeight),
+      direction,
+    });
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (direction === 'width') {
-        const deltaX = moveEvent.clientX - startX;
-        const newWidth = startWidth + deltaX * 2; // dual-side expand representation
-        const snappedWidth = Math.round(newWidth / 16) * 16;
-        updateBlockStyles(block.id, { width: `${Math.max(200, snappedWidth)}px` });
-      } else if (direction === 'innerWidth') {
+      let nextWidth = startWidth;
+      let nextHeight = startHeight;
+
+      if (direction === 'innerWidth') {
         const deltaX = moveEvent.clientX - startX;
         const newWidth = startInnerWidth + deltaX * 2;
-        const snappedWidth = Math.round(newWidth / 16) * 16;
-        updateBlockStyles(block.id, { contentWidth: `${Math.max(200, snappedWidth)}px` });
+        const snappedWidth = Math.max(200, Math.round(newWidth / 16) * 16);
+        nextWidth = snappedWidth;
+        updateBlockStyles(block.id, { contentWidth: `${snappedWidth}px` });
       } else {
-        const deltaY = moveEvent.clientY - startY;
-        const newHeight = startHeight + deltaY;
-        const snappedHeight = Math.round(newHeight / 8) * 8;
+        // Horizontal resizing
+        if (direction === 'e' || direction === 'se' || direction === 'ne') {
+          const deltaX = moveEvent.clientX - startX;
+          const newWidth = Math.max(80, Math.round((startWidth + deltaX) / 8) * 8);
+          nextWidth = newWidth;
+          updateBlockStyles(block.id, { width: `${newWidth}px` });
+        } else if (direction === 'w' || direction === 'sw' || direction === 'nw') {
+          const deltaX = startX - moveEvent.clientX;
+          const newWidth = Math.max(80, Math.round((startWidth + deltaX) / 8) * 8);
+          nextWidth = newWidth;
+          updateBlockStyles(block.id, { width: `${newWidth}px` });
+        }
 
-        if (block.type === 'spacer') {
-          updateBlockProps(block.id, { height: `${Math.max(8, snappedHeight)}px` });
-        } else if (block.type === 'section' || block.type === 'hero') {
-          // Account for estimated inner content height (~100px offset) so padding isn't excessively huge
-          const newPadding = Math.max(0, (snappedHeight - 100) / 2);
-          updateBlockStyles(block.id, { 
-            paddingTop: `${newPadding}px`, 
-            paddingBottom: `${newPadding}px` 
-          });
-        } else {
-          updateBlockStyles(block.id, { height: `${Math.max(16, snappedHeight)}px` });
+        // Vertical resizing
+        if (direction === 's' || direction === 'se' || direction === 'sw') {
+          const deltaY = moveEvent.clientY - startY;
+          const newHeight = Math.max(20, Math.round((startHeight + deltaY) / 8) * 8);
+          nextHeight = newHeight;
+
+          if (block.type === 'spacer') {
+            updateBlockProps(block.id, { height: `${newHeight}px` });
+          } else if (block.type === 'image') {
+            updateBlockProps(block.id, { maxHeight: `${newHeight}px` });
+            updateBlockStyles(block.id, { height: `${newHeight}px` });
+          } else if (block.type === 'section' || block.type === 'hero') {
+            const newPadding = Math.max(0, Math.round((newHeight - 100) / 2));
+            updateBlockStyles(block.id, { 
+              paddingTop: `${newPadding}px`, 
+              paddingBottom: `${newPadding}px` 
+            });
+          } else {
+            updateBlockStyles(block.id, { height: `${newHeight}px` });
+          }
         }
       }
+
+      setResizeInfo({
+        isResizing: true,
+        width: Math.round(nextWidth),
+        height: Math.round(nextHeight),
+        direction,
+      });
     };
 
     const handleMouseUp = () => {
+      setResizeInfo(null);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
@@ -342,34 +386,142 @@ function SortableElement({
             </div>
           )}
 
-          {/* Resizing Edge Handles */}
+          {/* Visible Bounding Box & Drag Resize Handles */}
           {!isPreviewMode && !isGlobal && (
             <>
-              {/* Outer Section / General Block Width Handle */}
+              {/* Live Dimension Tooltip during Active Resizing */}
+              {resizeInfo?.isResizing && (
+                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md shadow-2xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap border border-white/20 animate-in fade-in">
+                  <span className="text-brand-primary font-bold">W: {resizeInfo.width}px</span>
+                  <span className="text-white/40">•</span>
+                  <span className="text-amber-400 font-bold">H: {resizeInfo.height}px</span>
+                </div>
+              )}
+
+              {/* Quick Size Presets Toolbar on selection */}
+              {isSelected && !isDragging && !resizeInfo?.isResizing && (
+                <div className="absolute -bottom-7 right-0 bg-neutral-900 text-white text-[9px] font-mono px-2 py-0.5 rounded-b-sm flex items-center gap-1.5 z-40 transition-all shadow-md select-none pointer-events-auto">
+                  <span className="text-white/50 text-[8px] uppercase">Width:</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateBlockStyles(block.id, { width: "" });
+                    }}
+                    className="px-1 py-0.5 hover:bg-white/20 rounded text-[9px] transition-colors"
+                    title="Reset to 100% / Auto width"
+                  >
+                    Auto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateBlockStyles(block.id, { width: "50%" });
+                    }}
+                    className="px-1 py-0.5 hover:bg-white/20 rounded text-[9px] transition-colors"
+                    title="Set width to 50%"
+                  >
+                    50%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateBlockStyles(block.id, { width: "75%" });
+                    }}
+                    className="px-1 py-0.5 hover:bg-white/20 rounded text-[9px] transition-colors"
+                    title="Set width to 75%"
+                  >
+                    75%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateBlockStyles(block.id, { width: "100%" });
+                    }}
+                    className="px-1 py-0.5 hover:bg-white/20 rounded text-[9px] transition-colors"
+                    title="Set width to 100%"
+                  >
+                    100%
+                  </button>
+                </div>
+              )}
+
+              {/* 4 Corner Resize Handles (Prominent Figma/Webflow-style dots) */}
+              {isSelected && (
+                <>
+                  <div 
+                    onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                    className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-brand-primary rounded-xs shadow-md cursor-nwse-resize z-40 hover:scale-125 transition-transform"
+                    title="Drag corner to resize Width & Height"
+                  />
+                  <div 
+                    onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                    className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-brand-primary rounded-xs shadow-md cursor-nesw-resize z-40 hover:scale-125 transition-transform"
+                    title="Drag corner to resize Width & Height"
+                  />
+                  <div 
+                    onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                    className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-brand-primary rounded-xs shadow-md cursor-nesw-resize z-40 hover:scale-125 transition-transform"
+                    title="Drag corner to resize Width & Height"
+                  />
+                  <div 
+                    onMouseDown={(e) => handleResizeStart(e, 'se')}
+                    className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-brand-primary rounded-xs shadow-md cursor-nwse-resize z-40 hover:scale-125 transition-transform"
+                    title="Drag corner to resize Width & Height"
+                  />
+                </>
+              )}
+
+              {/* Edge Handles with visible pills */}
+              {/* Left Edge Bar */}
               <div 
-                onMouseDown={(e) => handleResizeStart(e, 'width')}
-                className="absolute top-0 -right-1 w-2.5 h-full cursor-col-resize group-hover/sortable:bg-brand-primary/20 hover:bg-brand-primary active:bg-brand-primary z-30 transition-all"
-                title={block.type === 'section' ? "Drag to resize Outer Background Width" : "Drag to resize Width"}
-              />
-              
+                onMouseDown={(e) => handleResizeStart(e, 'w')}
+                className={`absolute top-1/2 -left-1.5 -translate-y-1/2 w-2.5 h-7 bg-white border-2 border-brand-primary rounded-full shadow-md cursor-ew-resize z-40 hover:scale-110 transition-transform flex items-center justify-center ${
+                  isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
+                }`}
+                title="Drag left edge to resize Width"
+              >
+                <div className="w-0.5 h-2 bg-brand-primary rounded-full" />
+              </div>
+
+              {/* Right Edge Bar */}
+              <div 
+                onMouseDown={(e) => handleResizeStart(e, 'e')}
+                className={`absolute top-1/2 -right-1.5 -translate-y-1/2 w-2.5 h-7 bg-white border-2 border-brand-primary rounded-full shadow-md cursor-ew-resize z-40 hover:scale-110 transition-transform flex items-center justify-center ${
+                  isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
+                }`}
+                title="Drag right edge to resize Width"
+              >
+                <div className="w-0.5 h-2 bg-brand-primary rounded-full" />
+              </div>
+
+              {/* Bottom Edge Bar (Height / Padding) */}
+              <div 
+                onMouseDown={(e) => handleResizeStart(e, 's')}
+                className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-2.5 w-7 bg-white border-2 border-brand-primary rounded-full shadow-md cursor-ns-resize z-40 hover:scale-110 transition-transform flex items-center justify-center ${
+                  isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover/sortable:opacity-100 group-hover/sortable:visible"
+                }`}
+                title={block.type === 'section' ? "Drag to resize Section Vertical Padding" : "Drag to resize Height"}
+              >
+                <div className="h-0.5 w-2 bg-brand-primary rounded-full" />
+              </div>
+
               {/* Inner Section Content Width Handle (rendered only on Section types) */}
-              {block.type === 'section' && (
+              {block.type === 'section' && isSelected && (
                 <div 
                   onMouseDown={(e) => handleResizeStart(e, 'innerWidth')}
-                  className="absolute top-0 right-1/2 translate-x-[600px] w-2 h-2/3 my-auto bottom-0 cursor-col-resize border-r border-dashed border-brand-primary/50 hover:border-solid hover:border-brand-primary hover:border-r-2 z-30 transition-all"
+                  className="absolute top-0 right-1/2 translate-x-[600px] w-3 h-2/3 my-auto bottom-0 cursor-col-resize border-r-2 border-dashed border-brand-primary bg-brand-primary/10 hover:bg-brand-primary/30 z-40 transition-all flex items-center justify-center"
                   style={{
                     transform: `translateX(clamp(100px, calc(${resolveStyleLocal(block.styles.contentWidth) || '1200px'} / 2), 50vw))`
                   }}
-                  title="Drag to resize Inner Content Width"
-                />
+                  title="Drag to resize Section Inner Content Width"
+                >
+                  <span className="w-1 h-4 bg-brand-primary rounded-full" />
+                </div>
               )}
-
-              {/* Bottom Edge (Height / Padding) Resize handle */}
-              <div 
-                onMouseDown={(e) => handleResizeStart(e, 'height')}
-                className="absolute -bottom-1 left-0 w-full h-2 cursor-row-resize group-hover/sortable:border-b-2 group-hover/sortable:border-brand-primary/30 hover:border-brand-primary active:border-brand-primary z-30 transition-all"
-                title={block.type === 'section' ? "Drag to resize Section Vertical Padding" : "Drag to resize Height"}
-              />
             </>
           )}
 
@@ -999,14 +1151,11 @@ export default function Canvas() {
     Object.values(themeDoc.blocks).find((block) => block.type === "footer")?.id;
 
   const isHeaderOrFooterBlock = (blockId: string, blocks: Record<string, BuilderBlock>): boolean => {
-    if (blockId === headerBlockId || blockId === footerBlockId) return true;
-    const block = blocks[blockId];
-    if (!block) return false;
-    if (block.type === "header" || block.type === "footer") return true;
-    if (block.childrenIds && block.childrenIds.length > 0) {
-      return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
-    }
-    return false;
+    return (
+      blockId === headerBlockId ||
+      blockId === footerBlockId ||
+      hasHeaderOrFooterDescendant(blockId, blocks)
+    );
   };
 
   const fontHeading =
