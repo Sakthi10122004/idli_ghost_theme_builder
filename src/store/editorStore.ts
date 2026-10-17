@@ -95,6 +95,8 @@ export const INITIAL_THEME_DOCUMENT: ThemeDocument = {
       props: {
         general: {
           siteTitle: "",
+          showSubscribe: true,
+          subscribeText: "Subscribe",
         },
         navItems: [
           { label: "Home", url: "/" },

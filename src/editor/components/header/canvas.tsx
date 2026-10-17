@@ -217,6 +217,9 @@ export const CanvasElement = ({ block }: {
   const renderActions = (vertical = false) => {
     const isMember = general.memberPreviewState === "member";
 
+    const subscribeText = general.subscribeText?.trim() || "Subscribe";
+    const showSubscribeButton = general.showSubscribe !== false;
+
     const primaryAction = isMember ? (
       <button
         type="button"
@@ -233,7 +236,7 @@ export const CanvasElement = ({ block }: {
         Account
       </button>
     ) : (
-      general.showSubscribe !== false && (
+      showSubscribeButton ? (
         <button
           type="button"
           onClick={(e) => {
@@ -246,9 +249,9 @@ export const CanvasElement = ({ block }: {
           }
           style={{ backgroundColor: palette.buttonBg, color: palette.buttonText }}
         >
-          {general.subscribeText || "Subscribe"}
+          {subscribeText}
         </button>
-      )
+      ) : null
     );
 
     const secondaryAction = isMember ? (
