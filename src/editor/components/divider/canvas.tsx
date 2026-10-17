@@ -21,15 +21,11 @@ export const CanvasElement = ({
   const defaultHairline = isDark ? "#333333" : "var(--color-hairline, #ebebeb)";
   const color = (block.props?.color as string) || defaultHairline;
 
-  const justify =
-    alignment === "left"
-      ? "justify-start"
-      : alignment === "right"
-      ? "justify-end"
-      : "justify-center";
+  const marginLeft = alignment === "right" ? "auto" : alignment === "center" ? "auto" : "0";
+  const marginRight = alignment === "left" ? "auto" : alignment === "center" ? "auto" : "0";
 
   return (
-    <div className={`w-full flex ${justify} py-1 items-center`}>
+    <div className="w-full py-1">
       <hr
         className="transition-all"
         style={{
@@ -38,6 +34,8 @@ export const CanvasElement = ({
           width,
           marginTop: margin,
           marginBottom: margin,
+          marginLeft,
+          marginRight,
           boxSizing: "border-box",
         }}
       />

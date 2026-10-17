@@ -8,14 +8,12 @@ export const compileToHbs = (block: BuilderBlock) => {
   const margin = (block.props?.margin as string) || "32px";
   const color = (block.props?.color as string) || "var(--color-hairline, #ebebeb)";
 
-  const justify =
+  const marginX =
     alignment === "left"
-      ? "flex-start"
+      ? "margin-left: 0; margin-right: auto;"
       : alignment === "right"
-      ? "flex-end"
-      : "center";
+      ? "margin-left: auto; margin-right: 0;"
+      : "margin-left: auto; margin-right: auto;";
 
-  return `<div style="display: flex; justify-content: ${justify}; width: 100%;">
-  <hr class="divider-hairline" style="border: none; border-top: ${thickness} ${lineStyle} ${color}; width: ${width}; margin-top: ${margin}; margin-bottom: ${margin}; box-sizing: border-box;" />
-</div>`;
+  return `<hr class="divider-hairline" style="border: none; border-top: ${thickness} ${lineStyle} ${color}; width: ${width}; margin-top: ${margin}; margin-bottom: ${margin}; ${marginX} box-sizing: border-box;" />`;
 };

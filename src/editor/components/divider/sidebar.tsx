@@ -50,16 +50,6 @@ export const SidebarElement = ({
     { label: "Dark", value: "#171717" },
   ];
 
-  // When switching back to 100% width, reset alignment to center
-  // because left/right would be stored but invisible — avoid confusion.
-  const handleWidthChange = (newWidth: string) => {
-    if (newWidth === "100%") {
-      onChangeProps({ width: newWidth, alignment: "center" });
-    } else {
-      onChangeProps({ width: newWidth });
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4">
       {/* Line Style */}
@@ -118,7 +108,7 @@ export const SidebarElement = ({
             <button
               key={opt.value}
               type="button"
-              onClick={() => handleWidthChange(opt.value)}
+              onClick={() => onChangeProps({ width: opt.value })}
               className={`px-2 py-1.5 rounded-sm text-xs font-mono font-medium border text-center transition-all ${
                 width === opt.value
                   ? "bg-brand-primary text-white border-brand-primary shadow-xs"
@@ -150,10 +140,10 @@ export const SidebarElement = ({
               key={align}
               type="button"
               disabled={alignmentDisabled}
-              onClick={() => !alignmentDisabled && onChangeProps({ alignment: align })}
+              onClick={() => onChangeProps({ alignment: align })}
               className={`px-2 py-1.5 rounded-sm text-xs font-sans font-medium border text-center capitalize transition-all ${
                 alignmentDisabled
-                  ? "cursor-not-allowed bg-brand-surface border-brand-hairline text-brand-body"
+                  ? "cursor-not-allowed bg-brand-canvas-soft border-brand-hairline text-brand-body"
                   : alignment === align
                   ? "bg-brand-primary text-white border-brand-primary shadow-xs"
                   : "bg-white border-brand-hairline text-brand-body hover:border-brand-hairline-strong hover:text-brand-ink"
