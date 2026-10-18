@@ -3,6 +3,19 @@ import { hexToRgba, WIDTH_VALUES, CONTENT_WIDTH_VALUES } from "./constants";
 import { getBackgroundCSS } from "../shared/background";
 import { escapeHtml, escapeUrl } from "../shared/escape";
 
+/**
+ * Resolves an image src for Handlebars output.
+ * - asset:// URIs become {{asset "path/..."}} helpers (matching image/compiler.ts pattern).
+ * - Normal external URLs are passed through escapeUrl.
+ */
+const resolveHbsSrc = (src: string): string => {
+  if (src && src.startsWith("asset://")) {
+    const path = src.replace("asset://", "");
+    return `{{asset "${path}"}}`;
+  }
+  return src ? escapeUrl(src) : "";
+};
+
 export const compileToHbs = (block: BuilderBlock): string => {
   const p = block.props || {};
   const general = p.general || {};
@@ -50,15 +63,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
     <div class="gh-head-brand">
       <a class="gh-head-logo" href="{{@site.url}}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px;">
         {{#if @site.logo}}
-          <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          <img src="{{@site.logo}}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${resolveHbsSrc(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
         {{else}}
           ${general.logoUrl ? `
-          <img src="${escapeUrl(general.logoUrl)}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />
-          ${general.darkLogoUrl ? `<img src="${escapeUrl(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
-          ` : ""}
+          <img src="${resolveHbsSrc(general.logoUrl)}" class="gh-logo${general.darkLogoUrl ? " gh-logo-light" : ""}" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />
+          ${general.darkLogoUrl ? `<img src="${resolveHbsSrc(general.darkLogoUrl)}" class="gh-logo gh-logo-dark" alt="{{@site.title}}" style="max-height: ${general.logoSize || 40}px; width: auto;" />` : ""}
+          ` : `<span class="gh-site-title">{{@site.title}}</span>`}
         {{/if}}
-        <span class="gh-site-title">{{@site.title}}</span>
       </a>
       <div class="gh-head-brand-actions" style="display: flex; align-items: center; gap: 8px;">
         ${general.showSearch !== false ? `<button class="gh-search-btn gh-mobile-only" data-ghost-search aria-label="Search" style="padding: 6px; border-radius: 9999px; border: none; background: transparent; color: inherit; cursor: pointer; opacity: 0.8; transition: opacity 0.15s;">${searchSvg}</button>` : ""}

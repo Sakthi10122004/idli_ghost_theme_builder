@@ -54,22 +54,97 @@ async function verify() {
     if (!passed) throw new Error(`post.hbs failed check: ${check}`);
   }
 
-  const headerBlock = INITIAL_THEME_DOCUMENT.blocks["header-sec-1"];
-  const headerWithLogo = compileHeaderToHbs({
-    ...headerBlock,
+  // -----------------------------------------------------------------------
+  // Header compiler tests — Issue #6 (header uploaded logo fix)
+  // -----------------------------------------------------------------------
+  console.log("\n--- Checking header compiler ---");
+
+  // Inline helper to compile a header block with custom general props
+  // compileHeaderToHbs is imported statically at the top of this file
+  const baseHeaderBlock = INITIAL_THEME_DOCUMENT.blocks["header-sec-1"];
+
+  // --- Test A: asset:// logo compiles to {{asset "..."}} helper (not raw asset://) ---
+  const headerWithAssetLogo = compileHeaderToHbs({
+    ...baseHeaderBlock,
     props: {
-      ...headerBlock.props,
+      ...baseHeaderBlock.props,
       general: {
-        ...headerBlock.props.general,
-        logoUrl: "assets/images/header/logo.png",
+        ...baseHeaderBlock.props.general,
+        logoUrl: "asset://images/header/logo.png",
+        darkLogoUrl: undefined,
       },
     },
   });
-  const logoAndTitleRenderTogether =
-    headerWithLogo.includes('src="assets/images/header/logo.png"') &&
-    headerWithLogo.includes('<span class="gh-site-title">{{@site.title}}</span>');
-  console.log(`\n  [${logoAndTitleRenderTogether ? "PASS" : "FAIL"}] header logo and site title render together`);
-  if (!logoAndTitleRenderTogether) throw new Error("Header logo and site title must render together");
+  const assetHelperPresent = headerWithAssetLogo.includes('{{asset "images/header/logo.png"}}');
+  const rawAssetUrlAbsent = !headerWithAssetLogo.includes("asset://images/header/logo.png");
+  console.log(`  [${assetHelperPresent ? "PASS" : "FAIL"}] asset:// logo compiles to {{asset "..."}} helper`);
+  if (!assetHelperPresent) throw new Error("Header compiler must emit {{asset \"images/header/logo.png\"}} for asset:// logoUrl");
+  console.log(`  [${rawAssetUrlAbsent ? "PASS" : "FAIL"}] raw asset:// URL is NOT present in compiled output`);
+  if (!rawAssetUrlAbsent) throw new Error("Header compiler must not emit raw asset:// URLs in compiled Handlebars");
+
+  // --- Test B: logo is rendered WITHOUT the site title alongside it ---
+  const titleNotAlongsideLogo = !headerWithAssetLogo.includes('<span class="gh-site-title">{{@site.title}}</span>');
+  console.log(`  [${titleNotAlongsideLogo ? "PASS" : "FAIL"}] site title NOT rendered alongside the logo`);
+  if (!titleNotAlongsideLogo) throw new Error("Header compiler must NOT render site title alongside the logo");
+
+  // --- Test C: logo retains accessible alt text ---
+  const logoHasAlt = headerWithAssetLogo.includes('alt="{{@site.title}}"');
+  console.log(`  [${logoHasAlt ? "PASS" : "FAIL"}] logo img has accessible alt="{{@site.title}}"`);
+  if (!logoHasAlt) throw new Error("Header compiler logo must have alt=\"{{@site.title}}\"");
+
+  // --- Test D: no logo → site title is rendered ---
+  const headerNoLogo = compileHeaderToHbs({
+    ...baseHeaderBlock,
+    props: {
+      ...baseHeaderBlock.props,
+      general: {
+        ...baseHeaderBlock.props.general,
+        logoUrl: undefined,
+        darkLogoUrl: undefined,
+      },
+    },
+  });
+  const titleRenderedWithoutLogo = headerNoLogo.includes('<span class="gh-site-title">{{@site.title}}</span>');
+  console.log(`  [${titleRenderedWithoutLogo ? "PASS" : "FAIL"}] site title rendered when no logo is configured`);
+  if (!titleRenderedWithoutLogo) throw new Error("Header compiler must render site title when no logo is configured");
+
+  // --- Test E: dark asset:// logo also compiles correctly ---
+  const headerWithDarkLogo = compileHeaderToHbs({
+    ...baseHeaderBlock,
+    props: {
+      ...baseHeaderBlock.props,
+      general: {
+        ...baseHeaderBlock.props.general,
+        logoUrl: "asset://images/header/logo.png",
+        darkLogoUrl: "asset://images/header/dark-logo.png",
+      },
+    },
+  });
+  const darkAssetHelperPresent = headerWithDarkLogo.includes('{{asset "images/header/dark-logo.png"}}');
+  const rawDarkAssetAbsent = !headerWithDarkLogo.includes("asset://images/header/dark-logo.png");
+  console.log(`  [${darkAssetHelperPresent ? "PASS" : "FAIL"}] dark asset:// logo compiles to {{asset "..."}} helper`);
+  if (!darkAssetHelperPresent) throw new Error("Header compiler must emit {{asset}} helper for dark logo");
+  console.log(`  [${rawDarkAssetAbsent ? "PASS" : "FAIL"}] raw dark asset:// URL is NOT present in compiled output`);
+  if (!rawDarkAssetAbsent) throw new Error("Header compiler must not emit raw dark asset:// URL");
+
+  // --- Test F: normal external URL is not converted to an asset helper ---
+  const headerWithExternalLogo = compileHeaderToHbs({
+    ...baseHeaderBlock,
+    props: {
+      ...baseHeaderBlock.props,
+      general: {
+        ...baseHeaderBlock.props.general,
+        logoUrl: "https://example.com/logo.png",
+        darkLogoUrl: undefined,
+      },
+    },
+  });
+  const externalUrlPreserved = headerWithExternalLogo.includes('src="https://example.com/logo.png"');
+  const externalNotConvertedToAsset = !headerWithExternalLogo.includes("{{asset");
+  console.log(`  [${externalUrlPreserved ? "PASS" : "FAIL"}] external logo URL is preserved correctly`);
+  if (!externalUrlPreserved) throw new Error("Header compiler must preserve normal external logo URLs");
+  console.log(`  [${externalNotConvertedToAsset ? "PASS" : "FAIL"}] external logo URL is NOT converted to {{asset}} helper`);
+  if (!externalNotConvertedToAsset) throw new Error("Header compiler must not convert external URLs to {{asset}} helper");
 
   // Verify author.hbs scoping
   const authorHbs = files["author.hbs"];
